@@ -1,0 +1,481 @@
+openapi: 3.0.3
+
+info:
+  title: Clerk Backend API
+  x-logo:
+    url: https://clerk.com/_next/image?url=%2Fimages%2Fclerk-logo.svg&w=96&q=75
+    altText: Clerk docs
+    href: https://clerk.com/docs
+  contact:
+    email: support@clerk.com
+    name: Clerk Platform Team
+    url: https://clerk.com/support
+  description: |-
+    The Clerk REST Backend API, meant to be accessed by backend
+    servers.
+
+    ### Versions
+
+    When the API changes in a way that isn't compatible with older versions, a new version is released.
+    Each version is identified by its release date, e.g. `2021-02-05`. For more information, please see [Clerk API Versions](https://clerk.com/docs/backend-requests/versioning/overview).
+
+
+    Please see https://clerk.com/docs for more information.
+  version: "v1"
+  termsOfService: https://clerk.com/terms
+  license:
+    name: "MIT"
+    url: "https://github.com/clerkinc/clerk-sdk-go/blob/main/LICENSE"
+
+externalDocs:
+  url: https://clerk.com/docs
+
+servers:
+  - url: https://api.clerk.com/v1
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Secret key, obtained under "API Keys" in the Clerk Dashboard.
+      bearerFormat: sk_<environment>_<secret value>
+
+tags:
+  - name: Actor Tokens
+    description: Allow your users to sign in on behalf of other users.
+    externalDocs:
+      url: https://clerk.com/docs/authentication/user-impersonation#actor-tokens
+
+  - name: Allow-list / Block-list
+    description: |-
+      Allow-lists and Block-lists allow you to control who can sign up or sign in
+      to your application, by restricting access based on the user's email
+      address or phone number.
+    externalDocs:
+      url: https://clerk.com/docs/authentication/allowlist
+
+  - name: AWS Credentials
+    # TODO(2024-07-22,agis): These endpoints are shadow-launched for
+    # #prospect-braintrust only. Uncomment this if and when we want to roll it out
+    # publicly.
+    #
+    # - name: AWS Credentials
+    #   description: |-
+    #     AWS Credentials store data from AWS Cognito, that facilitate migrating
+    #     users from Cognito to your Clerk instance.
+    x-internal: true
+    description: |-
+      AWS Credentials store data from AWS Cognito, that facilitate migrating
+      users from Cognito to your Clerk instance.
+
+  #  - name: Cleanup
+  #    description: Cleanup Request
+
+  - name: Clients
+    description: |-
+      The Client object tracks sessions, as well as the state of any sign in and sign up attempts, for a given device.
+    externalDocs:
+      url: https://clerk.com/docs/reference/clerkjs/client
+
+  - name: Domains
+    description: Domains represent each instance's URLs and DNS setup.
+
+  - name: Email Addresses
+    description: A user can be associated with one or more email addresses, which allows them to be contacted via email.
+    externalDocs:
+      url: https://clerk.com/docs/reference/clerkjs/emailaddress
+
+  - name: Email & SMS Templates
+    description: |-
+      Email & SMS templates allow you to customize the theming and wording of emails & SMS messages that are sent by your instance.
+    externalDocs:
+      url: https://clerk.com/docs/authentication/email-sms-templates
+
+  - name: Instance Settings
+    description: Modify the settings of your instance.
+
+  - name: Invitations
+    description: Invitations allow you to invite someone to sign up to your application, via email.
+    externalDocs:
+      url: https://clerk.com/docs/authentication/invitations
+
+  - name: JWKS
+    description: Retrieve the JSON Web Key Set which can be used to verify the token signatures of the instance.
+
+  - name: JWT Templates
+    description: |-
+      JWT Templates allow you to generate custom authentication tokens
+      tied to authenticated sessions, enabling you to integrate with third-party
+      services.
+    externalDocs:
+      url: https://clerk.com/docs/request-authentication/jwt-templates
+
+  - name: OAuth Applications
+    description: OAuth applications contain data for clients using Clerk as an OAuth2 identity provider.
+    # TODO: add externalDocs once they are written
+
+  - name: Organizations
+    description: Organizations are used to group members under a common entity and provide shared access to resources.
+    externalDocs:
+      url: https://clerk.com/docs/organizations/overview
+
+  - name: Organization Invitations
+    description: Invite users to an organization.
+    externalDocs:
+      url: https://clerk.com/docs/organizations/invite-users
+
+  - name: Organization Memberships
+    description: Manage member roles in an organization.
+    externalDocs:
+      url: https://clerk.com/docs/organizations/manage-member-roles
+
+  - name: Phone Numbers
+    description: A user can be associated with one or more phone numbers, which allows them to be contacted via SMS.
+    externalDocs:
+      url: https://clerk.com/docs/reference/clerkjs/phonenumber
+
+  - name: Redirect URLs
+    description: |-
+      Redirect URLs are whitelisted URLs that facilitate secure authentication flows in native applications (e.g. React Native, Expo).
+      In these contexts, Clerk ensures that security-critical nonces are passed only to the whitelisted URLs.
+
+  - name: SAML Connections
+    description: |-
+      A SAML Connection holds configuration data required for facilitating a SAML SSO flow between your
+      Clerk Instance (SP) and a particular SAML IdP.
+
+  - name: Sessions
+    description: |-
+      The Session object is an abstraction over an HTTP session.
+      It models the period of information exchange between a user and the server.
+      Sessions are created when a user successfully goes through the sign in or sign up flows.
+    externalDocs:
+      url: https://clerk.com/docs/reference/clerkjs/session
+
+  - name: Sign-in Tokens
+    description: |-
+      Sign-in tokens are JWTs that can be used to sign in to an application without specifying any credentials.
+      A sign-in token can be used at most once and they can be consumed from the Frontend API using the `ticket` strategy.
+
+  #  - name: Sign-ups
+  #    description: |-
+  #      Sign-up objects track the progress of a sign-up attempt and store any field collected from user input.
+  #    externalDocs:
+  #      url: https://clerk.com/docs/reference/clerkjs/signup
+
+  - name: Testing Tokens
+    description: Tokens meant for use by end-to-end test suites in requests to the Frontend API, so as to bypass bot detection measures.
+    externalDocs:
+      url: https://clerk.com/docs/testing/overview#testing-tokens
+
+  - name: Users
+    description: The user object represents a user that has successfully signed up to your application.
+    externalDocs:
+      url: https://clerk.com/docs/reference/clerkjs/user
+
+  - name: Webhooks
+    description: |-
+      You can configure webhooks to be notified about various events that happen on your instance.
+    externalDocs:
+      url: https://clerk.com/docs/integration/webhooks
+
+  - name: Miscellaneous
+    description: Various endpoints that do not belong in any particular category.
+
+  - name: Beta Features
+    description: Modify instance settings that are currently in beta.
+
+paths:
+  /public/interstitial:
+    $ref: "../paths/2021-02-05.yml#/PublicInterstitial"
+  /jwks:
+    $ref: "../paths/2021-02-05.yml#/JWKS"
+
+  #
+  # AWS CREDENTIALS
+  #
+  /aws_credentials:
+    $ref: "../paths/2021-02-05.yml#/AWSCredentials"
+  /aws_credentials/{id}:
+    $ref: "../paths/2021-02-05.yml#/AWSCredential"
+
+
+
+  #
+  # CLIENTS
+  #
+  /clients:
+    $ref: "../paths/2021-02-05.yml#/Clients"
+  /clients/verify:
+    $ref: "../paths/2021-02-05.yml#/ClientVerify"
+  /clients/{client_id}:
+    $ref: "../paths/2021-02-05.yml#/Client"
+
+  #
+  # EMAIL ADDRESSES
+  #
+  /email_addresses:
+    $ref: "../paths/2021-02-05.yml#/EmailAddresses"
+  /email_addresses/{email_address_id}:
+    $ref: "../paths/2021-02-05.yml#/EmailAddress"
+
+  #
+  # PHONE NUMBERS
+  #
+  /phone_numbers:
+    $ref: "../paths/2021-02-05.yml#/PhoneNumbers"
+  /phone_numbers/{phone_number_id}:
+    $ref: "../paths/2021-02-05.yml#/PhoneNumber"
+
+  #
+  # SESSIONS
+  #
+  /sessions:
+    $ref: "../paths/2021-02-05.yml#/Sessions"
+  /sessions/{session_id}:
+    $ref: "../paths/2021-02-05.yml#/Session"
+  /sessions/{session_id}/revoke:
+    $ref: "../paths/2021-02-05.yml#/SessionRevoke"
+  /sessions/{session_id}/verify:
+    $ref: "../paths/2021-02-05.yml#/SessionVerify"
+  /sessions/{session_id}/tokens/{template_name}:
+    $ref: "../paths/2021-02-05.yml#/SessionTokensTemplate"
+
+  #
+  # EMAIL & SMS TEMPLATES
+  #
+  /templates/{template_type}:
+    $ref: "../paths/2021-02-05.yml#/TemplatesType"
+  /templates/{template_type}/{slug}:
+    $ref: "../paths/2021-02-05.yml#/Template"
+  /templates/{template_type}/{slug}/revert:
+    $ref: "../paths/2021-02-05.yml#/TemplateRevert"
+  /templates/{template_type}/{slug}/preview:
+    $ref: "../paths/2021-02-05.yml#/TemplatePreview"
+  /templates/{template_type}/{slug}/toggle_delivery:
+    $ref: "../paths/2021-02-05.yml#/TemplateToggleDelivery"
+
+  #
+  # USERS
+  #
+  /users:
+    $ref: "../paths/2021-02-05.yml#/Users"
+  /users/count:
+    $ref: "../paths/2021-02-05.yml#/UsersCount"
+  /users/{user_id}:
+    $ref: "../paths/2021-02-05.yml#/User"
+  /users/{user_id}/ban:
+    $ref: "../paths/2021-02-05.yml#/UserBan"
+  /users/{user_id}/unban:
+    $ref: "../paths/2021-02-05.yml#/UserUnban"
+  /users/{user_id}/lock:
+    $ref: "../paths/2021-02-05.yml#/UserLock"
+  /users/{user_id}/unlock:
+    $ref: "../paths/2021-02-05.yml#/UserUnlock"
+  /users/{user_id}/profile_image:
+    $ref: "../paths/2021-02-05.yml#/UserProfileImage"
+  /users/{user_id}/metadata:
+    $ref: "../paths/2021-02-05.yml#/UserMetadata"
+
+  # OAuth token wallet
+  /users/{user_id}/oauth_access_tokens/{provider}:
+    $ref: "../paths/2021-02-05.yml#/UserOAuthAccessTokensProvider"
+  /users/{user_id}/organization_memberships:
+    $ref: "../paths/2021-02-05.yml#/UserOrganizationMemberships"
+  /users/{user_id}/verify_password:
+    $ref: "../paths/2021-02-05.yml#/UserVerifyPassword"
+  /users/{user_id}/verify_totp:
+    $ref: "../paths/2021-02-05.yml#/UserVerifyTOTP"
+  /users/{user_id}/mfa:
+    $ref: "../paths/2021-02-05.yml#/UserMFA"
+
+  # Passkeys
+  /users/{user_id}/passkeys/{passkey_identification_id}:
+    $ref: "../paths/2021-02-05.yml#/UserPasskeyDelete"
+
+  # Web3 wallets
+  /users/{user_id}/web3_wallets/{web3_wallet_identification_id}:
+    $ref: "../paths/2021-02-05.yml#/UserWeb3WalletDelete"
+
+  # TOTP
+  /users/{user_id}/totp:
+    $ref: "../paths/2021-02-05.yml#/UserTOTP"
+
+  #
+  # INVITATIONS
+  #
+  /invitations:
+    $ref: "../paths/2021-02-05.yml#/Invitations"
+  /invitations/{invitation_id}/revoke:
+    $ref: "../paths/2021-02-05.yml#/InvitationRevoke"
+
+  #
+  # ALLOW-LIST
+  #
+  /allowlist_identifiers:
+    $ref: "../paths/2021-02-05.yml#/AllowlistIdentifiers"
+  /allowlist_identifiers/{identifier_id}:
+    $ref: "../paths/2021-02-05.yml#/AllowlistIdentifier"
+
+  #
+  # BLOCK-LIST
+  #
+  /blocklist_identifiers:
+    $ref: "../paths/2021-02-05.yml#/BlocklistIdentifiers"
+  /blocklist_identifiers/{identifier_id}:
+    $ref: "../paths/2021-02-05.yml#/BlocklistIdentifier"
+
+  #
+  # BETA FEATURES
+  #
+  /beta_features/instance_settings:
+    $ref: "../paths/2021-02-05.yml#/BetaFeaturesInstanceSettings"
+  /beta_features/domain:
+    $ref: "../paths/2021-02-05.yml#/BetaFeaturesDomain"
+
+  #
+  # ACTOR TOKENS
+  #
+  /actor_tokens:
+    $ref: "../paths/2021-02-05.yml#/ActorTokens"
+  /actor_tokens/{actor_token_id}/revoke:
+    $ref: "../paths/2021-02-05.yml#/ActorTokenRevoke"
+
+  #
+  # DOMAINS
+  #
+  /domains:
+    $ref: "../paths/2021-02-05.yml#/Domains"
+  /domains/{domain_id}:
+    $ref: "../paths/2021-02-05.yml#/Domain"
+
+  #
+  # INSTANCE SETTINGS
+  #
+  /instance:
+    $ref: "../paths/2021-02-05.yml#/Instance"
+  /instance/restrictions:
+    $ref: "../paths/2021-02-05.yml#/InstanceRestrictions"
+  /instance/change_domain:
+    $ref: "../paths/2021-02-05.yml#/InstanceChangeDomain"
+  /instance/organization_settings:
+    $ref: "../paths/2021-02-05.yml#/InstanceOrganizationSettings"
+
+  #
+  # WEBHOOKS
+  #
+  /webhooks/svix:
+    $ref: "../paths/2021-02-05.yml#/WebhooksSvix"
+  /webhooks/svix_url:
+    $ref: "../paths/2021-02-05.yml#/WebhooksSvixURL"
+
+  #
+  # JWT TEMPLATES
+  #
+  /jwt_templates:
+    $ref: "../paths/2021-02-05.yml#/JWTTemplates"
+  /jwt_templates/{template_id}:
+    $ref: "../paths/2021-02-05.yml#/JWTTemplate"
+
+  #
+  # ORGANIZATIONS
+  #
+  /organizations:
+    $ref: "../paths/2021-02-05.yml#/Organizations"
+  /organizations/{organization_id}:
+    $ref: "../paths/2021-02-05.yml#/Organization"
+  /organizations/{organization_id}/metadata:
+    $ref: "../paths/2021-02-05.yml#/OrganizationMetadata"
+  /organizations/{organization_id}/logo:
+    $ref: "../paths/2021-02-05.yml#/OrganizationLogo"
+
+  #
+  # ORGANIZATION INVITATIONS
+  #
+  /organizations/{organization_id}/invitations:
+    $ref: "../paths/2021-02-05.yml#/OrganizationInvitations"
+  /organizations/{organization_id}/invitations/bulk:
+    $ref: "../paths/2021-02-05.yml#/OrganizationInvitationsBulk"
+  /organizations/{organization_id}/invitations/pending:
+    $ref: "../paths/2021-02-05.yml#/OrganizationInvitationsPending"
+  /organizations/{organization_id}/invitations/{invitation_id}:
+    $ref: "../paths/2021-02-05.yml#/OrganizationInvitation"
+  /organizations/{organization_id}/invitations/{invitation_id}/revoke:
+    $ref: "../paths/2021-02-05.yml#/OrganizationInvitationRevoke"
+
+  #
+  # ORGANIZATION MEMBERSHIPS
+  #
+  /organizations/{organization_id}/memberships:
+    $ref: "../paths/2021-02-05.yml#/OrganizationMemberships"
+  /organizations/{organization_id}/memberships/{user_id}:
+    $ref: "../paths/2021-02-05.yml#/OrganizationMembership"
+  /organizations/{organization_id}/memberships/{user_id}/metadata:
+    $ref: "../paths/2021-02-05.yml#/OrganizationMembershipMetadata"
+
+  #
+  # ORGANIZATION DOMAINS
+  #
+  /organizations/{organization_id}/domains:
+    $ref: "../paths/2021-02-05.yml#/OrganizationDomains"
+  /organizations/{organization_id}/domains/{domain_id}:
+    $ref: "../paths/2021-02-05.yml#/OrganizationDomain"
+
+  /proxy_checks:
+    $ref: "../paths/2021-02-05.yml#/ProxyChecks"
+
+  #
+  # REDIRECT URLs
+  #
+  /redirect_urls:
+    $ref: "../paths/2021-02-05.yml#/RedirectURLs"
+  /redirect_urls/{id}:
+    $ref: "../paths/2021-02-05.yml#/RedirectURL"
+
+  #
+  # SIGN-IN TOKENS
+  #
+  /sign_in_tokens:
+    $ref: "../paths/2021-02-05.yml#/SignInTokens"
+  /sign_in_tokens/{sign_in_token_id}/revoke:
+    $ref: "../paths/2021-02-05.yml#/SignInTokenRevoke"
+
+  #
+  # SIGN-UPS
+  #
+  /sign_ups/{id}:
+    $ref: "../paths/2021-02-05.yml#/SignUp"
+
+  #
+  # OAUTH APPLICATIONS
+  #
+  /oauth_applications:
+    $ref: "../paths/2021-02-05.yml#/OAuthApplications"
+  /oauth_applications/{oauth_application_id}:
+    $ref: "../paths/2021-02-05.yml#/OAuthApplication"
+  /oauth_applications/{oauth_application_id}/rotate_secret:
+    $ref: "../paths/2021-02-05.yml#/OAuthApplicationRotateSecret"
+
+  #
+  # SAML CONNECTIONS
+  #
+  /saml_connections:
+    $ref: "../paths/2021-02-05.yml#/SAMLConnections"
+  /saml_connections/{saml_connection_id}:
+    $ref: "../paths/2021-02-05.yml#/SAMLConnection"
+
+  #
+  # TESTING TOKENS
+  #
+  /testing_tokens:
+    $ref: "../paths/2021-02-05.yml#/TestingTokens"
+
+  #
+  # ORGANIZATION MEMBERSHIPS
+  #
+  /organization_memberships:
+    $ref: "../paths/2021-02-05.yml#/InstanceOrganizationMemberships"
