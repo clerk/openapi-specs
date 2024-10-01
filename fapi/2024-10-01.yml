@@ -3781,7 +3781,10 @@ paths:
   /v1/tickets/accept:
     get:
       summary: Accept ticket
-      description: Accept a ticket and redirects to the appropriate location along with the ticket
+      description: |-
+        Parses a ticket JWT and performs the necessary actions depending on the ticket's source type.
+        Depending on the ticket source type, a successful response can either redirect to a new location
+        with the ticket in the query string, or respond directly with a text/html content type for the response body.
       operationId: acceptTicket
       tags:
         - Sign Ins
@@ -3793,6 +3796,8 @@ paths:
             type: string
           description: The JWT with verification information
       responses:
+        '200':
+          description: Successful response with a plain text or HTML body.
         '302':
           description: Redirect
         '303':
