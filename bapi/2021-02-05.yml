@@ -165,7 +165,7 @@ paths:
         - JWKS
       responses:
         '200':
-          description: The JSON Web Key Set
+          $ref: '#/components/responses/WellKnown.JWKS'
   /clients:
     get:
       deprecated: true
@@ -1845,6 +1845,41 @@ paths:
           $ref: '#/components/responses/OrganizationMemberships'
         '403':
           $ref: '#/components/responses/ClerkErrors'
+  /users/{user_id}/organization_invitations:
+    get:
+      operationId: UsersGetOrganizationInvitations
+      summary: Retrieve all invitations for a user
+      description: Retrieve a paginated list of the user's organization invitations
+      tags:
+        - Users
+      parameters:
+        - name: user_id
+          in: path
+          description: The ID of the user whose organization invitations we want to retrieve
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - in: query
+          name: status
+          description: Filter organization invitations based on their status
+          required: false
+          schema:
+            type: string
+            enum:
+              - pending
+              - accepted
+              - revoked
+      responses:
+        '200':
+          $ref: '#/components/responses/OrganizationInvitationsWithPublicOrganizationData'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /users/{user_id}/verify_password:
     post:
       operationId: VerifyPassword
@@ -2122,6 +2157,37 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '500':
           $ref: '#/components/responses/ClerkErrors'
+  /users/{user_id}/external_accounts/{external_account_id}:
+    delete:
+      operationId: DeleteExternalAccount
+      summary: Delete External Account
+      description: Delete an external account by ID.
+      tags:
+        - Users
+      parameters:
+        - name: user_id
+          in: path
+          description: The ID of the user's external account
+          required: true
+          schema:
+            type: string
+        - name: external_account_id
+          in: path
+          description: The ID of the external account to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /invitations:
     post:
       operationId: CreateInvitation
@@ -2229,6 +2295,62 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /organization_invitations:
+    get:
+      operationId: ListInstanceOrganizationInvitations
+      summary: Get a list of organization invitations for the current instance
+      description: |-
+        This request returns the list of organization invitations for the instance.
+        Results can be paginated using the optional `limit` and `offset` query parameters.
+        You can filter them by providing the 'status' query parameter, that accepts multiple values.
+        You can change the order by providing the 'order' query parameter, that accepts multiple values.
+        You can filter by the invited user email address providing the `query` query parameter.
+        The organization invitations are ordered by descending creation date by default.
+      tags:
+        - Organization Invitations
+      parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - in: query
+          name: order_by
+          required: false
+          description: |-
+            Allows to return organization invitations in a particular order.
+            At the moment, you can order the returned organization invitations either by their `created_at` or `email_address`.
+            In order to specify the direction, you can use the `+/-` symbols prepended in the property to order by.
+            For example, if you want organization invitations to be returned in descending order according to their `created_at` property, you can use `-created_at`.
+            If you don't use `+` or `-`, then `+` is implied.
+            Defaults to `-created_at`.
+          schema:
+            type: string
+            default: '-created_at'
+        - in: query
+          name: status
+          description: Filter organization invitations based on their status
+          required: false
+          schema:
+            type: string
+            enum:
+              - pending
+              - accepted
+              - revoked
+        - in: query
+          required: false
+          name: query
+          description: Filter organization invitations based on their `email_address`
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/OrganizationInvitationsWithPublicOrganizationData'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /allowlist_identifiers:
     get:
       operationId: ListAllowlistIdentifiers
@@ -3362,7 +3484,7 @@ paths:
         When the invited user clicks the link to accept the invitation, they will be redirected to the URL provided.
         Use this parameter to implement a custom invitation acceptance flow.
 
-        You must specify the ID of the user that will send the invitation with the `inviter_user_id` parameter.
+        You can specify the ID of the user that will send the invitation with the `inviter_user_id` parameter.
         That user must be a member with administrator privileges in the organization.
         Only "admin" members can create organization invitations.
 
@@ -3390,6 +3512,7 @@ paths:
                   description: The email address of the new member that is going to be invited to the organization
                 inviter_user_id:
                   type: string
+                  nullable: true
                   description: |-
                     The ID of the user that invites the new member to the organization.
                     Must be an administrator in the organization.
@@ -3407,7 +3530,6 @@ paths:
                   description: Optional URL that the invitee will be redirected to once they accept the invitation by clicking the join link in the invitation email.
               required:
                 - email_address
-                - inviter_user_id
                 - role
       responses:
         '200':
@@ -3469,7 +3591,7 @@ paths:
         The request body supports passing an optional `redirect_url` parameter for each invitation.
         When the invited user clicks the link to accept the invitation, they will be redirected to the provided URL.
         Use this parameter to implement a custom invitation acceptance flow.
-        You must specify the ID of the user that will send the invitation with the `inviter_user_id` parameter. Each invitation
+        You can specify the ID of the user that will send the invitation with the `inviter_user_id` parameter. Each invitation
         can have a different inviter user.
         Inviter users must be members with administrator privileges in the organization.
         Only "admin" members can create organization invitations.
@@ -3499,6 +3621,7 @@ paths:
                     description: The email address of the new member that is going to be invited to the organization
                   inviter_user_id:
                     type: string
+                    nullable: true
                     description: |-
                       The ID of the user that invites the new member to the organization.
                       Must be an administrator in the organization.
@@ -3516,7 +3639,6 @@ paths:
                     description: Optional URL that the invitee will be redirected to once they accept the invitation by clicking the join link in the invitation email.
                 required:
                   - email_address
-                  - inviter_user_id
                   - role
       responses:
         '200':
@@ -3596,7 +3718,7 @@ paths:
         Use this request to revoke a previously issued organization invitation.
         Revoking an organization invitation makes it invalid; the invited user will no longer be able to join the organization with the revoked invitation.
         Only organization invitations with "pending" status can be revoked.
-        The request needs the `requesting_user_id` parameter to specify the user which revokes the invitation.
+        The request accepts the `requesting_user_id` parameter to specify the user which revokes the invitation.
         Only users with "admin" role can revoke invitations.
       tags:
         - Organization Invitations
@@ -3614,7 +3736,7 @@ paths:
             type: string
           description: The organization invitation ID.
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
@@ -3622,11 +3744,10 @@ paths:
               properties:
                 requesting_user_id:
                   type: string
+                  nullable: true
                   description: |-
                     The ID of the user that revokes the invitation.
                     Must be an administrator in the organization.
-              required:
-                - requesting_user_id
       responses:
         '200':
           $ref: '#/components/responses/OrganizationInvitation'
@@ -4632,32 +4753,29 @@ components:
       scheme: bearer
       description: Secret key, obtained under "API Keys" in the Clerk Dashboard.
       bearerFormat: sk_<environment>_<secret value>
-  parameters:
-    LimitParameter:
-      name: limit
-      in: query
-      description: |-
-        Applies a limit to the number of results returned.
-        Can be used for paginating the results together with `offset`.
-      required: false
-      schema:
-        type: number
-        default: 10
-        minimum: 1
-        maximum: 500
-    OffsetParameter:
-      name: offset
-      in: query
-      description: |-
-        Skip the first `offset` results when paginating.
-        Needs to be an integer greater or equal to zero.
-        To be used in conjunction with `limit`.
-      required: false
-      schema:
-        type: number
-        default: 0
-        minimum: 0
   schemas:
+    WellKnown.JWKS:
+      type: object
+      additionalProperties: false
+      properties:
+        keys:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              use:
+                type: string
+              kty:
+                type: string
+              kid:
+                type: string
+              alg:
+                type: string
+              'n':
+                type: string
+              e:
+                type: string
     Session:
       type: object
       additionalProperties: false
@@ -4692,6 +4810,31 @@ components:
           nullable: true
         last_active_at:
           type: integer
+        latest_activity:
+          type: object
+          nullable: true
+          required:
+            - id
+            - object
+          properties:
+            object:
+              type: string
+            id:
+              type: string
+            device_type:
+              type: string
+            is_mobile:
+              type: boolean
+            browser_name:
+              type: string
+            browser_version:
+              type: string
+            ip_address:
+              type: string
+            city:
+              type: string
+            country:
+              type: string
         expire_at:
           type: integer
         abandon_at:
@@ -5102,6 +5245,9 @@ components:
             - web3_metamask_signature
             - web3_coinbase_wallet_signature
         nonce:
+          type: string
+          nullable: true
+        message:
           type: string
           nullable: true
         attempts:
@@ -5589,6 +5735,8 @@ components:
             - organization_membership
         role:
           type: string
+        role_name:
+          type: string
         permissions:
           type: array
           items:
@@ -5649,6 +5797,70 @@ components:
           format: int64
           description: |
             Total number of organization memberships
+      required:
+        - data
+        - total_count
+    OrganizationInvitationWithPublicOrganizationData:
+      description: An organization invitation with public organization data populated
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - organization_invitation
+        email_address:
+          type: string
+        role:
+          type: string
+        role_name:
+          type: string
+        organization_id:
+          type: string
+        status:
+          type: string
+        public_metadata:
+          type: object
+        private_metadata:
+          type: object
+        public_organization_data:
+          type: object
+          additionalProperties: false
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            slug:
+              type: string
+            image_url:
+              type: string
+            has_image:
+              type: boolean
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of last update.
+    OrganizationInvitationsWithPublicOrganizationData:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizationInvitationWithPublicOrganizationData'
+        total_count:
+          type: integer
+          format: int64
+          description: |
+            Total number of organization invitations
       required:
         - data
         - total_count
@@ -6086,6 +6298,8 @@ components:
         email_address:
           type: string
         role:
+          type: string
+        role_name:
           type: string
         organization_id:
           type: string
@@ -6588,6 +6802,12 @@ components:
         - token
         - expires_at
   responses:
+    WellKnown.JWKS:
+      description: Get the JSON Web Key Set
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WellKnown.JWKS'
     Client.List:
       description: Success
       content:
@@ -6716,6 +6936,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/OrganizationMemberships'
+    OrganizationInvitationsWithPublicOrganizationData:
+      description: A list of organization invitations with public organization data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrganizationInvitationsWithPublicOrganizationData'
     TOTP:
       description: A TOTP (Time-based One-Time Password)
       content:
@@ -6969,3 +7195,28 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/TestingToken'
+  parameters:
+    LimitParameter:
+      name: limit
+      in: query
+      description: |-
+        Applies a limit to the number of results returned.
+        Can be used for paginating the results together with `offset`.
+      required: false
+      schema:
+        type: number
+        default: 10
+        minimum: 1
+        maximum: 500
+    OffsetParameter:
+      name: offset
+      in: query
+      description: |-
+        Skip the first `offset` results when paginating.
+        Needs to be an integer greater or equal to zero.
+        To be used in conjunction with `limit`.
+      required: false
+      schema:
+        type: number
+        default: 0
+        minimum: 0

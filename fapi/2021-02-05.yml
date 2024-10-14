@@ -117,7 +117,7 @@ paths:
         - Well Known
       responses:
         '200':
-          description: The JSON Web Key Set
+          $ref: '#/components/responses/WellKnown.JWKS'
   /.well-known/apple-app-site-association:
     get:
       summary: Apple App Site Association
@@ -171,6 +171,8 @@ paths:
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
           $ref: '#/components/responses/ClerkErrors'
   /oauth/userinfo:
     get:
@@ -577,8 +579,8 @@ paths:
                     The strategy to be prepared for first factor authentication.
 
                     Can be one of the following `email_code`, `email_link`,
-                    `phone_code`, `web3_metamask_signature`, `web3_coinbase_wallet_signature`, 
-                    `reset_password_phone_code`, `reset_password_email_code`, `oauth_[provider]`, 
+                    `phone_code`, `web3_metamask_signature`, `web3_coinbase_wallet_signature`,
+                    `reset_password_phone_code`, `reset_password_email_code`, `oauth_[provider]`,
                     `saml`, `passkey`
                 email_address_id:
                   type: string
@@ -648,9 +650,9 @@ paths:
                   description: |-
                     The strategy to be used for first factor authentication.
 
-                    Can be one of the following `email_code`, `email_link`, 
-                    `password`, `phone_code`, `web3_metamask_signature`, 
-                    `web3_coinbase_wallet_signature`, `reset_password_phone_code`, 
+                    Can be one of the following `email_code`, `email_link`,
+                    `password`, `phone_code`, `web3_metamask_signature`,
+                    `web3_coinbase_wallet_signature`, `reset_password_phone_code`,
                     `reset_password_email_code`, `passkey`, `google_one_tap`
                 code:
                   type: string
@@ -2307,7 +2309,7 @@ paths:
     delete:
       summary: Delete External Account
       operationId: deleteExternalAccount
-      description: Delete an exteral account by ID.
+      description: Delete an external account by ID.
       tags:
         - External Accounts
       parameters:
@@ -3781,7 +3783,10 @@ paths:
   /v1/tickets/accept:
     get:
       summary: Accept ticket
-      description: Accept a ticket and redirects to the appropriate location along with the ticket
+      description: |-
+        Parses a ticket JWT and performs the necessary actions depending on the ticket's source type.
+        Depending on the ticket source type, a successful response can either redirect to a new location
+        with the ticket in the query string, or respond directly with a text/html content type for the response body.
       operationId: acceptTicket
       tags:
         - Sign Ins
@@ -3793,6 +3798,8 @@ paths:
             type: string
           description: The JWT with verification information
       responses:
+        '200':
+          description: Successful response with a plain text or HTML body.
         '302':
           description: Redirect
         '303':
@@ -3882,6 +3889,28 @@ components:
                 type: array
                 items:
                   type: string
+    WellKnown.JWKS:
+      type: object
+      additionalProperties: false
+      properties:
+        keys:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              use:
+                type: string
+              kty:
+                type: string
+              kid:
+                type: string
+              alg:
+                type: string
+              'n':
+                type: string
+              e:
+                type: string
     WellKnown.OpenIDConfiguration:
       type: object
       additionalProperties: false
@@ -4259,6 +4288,10 @@ components:
           enum:
             - turnstile
             - hcaptcha
+        captcha_oauth_bypass:
+          type: array
+          items:
+            type: string
         google_one_tap_client_id:
           type: string
           nullable: true
@@ -4286,6 +4319,7 @@ components:
         - captcha_public_key
         - captcha_widget_type
         - captcha_public_key_invisible
+        - captcha_oauth_bypass
     UserSettings.Attribute:
       type: object
       additionalProperties: false
@@ -4465,6 +4499,11 @@ components:
           type: boolean
         progressive:
           type: boolean
+        mode:
+          type: string
+          enum:
+            - public
+            - restricted
       required:
         - captcha_enabled
         - custom_action_required
@@ -4920,6 +4959,9 @@ components:
           type: integer
           nullable: true
         nonce:
+          type: string
+          nullable: true
+        message:
           type: string
           nullable: true
       required:
@@ -6964,6 +7006,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/WellKnown.Assetlinks'
+    WellKnown.JWKS:
+      description: Get the JSON Web Key Set
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WellKnown.JWKS'
     WellKnown.OpenIDConfiguration:
       description: Get a basic openid configuration payload
       content:
