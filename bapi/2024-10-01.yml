@@ -5006,6 +5006,8 @@ components:
             - oauth_google
             - oauth_mock
             - oauth_custom_mock
+            - oauth_microsoft
+            - email_link
         external_verification_redirect_url:
           type: string
         error:
@@ -5032,6 +5034,8 @@ components:
             - oauth_google
             - oauth_mock
             - saml
+            - oauth_microsoft
+            - email_link
         id:
           type: string
       required:
