@@ -5006,6 +5006,7 @@ components:
             - oauth_google
             - oauth_mock
             - oauth_custom_mock
+            - oauth_microsoft
         external_verification_redirect_url:
           type: string
         error:
@@ -5032,6 +5033,7 @@ components:
             - oauth_google
             - oauth_mock
             - saml
+            - oauth_microsoft
         id:
           type: string
       required:
