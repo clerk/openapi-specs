@@ -5002,6 +5002,7 @@ components:
             - transferable
         strategy:
           type: string
+          x-speakeasy-unknown-values: allow
           enum:
             - oauth_google
             - oauth_mock
@@ -5030,6 +5031,7 @@ components:
       properties:
         type:
           type: string
+          x-speakeasy-unknown-values: allow
           enum:
             - oauth_google
             - oauth_mock
