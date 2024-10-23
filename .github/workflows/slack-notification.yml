@@ -22,7 +22,6 @@ jobs:
       - name: Generate notification payload
         id: notification
         env:
-          BODY: ${{ github.event.pull_request.body }}
           PULL_REQUEST_DATA: ${{ toJson(github.event.pull_request) }}
         run: |
           payload=$(node ./.github/utils/slack-notify.mjs '${{ env.PULL_REQUEST_DATA }}' '${{ steps.slackify.outputs.text }}')
