@@ -10,6 +10,7 @@
  * @property {string} title
  * @property {string} body
  * @property {Actor} actor
+ * @property {string} prUrl
  */
 
 /**
@@ -24,7 +25,7 @@
  * @type {Formatter}
  */
 const slackFormatter = {
-  generateMsg: ({ title, body, actor }) => {
+  generateMsg: ({ title, body, actor, prUrl }) => {
     const markdown = text => ({ type: 'section', text: { type: 'mrkdwn', text } });
     const header = text => ({ type: 'header', text: { type: 'plain_text', text } });
     const context = (imgUrl, text) => ({
@@ -40,7 +41,7 @@ const slackFormatter = {
 
     blocks.push(markdown(body));
     blocks.push(markdown('\n'));
-    blocks.push(context(actor.avatarUrl, `<${actor.profileUrl}|*${actor.username}*> created this PR.`));
+    blocks.push(context(actor.avatarUrl, `<${actor.profileUrl}|*${actor.username}*> created <${prUrl}|this PR>.`));
 
     return JSON.stringify({ blocks });
   },
@@ -61,7 +62,7 @@ const createActor = username => {
 };
 
 const run = async () => {
-  const { title, user } = JSON.parse(process.argv[2]);
+  const { title, user, html_url } = JSON.parse(process.argv[2]);
   const body = process.argv[3];
   const actor = createActor(user.login);
 
@@ -70,7 +71,7 @@ const run = async () => {
     throw new Error('Invalid formatter, supported formatters are: ' + Object.keys(formatters).join(', '));
   }
 
-  console.log(formatter.generateMsg({ title, body, actor }));
+  console.log(formatter.generateMsg({ title, body, actor, prUrl: html_url }));
 }
 
 run()
