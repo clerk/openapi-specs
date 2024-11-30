@@ -199,6 +199,7 @@ paths:
       summary: Verify a client
       description: Verifies the client in the provided token
       requestBody:
+        required: true
         description: Parameters.
         content:
           application/json:
@@ -249,6 +250,7 @@ paths:
       summary: Create an email address
       description: Create a new email address
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -346,6 +348,7 @@ paths:
           schema:
             type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -378,6 +381,7 @@ paths:
       summary: Create a phone number
       description: Create a new phone number
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -482,6 +486,7 @@ paths:
           schema:
             type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -630,6 +635,7 @@ paths:
           schema:
             type: string
       requestBody:
+        required: true
         description: Parameters.
         content:
           application/json:
@@ -777,6 +783,7 @@ paths:
           schema:
             type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -887,6 +894,7 @@ paths:
           schema:
             type: string
       requestBody:
+        required: true
         description: Required parameters
         content:
           application/json:
@@ -958,6 +966,7 @@ paths:
           schema:
             type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -1721,6 +1730,7 @@ paths:
           schema:
             type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -1897,6 +1907,7 @@ paths:
           schema:
             type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -1947,6 +1958,7 @@ paths:
           schema:
             type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -2199,6 +2211,7 @@ paths:
       tags:
         - Invitations
       requestBody:
+        required: true
         description: Required parameters
         content:
           application/json:
@@ -2372,6 +2385,7 @@ paths:
       tags:
         - Allow-list / Block-list
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -2442,6 +2456,7 @@ paths:
       tags:
         - Allow-list / Block-list
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -2493,6 +2508,7 @@ paths:
       tags:
         - Beta Features
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -2552,6 +2568,7 @@ paths:
       tags:
         - Beta Features
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -2578,6 +2595,7 @@ paths:
       tags:
         - Actor Tokens
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -2663,6 +2681,7 @@ paths:
       tags:
         - Domains
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -2780,6 +2799,7 @@ paths:
       tags:
         - Instance Settings
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -2840,6 +2860,7 @@ paths:
       tags:
         - Instance Settings
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -2881,6 +2902,7 @@ paths:
       tags:
         - Beta Features
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -2911,6 +2933,7 @@ paths:
       tags:
         - Instance Settings
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -3002,6 +3025,7 @@ paths:
       tags:
         - JWT Templates
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -3081,6 +3105,7 @@ paths:
           schema:
             type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -3215,6 +3240,7 @@ paths:
       tags:
         - Organizations
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -3429,6 +3455,7 @@ paths:
           schema:
             type: string
       requestBody:
+        required: true
         content:
           multipart/form-data:
             schema:
@@ -4123,6 +4150,7 @@ paths:
       tags:
         - Proxy checks
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -4158,6 +4186,7 @@ paths:
       tags:
         - Redirect URLs
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -4222,6 +4251,7 @@ paths:
       tags:
         - Sign-in Tokens
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -4279,6 +4309,7 @@ paths:
           schema:
             type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -4328,6 +4359,7 @@ paths:
       tags:
         - OAuth Applications
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -4498,6 +4530,7 @@ paths:
       tags:
         - SAML Connections
       requestBody:
+        required: true
         content:
           application/json:
             schema:
