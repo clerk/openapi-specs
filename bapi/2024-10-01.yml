@@ -134,6 +134,8 @@ paths:
         The Clerk interstitial endpoint serves an html page that loads clerk.js in order to check the user's authentication state.
         It is used by Clerk SDKs when the user's authentication state cannot be immediately determined.
       operationId: GetPublicInterstitial
+      x-sdk-ruby-operationGroup: miscellaneous
+      x-sdk-ruby-operationId: get_interstitial
       tags:
         - Miscellaneous
       parameters:
@@ -159,6 +161,8 @@ paths:
   /jwks:
     get:
       operationId: GetJWKS
+      x-sdk-ruby-operationGroup: jwks
+      x-sdk-ruby-operationId: get
       summary: Retrieve the JSON Web Key Set of the instance
       description: Retrieve the JSON Web Key Set of the instance
       tags:
@@ -170,6 +174,8 @@ paths:
     get:
       deprecated: true
       operationId: GetClientList
+      x-sdk-ruby-operationGroup: clients
+      x-sdk-ruby-operationId: all
       tags:
         - Clients
       summary: List all clients
@@ -194,6 +200,8 @@ paths:
   /clients/verify:
     post:
       operationId: VerifyClient
+      x-sdk-ruby-operationGroup: clients
+      x-sdk-ruby-operationId: verify
       tags:
         - Clients
       summary: Verify a client
@@ -221,6 +229,8 @@ paths:
   /clients/{client_id}:
     get:
       operationId: GetClient
+      x-sdk-ruby-operationGroup: clients
+      x-sdk-ruby-operationId: find
       tags:
         - Clients
       summary: Get a client
@@ -244,6 +254,8 @@ paths:
   /email_addresses:
     post:
       operationId: CreateEmailAddress
+      x-sdk-ruby-operationGroup: email_addresses
+      x-sdk-ruby-operationId: create
       tags:
         - Email Addresses
       summary: Create an email address
@@ -287,6 +299,8 @@ paths:
   /email_addresses/{email_address_id}:
     get:
       operationId: GetEmailAddress
+      x-sdk-ruby-operationGroup: email_addresses
+      x-sdk-ruby-operationId: find
       tags:
         - Email Addresses
       summary: Retrieve an email address
@@ -311,6 +325,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     delete:
       operationId: DeleteEmailAddress
+      x-sdk-ruby-operationGroup: email_addresses
+      x-sdk-ruby-operationId: delete
       tags:
         - Email Addresses
       summary: Delete an email address
@@ -335,6 +351,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateEmailAddress
+      x-sdk-ruby-operationGroup: email_addresses
+      x-sdk-ruby-operationId: update
       tags:
         - Email Addresses
       summary: Update an email address
@@ -375,6 +393,8 @@ paths:
   /phone_numbers:
     post:
       operationId: CreatePhoneNumber
+      x-sdk-ruby-operationGroup: phone_numbers
+      x-sdk-ruby-operationId: create
       tags:
         - Phone Numbers
       summary: Create a phone number
@@ -425,6 +445,8 @@ paths:
   /phone_numbers/{phone_number_id}:
     get:
       operationId: GetPhoneNumber
+      x-sdk-ruby-operationGroup: phone_numbers
+      x-sdk-ruby-operationId: find
       tags:
         - Phone Numbers
       summary: Retrieve a phone number
@@ -449,6 +471,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     delete:
       operationId: DeletePhoneNumber
+      x-sdk-ruby-operationGroup: phone_numbers
+      x-sdk-ruby-operationId: delete
       tags:
         - Phone Numbers
       summary: Delete a phone number
@@ -473,6 +497,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdatePhoneNumber
+      x-sdk-ruby-operationGroup: phone_numbers
+      x-sdk-ruby-operationId: update
       tags:
         - Phone Numbers
       summary: Update a phone number
@@ -520,6 +546,8 @@ paths:
   /sessions:
     get:
       operationId: GetSessionList
+      x-sdk-ruby-operationGroup: sessions
+      x-sdk-ruby-operationId: all
       tags:
         - Sessions
       summary: List all sessions
@@ -569,6 +597,8 @@ paths:
   /sessions/{session_id}:
     get:
       operationId: GetSession
+      x-sdk-ruby-operationGroup: sessions
+      x-sdk-ruby-operationId: find
       tags:
         - Sessions
       summary: Retrieve a session
@@ -592,6 +622,8 @@ paths:
   /sessions/{session_id}/revoke:
     post:
       operationId: RevokeSession
+      x-sdk-ruby-operationGroup: sessions
+      x-sdk-ruby-operationId: revoke
       tags:
         - Sessions
       summary: Revoke a session
@@ -618,6 +650,8 @@ paths:
     post:
       deprecated: true
       operationId: VerifySession
+      x-sdk-ruby-operationGroup: sessions
+      x-sdk-ruby-operationId: verify
       tags:
         - Sessions
       summary: Verify a session
@@ -660,6 +694,8 @@ paths:
   /sessions/{session_id}/tokens/{template_name}:
     post:
       operationId: CreateSessionTokenFromTemplate
+      x-sdk-ruby-operationGroup: sessions
+      x-sdk-ruby-operationId: create_token_from_template
       tags:
         - Sessions
       summary: Create a session token from a jwt template
@@ -699,6 +735,8 @@ paths:
     get:
       deprecated: true
       operationId: GetTemplateList
+      x-sdk-ruby-operationGroup: templates
+      x-sdk-ruby-operationId: all
       summary: List all templates
       description: |-
         Returns a list of all templates.
@@ -728,6 +766,8 @@ paths:
     get:
       deprecated: true
       operationId: GetTemplate
+      x-sdk-ruby-operationGroup: templates
+      x-sdk-ruby-operationId: find
       summary: Retrieve a template
       description: Returns the details of a template
       tags:
@@ -760,6 +800,8 @@ paths:
     put:
       deprecated: true
       operationId: UpsertTemplate
+      x-sdk-ruby-operationGroup: templates
+      x-sdk-ruby-operationId: update
       summary: Update a template for a given type and slug
       description: Updates the existing template of the given type and slug
       tags:
@@ -838,6 +880,8 @@ paths:
     post:
       deprecated: true
       operationId: RevertTemplate
+      x-sdk-ruby-operationGroup: templates
+      x-sdk-ruby-operationId: revert
       summary: Revert a template
       description: Reverts an updated template to its default state
       tags:
@@ -873,6 +917,8 @@ paths:
     post:
       deprecated: true
       operationId: PreviewTemplate
+      x-sdk-ruby-operationGroup: templates
+      x-sdk-ruby-operationId: preview
       summary: Preview changes to a template
       description: Returns a preview of a template for a given template_type, slug and body
       tags:
@@ -938,6 +984,8 @@ paths:
     post:
       deprecated: true
       operationId: ToggleTemplateDelivery
+      x-sdk-ruby-operationGroup: templates
+      x-sdk-ruby-operationId: toggle_delivery
       summary: Toggle the delivery by Clerk for a template of a given type and slug
       description: |-
         Toggles the delivery by Clerk for a template of a given type and slug.
@@ -984,6 +1032,8 @@ paths:
   /users:
     get:
       operationId: GetUserList
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: all
       summary: List all users
       description: |-
         Returns a list of all users.
@@ -1124,6 +1174,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     post:
       operationId: CreateUser
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: create
       summary: Create a new user
       description: |-
         Creates a new user. Your user management settings determine how you should setup your user model.
@@ -1281,6 +1333,8 @@ paths:
   /users/count:
     get:
       operationId: GetUsersCount
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: count
       summary: Count users
       description: Returns a total count of all users that match the given filtering criteria.
       tags:
@@ -1369,6 +1423,8 @@ paths:
   /users/{user_id}:
     get:
       operationId: GetUser
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: find
       summary: Retrieve a user
       description: Retrieve the details of a user
       tags:
@@ -1391,6 +1447,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateUser
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: update
       summary: Update a user
       description: |-
         Update a user's attributes.
@@ -1553,6 +1611,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteUser
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: delete
       summary: Delete a user
       description: Delete the specified user
       tags:
@@ -1576,6 +1636,8 @@ paths:
   /users/{user_id}/ban:
     post:
       operationId: BanUser
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: ban
       summary: Ban a user
       description: Marks the given user as banned, which means that all their sessions are revoked and they are not allowed to sign in again.
       tags:
@@ -1595,6 +1657,8 @@ paths:
   /users/{user_id}/unban:
     post:
       operationId: UnbanUser
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: unban
       summary: Unban a user
       description: Removes the ban mark from the given user.
       tags:
@@ -1614,6 +1678,8 @@ paths:
   /users/{user_id}/lock:
     post:
       operationId: LockUser
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: lock
       summary: Lock a user
       description: |-
         Marks the given user as locked, which means they are not allowed to sign in again until the lock expires.
@@ -1635,6 +1701,8 @@ paths:
   /users/{user_id}/unlock:
     post:
       operationId: UnlockUser
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: unlock
       summary: Unlock a user
       description: Removes the lock from the given user.
       tags:
@@ -1654,6 +1722,8 @@ paths:
   /users/{user_id}/profile_image:
     post:
       operationId: SetUserProfileImage
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: update_profile_image
       summary: Set user profile image
       description: Update a user's profile image
       tags:
@@ -1686,6 +1756,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
     delete:
       operationId: DeleteUserProfileImage
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: delete_profile_image
       summary: Delete user profile image
       description: Delete a user's profile image
       tags:
@@ -1705,6 +1777,8 @@ paths:
   /users/{user_id}/metadata:
     patch:
       operationId: UpdateUserMetadata
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: update_metadata
       summary: Merge and update a user's metadata
       description: |-
         Update a user's metadata attributes by merging existing values with the provided parameters.
@@ -1766,6 +1840,8 @@ paths:
   /users/{user_id}/oauth_access_tokens/{provider}:
     get:
       operationId: GetOAuthAccessToken
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: oauth_access_token
       summary: Retrieve the OAuth access token of a user
       description: |-
         Fetch the corresponding OAuth access token for a user that has previously authenticated with a particular OAuth provider.
@@ -1832,6 +1908,8 @@ paths:
   /users/{user_id}/organization_memberships:
     get:
       operationId: UsersGetOrganizationMemberships
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: organization_memberships
       summary: Retrieve all memberships for a user
       description: Retrieve a paginated list of the user's organization memberships
       tags:
@@ -1853,6 +1931,8 @@ paths:
   /users/{user_id}/organization_invitations:
     get:
       operationId: UsersGetOrganizationInvitations
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: organization_invitations
       summary: Retrieve all invitations for a user
       description: Retrieve a paginated list of the user's organization invitations
       tags:
@@ -1888,6 +1968,8 @@ paths:
   /users/{user_id}/verify_password:
     post:
       operationId: VerifyPassword
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: verify_password
       summary: Verify the password of a user
       description: |-
         Check that the user's password matches the supplied input.
@@ -1937,6 +2019,8 @@ paths:
   /users/{user_id}/verify_totp:
     post:
       operationId: VerifyTOTP
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: verify_totp
       summary: Verify a TOTP or backup code for a user
       description: |-
         Verify that the provided TOTP or backup code is valid for the user.
@@ -1994,6 +2078,8 @@ paths:
   /users/{user_id}/mfa:
     delete:
       operationId: DisableMFA
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: disable_mfa
       summary: Disable a user's MFA methods
       description: Disable all of a user's MFA methods (e.g. OTP sent via SMS, TOTP on their authenticator app) at once.
       tags:
@@ -2024,6 +2110,8 @@ paths:
   /users/{user_id}/backup_code:
     delete:
       operationId: DeleteBackupCode
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: delete_backup_code
       summary: Disable all user's Backup codes
       description: Disable all of a user's backup codes.
       tags:
@@ -2054,6 +2142,8 @@ paths:
   /users/{user_id}/passkeys/{passkey_identification_id}:
     delete:
       operationId: UserPasskeyDelete
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: delete_passkey
       summary: Delete a user passkey
       description: Delete the passkey identification for a given user and notify them through email.
       tags:
@@ -2083,6 +2173,8 @@ paths:
   /users/{user_id}/web3_wallets/{web3_wallet_identification_id}:
     delete:
       operationId: UserWeb3WalletDelete
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: delete_web3_wallet
       summary: Delete a user web3 wallet
       description: Delete the web3 wallet identification for a given user.
       tags:
@@ -2114,6 +2206,8 @@ paths:
   /users/{user_id}/totp:
     post:
       operationId: CreateUserTOTP
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: create_totp
       summary: Create a TOTP for a user
       description: |
         Creates a TOTP (Time-based One-Time Password) for a given user, returning both the TOTP secret and the URI.
@@ -2137,6 +2231,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
     delete:
       operationId: DeleteTOTP
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: delete_totp
       summary: Delete all the user's TOTPs
       description: Deletes all of the user's TOTPs.
       tags:
@@ -2167,6 +2263,8 @@ paths:
   /users/{user_id}/external_accounts/{external_account_id}:
     delete:
       operationId: DeleteExternalAccount
+      x-sdk-ruby-operationGroup: users
+      x-sdk-ruby-operationId: delete_external_account
       summary: Delete External Account
       description: Delete an external account by ID.
       tags:
@@ -2198,6 +2296,8 @@ paths:
   /invitations:
     post:
       operationId: CreateInvitation
+      x-sdk-ruby-operationGroup: invitations
+      x-sdk-ruby-operationId: create
       summary: Create an invitation
       description: |-
         Creates a new invitation for the given email address and sends the invitation email.
@@ -2259,6 +2359,8 @@ paths:
       summary: List all invitations
       description: Returns all non-revoked invitations for your application, sorted by creation date
       operationId: ListInvitations
+      x-sdk-ruby-operationGroup: invitations
+      x-sdk-ruby-operationId: all
       parameters:
         - $ref: '#/components/parameters/LimitParameter'
         - $ref: '#/components/parameters/OffsetParameter'
@@ -2281,6 +2383,8 @@ paths:
   /invitations/{invitation_id}/revoke:
     post:
       operationId: RevokeInvitation
+      x-sdk-ruby-operationGroup: invitations
+      x-sdk-ruby-operationId: revoke
       summary: Revokes an invitation
       description: |-
         Revokes the given invitation.
@@ -2306,6 +2410,8 @@ paths:
   /organization_invitations:
     get:
       operationId: ListInstanceOrganizationInvitations
+      x-sdk-ruby-operationGroup: organization_invitations
+      x-sdk-ruby-operationId: all
       summary: Get a list of organization invitations for the current instance
       description: |-
         This request returns the list of organization invitations for the instance.
@@ -2362,6 +2468,8 @@ paths:
   /allowlist_identifiers:
     get:
       operationId: ListAllowlistIdentifiers
+      x-sdk-ruby-operationGroup: allowlist_identifiers
+      x-sdk-ruby-operationId: all
       summary: List all identifiers on the allow-list
       description: Get a list of all identifiers allowed to sign up to an instance
       tags:
@@ -2375,6 +2483,8 @@ paths:
           $ref: '#/components/responses/PaymentRequired'
     post:
       operationId: CreateAllowlistIdentifier
+      x-sdk-ruby-operationGroup: allowlist_identifiers
+      x-sdk-ruby-operationId: create
       summary: Add identifier to the allow-list
       description: Create an identifier allowed to sign up to an instance
       tags:
@@ -2412,6 +2522,8 @@ paths:
   /allowlist_identifiers/{identifier_id}:
     delete:
       operationId: DeleteAllowlistIdentifier
+      x-sdk-ruby-operationGroup: allowlist_identifiers
+      x-sdk-ruby-operationId: delete
       summary: Delete identifier from allow-list
       description: Delete an identifier from the instance allow-list
       tags:
@@ -2433,6 +2545,8 @@ paths:
   /blocklist_identifiers:
     get:
       operationId: ListBlocklistIdentifiers
+      x-sdk-ruby-operationGroup: blocklist_identifiers
+      x-sdk-ruby-operationId: all
       summary: List all identifiers on the block-list
       description: Get a list of all identifiers which are not allowed to access an instance
       tags:
@@ -2446,6 +2560,8 @@ paths:
           $ref: '#/components/responses/PaymentRequired'
     post:
       operationId: CreateBlocklistIdentifier
+      x-sdk-ruby-operationGroup: blocklist_identifiers
+      x-sdk-ruby-operationId: create
       summary: Add identifier to the block-list
       description: Create an identifier that is blocked from accessing an instance
       tags:
@@ -2477,6 +2593,8 @@ paths:
   /blocklist_identifiers/{identifier_id}:
     delete:
       operationId: DeleteBlocklistIdentifier
+      x-sdk-ruby-operationGroup: blocklist_identifiers
+      x-sdk-ruby-operationId: delete
       summary: Delete identifier from block-list
       description: Delete an identifier from the instance block-list
       tags:
@@ -2498,6 +2616,8 @@ paths:
   /beta_features/instance_settings:
     patch:
       operationId: UpdateInstanceAuthConfig
+      x-sdk-ruby-operationGroup: beta_features
+      x-sdk-ruby-operationId: update_instance_settings
       summary: Update instance settings
       description: Updates the settings of an instance
       tags:
@@ -2553,6 +2673,8 @@ paths:
     put:
       deprecated: true
       operationId: UpdateProductionInstanceDomain
+      x-sdk-ruby-operationGroup: beta_features
+      x-sdk-ruby-operationId: update_production_instance_domain
       summary: Update production instance domain
       description: |-
         Change the domain of a production instance.
@@ -2586,6 +2708,8 @@ paths:
         Create an actor token that can be used to impersonate the given user.
         The `actor` parameter needs to include at least a "sub" key whose value is the ID of the actor (impersonating) user.
       operationId: CreateActorToken
+      x-sdk-ruby-operationGroup: actor_tokens
+      x-sdk-ruby-operationId: create
       tags:
         - Actor Tokens
       requestBody:
@@ -2635,6 +2759,8 @@ paths:
       summary: Revoke actor token
       description: Revokes a pending actor token.
       operationId: RevokeActorToken
+      x-sdk-ruby-operationGroup: actor_tokens
+      x-sdk-ruby-operationId: revoke
       tags:
         - Actor Tokens
       parameters:
@@ -2658,6 +2784,8 @@ paths:
         Use this endpoint to get a list of all domains for an instance.
         The response will contain the primary domain for the instance and any satellite domains. Each domain in the response contains information about the URLs where Clerk operates and the required CNAME targets.
       operationId: ListDomains
+      x-sdk-ruby-operationGroup: domains
+      x-sdk-ruby-operationId: all
       tags:
         - Domains
       responses:
@@ -2672,6 +2800,8 @@ paths:
         At the moment, instances can have only one primary domain, so the `is_satellite` parameter must be set to `true`.
         If you're planning to configure the new satellite domain to run behind a proxy, pass the `proxy_url` parameter accordingly.
       operationId: AddDomain
+      x-sdk-ruby-operationGroup: domains
+      x-sdk-ruby-operationId: create
       tags:
         - Domains
       requestBody:
@@ -2707,6 +2837,8 @@ paths:
   /domains/{domain_id}:
     delete:
       operationId: DeleteDomain
+      x-sdk-ruby-operationGroup: domains
+      x-sdk-ruby-operationId: delete
       summary: Delete a satellite domain
       description: |-
         Deletes a satellite domain for the instance.
@@ -2729,6 +2861,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateDomain
+      x-sdk-ruby-operationGroup: domains
+      x-sdk-ruby-operationId: update
       summary: Update a domain
       description: |-
         The `proxy_url` can be updated only for production instances.
@@ -2788,6 +2922,8 @@ paths:
   /instance:
     patch:
       operationId: UpdateInstance
+      x-sdk-ruby-operationGroup: instance
+      x-sdk-ruby-operationId: update
       summary: Update instance settings
       description: Updates the settings of an instance
       tags:
@@ -2849,6 +2985,8 @@ paths:
   /instance/restrictions:
     patch:
       operationId: UpdateInstanceRestrictions
+      x-sdk-ruby-operationGroup: instance
+      x-sdk-ruby-operationId: update_restrictions
       summary: Update instance restrictions
       description: Updates the restriction settings of an instance
       tags:
@@ -2886,6 +3024,8 @@ paths:
   /instance/change_domain:
     post:
       operationId: ChangeProductionInstanceDomain
+      x-sdk-ruby-operationGroup: instance
+      x-sdk-ruby-operationId: update_production_domain
       summary: Update production instance domain
       description: |-
         Change the domain of a production instance.
@@ -2922,6 +3062,8 @@ paths:
   /instance/organization_settings:
     patch:
       operationId: UpdateInstanceOrganizationSettings
+      x-sdk-ruby-operationGroup: instance
+      x-sdk-ruby-operationId: update_organization_settings
       summary: Update instance organization settings
       description: Updates the organization settings of the instance
       tags:
@@ -2971,6 +3113,8 @@ paths:
   /webhooks/svix:
     post:
       operationId: CreateSvixApp
+      x-sdk-ruby-operationGroup: webhooks
+      x-sdk-ruby-operationId: create
       summary: Create a Svix app
       description: Create a Svix app and associate it with the current instance
       tags:
@@ -2982,6 +3126,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
     delete:
       operationId: DeleteSvixApp
+      x-sdk-ruby-operationGroup: webhooks
+      x-sdk-ruby-operationId: delete
       summary: Delete a Svix app
       description: Delete a Svix app and disassociate it from the current instance
       tags:
@@ -2994,6 +3140,8 @@ paths:
   /webhooks/svix_url:
     post:
       operationId: GenerateSvixAuthURL
+      x-sdk-ruby-operationGroup: webhooks
+      x-sdk-ruby-operationId: generate_auth_url
       summary: Create a Svix Dashboard URL
       description: Generate a new url for accessing the Svix's management dashboard for that particular instance
       tags:
@@ -3007,6 +3155,8 @@ paths:
     get:
       summary: List all templates
       operationId: ListJWTTemplates
+      x-sdk-ruby-operationGroup: jwt_templates
+      x-sdk-ruby-operationId: all
       tags:
         - JWT Templates
       responses:
@@ -3014,6 +3164,8 @@ paths:
           $ref: '#/components/responses/JWTTemplate.List'
     post:
       operationId: CreateJWTTemplate
+      x-sdk-ruby-operationGroup: jwt_templates
+      x-sdk-ruby-operationId: create
       summary: Create a JWT template
       description: Create a new JWT template
       tags:
@@ -3069,6 +3221,8 @@ paths:
   /jwt_templates/{template_id}:
     get:
       operationId: GetJWTTemplate
+      x-sdk-ruby-operationGroup: jwt_templates
+      x-sdk-ruby-operationId: find
       summary: Retrieve a template
       description: Retrieve the details of a given JWT template
       tags:
@@ -3087,6 +3241,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateJWTTemplate
+      x-sdk-ruby-operationGroup: jwt_templates
+      x-sdk-ruby-operationId: update
       summary: Update a JWT template
       description: Updates an existing JWT template
       tags:
@@ -3148,6 +3304,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteJWTTemplate
+      x-sdk-ruby-operationGroup: jwt_templates
+      x-sdk-ruby-operationId: delete
       summary: Delete a Template
       description: ''
       tags:
@@ -3169,6 +3327,8 @@ paths:
   /organizations:
     get:
       operationId: ListOrganizations
+      x-sdk-ruby-operationGroup: organizations
+      x-sdk-ruby-operationId: all
       summary: Get a list of organizations for an instance
       description: |-
         This request returns the list of organizations for an instance.
@@ -3218,6 +3378,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     post:
       operationId: CreateOrganization
+      x-sdk-ruby-operationGroup: organizations
+      x-sdk-ruby-operationId: create
       summary: Create an organization
       description: |-
         Creates a new organization with the given name for an instance.
@@ -3281,6 +3443,8 @@ paths:
   /organizations/{organization_id}:
     get:
       operationId: GetOrganization
+      x-sdk-ruby-operationGroup: organizations
+      x-sdk-ruby-operationId: find
       summary: Retrieve an organization by ID or slug
       description: Fetches the organization whose ID or slug matches the provided `id_or_slug` URL query parameter.
       tags:
@@ -3307,6 +3471,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateOrganization
+      x-sdk-ruby-operationGroup: organizations
+      x-sdk-ruby-operationId: update
       summary: Update an organization
       description: Updates an existing organization
       tags:
@@ -3364,6 +3530,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteOrganization
+      x-sdk-ruby-operationGroup: organizations
+      x-sdk-ruby-operationId: delete
       summary: Delete an organization
       description: |-
         Deletes the given organization.
@@ -3386,6 +3554,8 @@ paths:
   /organizations/{organization_id}/metadata:
     patch:
       operationId: MergeOrganizationMetadata
+      x-sdk-ruby-operationGroup: organizations
+      x-sdk-ruby-operationId: merge_metadata
       summary: Merge and update metadata for an organization
       description: |-
         Update organization metadata attributes by merging existing values with the provided parameters.
@@ -3433,6 +3603,8 @@ paths:
   /organizations/{organization_id}/logo:
     put:
       operationId: UploadOrganizationLogo
+      x-sdk-ruby-operationGroup: organizations
+      x-sdk-ruby-operationId: upload_logo
       summary: Upload a logo for the organization
       description: |-
         Set or replace an organization's logo, by uploading an image file.
@@ -3476,6 +3648,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
     delete:
       operationId: DeleteOrganizationLogo
+      x-sdk-ruby-operationGroup: organizations
+      x-sdk-ruby-operationId: delete_logo
       description: Delete the organization's logo.
       tags:
         - Organizations
@@ -3494,6 +3668,8 @@ paths:
   /organizations/{organization_id}/invitations:
     post:
       operationId: CreateOrganizationInvitation
+      x-sdk-ruby-operationGroup: organization_invitations
+      x-sdk-ruby-operationId: create
       summary: Create and send an organization invitation
       description: |-
         Creates a new organization invitation and sends an email to the provided `email_address` with a link to accept the invitation and join the organization.
@@ -3565,6 +3741,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     get:
       operationId: ListOrganizationInvitations
+      x-sdk-ruby-operationGroup: organization_invitations
+      x-sdk-ruby-operationId: all
       summary: Get a list of organization invitations
       description: |-
         This request returns the list of organization invitations.
@@ -3604,6 +3782,8 @@ paths:
   /organizations/{organization_id}/invitations/bulk:
     post:
       operationId: CreateOrganizationInvitationBulk
+      x-sdk-ruby-operationGroup: organization_invitations
+      x-sdk-ruby-operationId: create_bulk
       summary: Bulk create and send organization invitations
       description: |-
         Creates new organization invitations in bulk and sends out emails to the provided email addresses with a link to accept the invitation and join the organization.
@@ -3676,6 +3856,8 @@ paths:
     get:
       deprecated: true
       operationId: ListPendingOrganizationInvitations
+      x-sdk-ruby-operationGroup: organization_invitations
+      x-sdk-ruby-operationId: pending
       summary: Get a list of pending organization invitations
       description: |-
         This request returns the list of organization invitations with "pending" status.
@@ -3705,6 +3887,8 @@ paths:
   /organizations/{organization_id}/invitations/{invitation_id}:
     get:
       operationId: GetOrganizationInvitation
+      x-sdk-ruby-operationGroup: organization_invitations
+      x-sdk-ruby-operationId: find
       summary: Retrieve an organization invitation by ID
       description: Use this request to get an existing organization invitation by ID.
       tags:
@@ -3734,6 +3918,8 @@ paths:
   /organizations/{organization_id}/invitations/{invitation_id}/revoke:
     post:
       operationId: RevokeOrganizationInvitation
+      x-sdk-ruby-operationGroup: organization_invitations
+      x-sdk-ruby-operationId: revoke
       summary: Revoke a pending organization invitation
       description: |-
         Use this request to revoke a previously issued organization invitation.
@@ -3781,6 +3967,8 @@ paths:
   /organizations/{organization_id}/memberships:
     post:
       operationId: CreateOrganizationMembership
+      x-sdk-ruby-operationGroup: organization_memberships
+      x-sdk-ruby-operationId: create
       summary: Create a new organization membership
       description: |-
         Adds a user as a member to the given organization.
@@ -3829,6 +4017,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     get:
       operationId: ListOrganizationMemberships
+      x-sdk-ruby-operationGroup: organization_memberships
+      x-sdk-ruby-operationId: all_by_organization
       summary: Get a list of all members of an organization
       description: Retrieves all user memberships for the given organization
       tags:
@@ -3861,6 +4051,8 @@ paths:
   /organizations/{organization_id}/memberships/{user_id}:
     patch:
       operationId: UpdateOrganizationMembership
+      x-sdk-ruby-operationGroup: organization_memberships
+      x-sdk-ruby-operationId: update
       summary: Update an organization membership
       description: Updates the properties of an existing organization membership
       tags:
@@ -3901,6 +4093,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteOrganizationMembership
+      x-sdk-ruby-operationGroup: organization_memberships
+      x-sdk-ruby-operationId: delete
       summary: Remove a member from an organization
       description: Removes the given membership from the organization
       tags:
@@ -3930,6 +4124,8 @@ paths:
   /organizations/{organization_id}/memberships/{user_id}/metadata:
     patch:
       operationId: UpdateOrganizationMembershipMetadata
+      x-sdk-ruby-operationGroup: organization_memberships
+      x-sdk-ruby-operationId: update_metadata
       summary: Merge and update organization membership metadata
       description: |-
         Update an organization membership's metadata attributes by merging existing values with the provided parameters.
@@ -3980,6 +4176,8 @@ paths:
   /organizations/{organization_id}/domains:
     post:
       operationId: CreateOrganizationDomain
+      x-sdk-ruby-operationGroup: organization_domains
+      x-sdk-ruby-operationId: create
       summary: Create a new organization domain.
       description: Creates a new organization domain. By default the domain is verified, but can be optionally set to unverified.
       tags:
@@ -4024,6 +4222,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     get:
       operationId: ListOrganizationDomains
+      x-sdk-ruby-operationGroup: organization_domains
+      x-sdk-ruby-operationId: all
       summary: Get a list of all domains of an organization.
       description: Get a list of all domains of an organization.
       tags:
@@ -4059,6 +4259,8 @@ paths:
   /organizations/{organization_id}/domains/{domain_id}:
     patch:
       operationId: UpdateOrganizationDomain
+      x-sdk-ruby-operationGroup: organization_domains
+      x-sdk-ruby-operationId: update
       summary: Update an organization domain.
       description: Updates the properties of an existing organization domain.
       tags:
@@ -4102,6 +4304,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteOrganizationDomain
+      x-sdk-ruby-operationGroup: organization_domains
+      x-sdk-ruby-operationId: delete
       summary: Remove a domain from an organization.
       description: Removes the given domain from the organization.
       tags:
@@ -4141,6 +4345,8 @@ paths:
         The `proxy_url` parameter allows for testing proxy configurations for domains that don't have a proxy URL yet, or operate on
         a different proxy URL than the one provided. It can also be used to re-validate a domain that is already configured to work with a proxy.
       operationId: VerifyDomainProxy
+      x-sdk-ruby-operationGroup: proxy_checks
+      x-sdk-ruby-operationId: verify
       tags:
         - Proxy checks
       requestBody:
@@ -4168,6 +4374,8 @@ paths:
       summary: List all redirect URLs
       description: Lists all whitelisted redirect_urls for the instance
       operationId: ListRedirectURLs
+      x-sdk-ruby-operationGroup: redirect_urls
+      x-sdk-ruby-operationId: all
       tags:
         - Redirect URLs
       responses:
@@ -4177,6 +4385,8 @@ paths:
       summary: Create a redirect URL
       description: Create a redirect URL
       operationId: CreateRedirectURL
+      x-sdk-ruby-operationGroup: redirect_urls
+      x-sdk-ruby-operationId: create
       tags:
         - Redirect URLs
       requestBody:
@@ -4202,6 +4412,8 @@ paths:
       summary: Retrieve a redirect URL
       description: Retrieve the details of the redirect URL with the given ID
       operationId: GetRedirectURL
+      x-sdk-ruby-operationGroup: redirect_urls
+      x-sdk-ruby-operationId: find
       tags:
         - Redirect URLs
       parameters:
@@ -4220,6 +4432,8 @@ paths:
       summary: Delete a redirect URL
       description: Remove the selected redirect URL from the whitelist of the instance
       operationId: DeleteRedirectURL
+      x-sdk-ruby-operationGroup: redirect_urls
+      x-sdk-ruby-operationId: delete
       tags:
         - Redirect URLs
       parameters:
@@ -4242,6 +4456,8 @@ paths:
         By default, sign-in tokens expire in 30 days.
         You can optionally supply a different duration in seconds using the `expires_in_seconds` property.
       operationId: CreateSignInToken
+      x-sdk-ruby-operationGroup: sign_in_tokens
+      x-sdk-ruby-operationId: create
       tags:
         - Sign-in Tokens
       requestBody:
@@ -4272,6 +4488,8 @@ paths:
       summary: Revoke the given sign-in token
       description: Revokes a pending sign-in token
       operationId: RevokeSignInToken
+      x-sdk-ruby-operationGroup: sign_in_tokens
+      x-sdk-ruby-operationId: revoke
       tags:
         - Sign-in Tokens
       parameters:
@@ -4291,6 +4509,8 @@ paths:
   /sign_ups/{id}:
     patch:
       operationId: UpdateSignUp
+      x-sdk-ruby-operationGroup: sign_ups
+      x-sdk-ruby-operationId: update
       summary: Update a sign-up
       description: Update the sign-up with the given ID
       tags:
@@ -4323,6 +4543,8 @@ paths:
   /oauth_applications:
     get:
       operationId: ListOAuthApplications
+      x-sdk-ruby-operationGroup: oauth_applications
+      x-sdk-ruby-operationId: all
       summary: Get a list of OAuth applications for an instance
       description: |-
         This request returns the list of OAuth applications for an instance.
@@ -4345,6 +4567,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     post:
       operationId: CreateOAuthApplication
+      x-sdk-ruby-operationGroup: oauth_applications
+      x-sdk-ruby-operationId: create
       summary: Create an OAuth application
       description: |-
         Creates a new OAuth application with the given name and callback URL for an instance.
@@ -4391,6 +4615,8 @@ paths:
   /oauth_applications/{oauth_application_id}:
     get:
       operationId: GetOAuthApplication
+      x-sdk-ruby-operationGroup: oauth_applications
+      x-sdk-ruby-operationId: find
       summary: Retrieve an OAuth application by ID
       description: Fetches the OAuth application whose ID matches the provided `id` in the path.
       tags:
@@ -4411,6 +4637,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateOAuthApplication
+      x-sdk-ruby-operationGroup: oauth_applications
+      x-sdk-ruby-operationId: update
       summary: Update an OAuth application
       description: Updates an existing OAuth application
       tags:
@@ -4452,6 +4680,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteOAuthApplication
+      x-sdk-ruby-operationGroup: oauth_applications
+      x-sdk-ruby-operationId: delete
       summary: Delete an OAuth application
       description: |-
         Deletes the given OAuth application.
@@ -4475,6 +4705,8 @@ paths:
   /oauth_applications/{oauth_application_id}/rotate_secret:
     post:
       operationId: RotateOAuthApplicationSecret
+      x-sdk-ruby-operationGroup: oauth_applications
+      x-sdk-ruby-operationId: rotate_secret
       summary: Rotate the client secret of the given OAuth application
       description: |-
         Rotates the OAuth application's client secret.
@@ -4498,6 +4730,8 @@ paths:
   /saml_connections:
     get:
       operationId: ListSAMLConnections
+      x-sdk-ruby-operationGroup: saml_connections
+      x-sdk-ruby-operationId: all
       summary: Get a list of SAML Connections for an instance
       description: |-
         Returns the list of SAML Connections for an instance.
@@ -4519,6 +4753,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     post:
       operationId: CreateSAMLConnection
+      x-sdk-ruby-operationGroup: saml_connections
+      x-sdk-ruby-operationId: create
       summary: Create a SAML Connection
       description: Create a new SAML Connection.
       tags:
@@ -4595,6 +4831,8 @@ paths:
   /saml_connections/{saml_connection_id}:
     get:
       operationId: GetSAMLConnection
+      x-sdk-ruby-operationGroup: saml_connections
+      x-sdk-ruby-operationId: find
       summary: Retrieve a SAML Connection by ID
       description: Fetches the SAML Connection whose ID matches the provided `saml_connection_id` in the path.
       tags:
@@ -4617,6 +4855,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateSAMLConnection
+      x-sdk-ruby-operationGroup: saml_connections
+      x-sdk-ruby-operationId: update
       summary: Update a SAML Connection
       description: Updates the SAML Connection whose ID matches the provided `id` in the path.
       tags:
@@ -4711,6 +4951,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteSAMLConnection
+      x-sdk-ruby-operationGroup: saml_connections
+      x-sdk-ruby-operationId: delete
       summary: Delete a SAML Connection
       description: Deletes the SAML Connection whose ID matches the provided `id` in the path.
       tags:
@@ -4734,6 +4976,8 @@ paths:
   /testing_tokens:
     post:
       operationId: CreateTestingToken
+      x-sdk-ruby-operationGroup: testing_tokens
+      x-sdk-ruby-operationId: create
       summary: Retrieve a new testing token
       description: Retrieve a new testing token. Only available for development instances.
       tags:
@@ -4746,6 +4990,8 @@ paths:
   /organization_memberships:
     get:
       operationId: InstanceGetOrganizationMemberships
+      x-sdk-ruby-operationGroup: organization_memberships
+      x-sdk-ruby-operationId: all
       summary: Get a list of all organization memberships within an instance.
       description: Retrieves all organization user memberships for the given instance.
       tags:

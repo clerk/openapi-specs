@@ -3582,7 +3582,7 @@ paths:
     put:
       operationId: UploadOrganizationLogo
       x-sdk-ruby-operationGroup: organizations
-      x-sdk-ruby-operationId: update_logo
+      x-sdk-ruby-operationId: upload_logo
       summary: Upload a logo for the organization
       description: |-
         Set or replace an organization's logo, by uploading an image file.
