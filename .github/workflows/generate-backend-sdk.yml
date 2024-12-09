@@ -4,8 +4,8 @@ on:
   pull_request:
     types:
       - closed
-    paths:
-      - 'bapi/**'
+    # paths:
+    #   - 'bapi/**'
 
 jobs:
   generate:
