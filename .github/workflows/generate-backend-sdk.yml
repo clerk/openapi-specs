@@ -24,9 +24,9 @@ jobs:
           event-type: generate-sdk
           client-payload: >
             {
-              "actor": "${{ github.event.pull_request.user.login }}"
+              "actor": "${{ github.event.pull_request.user.login }}",
               "id": "${{ github.event.pull_request.number }}",
               "url": "${{ github.event.pull_request.html_url }}",
               "title": "${{ github.event.pull_request.title }}",
-              "description": "${{ github.event.pull_request.body }}",
+              "description": "${{ github.event.pull_request.body }}"
             }
