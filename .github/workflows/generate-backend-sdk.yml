@@ -1,0 +1,32 @@
+name: Generate Backend SDKs
+
+on:
+  pull_request:
+    types:
+      - closed
+    paths:
+      - 'bapi/**'
+
+jobs:
+  generate:
+    name: Generate Ruby Backend SDK
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo: ['clerk/clerk-sdk-ruby-backend']
+
+    steps:
+      - name: Trigger repository dispatch
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          repository: ${{ matrix.repo }}
+          event-type: generate-sdk
+          client-payload: >
+            {
+              "actor": "${{ github.event.pull_request.user.login }}"
+              "id": "${{ github.event.pull_request.number }}",
+              "url": "${{ github.event.pull_request.html_url }}",
+              "title": "${{ github.event.pull_request.title }}",
+              "description": "${{ github.event.pull_request.body }}",
+            }
