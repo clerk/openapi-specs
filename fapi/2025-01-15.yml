@@ -1,0 +1,467 @@
+openapi: 3.0.3
+
+info:
+  title: Clerk Frontend API
+  version: "v1"
+  description: |-
+    The Clerk REST Frontend API, meant to be accessed from a browser or native environment.
+
+    This is a Form Based API and all the data must be sent and formatted according to the `application/x-www-form-urlencoded` content type.
+
+    ### Versions
+
+    When the API changes in a way that isn't compatible with older versions, a new version is released.
+    Each version is identified by its release date, e.g. `2021-02-05`. For more information, please see [Clerk API Versions](https://clerk.com/docs/backend-requests/versioning/overview).
+
+    ### Using the Try It Console
+
+    The `Try It` feature of the docs only works for **Development Instances** when using the `DevBrowser` security scheme.
+    To use it, first generate a dev instance token from the `/v1/dev_browser` endpoint.
+
+    Please see https://clerk.com/docs for more information.
+  x-logo:
+    url: https://clerk.com/_next/image?url=%2Fimages%2Fclerk-logo.svg&w=96&q=75
+    altText: Clerk docs
+    href: https://clerk.com/docs
+  contact:
+    email: support@clerk.com
+    name: Clerk Team
+    url: https://clerk.com/support
+  termsOfService: https://clerk.com/terms
+  license:
+    name: "MIT"
+    url: "https://github.com/clerk/javascript/blob/main/LICENSE"
+
+servers:
+  - url: https://{domain}.clerk.accounts.dev
+    variables:
+      domain:
+        default: example-destined-camel-13
+        description: Your Development Instance Frontend API Domain.
+
+tags:
+  - name: DevBrowser
+    description: Used to handle dev browsers.
+  - name: Well Known
+    description: Well known endpoints like jwks, deep linking and openid-configuration.
+  - name: Health
+    description: Used to get the health status of the API.
+  - name: OAuth2 Identify Provider
+    description: Requests for the OAuth2 authorization flow.
+  - name: OAuth2 Callbacks
+    description: Used to receive callbacks from successful oauth attempts.
+  - name: SAML
+    description: Used in authentication flows using SAML.
+  - name: Client
+    description: Used to interact with the Client Object.
+  - name: Sessions
+    description: Used to interact with the sessions of a client.
+  - name: Sign Ins
+    description: Used to sign in a user in the current client.
+  - name: Sign Ups
+    description: Used to sign up a new user in the current client.
+  - name: User
+    description: Used to interact with the properties of the current user.
+  - name: Active Sessions
+    description: Used to interact with the sessions of the current user.
+  - name: Email Addresses
+    description: Used to interact with the email addresses of the logged in user.
+  - name: Phone Numbers
+    description: Used to interact with the phone numbers of the logged in user.
+  - name: Web3 Wallets
+    description: Used to interact with the web3 wallets of the logged in user.
+  - name: Passkeys
+    description: Used to interact with the passkeys of the logged in user.
+  - name: External Accounts
+    description: Used to interact with the external accounts of the current user.
+  - name: TOTP
+    description: Used to interact with One Time Password authenticators of the current user.
+  - name: Backup Codes
+    description: Used to interact with the two factor authentication backup codes of the current user.
+  - name: Organizations Memberships
+    description: Used to interact with the current user's organization memberships, invitations and suggestions.
+  - name: Organization
+    description: |-
+      Used to interact with the an organization and its properties. The current user must be an administrator to access them.
+  - name: Invitations
+    description: |-
+      Used to interact with the invitations of an organization. The current user must be an administrator to access them.
+  - name: Members
+    description: |-
+      Used to interact with the members of an organization. The current user must be an administrator to access them.
+  - name: Membership Requests
+    description: |-
+      Used to interact with the members of an organization. The current user must be an administrator to access them.
+  - name: Domains
+    description: |-
+      Used to interact with the members of an organization. The current user must be an administrator to access them.
+  - name: Environment
+    description: Used to get and update the current Environment
+  - name: Waitlist
+    description: Used to interact with the waitlist.
+
+# https://redocly.com/docs/api-reference-docs/specification-extensions/x-tag-groups/
+# All tags must be included in a group. Otherwise they won't appear.
+# Also all endpoints must have a tag.
+x-tagGroups:
+  - name: Environment
+    tags:
+      - Environment
+  - name: Client
+    tags:
+      - Client
+      - Sessions
+      - Sign Ins
+      - Sign Ups
+  - name: User
+    tags:
+      - User
+      - Active Sessions
+      - Email Addresses
+      - Phone Numbers
+      - Web3 Wallets
+      - Passkeys
+      - External Accounts
+      - TOTP
+      - Backup Codes
+      - Organizations Memberships
+  - name: Organizations
+    tags:
+      - Organization
+      - Invitations
+      - Membership Requests
+      - Members
+      - Domains
+      - Roles
+  - name: Other
+    tags:
+      - Well Known
+      - DevBrowser
+      - Health
+      - OAuth2 Identify Provider
+      - OAuth2 Callbacks
+      - SAML
+      - Waitlist
+
+security:
+  - {}
+  - DevBrowser: []
+  - ProductionBrowser: []
+  - ProductionNativeApp: []
+    ProductionNativeFlag: []
+
+components:
+  securitySchemes:
+    ProductionBrowser:
+      type: apiKey
+      in: cookie
+      name: __client
+      description: |-
+        The Client API token sent in the form of a browser cookie.
+
+        Used to authenticate production browser applications.
+    DevBrowser:
+      type: apiKey
+      in: query
+      name: __dev_session
+      description: |-
+        A Dev Browser API token sent as a query parameter.
+
+        Used to authenticate only dev instances.
+
+        To generate an dev instance API token you must first make a request to `/v1/dev_browser`
+        and copy it from the response.
+    ProductionNativeApp:
+      type: http
+      scheme: bearer
+      description: |-
+        The Client API token sent in the `Authorization` header.
+
+        Used to authentication native applications.
+    ProductionNativeFlag:
+      type: apiKey
+      in: query
+      name: _is_native
+      description: |-
+        If sent and the value is true, it instructs the server to parse the api token from the `Authorization` Header.
+
+        It should always be set to true when using `Authorization` header authentication strategy.
+
+paths:
+  #
+  # Well Known Endpoints
+  #
+  /.well-known/assetlinks.json:
+    $ref: "../paths/2021-02-05.yml#/AndroidAssetLinks"
+  /.well-known/jwks.json:
+    $ref: "../paths/2021-02-05.yml#/JWKS"
+  /.well-known/apple-app-site-association:
+    $ref: "../paths/2021-02-05.yml#/AppleAppSiteAssociation"
+  /.well-known/openid-configuration:
+    $ref: "../paths/2021-02-05.yml#/OpenIDConfiguration"
+
+  #
+  # OAUTH
+  #
+  /oauth/authorize:
+    $ref: "../paths/2021-02-05.yml#/OAuthAuthorize"
+  /oauth/token:
+    $ref: "../paths/2021-02-05.yml#/OAuthToken"
+  /oauth/userinfo:
+    $ref: "../paths/2021-02-05.yml#/OAuthUserinfo"
+
+  /v1/account_portal:
+    $ref: "../paths/2021-02-05.yml#/AccountPortal"
+
+  /v1/environment:
+    $ref: "../paths/2021-02-05.yml#/Environment"
+
+  /v1/saml/metadata/{saml_connection_id}:
+    $ref: "../paths/2021-02-05.yml#/SAMLMetadata"
+  /v1/saml/acs/{saml_connection_id}:
+    $ref: "../paths/2021-02-05.yml#/SAMLACS"
+
+  /v1/health:
+    $ref: "../paths/2021-02-05.yml#/Health"
+  /v1/proxy-health:
+    $ref: "../paths/2021-02-05.yml#/ProxyHealth"
+
+  #
+  # CLIENT SIGN IN / SIGN UP
+  #
+  /v1/client:
+    $ref: "../paths/2021-02-05.yml#/Client"
+  /v1/client/sign_ins:
+    $ref: "../paths/2021-02-05.yml#/ClientSignIns"
+  /v1/client/sign_ins/{sign_in_id}:
+    $ref: "../paths/2021-02-05.yml#/ClientSignIn"
+  /v1/client/sign_ins/{sign_in_id}/reset_password:
+    $ref: "../paths/2021-02-05.yml#/ClientSignInResetPassword"
+  /v1/client/sign_ins/{sign_in_id}/prepare_first_factor:
+    $ref: "../paths/2021-02-05.yml#/ClientSignInPrepareFirstFactor"
+  /v1/client/sign_ins/{sign_in_id}/attempt_first_factor:
+    $ref: "../paths/2021-02-05.yml#/ClientSignInAttemptFirstFactor"
+  /v1/client/sign_ins/{sign_in_id}/prepare_second_factor:
+    $ref: "../paths/2021-02-05.yml#/ClientSignInPrepareSecondFactor"
+  /v1/client/sign_ins/{sign_in_id}/attempt_second_factor:
+    $ref: "../paths/2021-02-05.yml#/ClientSignInAttemptSecondFactor"
+  /v1/client/sign_ups:
+    $ref: "../paths/2021-02-05.yml#/ClientSignUps"
+  /v1/client/sign_ups/{id}:
+    $ref: "../paths/2021-02-05.yml#/ClientSignUp"
+  /v1/client/sign_ups/{id}/prepare_verification:
+    $ref: "../paths/2021-02-05.yml#/ClientSignUpPrepareVerification"
+  /v1/client/sign_ups/{id}/attempt_verification:
+    $ref: "../paths/2021-02-05.yml#/ClientSignUpAttemptVerification"
+  /v1/client/sync:
+    $ref: "../paths/2021-02-05.yml#/ClientSync"
+  /v1/client/link:
+    $ref: "../paths/2021-02-05.yml#/ClientLink"
+  /v1/client/handshake:
+    $ref: "../paths/2021-02-05.yml#/ClientHandshake"
+
+  #
+  # DEV BROWSER
+  #
+  /v1/dev_browser:
+    $ref: "../paths/2021-02-05.yml#/DevBrowser"
+  /v1/dev_browser/set_first_party_cookie:
+    post:
+      summary: "Post Dev Broswer init set cookie"
+      description: "post dev_browser/set_first_party_cookie"
+      operationId: postDevBrowserInitSetCookie
+      responses:
+        "200":
+          description: A cookie for the dev browser was set.
+
+  /v1/dev_browser/init:
+    $ref: "../paths/2021-02-05.yml#/DevBrowserInit"
+
+  /v1/oauth_callback:
+    $ref: "../paths/2021-02-05.yml#/OAuthCallback"
+
+  /v1/clear-site-data:
+    $ref: "../paths/2021-02-05.yml#/ClearSiteData"
+
+  # authenticated requests
+
+  #
+  # CLIENT SESSIONS
+  #
+  /v1/client/sessions:
+    $ref: "../paths/2021-02-05.yml#/ClientSessions"
+  /v1/client/sessions/{session_id}:
+    $ref: "../paths/2021-02-05.yml#/ClientSession"
+  /v1/client/sessions/{session_id}/touch:
+    $ref: "../paths/2021-02-05.yml#/ClientSessionTouch"
+  /v1/client/sessions/{session_id}/end:
+    $ref: "../paths/2021-02-05.yml#/ClientSessionEnd"
+  /v1/client/sessions/{session_id}/remove:
+    $ref: "../paths/2021-02-05.yml#/ClientSessionRemove"
+  /v1/me/sessions/active:
+    $ref: "../paths/2021-02-05.yml#/MeSessionsActive"
+  /v1/me/sessions/{session_id}/revoke:
+    $ref: "../paths/2021-02-05.yml#/MeSessionRevoke"
+  /v1/client/sessions/{session_id}/tokens:
+    $ref: "../paths/2021-02-05.yml#/ClientSessionTokens"
+  /v1/client/sessions/{session_id}/tokens/{template_name}:
+    $ref: "../paths/2021-02-05.yml#/ClientSessionTokensTemplate"
+  /v1/client/sessions/{session_id}/verify:
+    $ref: "../paths/2021-02-05.yml#/ClientSessionVerify"
+  /v1/client/sessions/{session_id}/verify/prepare_first_factor:
+    $ref: "../paths/2021-02-05.yml#/ClientSessionVerifyPrepareFirstFactor"
+  /v1/client/sessions/{session_id}/verify/attempt_first_factor:
+    $ref: "../paths/2021-02-05.yml#/ClientSessionVerifyAttemptFirstFactor"
+  /v1/client/sessions/{session_id}/verify/prepare_second_factor:
+    $ref: "../paths/2021-02-05.yml#/ClientSessionVerifyPrepareSecondFactor"
+  /v1/client/sessions/{session_id}/verify/attempt_second_factor:
+    $ref: "../paths/2021-02-05.yml#/ClientSessionAttemptPrepareSecondFactor"
+  /v1/me/sessions:
+    $ref: "../paths/2021-02-05.yml#/MeSessions"
+
+  #
+  # USER EMAIL
+  #
+  /v1/me/email_addresses:
+    $ref: "../paths/2021-02-05.yml#/MeEmailAddresses"
+  /v1/me/email_addresses/{email_id}/attempt_verification:
+    $ref: "../paths/2021-02-05.yml#/MeEmailAddressAttemptVerification"
+  /v1/me/email_addresses/{email_id}/prepare_verification:
+    $ref: "../paths/2021-02-05.yml#/MeEmailAddressPrepareVerification"
+  /v1/me/email_addresses/{email_id}:
+    $ref: "../paths/2021-02-05.yml#/MeEmailAddress"
+
+  #
+  # USER PHONE NUMBERS
+  #
+  /v1/me/phone_numbers:
+    $ref: "../paths/2021-02-05.yml#/MePhoneNumbers"
+  /v1/me/phone_numbers/{phone_number_id}/attempt_verification:
+    $ref: "../paths/2021-02-05.yml#/MePhoneNumberAttemptVerification"
+  /v1/me/phone_numbers/{phone_number_id}/prepare_verification:
+    $ref: "../paths/2021-02-05.yml#/MePhoneNumberPrepareVerification"
+  /v1/me/phone_numbers/{phone_number_id}:
+    $ref: "../paths/2021-02-05.yml#/MePhoneNumber"
+
+  #
+  # USER WEB3 WALLETS
+  #
+  /v1/me/web3_wallets:
+    $ref: "../paths/2021-02-05.yml#/MeWeb3Wallets"
+  /v1/me/web3_wallets/{web3_wallet_id}:
+    $ref: "../paths/2021-02-05.yml#/MeWeb3Wallet"
+  /v1/me/web3_wallets/{web3_wallet_id}/prepare_verification:
+    $ref: "../paths/2021-02-05.yml#/MeWeb3WalletPrepareVerification"
+  /v1/me/web3_wallets/{web3_wallet_id}/attempt_verification:
+    $ref: "../paths/2021-02-05.yml#/MeWeb3WalletAttemptVerification"
+
+  #
+  # USER PASSKEYS
+  #
+  /v1/me/passkeys:
+    $ref: "../paths/2021-02-05.yml#/MePasskeys"
+  /v1/me/passkeys/{passkey_id}:
+    $ref: "../paths/2021-02-05.yml#/MePasskey"
+  /v1/me/passkeys/{passkey_id}/attempt_verification:
+    $ref: "../paths/2021-02-05.yml#/MePasskeyAttemptVerification"
+
+  #
+  # USER EXTERNAL ACCOUNTS
+  #
+  /v1/me/external_accounts:
+    $ref: "../paths/2021-02-05.yml#/MeExternalAccounts"
+  /v1/me/external_accounts/{external_account_id}/reauthorize:
+    $ref: "../paths/2021-02-05.yml#/MeExternalAccountReauthorize"
+  /v1/me/external_accounts/{external_account_id}:
+    $ref: "../paths/2021-02-05.yml#/MeExternalAccount"
+  /v1/me/external_accounts/{external_account_id}/tokens:
+    $ref: "../paths/2021-02-05.yml#/MeExternalAccountRevokeTokens"
+
+  #
+  # USER TOTP
+  #
+  /v1/me/totp:
+    $ref: "../paths/2021-02-05.yml#/MeTOTP"
+  /v1/me/totp/attempt_verification:
+    $ref: "../paths/2021-02-05.yml#/MeTOTPAttemptVerification"
+  /v1/me/backup_codes:
+    $ref: "../paths/2021-02-05.yml#/MeBackupCodes"
+
+  #
+  # USER
+  #
+  /v1/me:
+    $ref: "../paths/2021-02-05.yml#/Me"
+  /v1/me/tokens:
+    $ref: "../paths/2021-02-05.yml#/MeTokens"
+  /v1/me/profile_image:
+    $ref: "../paths/2021-02-05.yml#/MeProfileImage"
+  /v1/me/change_password:
+    $ref: "../paths/2021-02-05.yml#/MeChangePassword"
+  /v1/me/remove_password:
+    $ref: "../paths/2021-02-05.yml#/MeRemovePassword"
+
+  #
+  # ORGANIZATIONS
+  #
+  /v1/me/organization_memberships:
+    $ref: "../paths/2021-02-05.yml#/MeOrganizationMemberships"
+  /v1/me/organization_memberships/{organization_id}:
+    $ref: "../paths/2021-02-05.yml#/MeOrganizationMembership"
+  /v1/me/organization_invitations:
+    $ref: "../paths/2021-02-05.yml#/MeOrganizationInvitations"
+  /v1/me/organization_invitations/{invitation_id}/accept:
+    $ref: "../paths/2021-02-05.yml#/MeOrganizationInvitationAccept"
+  /v1/me/organization_suggestions:
+    $ref: "../paths/2021-02-05.yml#/MeOrganizationSuggestions"
+  /v1/me/organization_suggestions/{suggestion_id}/accept:
+    $ref: "../paths/2021-02-05.yml#/MeOrganizationSuggestionAccept"
+
+  #
+  # ORGANIZATION MANAGEMENT
+  #
+  /v1/organizations:
+    $ref: "../paths/2021-02-05.yml#/Organizations"
+  /v1/organizations/{organization_id}:
+    $ref: "../paths/2021-02-05.yml#/Organization"
+  /v1/organizations/{organization_id}/logo:
+    $ref: "../paths/2021-02-05.yml#/OrganizationLogo"
+  /v1/organizations/{organization_id}/invitations:
+    $ref: "../paths/2021-02-05.yml#/OrganizationInvitations"
+  /v1/organizations/{organization_id}/invitations/bulk:
+    $ref: "../paths/2021-02-05.yml#/OrganizationInvitationsBulk"
+  /v1/organizations/{organization_id}/invitations/pending:
+    $ref: "../paths/2021-02-05.yml#/OrganizationInvitationsPending"
+  /v1/organizations/{organization_id}/invitations/{invitation_id}/revoke:
+    $ref: "../paths/2021-02-05.yml#/OrganizationInvitationRevoke"
+  /v1/organizations/{organization_id}/memberships:
+    $ref: "../paths/2021-02-05.yml#/OrganizationMemberships"
+  /v1/organizations/{organization_id}/memberships/{user_id}:
+    $ref: "../paths/2021-02-05.yml#/OrganizationMembership"
+  /v1/organizations/{organization_id}/domains:
+    $ref: "../paths/2021-02-05.yml#/OrganizationDomains"
+  /v1/organizations/{organization_id}/domains/{domain_id}:
+    $ref: "../paths/2021-02-05.yml#/OrganizationDomain"
+  /v1/organizations/{organization_id}/domains/{domain_id}/update_enrollment_mode:
+    $ref: "../paths/2021-02-05.yml#/OrganizationDomainUpdateEnrollmentMode"
+  /v1/organizations/{organization_id}/domains/{domain_id}/prepare_affiliation_verification:
+    $ref: "../paths/2021-02-05.yml#/OrganizationDomainPrepareAffiliationVerification"
+  /v1/organizations/{organization_id}/domains/{domain_id}/attempt_affiliation_verification:
+    $ref: "../paths/2021-02-05.yml#/OrganizationDomainsAttemptAffiliationVerification"
+  /v1/organizations/{organization_id}/membership_requests:
+    $ref: "../paths/2021-02-05.yml#/OrganizationMembershipRequests"
+  /v1/organizations/{organization_id}/membership_requests/{request_id}/accept:
+    $ref: "../paths/2021-02-05.yml#/OrganizationMembershipRequestAccept"
+  /v1/organizations/{organization_id}/membership_requests/{request_id}/reject:
+    $ref: "../paths/2021-02-05.yml#/OrganizationMembershipRequestReject"
+  /v1/organizations/{organization_id}/roles:
+    $ref: "../paths/2021-02-05.yml#/OrganizationRoles"
+
+  /v1/tickets/accept:
+    $ref: "../paths/2021-02-05.yml#/TicketsAccept"
+
+  /v1/verify:
+    $ref: "../paths/2021-02-05.yml#/Verify"
+
+  /v1/waitlist:
+    $ref: "../paths/2021-02-05.yml#/Waitlist"
