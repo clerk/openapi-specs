@@ -14,12 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        repo: ['clerk/clerk-sdk-ruby-backend']
+        repo: ['clerk/clerk-http-client-ruby']
 
     steps:
       - name: Trigger repository dispatch
         uses: peter-evans/repository-dispatch@v2
         with:
+          token: ${{ secrets.PAT }}
           repository: ${{ matrix.repo }}
           event-type: generate-sdk
           client-payload: >
