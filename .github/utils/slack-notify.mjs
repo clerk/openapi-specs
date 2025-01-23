@@ -37,7 +37,7 @@ const slackFormatter = {
     });
     const blocks = [];
 
-    blocks.push(header(`openapi-specs: ${title}`));
+    blocks.push(header(title));
 
     blocks.push(markdown(body));
     blocks.push(markdown('\n'));
@@ -64,9 +64,10 @@ const createActor = username => {
 const run = async () => {
   // Input arguments order will be: title actor html_url body
   const title = process.argv[2];
-  const actor = process.argv[3];
+  const user_login = process.argv[3];
   const html_url = process.argv[4];
   const body = process.argv[5];
+  const actor = createActor(user_login);
 
   const formatter = formatters['slack'];
   if (!formatter) {
