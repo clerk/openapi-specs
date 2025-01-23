@@ -95,6 +95,8 @@ tags:
     description: Used to interact with the members of an organization. The current user must be an administrator to access them.
   - name: Environment
     description: Used to get and update the current Environment
+  - name: Waitlist
+    description: Used to interact with the waitlist.
 paths:
   /.well-known/assetlinks.json:
     get:
@@ -105,8 +107,8 @@ paths:
       tags:
         - Well Known
       responses:
-        '200':
-          $ref: '#/components/responses/WellKnown.Assetlinks'
+        "200":
+          $ref: "#/components/responses/WellKnown.Assetlinks"
   /.well-known/jwks.json:
     get:
       summary: JWKS
@@ -116,8 +118,8 @@ paths:
       tags:
         - Well Known
       responses:
-        '200':
-          $ref: '#/components/responses/WellKnown.JWKS'
+        "200":
+          $ref: "#/components/responses/WellKnown.JWKS"
   /.well-known/apple-app-site-association:
     get:
       summary: Apple App Site Association
@@ -127,7 +129,7 @@ paths:
       tags:
         - Well Known
       responses:
-        '200':
+        "200":
           description: The Apple App Site Association file
   /.well-known/openid-configuration:
     get:
@@ -138,8 +140,8 @@ paths:
       tags:
         - Well Known
       responses:
-        '200':
-          $ref: '#/components/responses/WellKnown.OpenIDConfiguration'
+        "200":
+          $ref: "#/components/responses/WellKnown.OpenIDConfiguration"
   /oauth/authorize:
     get:
       summary: Request OAuth2 authorization
@@ -149,14 +151,38 @@ paths:
       tags:
         - OAuth2 Identify Provider
       responses:
-        '302':
+        "200":
+          description: Success for 'form_post' response mode
+        "302":
           description: Redirect, no body.
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
+        "303":
+          description: Redirect, no body.
+        "400":
+          description: Bad request error, for example a request parameter is invalid.
+        "401":
+          description: Unauthorized error, for example the provided client is invalid.
+        "403":
+          description: Forbidden error, for example you are trying to use a satellite domain
+    post:
+      summary: Request OAuth2 authorization
+      description: Request OAuth2 authorization. If successful, receive authorization grant via redirect.
+      operationId: requestOAuthAuthorizePOST
+      security: []
+      tags:
+        - OAuth2 Identify Provider
+      responses:
+        "200":
+          description: Success for 'form_post' response mode
+        "302":
+          description: Redirect, no body.
+        "303":
+          description: Redirect, no body.
+        "400":
+          description: Bad request error, for example a request parameter is invalid.
+        "401":
+          description: Unauthorized error, for example the provided client is invalid.
+        "403":
+          description: Forbidden error, for example you are trying to use a satellite domain
   /oauth/token:
     post:
       summary: Get OAuth2 token
@@ -166,14 +192,14 @@ paths:
       tags:
         - OAuth2 Identify Provider
       responses:
-        '200':
-          $ref: '#/components/responses/OAuth.Token'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/OAuth.Token"
+        "400":
+          description: Bad request error, for example a request parameter is invalid.
+        "401":
+          description: Unauthorized error, for example the provided client is invalid.
+        "403":
+          description: Forbidden error, for example you are trying to use a satellite domain
   /oauth/userinfo:
     get:
       summary: Get user info after OAuth2 flow
@@ -183,26 +209,76 @@ paths:
       tags:
         - OAuth2 Identify Provider
       responses:
-        '200':
-          $ref: '#/components/responses/OAuth.UserInfo'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/OAuth.UserInfo"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+    post:
+      summary: Get user info after OAuth2 flow
+      description: Get user info in exchange for a valid OAuth2 access token.
+      operationId: getOAuthUserInfoPOST
+      security: []
+      tags:
+        - OAuth2 Identify Provider
+      responses:
+        "200":
+          $ref: "#/components/responses/OAuth.UserInfo"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+  /oauth/token_info:
+    post:
+      summary: Get information for an access or refresh token
+      description: Get information for an access or refresh token
+      operationId: getOAuthTokenInfo
+      security: []
+      tags:
+        - OAuth2 Identify Provider
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: The value of the access or the refresh token
+                token_type_hint:
+                  type: string
+                  description: A hint about the type of the token submitted for introspection. Can be one of the following `access_token` and `refresh_token`
+                  nullable: true
+                scope:
+                  type: string
+                  description: The granted scopes for the token to check against
+                  nullable: true
+      responses:
+        "200":
+          $ref: "#/components/responses/OAuth.TokenInfo"
+        "401":
+          description: Unauthorized error, for example the provided client is invalid.
+        "403":
+          description: You are currently using the legacy OAuth 2.0 provider, please migrate to the new one via Clerk Dashboard.
   /v1/account_portal:
     get:
       summary: Get account portal
       description: Get users account portal
       operationId: getAccountPortal
       responses:
-        '200':
-          $ref: '#/components/responses/Client.AccountPortal'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.AccountPortal"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/environment:
     get:
       summary: Get environment
@@ -214,12 +290,12 @@ paths:
       tags:
         - Environment
       responses:
-        '200':
-          $ref: '#/components/responses/Client.Environment'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.Environment"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
     patch:
       summary: Update environment
       description: Update environment using request origin
@@ -230,10 +306,10 @@ paths:
       tags:
         - Environment
       responses:
-        '200':
-          $ref: '#/components/responses/Client.Environment'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.Environment"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/saml/metadata/{saml_connection_id}:
     get:
       summary: SAML Metadata
@@ -252,12 +328,12 @@ paths:
             type: string
           description: The ID of the SAML Connection
       responses:
-        '200':
+        "200":
           description: OK
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/saml/acs/{saml_connection_id}:
     post:
       summary: SAML ACS
@@ -277,18 +353,18 @@ paths:
             type: string
           description: The ID of the SAML Connection
       responses:
-        '302':
+        "302":
           description: OK
-        '303':
+        "303":
           description: OK
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/health:
     get:
       summary: Get Health
@@ -300,7 +376,7 @@ paths:
         - Health
       operationId: getHealth
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -314,7 +390,7 @@ paths:
         Pass the instance ID and domain ID as query parameters.
       operationId: getProxyHealth
       responses:
-        '200':
+        "200":
           description: Configuration is valid
           content:
             application/json:
@@ -323,11 +399,11 @@ paths:
                 properties:
                   status:
                     type: string
-        '400':
+        "400":
           description: Bad request
-        '404':
+        "404":
           description: Not found
-        '503':
+        "503":
           description: Configuration is invalid or service is unavailable
           content:
             application/json:
@@ -349,12 +425,12 @@ paths:
         - {}
         - DevBrowser: []
       responses:
-        '200':
-          $ref: '#/components/responses/Client.Client'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.Client"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
     put:
       summary: Create New Client
       description: Creates a new Client and sets it either in the response cookies or the response authorization header.
@@ -365,9 +441,9 @@ paths:
         - Client
       operationId: putClient
       responses:
-        '200':
-          $ref: '#/components/responses/Client.Client'
-        '307':
+        "200":
+          $ref: "#/components/responses/Client.Client"
+        "307":
           description: Redirect, no body.
     post:
       summary: Create New Client
@@ -379,9 +455,9 @@ paths:
       tags:
         - Client
       responses:
-        '200':
-          $ref: '#/components/responses/Client.Client'
-        '307':
+        "200":
+          $ref: "#/components/responses/Client.Client"
+        "307":
           description: Redirect, no body.
     delete:
       summary: Delete Client's Sessions
@@ -390,12 +466,12 @@ paths:
         - Client
       operationId: deleteClientSessions
       responses:
-        '200':
-          $ref: '#/components/responses/Client.DeleteSession'
-        '307':
+        "200":
+          $ref: "#/components/responses/Client.DeleteSession"
+        "307":
           description: Redirect, no body.
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sign_ins:
     post:
       security:
@@ -466,23 +542,31 @@ paths:
                   nullable: true
                 token:
                   type: string
-                  description: The ID token for an OpenID Connect flow. Only used with `oauth_token_[provider]` strategies.
+                  description: The ID token from an OpenID Connect flow. Only used with `oauth_token_[provider]` and `google_one_tap` strategies.
+                  nullable: true
+                oidc_login_hint:
+                  type: string
+                  description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect url.
+                  nullable: true
+                oidc_prompt:
+                  type: string
+                  description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `prompt` parameter of the generated redirect URL. When using shared credentials, this value might be adjusted for security reasons.
                   nullable: true
       responses:
-        '200':
-          $ref: '#/components/responses/Client.SignIn'
-        '307':
+        "200":
+          $ref: "#/components/responses/Client.SignIn"
+        "307":
           description: Redirect, no body.
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '409':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "409":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sign_ins/{sign_in_id}:
     get:
       summary: Retrieve sign-in
@@ -500,14 +584,14 @@ paths:
             type: string
           description: The id of the sign in to be retrieved.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.SignIn'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.SignIn"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sign_ins/{sign_in_id}/reset_password:
     post:
       summary: Reset password on sign-in
@@ -535,19 +619,19 @@ paths:
             type: string
           description: The id of the sign in to be retrieved.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.SignIn'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.SignIn"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sign_ins/{sign_in_id}/prepare_first_factor:
     post:
       summary: Prepare First Factor Verification
       description: |-
         Prepares the verification object for the identified Sign in.
         This step authenticates that the user is who they say they are.
-        Depending on the strategy, this request request will do something different.
+        Depending on the strategy, this request will do something different.
 
         Parameter actions:
         If the strategy equals email_code then this request will send an email with an OTP code.
@@ -580,8 +664,8 @@ paths:
 
                     Can be one of the following `email_code`, `email_link`,
                     `phone_code`, `web3_metamask_signature`, `web3_coinbase_wallet_signature`,
-                    `reset_password_phone_code`, `reset_password_email_code`, `oauth_[provider]`,
-                    `saml`, `passkey`
+                    `web3_okx_wallet_signature`, `reset_password_phone_code`, `reset_password_email_code`,
+                    `oauth_[provider]`, `saml`, `passkey`
                 email_address_id:
                   type: string
                   description: Used with the `email_code`, `reset_password_email_code` and `email_link` strategies.
@@ -592,7 +676,7 @@ paths:
                   nullable: true
                 web3_wallet_id:
                   type: string
-                  description: Used with the `web3_metamask_signature` and `web3_coinbase_wallet_signature` strategies.
+                  description: Used with the `web3_metamask_signature`, `web3_coinbase_wallet_signature` and `web3_okx_wallet_signature` strategies.
                   nullable: true
                 passkey_id:
                   type: string
@@ -606,19 +690,27 @@ paths:
                   type: string
                   description: Used with `oauth_[provider]` and `saml` strategies.
                   nullable: true
+                oidc_login_hint:
+                  type: string
+                  description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect url.
+                  nullable: true
+                oidc_prompt:
+                  type: string
+                  description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `prompt` parameter of the generated redirect url. When using shared credentials this value might be adjusted for security reasons.
+                  nullable: true
       responses:
-        '200':
-          $ref: '#/components/responses/Client.SignIn'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
-        '429':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.SignIn"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
+        "429":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sign_ins/{sign_in_id}/attempt_first_factor:
     post:
       summary: Attempt First Factor Verification
@@ -650,10 +742,9 @@ paths:
                   description: |-
                     The strategy to be used for first factor authentication.
 
-                    Can be one of the following `email_code`, `email_link`,
-                    `password`, `phone_code`, `web3_metamask_signature`,
-                    `web3_coinbase_wallet_signature`, `reset_password_phone_code`,
-                    `reset_password_email_code`, `passkey`, `google_one_tap`
+                    Can be one of the following `email_code`, `email_link`, `password`, `phone_code`,
+                    `web3_metamask_signature`, `web3_coinbase_wallet_signature`, `web3_okx_wallet_signature`,
+                    `reset_password_phone_code`, `reset_password_email_code`, `passkey`, `google_one_tap`
                 code:
                   type: string
                   description: The code the was sent to the email. Used with the `email_code`, `phone_code` and `email_link` strategies.
@@ -664,35 +755,31 @@ paths:
                   nullable: true
                 signature:
                   type: string
-                  description: Used with the `web3_metamask_signature` and `web3_coinbase_wallet_signature` strategies.
+                  description: Used with the `web3_metamask_signature`, `web3_coinbase_wallet_signature` and `web3_okx_wallet_signature` strategies.
                   nullable: true
-                redirect_url:
+                token:
                   type: string
-                  description: Used with `oauth_[provider]` and `saml` strategies.
-                  nullable: true
-                action_complete_redirect_url:
-                  type: string
-                  description: Used with `oauth_[provider]` and `saml` strategies.
+                  description: The ID token from an OpenID Connect flow. Only used with `oauth_token_[provider]` and `google_one_tap` strategies.
                   nullable: true
                 ticket:
                   type: string
                   deprecated: true
                   nullable: true
       responses:
-        '200':
-          $ref: '#/components/responses/Client.SignIn'
-        '307':
+        "200":
+          $ref: "#/components/responses/Client.SignIn"
+        "307":
           description: Redirect, no body.
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
-        '429':
-          $ref: '#/components/responses/ClerkErrors'
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
+        "429":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sign_ins/{sign_in_id}/prepare_second_factor:
     post:
       summary: Prepare Second Factor Verification
@@ -726,14 +813,14 @@ paths:
                   description: Used with the `phone_code` strategy.
                   nullable: true
       responses:
-        '200':
-          $ref: '#/components/responses/Client.SignIn'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.SignIn"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sign_ins/{sign_in_id}/attempt_second_factor:
     post:
       summary: Attempt Second Factor Verification
@@ -767,16 +854,16 @@ paths:
                   type: string
                   description: Used with the `phone_code`, `totp` and `backup_code` strategies.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.SignIn'
-        '307':
+        "200":
+          $ref: "#/components/responses/Client.SignIn"
+        "307":
           description: Redirect, no body.
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sign_ups:
     post:
       summary: Create Sign-up
@@ -847,23 +934,36 @@ paths:
                   nullable: true
                 token:
                   type: string
-                  description: The ID token for an OpenID Connect flow. Only used with `oauth_token_[provider]` strategies.
+                  description: The ID token from an OpenID Connect flow. Only used with `oauth_token_[provider]` and `google_one_tap` strategies.
+                  nullable: true
+                legal_accepted:
+                  type: boolean
+                  nullable: true
+                  description: |
+                    Has the value `true` if the user has accepted the legal requirements.
+                oidc_login_hint:
+                  type: string
+                  description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect url.
+                  nullable: true
+                oidc_prompt:
+                  type: string
+                  description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `prompt` parameter of the generated redirect url. When using shared credentials this value might be adjusted for security reasons.
                   nullable: true
       responses:
-        '200':
-          $ref: '#/components/responses/Client.SignUp'
-        '307':
+        "200":
+          $ref: "#/components/responses/Client.SignUp"
+        "307":
           description: Redirect, no body.
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '409':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "409":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sign_ups/{id}:
     get:
       summary: Get Sign-up
@@ -879,14 +979,14 @@ paths:
             type: string
           description: The sign up unique identifier.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.SignUp'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.SignUp"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
     patch:
       summary: Update Sign-up
       description: Updates the sign-up object specified by id, with the supplied parameters.
@@ -954,21 +1054,26 @@ paths:
                   nullable: true
                 token:
                   type: string
-                  description: The ID token for an OpenID Connect flow. Only used with `oauth_token_[provider]` strategies.
+                  description: The ID token from an OpenID Connect flow. Only used with `oauth_token_[provider]` and `google_one_tap` strategies.
                   nullable: true
+                legal_accepted:
+                  type: boolean
+                  nullable: true
+                  description: |
+                    Has the value `true` if the user has accepted the legal requirements.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.SignUp'
-        '307':
+        "200":
+          $ref: "#/components/responses/Client.SignUp"
+        "307":
           description: Redirect, no body.
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sign_ups/{id}/prepare_verification:
     post:
       summary: Prepare Sign-up Identification Verification
@@ -999,8 +1104,23 @@ paths:
                     - phone_code
                     - web3_metamask_signature
                     - web3_coinbase_wallet_signature
+                    - web3_okx_wallet_signature
                     - saml
                     - oauth
+                redirect_url:
+                  type: string
+                  nullable: true
+                action_complete_redirect_url:
+                  type: string
+                  nullable: true
+                oidc_login_hint:
+                  type: string
+                  description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect url.
+                  nullable: true
+                oidc_prompt:
+                  type: string
+                  description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `prompt` parameter of the generated redirect url. When using shared credentials this value might be adjusted for security reasons.
+                  nullable: true
       parameters:
         - in: path
           name: id
@@ -1009,14 +1129,16 @@ paths:
             type: string
           description: The sign up unique identifier.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.SignUp'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
-        '429':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.SignUp"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
+        "429":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sign_ups/{id}/attempt_verification:
     post:
       summary: Attempt Sign-up Identification Verification
@@ -1040,6 +1162,7 @@ paths:
                     - phone_code
                     - web3_metamask_signature
                     - web3_coinbase_wallet_signature
+                    - web3_okx_wallet_signature
                     - google_one_tap
                 code:
                   nullable: true
@@ -1049,6 +1172,10 @@ paths:
                   nullable: true
                   type: string
                   description: The verification web3 signature
+                token:
+                  type: string
+                  description: The ID token from an OpenID Connect flow. Only used with `oauth_token_[provider]` and `google_one_tap` strategies.
+                  nullable: true
       parameters:
         - in: path
           name: id
@@ -1057,20 +1184,20 @@ paths:
             type: string
           description: The sign up unique identifier.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.SignUp'
-        '307':
+        "200":
+          $ref: "#/components/responses/Client.SignUp"
+        "307":
           description: Redirect, no body.
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '409':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
-        '429':
-          $ref: '#/components/responses/ClerkErrors'
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "409":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
+        "429":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sync:
     get:
       summary: Sync clients across multiple domains
@@ -1088,12 +1215,12 @@ paths:
             type: string
           description: The URL to redirect to after the syncing process has been completed.
       responses:
-        '307':
+        "307":
           description: Redirect
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/link:
     get:
       summary: Link clients across multiple domains
@@ -1106,14 +1233,14 @@ paths:
             type: string
           description: The token generated from a sync request.
       responses:
-        '307':
+        "307":
           description: Redirect
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/handshake:
     get:
       summary: Generate and returns a new session token for a given client.
@@ -1137,18 +1264,18 @@ paths:
             the personal workspace will be set as active. If the organization cannot be set as active (because it does not
             exist, or the user is not a member), the active organization for the session will not change.
       responses:
-        '307':
+        "307":
           description: Redirect
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
-        '500':
-          $ref: '#/components/responses/ClerkErrors'
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
+        "500":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/dev_browser:
     post:
       summary: Create a Dev Browser token
@@ -1162,9 +1289,9 @@ paths:
       tags:
         - DevBrowser
       responses:
-        '200':
+        "200":
           description: A DevBrowser was created.
-        '400':
+        "400":
           description: The hostname is invalid.
   /v1/dev_browser/set_first_party_cookie:
     post:
@@ -1172,7 +1299,7 @@ paths:
       description: post dev_browser/set_first_party_cookie
       operationId: postDevBrowserInitSetCookie
       responses:
-        '200':
+        "200":
           description: A cookie for the dev browser was set.
   /v1/dev_browser/init:
     get:
@@ -1180,12 +1307,12 @@ paths:
       description: get dev_browser/init
       operationId: getDevBrowserInit
       responses:
-        '200':
+        "200":
           description: Successfully initialized the dev browser.
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '500':
-          $ref: '#/components/responses/ClerkErrors'
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "500":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/oauth_callback:
     get:
       operationId: getOauthCallback
@@ -1210,18 +1337,18 @@ paths:
             type: string
           description: returned state from oauth provider.
       responses:
-        '200':
-          description: '[AuthV2] HTML-based redirection in dev instances'
-        '299':
+        "200":
+          description: "[AuthV2] HTML-based redirection in dev instances"
+        "299":
           description: FAKE SUCCESS
-        '301':
+        "301":
           description: Redirect
-        '303':
+        "303":
           description: Redirect
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
     post:
       operationId: postOauthCallback
       summary: OAuth Post Callback
@@ -1242,7 +1369,7 @@ paths:
                   description: returned state from oauth provider.
                   type: string
       responses:
-        '303':
+        "303":
           description: Redirect to GET /v1/oauth_callback with same parameters
   /v1/clear-site-data:
     get:
@@ -1250,7 +1377,7 @@ paths:
       description: Clear browsing data (cookies, storage, cache) associated with the requesting website
       operationId: clearSiteData
       responses:
-        '200':
+        "200":
           description: The Clear-Site-Data header was set with wildcard value.
   /v1/client/sessions:
     delete:
@@ -1260,12 +1387,12 @@ paths:
         - Sessions
       operationId: removeClientSessionsAndRetainCookie
       responses:
-        '200':
-          $ref: '#/components/responses/Client.DeleteSession'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.DeleteSession"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sessions/{session_id}:
     get:
       operationId: getSession
@@ -1281,10 +1408,12 @@ paths:
             type: string
           description: the user session id.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.Session'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.Session"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sessions/{session_id}/touch:
     post:
       operationId: touchSession
@@ -1310,18 +1439,18 @@ paths:
                   description: The ID or slug of the organization to activate.
                   nullable: true
       responses:
-        '200':
-          $ref: '#/components/responses/Client.Session'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.Session"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sessions/{session_id}/end:
     post:
       operationId: endSession
@@ -1337,12 +1466,12 @@ paths:
             type: string
           description: the user session id.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.Session'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.Session"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sessions/{session_id}/remove:
     post:
       operationId: removeSession
@@ -1358,12 +1487,12 @@ paths:
             type: string
           description: the user session id.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.Session'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.Session"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/sessions/active:
     get:
       summary: Get Active Sessions
@@ -1378,10 +1507,10 @@ paths:
             type: string
           description: The session_id associated with the requesting user.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ActiveSessions'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ActiveSessions"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/sessions/{session_id}/revoke:
     post:
       summary: Revoke given session
@@ -1402,16 +1531,16 @@ paths:
             type: string
           description: The session id to be revoked.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.Session'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.Session"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sessions/{session_id}/tokens:
     post:
       summary: Create Session Token
@@ -1437,7 +1566,7 @@ paths:
                   description: The organization id to associate with the token. The user must be a member of the organization. If present but empty, the personal workspace will be set as active. If absent, the previous active organization for the session will be used.
                   nullable: true
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -1446,10 +1575,10 @@ paths:
                 properties:
                   jwt:
                     type: string
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/client/sessions/{session_id}/tokens/{template_name}:
     post:
       summary: Create Session Token With JWT Template
@@ -1471,7 +1600,7 @@ paths:
             type: string
           description: the template name
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -1480,6 +1609,229 @@ paths:
                 properties:
                   jwt:
                     type: string
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+  /v1/client/sessions/{session_id}/verify:
+    post:
+      summary: Start a new session reverification
+      description: |-
+        Start a new session reverification flow by providing a verification level.
+
+        If the requested level equals 'secondFactor' or 'multiFactor' and the associated user
+        doesn't have any available second factor, then we fallback to 'firstFactor'
+      tags:
+        - Sessions
+      operationId: startSessionReverification
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema:
+            type: string
+          description: the user session ID.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                level:
+                  type: string
+                  description: The level of authentication that the user needs to go through
+                  enum:
+                    - first_factor
+                    - second_factor
+                    - multi_factor
+              required:
+                - level
+      responses:
+        "200":
+          $ref: "#/components/responses/Client.SessionReverification"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
+  /v1/client/sessions/{session_id}/verify/prepare_first_factor:
+    post:
+      summary: Prepare session reverification first factor
+      description: |-
+        Prepare the first factor verification.
+        Depending on the strategy, this request will do something different.
+
+        Parameter actions:
+        If the strategy equals email_code then this request will send an email with an OTP code.
+        If the strategy equals phone_code then this request will send an SMS with an OTP code.
+      tags:
+        - Sessions
+      operationId: prepareSessionReverificationFirstFactor
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema:
+            type: string
+          description: the user session ID.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                strategy:
+                  type: string
+                  description: The strategy to be prepared for first factor authentication.
+                  enum:
+                    - email_code
+                    - phone_code
+                email_address_id:
+                  type: string
+                  description: Used with the `email_code` strategy.
+                  nullable: true
+                phone_number_id:
+                  type: string
+                  description: Used with the `phone_code` strategy.
+                  nullable: true
+      responses:
+        "200":
+          $ref: "#/components/responses/Client.SessionReverification"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
+  /v1/client/sessions/{session_id}/verify/attempt_first_factor:
+    post:
+      summary: Attempt session reverification first factor
+      description: |-
+        Attempt the first factor verification.
+        Requires the first factor verification to be prepared, unless you're using a password.
+
+        Parameter rules:
+        If the strategy equals `email_code` then a code is required.
+        If the strategy equals `password` then a password is required.
+      tags:
+        - Sessions
+      operationId: attemptSessionReverificationFirstFactor
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema:
+            type: string
+          description: the user session ID.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                strategy:
+                  type: string
+                  description: The strategy to be used for first factor authentication.
+                  enum:
+                    - email_code
+                    - password
+                    - phone_code
+                code:
+                  type: string
+                  description: The code the was sent to the email. Used with the `email_code` and `phone_code` strategies.
+                  nullable: true
+                password:
+                  type: string
+                  description: Used with the `password` strategy.
+                  nullable: true
+      responses:
+        "200":
+          $ref: "#/components/responses/Client.SessionReverification"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
+  /v1/client/sessions/{session_id}/verify/prepare_second_factor:
+    post:
+      summary: Prepare session reverification second factor
+      description: |-
+        Prepare the second factor verification.
+        Requires the `status` to be equal to `needs_second_factor`.
+      tags:
+        - Sessions
+      operationId: prepareSessionReverificationSecondFactor
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema:
+            type: string
+          description: the user session ID.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                strategy:
+                  type: string
+                  description: The strategy to be prepared for second factor authentication.
+                  nullable: true
+                  enum:
+                    - phone_code
+                phone_number_id:
+                  type: string
+                  description: Used with the `phone_code` strategy.
+                  nullable: true
+      responses:
+        "200":
+          $ref: "#/components/responses/Client.SessionReverification"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
+  /v1/client/sessions/{session_id}/verify/attempt_second_factor:
+    post:
+      summary: Attempt session reverification second factor
+      description: |-
+        Attempt the second factor verification.
+        Requires the `status` to be equal to `needs_second_factor` and for the preparation step to have been called.
+      tags:
+        - Sessions
+      operationId: attemptSessionReverificationSecondFactor
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema:
+            type: string
+          description: the user session ID.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                strategy:
+                  type: string
+                  description: The strategy to be attempted for second factor authentication.
+                  enum:
+                    - phone_code
+                    - totp
+                    - backup_code
+                code:
+                  type: string
+                  description: Used with the `phone_code`, `totp` and `backup_code` strategies.
+      responses:
+        "200":
+          $ref: "#/components/responses/Client.SessionReverification"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/sessions:
     get:
       summary: Get Sessions
@@ -1494,14 +1846,14 @@ paths:
             type: string
           description: The session_id associated with the requesting user.
       responses:
-        '200':
-          $ref: '#/components/responses/Server.Sessions'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Server.Sessions"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/email_addresses:
     get:
       operationId: getEmailAddresses
@@ -1516,14 +1868,14 @@ paths:
             type: string
           description: The session_id associated with the requesting user.
       responses:
-        '200':
-          $ref: '#/components/responses/Server.UserEmailAddresses'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Server.UserEmailAddresses"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
     post:
       summary: Create Email Address
       description: Add an email address to the current user. The address then needs to be verified using the `prepare_verification` and `attempt_verification` endpoints.
@@ -1546,18 +1898,18 @@ paths:
                   type: string
                   description: The email address to be added to the user.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedEmailAddress'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedEmailAddress"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/email_addresses/{email_id}/attempt_verification:
     post:
       operationId: verifyEmailAddress
@@ -1587,23 +1939,23 @@ paths:
                   type: string
                   description: The code that was previously sent to the email address.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedEmailAddress'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedEmailAddress"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/email_addresses/{email_id}/prepare_verification:
     post:
       description: |-
         Depending on the given strategy, the API will prepare the verification for the email address.
-        In particular, * for `email_code`, the API will send a verification email to the address containing a code. * for `email_link`, the API will send a verification email to the address containg a link to the verification attempt endpoint.
+        In particular, * for `email_code`, the API will send a verification email to the address containing a code. * for `email_link`, the API will send a verification email to the address containg a link to the verification attempt endpoint. * for `enterprise_sso`, the API will send an external redirect URL to the browser containg a link to the SSO verification endpoint.
       summary: Prepare Email Address Verification
       tags:
         - Email Addresses
@@ -1632,21 +1984,26 @@ paths:
                   enum:
                     - email_code
                     - email_link
+                    - enterprise_sso
                 redirect_url:
                   type: string
                   description: Used with the `email_link` strategy.
                   nullable: true
+                action_complete_redirect_url:
+                  type: string
+                  description: Used with `oauth_[provider]` and `saml` strategies.
+                  nullable: true
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedEmailAddress'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedEmailAddress"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/email_addresses/{email_id}:
     get:
       summary: Get Email Address
@@ -1667,14 +2024,14 @@ paths:
             type: string
           description: The session_id associated with the requesting user.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedEmailAddress'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedEmailAddress"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
     delete:
       summary: Delete email address
       description: Delete an email address by id.
@@ -1694,16 +2051,16 @@ paths:
             type: string
           description: The session_id associated with the requesting user.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedDeletedObject'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedDeletedObject"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/phone_numbers:
     get:
       summary: Get Phone Numbers
@@ -1718,14 +2075,14 @@ paths:
             type: string
           description: The session_id associated with the requesting user.
       responses:
-        '200':
-          $ref: '#/components/responses/Server.UserPhoneNumbers'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Server.UserPhoneNumbers"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
     post:
       summary: Create Phone Number
       description: Add a phone number to the current user. The phone number then needs to be verified using the sms `prepare_verification` and `attempt_verification` endpoints.
@@ -1748,18 +2105,18 @@ paths:
                   type: string
                   description: The phone number to be added to the user.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedPhoneNumber'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedPhoneNumber"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/phone_numbers/{phone_number_id}/attempt_verification:
     post:
       summary: Attempt Phone Number Verification
@@ -1789,20 +2146,20 @@ paths:
                   type: string
                   description: Strategy used to verify the phone number.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedPhoneNumber'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
-        '429':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedPhoneNumber"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
+        "429":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/phone_numbers/{phone_number_id}/prepare_verification:
     post:
       summary: Prepare Phone Number Verification
@@ -1834,18 +2191,18 @@ paths:
                   enum:
                     - phone_code
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedPhoneNumber'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '429':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedPhoneNumber"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "429":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/phone_numbers/{phone_number_id}:
     get:
       summary: Retrieve Phone Number
@@ -1866,14 +2223,14 @@ paths:
             type: string
           description: The session_id associated with the requesting user.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedPhoneNumber'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedPhoneNumber"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
     patch:
       summary: Update Phone Number
       description: Update the properties of the given phone number.
@@ -1907,16 +2264,16 @@ paths:
                   description: Marks the phone number as the default that will be used in multi-factor authentication.
                   nullable: true
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedPhoneNumber'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedPhoneNumber"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
     delete:
       summary: Delete Phone Number
       description: Deletes the phone number with the given id.
@@ -1936,16 +2293,16 @@ paths:
             type: string
           description: The session_id associated with the requesting user.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.DeletedPhoneNumber'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.DeletedPhoneNumber"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/web3_wallets:
     get:
       summary: Get All Web3 Wallets
@@ -1960,14 +2317,14 @@ paths:
             type: string
           description: The session_id associated with the requesting user.
       responses:
-        '200':
-          $ref: '#/components/responses/Server.UserWeb3Wallets'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Server.UserWeb3Wallets"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
     post:
       summary: Create Web3 Wallet
       description: Create a new web3 wallet.
@@ -1994,16 +2351,16 @@ paths:
                   type: string
                   nullable: true
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedWeb3Wallet'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedWeb3Wallet"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/web3_wallets/{web3_wallet_id}:
     get:
       summary: Get Web3 Wallet
@@ -2019,14 +2376,14 @@ paths:
             type: string
           description: The web3 wallet ID.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedWeb3Wallet'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedWeb3Wallet"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
     delete:
       summary: Delete Web3 Wallet
       description: Delete a web3 wallet by id.
@@ -2041,16 +2398,16 @@ paths:
             type: string
           description: The web3 wallet ID.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.DeletedPhoneNumber'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.DeletedPhoneNumber"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/web3_wallets/{web3_wallet_id}/prepare_verification:
     post:
       summary: Prepare Web3 Wallet Verification
@@ -2066,16 +2423,16 @@ paths:
             type: string
           description: The web3 wallet ID
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedWeb3Wallet'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedWeb3Wallet"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/web3_wallets/{web3_wallet_id}/attempt_verification:
     post:
       summary: Attempt Web3 Wallet Verification
@@ -2091,18 +2448,18 @@ paths:
             type: string
           description: The web3 wallet ID.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedWeb3Wallet'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedWeb3Wallet"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/passkeys:
     post:
       summary: Create Passkey
@@ -2117,10 +2474,10 @@ paths:
             type: string
           description: The session_id associated with the requesting user.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedPasskey'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedPasskey"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/passkeys/{passkey_id}:
     get:
       summary: Get Passkey
@@ -2136,12 +2493,12 @@ paths:
             type: string
           description: The passkey identification ID.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedPasskey'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedPasskey"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
     patch:
       summary: Update Passkey
       description: Update properties of a specific passkey.
@@ -2166,12 +2523,12 @@ paths:
                   type: string
                   nullable: true
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedPasskey'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedPasskey"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
     delete:
       summary: Delete Passkey
       description: Delete a passkey by id.
@@ -2186,12 +2543,12 @@ paths:
             type: string
           description: The passkey identification ID.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.DeletedPasskey'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.DeletedPasskey"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/passkeys/{passkey_id}/attempt_verification:
     post:
       summary: Attempt Passkey Verification
@@ -2207,18 +2564,18 @@ paths:
             type: string
           description: The passkey identification ID.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedPasskey'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedPasskey"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/external_accounts:
     post:
       summary: Connect OAuth Accounts
@@ -2255,19 +2612,27 @@ paths:
                   type: string
                   description: The ID token that an OpenID Connect provider returns during authentication. Can be used with `oauth_token_[provider]` strategies.
                   nullable: true
+                oidc_login_hint:
+                  type: string
+                  description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect url.
+                  nullable: true
+                oidc_prompt:
+                  type: string
+                  description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `prompt` parameter of the generated redirect url. When using shared credentials this value might be adjusted for security reasons.
+                  nullable: true
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedExternalAccount'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
-        '500':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedExternalAccount"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
+        "500":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/external_accounts/{external_account_id}/reauthorize:
     patch:
       summary: Reauthorize External Account
@@ -2298,13 +2663,21 @@ paths:
                 action_complete_redirect_url:
                   type: string
                   nullable: true
+                oidc_login_hint:
+                  type: string
+                  description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect url.
+                  nullable: true
+                oidc_prompt:
+                  type: string
+                  description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `prompt` parameter of the generated redirect url. When using shared credentials this value might be adjusted for security reasons.
+                  nullable: true
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedExternalAccount'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedExternalAccount"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/external_accounts/{external_account_id}:
     delete:
       summary: Delete External Account
@@ -2320,14 +2693,14 @@ paths:
           schema:
             type: string
       responses:
-        '200':
-          $ref: '#/components/responses/Client.DeletedExternalAccount'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.DeletedExternalAccount"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/external_accounts/{external_account_id}/tokens:
     delete:
       summary: Revoke OAuth tokens
@@ -2343,12 +2716,12 @@ paths:
           schema:
             type: string
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedUser'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedUser"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/totp:
     post:
       summary: Create TOTP
@@ -2357,14 +2730,14 @@ paths:
         - TOTP
       operationId: postTOTP
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedTOTP'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '500':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedTOTP"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "500":
+          $ref: "#/components/responses/ClerkErrors"
     delete:
       summary: Delete TOTP
       description: Deletes the current TOTP secret. This will invalidate all authenticators that where previously added.
@@ -2372,14 +2745,14 @@ paths:
         - TOTP
       operationId: deleteTOTP
       responses:
-        '200':
-          $ref: '#/components/responses/Client.DeletedTOTP'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '500':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.DeletedTOTP"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "500":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/totp/attempt_verification:
     post:
       summary: Attempt TOTP Verification
@@ -2398,18 +2771,18 @@ paths:
                   type: string
                   nullable: false
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedTOTP'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
-        '500':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedTOTP"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
+        "500":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/backup_codes:
     post:
       summary: Create Backup Codes
@@ -2420,14 +2793,14 @@ paths:
         - Backup Codes
       operationId: createBackupCodes
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedBackupCodes'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '500':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedBackupCodes"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "500":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me:
     get:
       summary: Get User
@@ -2436,14 +2809,14 @@ paths:
         - User
       operationId: getUser
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedUser'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedUser"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
     patch:
       summary: Update User
       description: Update the current user with the given attributes.
@@ -2479,18 +2852,18 @@ paths:
                   type: string
                   description: A stringified JSON containing the unsafe medata of the current user.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedUser'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedUser"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
     delete:
       summary: Delete User
       description: Delete the current user.
@@ -2498,29 +2871,29 @@ paths:
         - User
       operationId: deleteUser
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedDeletedObject'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '500':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedDeletedObject"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "500":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/tokens:
     post:
       description: create a jwt for the requested user.
       operationId: createServiceToken
       responses:
-        '200':
-          $ref: '#/components/responses/Token'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Token"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/profile_image:
     post:
       summary: Update Profile Image
@@ -2542,14 +2915,14 @@ paths:
             schema:
               format: base64
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedImage'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedImage"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
     delete:
       summary: Delete Profile Image
       description: Remove the current user's profile image.
@@ -2557,12 +2930,12 @@ paths:
       tags:
         - User
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedDeletedObject'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedDeletedObject"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/change_password:
     post:
       summary: Update Password
@@ -2586,14 +2959,14 @@ paths:
                   type: boolean
                   nullable: true
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedUser'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedUser"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/remove_password:
     post:
       summary: Delete Password
@@ -2612,12 +2985,12 @@ paths:
                 current_password:
                   type: string
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedUser'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedUser"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/organization_memberships:
     get:
       summary: Get Organization Memberships
@@ -2635,12 +3008,12 @@ paths:
           schema:
             type: integer
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationMemberships'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationMemberships"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/organization_memberships/{organization_id}:
     delete:
       summary: Delete Organization Membership
@@ -2656,14 +3029,14 @@ paths:
             type: string
           description: The id of the organization for which the membership will be deleted
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedDeletedObject'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedDeletedObject"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/organization_invitations:
     get:
       summary: Get Current User's Organization Invitations
@@ -2681,12 +3054,12 @@ paths:
           schema:
             type: integer
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationInvitationsUserContext'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationInvitationsUserContext"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/organization_invitations/{invitation_id}/accept:
     post:
       summary: Accept Organization invitation
@@ -2702,14 +3075,14 @@ paths:
             type: string
           description: The id of the organization invitation to accept
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationInvitationUserContext'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationInvitationUserContext"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/organization_suggestions:
     get:
       summary: Get Organization Suggestions
@@ -2731,12 +3104,12 @@ paths:
           schema:
             type: string
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationSuggestions'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationSuggestions"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/me/organization_suggestions/{suggestion_id}/accept:
     post:
       summary: Accept Organization Suggestion
@@ -2752,16 +3125,16 @@ paths:
             type: string
           description: The id of the organization suggestion to accept
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationSuggestion'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationSuggestion"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations:
     post:
       summary: Create Organization
@@ -2783,14 +3156,14 @@ paths:
                     The organization name.
                     May not contain URLs or HTML.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganization'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganization"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations/{organization_id}:
     get:
       summary: Get Organization
@@ -2806,14 +3179,14 @@ paths:
             type: string
           description: The organization ID.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganization'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganization"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
     patch:
       summary: Update Organization
       description: |-
@@ -2849,18 +3222,18 @@ paths:
                   description: The organization slug
                   nullable: true
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganization'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganization"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
     delete:
       summary: Delete Organization
       description: |-
@@ -2878,12 +3251,12 @@ paths:
             type: string
           description: The id of the organization to delete
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedDeletedObject'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedDeletedObject"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations/{organization_id}/logo:
     put:
       summary: Update Organization Logo
@@ -2915,20 +3288,20 @@ paths:
             schema:
               format: base64
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganization'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '413':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganization"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "413":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
     delete:
       summary: Delete Organization Logo
       description: |-
@@ -2946,14 +3319,14 @@ paths:
             type: string
           description: The id of the organization.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedDeletedObject'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedDeletedObject"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations/{organization_id}/invitations:
     post:
       summary: Create Organization Invitation
@@ -3000,18 +3373,18 @@ paths:
                     This can be one of the predefined roles (`admin`, `basic_member`) or a custom role.
                   nullable: false
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationInvitation'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationInvitation"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
     get:
       summary: Get All Organization Invitations
       description: |-
@@ -3050,18 +3423,18 @@ paths:
               - invalid
               - completed
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationInvitations'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationInvitations"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations/{organization_id}/invitations/bulk:
     post:
       summary: Bulk Create Organization Invitations
@@ -3100,18 +3473,18 @@ paths:
                     This can be one of the predefined roles (`admin`, `basic_member`) or a custom role.
                   nullable: false
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationInvitations'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationInvitations"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations/{organization_id}/invitations/pending:
     get:
       summary: Get All Pending Organization Invitations
@@ -3132,14 +3505,14 @@ paths:
             type: string
           description: The id of the organization for which the invitations will be retrieved.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationInvitations'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationInvitations"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations/{organization_id}/invitations/{invitation_id}/revoke:
     post:
       summary: Revoke Pending Organization Invitation
@@ -3164,14 +3537,14 @@ paths:
             type: string
           description: The id of the invitation to revoke.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationInvitation'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationInvitation"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations/{organization_id}/memberships:
     post:
       summary: Create Organization Membership
@@ -3221,16 +3594,16 @@ paths:
                     This can be one of the predefined roles (`admin`, `basic_member`) or a custom role defined.
                   nullable: true
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationMembership'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationMembership"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
     get:
       summary: Get All Organization Members
       description: |-
@@ -3257,15 +3630,24 @@ paths:
           name: offset
           schema:
             type: number
+        - in: query
+          required: false
+          name: query
+          schema:
+            type: string
+          description: |-
+            Returns members that match the given query.
+            For possible matches, we check for any of the user's identifier, usernames, user ids, first and last names.
+            The query value doesn't need to match the exact value you are looking for, it is capable of partial matches as well.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationMemberships'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationMemberships"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations/{organization_id}/memberships/{user_id}:
     patch:
       summary: Update Organization Membership
@@ -3303,18 +3685,18 @@ paths:
                     This can be one of the predefined roles (`admin`, `basic_member`) or a custom role defined.
                   nullable: false
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationMembership'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationMembership"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
     delete:
       summary: Remove Organization Member
       description: |-
@@ -3338,16 +3720,16 @@ paths:
             type: string
           description: The member ID.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationMembership'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationMembership"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations/{organization_id}/domains:
     post:
       summary: Create Organization Domain
@@ -3378,16 +3760,16 @@ paths:
                   description: The name of the new domain
                   nullable: false
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationDomain'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationDomain"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
     get:
       summary: Get All Organization Domains
       description: |-
@@ -3415,14 +3797,14 @@ paths:
           schema:
             type: number
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationDomains'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationDomains"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations/{organization_id}/domains/{domain_id}:
     get:
       summary: Get Organization Domain
@@ -3456,16 +3838,16 @@ paths:
             type: string
           description: The domains ID.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationDomain'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationDomain"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
     delete:
       summary: Delete Organization Domain
       description: |-
@@ -3489,16 +3871,16 @@ paths:
             type: string
           description: The domain ID.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.DeletedOrganizationDomain'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.DeletedOrganizationDomain"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations/{organization_id}/domains/{domain_id}/update_enrollment_mode:
     post:
       summary: Update Organization Enrollment Mode
@@ -3538,16 +3920,16 @@ paths:
             type: string
           description: The domain ID.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationDomain'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationDomain"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations/{organization_id}/domains/{domain_id}/prepare_affiliation_verification:
     post:
       summary: Prepare Organization Domain Affiliation Verification
@@ -3581,16 +3963,16 @@ paths:
                 affiliation_email_address:
                   type: string
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationDomain'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationDomain"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations/{organization_id}/domains/{domain_id}/attempt_affiliation_verification:
     post:
       summary: Attempt Organization Domain Affiliation Verification
@@ -3626,18 +4008,18 @@ paths:
                   description: The code that was sent to the email address.
                   nullable: false
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationDomain'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationDomain"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations/{organization_id}/membership_requests:
     get:
       summary: Get Organization Membership Requests
@@ -3671,14 +4053,14 @@ paths:
           schema:
             type: string
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationMembershipRequests'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationMembershipRequests"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations/{organization_id}/membership_requests/{request_id}/accept:
     post:
       summary: Accept Organization Membership Request
@@ -3703,18 +4085,18 @@ paths:
             type: string
           description: The request ID.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationMembershipRequest'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationMembershipRequest"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations/{organization_id}/membership_requests/{request_id}/reject:
     post:
       summary: Reject Organization Membership Request
@@ -3739,16 +4121,16 @@ paths:
             type: string
           description: The request ID.
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedOrganizationMembershipRequest'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedOrganizationMembershipRequest"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/organizations/{organization_id}/roles:
     get:
       summary: Get Organization Roles
@@ -3774,12 +4156,12 @@ paths:
           schema:
             type: number
       responses:
-        '200':
-          $ref: '#/components/responses/Client.ClientWrappedRoles'
-        '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
+        "200":
+          $ref: "#/components/responses/Client.ClientWrappedRoles"
+        "401":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/tickets/accept:
     get:
       summary: Accept ticket
@@ -3798,16 +4180,16 @@ paths:
             type: string
           description: The JWT with verification information
       responses:
-        '200':
+        "200":
           description: Successful response with a plain text or HTML body.
-        '302':
+        "302":
           description: Redirect
-        '303':
+        "303":
           description: Redirect
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "404":
+          $ref: "#/components/responses/ClerkErrors"
   /v1/verify:
     get:
       summary: Attempt Email Link Verification
@@ -3823,12 +4205,44 @@ paths:
             type: string
           description: The JWT with verification information
       responses:
-        '200':
+        "200":
           description: OK
-        '303':
+        "303":
           description: Redirect
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+  /v1/waitlist:
+    post:
+      summary: Join Waitlist
+      description: |-
+        Adds an email address to the waitlist. If the email is already on the waitlist, the request will still succeed,
+        returning the ID of the existing waitlist entry.
+      operationId: joinWaitlist
+      security:
+        - {}
+        - DevBrowser: []
+      tags:
+        - Waitlist
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                email_address:
+                  type: string
+                  nullable: false
+      responses:
+        "200":
+          $ref: "#/components/responses/Client.WaitlistEntry"
+        "400":
+          $ref: "#/components/responses/ClerkErrors"
+        "403":
+          $ref: "#/components/responses/ClerkErrors"
+        "422":
+          $ref: "#/components/responses/ClerkErrors"
 components:
   securitySchemes:
     ProductionBrowser:
@@ -3889,7 +4303,7 @@ components:
                 type: array
                 items:
                   type: string
-    WellKnown.JWKS:
+    JWKS:
       type: object
       additionalProperties: false
       properties:
@@ -3907,9 +4321,13 @@ components:
                 type: string
               alg:
                 type: string
-              'n':
+              "n":
                 type: string
               e:
+                type: string
+              x:
+                type: string
+              crv:
                 type: string
     WellKnown.OpenIDConfiguration:
       type: object
@@ -3917,19 +4335,15 @@ components:
       properties:
         issuer:
           type: string
-        jwks_uri:
-          type: string
         authorization_endpoint:
           type: string
-        backchannel_logout_supported:
-          type: boolean
-        frontchannel_logout_supported:
-          type: boolean
-        grant_types_supported:
-          type: array
-          items:
-            type: string
-        response_modes_supported:
+        token_endpoint:
+          type: string
+        userinfo_endpoint:
+          type: string
+        jwks_uri:
+          type: string
+        scopes_supported:
           type: array
           items:
             type: string
@@ -3937,14 +4351,103 @@ components:
           type: array
           items:
             type: string
-        token_endpoint:
-          type: string
+        response_modes_supported:
+          type: array
+          items:
+            type: string
+        grant_types_supported:
+          type: array
+          items:
+            type: string
+        subject_types_supported:
+          type: array
+          items:
+            type: string
+        id_token_signing_alg_values_supported:
+          type: array
+          items:
+            type: string
         token_endpoint_auth_methods_supported:
           type: array
           items:
             type: string
-        userinfo_endpoint:
+        claims_supported:
+          type: array
+          items:
+            type: string
+        code_challenge_methods_supported:
+          type: array
+          items:
+            type: string
+        backchannel_logout_supported:
+          type: boolean
+        frontchannel_logout_supported:
+          type: boolean
+    OAuth.Token:
+      type: object
+      additionalProperties: false
+      properties:
+        access_token:
           type: string
+        expires_in:
+          type: integer
+        refresh_token:
+          type: string
+        scope:
+          type: string
+        token_type:
+          type: string
+    OAuth.UserInfo:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+        instance_id:
+          type: string
+        user_id:
+          type: string
+        email:
+          type: string
+          nullable: true
+        email_verified:
+          type: boolean
+          nullable: true
+        family_name:
+          type: string
+          nullable: true
+        given_name:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        username:
+          type: string
+          nullable: true
+          deprecated: true
+        preferred_username:
+          type: string
+          nullable: true
+        picture:
+          type: string
+          nullable: true
+        public_metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+        private_metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+        unsafe_metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+      required:
+        - object
+        - instance_id
+        - user_id
     ClerkError:
       type: object
       properties:
@@ -3968,68 +4471,31 @@ components:
         errors:
           type: array
           items:
-            $ref: '#/components/schemas/ClerkError'
+            $ref: "#/components/schemas/ClerkError"
         meta:
           type: object
       required:
         - errors
-    OAuth.Token:
+    OAuth.TokenInfo:
       type: object
       additionalProperties: false
       properties:
-        access_token:
+        active:
+          type: boolean
+        client_id:
           type: string
-        expires_in:
+          nullable: true
+        iat:
           type: integer
-        refresh_token:
-          type: string
+          nullable: true
         scope:
           type: string
-        token_type:
-          type: string
-    OAuth.UserInfo:
-      type: object
-      additionalProperties: false
-      properties:
-        object:
-          type: string
-        instance_id:
-          type: string
-        email:
-          type: string
-        email_verified:
-          type: boolean
-        family_name:
-          type: string
-        given_name:
-          type: string
-        name:
-          type: string
-        username:
-          type: string
-        picture:
-          type: string
-        user_id:
-          type: string
-        public_metadata:
-          type: object
           nullable: true
-        private_metadata:
-          type: object
-        unsafe_metadata:
-          type: object
+        sub:
+          type: string
+          nullable: true
       required:
-        - object
-        - instance_id
-        - email
-        - email_verified
-        - family_name
-        - given_name
-        - name
-        - username
-        - picture
-        - user_id
-        - public_metadata
+        - active
     Client.AccountPortal:
       type: object
       additionalProperties: false
@@ -4047,6 +4513,8 @@ components:
         after_sign_in_url:
           type: string
         after_sign_up_url:
+          type: string
+        after_join_waitlist_url:
           type: string
         after_create_organization_url:
           type: string
@@ -4076,38 +4544,38 @@ components:
         first_name:
           type: string
           enum:
-            - 'on'
-            - 'off'
+            - "on"
+            - "off"
             - required
         last_name:
           type: string
           enum:
-            - 'on'
-            - 'off'
+            - "on"
+            - "off"
             - required
         email_address:
           type: string
           enum:
-            - 'on'
-            - 'off'
+            - "on"
+            - "off"
             - required
         phone_number:
           type: string
           enum:
-            - 'on'
-            - 'off'
+            - "on"
+            - "off"
             - required
         username:
           type: string
           enum:
-            - 'on'
-            - 'off'
+            - "on"
+            - "off"
             - required
         password:
           type: string
           enum:
-            - 'on'
-            - 'off'
+            - "on"
+            - "off"
             - required
         identification_requirements:
           type: array
@@ -4137,8 +4605,10 @@ components:
           type: boolean
         test_mode:
           type: boolean
-        demo:
-          type: boolean
+        claimed_at:
+          type: integer
+          format: int64
+          nullable: true
         cookieless_dev:
           type: boolean
           deprecated: true
@@ -4201,7 +4671,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/Image'
+            - $ref: "#/components/schemas/Image"
           deprecated: true
         logo_url:
           nullable: true
@@ -4214,7 +4684,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/Image'
+            - $ref: "#/components/schemas/Image"
           deprecated: true
         favicon_url:
           nullable: true
@@ -4231,6 +4701,8 @@ components:
           type: string
         user_profile_url:
           type: string
+        waitlist_url:
+          type: string
         after_sign_in_url:
           type: string
         after_sign_up_url:
@@ -4240,6 +4712,8 @@ components:
         after_sign_out_all_url:
           type: string
         after_switch_session_url:
+          type: string
+        after_join_waitlist_url:
           type: string
         organization_profile_url:
           type: string
@@ -4287,11 +4761,13 @@ components:
           nullable: true
           enum:
             - turnstile
-            - hcaptcha
         captcha_oauth_bypass:
           type: array
           items:
             type: string
+        captcha_heartbeat:
+          type: boolean
+          nullable: true
         google_one_tap_client_id:
           type: string
           nullable: true
@@ -4351,27 +4827,27 @@ components:
       additionalProperties: false
       properties:
         email_address:
-          $ref: '#/components/schemas/UserSettings.Attribute'
+          $ref: "#/components/schemas/UserSettings.Attribute"
         phone_number:
-          $ref: '#/components/schemas/UserSettings.Attribute'
+          $ref: "#/components/schemas/UserSettings.Attribute"
         username:
-          $ref: '#/components/schemas/UserSettings.Attribute'
+          $ref: "#/components/schemas/UserSettings.Attribute"
         password:
-          $ref: '#/components/schemas/UserSettings.Attribute'
+          $ref: "#/components/schemas/UserSettings.Attribute"
         first_name:
-          $ref: '#/components/schemas/UserSettings.Attribute'
+          $ref: "#/components/schemas/UserSettings.Attribute"
         last_name:
-          $ref: '#/components/schemas/UserSettings.Attribute'
+          $ref: "#/components/schemas/UserSettings.Attribute"
         ticket:
-          $ref: '#/components/schemas/UserSettings.Attribute'
+          $ref: "#/components/schemas/UserSettings.Attribute"
         web3_wallet:
-          $ref: '#/components/schemas/UserSettings.Attribute'
+          $ref: "#/components/schemas/UserSettings.Attribute"
         authenticator_app:
-          $ref: '#/components/schemas/UserSettings.Attribute'
+          $ref: "#/components/schemas/UserSettings.Attribute"
         backup_code:
-          $ref: '#/components/schemas/UserSettings.Attribute'
+          $ref: "#/components/schemas/UserSettings.Attribute"
         passkey:
-          $ref: '#/components/schemas/UserSettings.Attribute'
+          $ref: "#/components/schemas/UserSettings.Attribute"
       required:
         - email_address
         - phone_number
@@ -4412,60 +4888,60 @@ components:
       additionalProperties: false
       properties:
         oauth_atlassian:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_bitbucket:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_discord:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_dropbox:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_facebook:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_github:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_gitlab:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_google:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_hubspot:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_microsoft:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_tiktok:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_twitch:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_twitter:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_linkedin:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_linkedin_oidc:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_notion:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_apple:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_line:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_coinbase:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_box:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_xero:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_spotify:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_slack:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_linear:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_x:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_mock:
-          $ref: '#/components/schemas/UserSettings.Social'
+          $ref: "#/components/schemas/UserSettings.Social"
         oauth_custom_mock:
-          $ref: '#/components/schemas/UserSettings.Social'
-    UserSettings.Saml:
+          $ref: "#/components/schemas/UserSettings.Social"
+    UserSettings.EnterpriseSSO:
       type: object
       additionalProperties: false
       properties:
@@ -4484,7 +4960,7 @@ components:
       additionalProperties: false
       properties:
         second_factor:
-          $ref: '#/components/schemas/UserSettings.SecondFactor'
+          $ref: "#/components/schemas/UserSettings.SecondFactor"
       required:
         - second_factor
     UserSettings.SignUp:
@@ -4504,6 +4980,8 @@ components:
           enum:
             - public
             - restricted
+        legal_consent_enabled:
+          type: boolean
       required:
         - captcha_enabled
         - custom_action_required
@@ -4529,9 +5007,9 @@ components:
       additionalProperties: false
       properties:
         allowlist:
-          $ref: '#/components/schemas/UserSettings.Restrictions.Allowlist'
+          $ref: "#/components/schemas/UserSettings.Restrictions.Allowlist"
         blocklist:
-          $ref: '#/components/schemas/UserSettings.Restrictions.Blocklist'
+          $ref: "#/components/schemas/UserSettings.Restrictions.Blocklist"
         block_email_subaddresses:
           type: object
           properties:
@@ -4663,11 +5141,11 @@ components:
       additionalProperties: false
       properties:
         user_lockout:
-          $ref: '#/components/schemas/UserSettings.AttackProtectionSettings.UserLockout'
+          $ref: "#/components/schemas/UserSettings.AttackProtectionSettings.UserLockout"
         pii:
-          $ref: '#/components/schemas/UserSettings.AttackProtectionSettings.PII'
+          $ref: "#/components/schemas/UserSettings.AttackProtectionSettings.PII"
         email_link:
-          $ref: '#/components/schemas/UserSettings.AttackProtectionSettings.EmailLink'
+          $ref: "#/components/schemas/UserSettings.AttackProtectionSettings.EmailLink"
     UserSettings.PasskeySettings:
       type: object
       additionalProperties: false
@@ -4688,27 +5166,27 @@ components:
       additionalProperties: false
       properties:
         attributes:
-          $ref: '#/components/schemas/UserSettings.Attributes'
+          $ref: "#/components/schemas/UserSettings.Attributes"
         social:
-          $ref: '#/components/schemas/UserSettings.Socials'
+          $ref: "#/components/schemas/UserSettings.Socials"
         saml:
-          $ref: '#/components/schemas/UserSettings.Saml'
+          $ref: "#/components/schemas/UserSettings.EnterpriseSSO"
         sign_in:
-          $ref: '#/components/schemas/UserSettings.SignIn'
+          $ref: "#/components/schemas/UserSettings.SignIn"
         sign_up:
-          $ref: '#/components/schemas/UserSettings.SignUp'
+          $ref: "#/components/schemas/UserSettings.SignUp"
         restrictions:
-          $ref: '#/components/schemas/UserSettings.Restrictions'
+          $ref: "#/components/schemas/UserSettings.Restrictions"
         username_settings:
-          $ref: '#/components/schemas/UserSettings.UsernameSettings'
+          $ref: "#/components/schemas/UserSettings.UsernameSettings"
         password_settings:
-          $ref: '#/components/schemas/UserSettings.PasswordSettings'
+          $ref: "#/components/schemas/UserSettings.PasswordSettings"
         actions:
-          $ref: '#/components/schemas/UserSettings.ActionsSettings'
+          $ref: "#/components/schemas/UserSettings.ActionsSettings"
         attack_protection:
-          $ref: '#/components/schemas/UserSettings.AttackProtectionSettings'
+          $ref: "#/components/schemas/UserSettings.AttackProtectionSettings"
         passkey_settings:
-          $ref: '#/components/schemas/UserSettings.PasskeySettings'
+          $ref: "#/components/schemas/UserSettings.PasskeySettings"
       required:
         - attributes
         - social
@@ -4756,9 +5234,9 @@ components:
         max_allowed_memberships:
           type: integer
         actions:
-          $ref: '#/components/schemas/OrganizationSettings.ActionsSettings'
+          $ref: "#/components/schemas/OrganizationSettings.ActionsSettings"
         domains:
-          $ref: '#/components/schemas/OrganizationSettings.DomainsSettings'
+          $ref: "#/components/schemas/OrganizationSettings.DomainsSettings"
         creator_role:
           type: string
           description: The role key that a user will be assigned after creating an organization.
@@ -4770,13 +5248,13 @@ components:
       additionalProperties: false
       properties:
         auth_config:
-          $ref: '#/components/schemas/Client.AuthConfig'
+          $ref: "#/components/schemas/Client.AuthConfig"
         display_config:
-          $ref: '#/components/schemas/Client.DisplayConfig'
+          $ref: "#/components/schemas/Client.DisplayConfig"
         user_settings:
-          $ref: '#/components/schemas/Client.UserSettings'
+          $ref: "#/components/schemas/Client.UserSettings"
         organization_settings:
-          $ref: '#/components/schemas/Client.OrganizationSettings'
+          $ref: "#/components/schemas/Client.OrganizationSettings"
         maintenance_mode:
           type: boolean
     Stubs.SignInFactor:
@@ -4793,6 +5271,7 @@ components:
             - phone_code
             - web3_metamask_signature
             - web3_coinbase_wallet_signature
+            - web3_okx_wallet_signature
             - totp
             - backup_code
             - oauth_apple
@@ -4804,6 +5283,7 @@ components:
             - oauth_custom_mock
             - oauth_token_mock
             - saml
+            - enterprise_sso
             - reset_password_email_code
             - reset_password_phone_code
             - passkey
@@ -4821,6 +5301,9 @@ components:
         primary:
           type: boolean
           nullable: true
+        external_verification_redirect_url:
+          nullable: true
+          type: string
         default:
           type: boolean
       required:
@@ -4861,11 +5344,7 @@ components:
             - transferable
         strategy:
           type: string
-          enum:
-            - oauth_apple
-            - oauth_google
-            - oauth_mock
-            - oauth_custom_mock
+          pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z]+$
         external_verification_redirect_url:
           nullable: true
           type: string
@@ -4873,7 +5352,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/ClerkError'
+            - $ref: "#/components/schemas/ClerkError"
         expire_at:
           type: integer
         attempts:
@@ -4952,6 +5431,7 @@ components:
           enum:
             - web3_metamask_signature
             - web3_coinbase_wallet_signature
+            - web3_okx_wallet_signature
         attempts:
           type: integer
           nullable: true
@@ -5011,7 +5491,7 @@ components:
           type: string
         error:
           allOf:
-            - $ref: '#/components/schemas/ClerkError'
+            - $ref: "#/components/schemas/ClerkError"
             - type: object
               nullable: true
         expire_at:
@@ -5174,33 +5654,33 @@ components:
           type: array
           nullable: true
           items:
-            $ref: '#/components/schemas/Stubs.SignInFactor'
+            $ref: "#/components/schemas/Stubs.SignInFactor"
         first_factor_verification:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Stubs.Verification.Password'
-            - $ref: '#/components/schemas/Stubs.Verification.Oauth'
-            - $ref: '#/components/schemas/Stubs.Verification.OTP'
-            - $ref: '#/components/schemas/Stubs.Verification.Link'
-            - $ref: '#/components/schemas/Stubs.Verification.Web3Signature'
-            - $ref: '#/components/schemas/Stubs.Verification.Ticket'
-            - $ref: '#/components/schemas/Stubs.Verification.SAML'
-            - $ref: '#/components/schemas/Stubs.Verification.Passkey'
-            - $ref: '#/components/schemas/Stubs.Verification.GoogleOneTap'
+            - $ref: "#/components/schemas/Stubs.Verification.Password"
+            - $ref: "#/components/schemas/Stubs.Verification.Oauth"
+            - $ref: "#/components/schemas/Stubs.Verification.OTP"
+            - $ref: "#/components/schemas/Stubs.Verification.Link"
+            - $ref: "#/components/schemas/Stubs.Verification.Web3Signature"
+            - $ref: "#/components/schemas/Stubs.Verification.Ticket"
+            - $ref: "#/components/schemas/Stubs.Verification.SAML"
+            - $ref: "#/components/schemas/Stubs.Verification.Passkey"
+            - $ref: "#/components/schemas/Stubs.Verification.GoogleOneTap"
         supported_second_factors:
           type: array
           nullable: true
           items:
-            $ref: '#/components/schemas/Stubs.SignInFactor'
+            $ref: "#/components/schemas/Stubs.SignInFactor"
         second_factor_verification:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Stubs.Verification.OTP'
-            - $ref: '#/components/schemas/Stubs.Verification.TOTP'
-            - $ref: '#/components/schemas/Stubs.Verification.Ticket'
-            - $ref: '#/components/schemas/Stubs.Verification.BackupCode'
+            - $ref: "#/components/schemas/Stubs.Verification.OTP"
+            - $ref: "#/components/schemas/Stubs.Verification.TOTP"
+            - $ref: "#/components/schemas/Stubs.Verification.Ticket"
+            - $ref: "#/components/schemas/Stubs.Verification.BackupCode"
         created_session_id:
           nullable: true
           type: string
@@ -5225,7 +5705,7 @@ components:
           enum:
             - needs_prepare
             - needs_attempt
-            - ''
+            - ""
         supported_strategies:
           type: array
           items:
@@ -5237,20 +5717,20 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Stubs.SignUpVerification'
+            - $ref: "#/components/schemas/Stubs.SignUpVerification"
         phone_number:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Stubs.SignUpVerification'
+            - $ref: "#/components/schemas/Stubs.SignUpVerification"
         external_account:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Stubs.Verification.Oauth'
-            - $ref: '#/components/schemas/Stubs.Verification.SAML'
-            - $ref: '#/components/schemas/Stubs.Verification.Ticket'
-            - $ref: '#/components/schemas/Stubs.Verification.GoogleOneTap'
+            - $ref: "#/components/schemas/Stubs.Verification.Oauth"
+            - $ref: "#/components/schemas/Stubs.Verification.SAML"
+            - $ref: "#/components/schemas/Stubs.Verification.Ticket"
+            - $ref: "#/components/schemas/Stubs.Verification.GoogleOneTap"
     Client.SignUp:
       type: object
       properties:
@@ -5297,7 +5777,7 @@ components:
           description: |
             Group for all available verifications.
           allOf:
-            - $ref: '#/components/schemas/Client.SignUp.Verifications'
+            - $ref: "#/components/schemas/Client.SignUp.Verifications"
         username:
           type: string
           nullable: true
@@ -5323,10 +5803,12 @@ components:
           description: |
             Custom JSON that callers can use to store arbitrary values that make sense in the context of the current sign up.
           type: object
+          additionalProperties: true
         public_metadata:
           description: |
             Custom JSON that can be used to store arbitrary values which will end up in the user's public metadata. This field can only be populated from the application's BE. At this point, this can be done via invitations.
           type: object
+          additionalProperties: true
         external_id:
           type: string
           nullable: true
@@ -5339,6 +5821,13 @@ components:
         abandon_at:
           type: integer
           nullable: true
+        legal_accepted_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp at which the user accepted the legal requirements.
+          example: 1700690400000
     Client.SessionBase:
       type: object
       properties:
@@ -5472,17 +5961,21 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Stubs.Verification.OTP'
-            - $ref: '#/components/schemas/Stubs.Verification.Invitation'
-            - $ref: '#/components/schemas/Stubs.Verification.Link'
-            - $ref: '#/components/schemas/Stubs.Verification.Ticket'
-            - $ref: '#/components/schemas/Stubs.Verification.Admin'
-            - $ref: '#/components/schemas/Stubs.Verification.FromOauth'
-            - $ref: '#/components/schemas/Stubs.Verification.SAML'
+            - $ref: "#/components/schemas/Stubs.Verification.OTP"
+            - $ref: "#/components/schemas/Stubs.Verification.Invitation"
+            - $ref: "#/components/schemas/Stubs.Verification.Link"
+            - $ref: "#/components/schemas/Stubs.Verification.Ticket"
+            - $ref: "#/components/schemas/Stubs.Verification.Admin"
+            - $ref: "#/components/schemas/Stubs.Verification.FromOauth"
+            - $ref: "#/components/schemas/Stubs.Verification.SAML"
         linked_to:
           type: array
           items:
-            $ref: '#/components/schemas/Stubs.Identification.Link'
+            $ref: "#/components/schemas/Stubs.Identification.Link"
+        matches_sso_connection:
+          description: |
+            Indicates whether this email address domain matches an active enterprise connection.
+          type: boolean
         created_at:
           type: integer
           format: int64
@@ -5525,12 +6018,12 @@ components:
           nullable: true
           type: object
           oneOf:
-            - $ref: '#/components/schemas/Stubs.Verification.OTP'
-            - $ref: '#/components/schemas/Stubs.Verification.Admin'
+            - $ref: "#/components/schemas/Stubs.Verification.OTP"
+            - $ref: "#/components/schemas/Stubs.Verification.Admin"
         linked_to:
           type: array
           items:
-            $ref: '#/components/schemas/Stubs.Identification.Link'
+            $ref: "#/components/schemas/Stubs.Identification.Link"
         backup_codes:
           type: array
           items:
@@ -5572,8 +6065,8 @@ components:
           nullable: true
           type: object
           oneOf:
-            - $ref: '#/components/schemas/Stubs.Verification.Web3Signature'
-            - $ref: '#/components/schemas/Stubs.Verification.Admin'
+            - $ref: "#/components/schemas/Stubs.Verification.Web3Signature"
+            - $ref: "#/components/schemas/Stubs.Verification.Admin"
         created_at:
           type: integer
           format: int64
@@ -5613,7 +6106,7 @@ components:
           nullable: true
           type: object
           oneOf:
-            - $ref: '#/components/schemas/Stubs.Verification.Passkey'
+            - $ref: "#/components/schemas/Stubs.Verification.Passkey"
         created_at:
           type: integer
           format: int64
@@ -5663,6 +6156,7 @@ components:
           type: integer
         public_metadata:
           type: object
+          additionalProperties: true
         created_at:
           type: integer
           format: int64
@@ -5698,7 +6192,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Organization'
+            - $ref: "#/components/schemas/Client.Organization"
         public_user_data:
           type: object
           additionalProperties: false
@@ -5737,17 +6231,14 @@ components:
             - transferable
         strategy:
           type: string
-          enum:
-            - oauth_google
-            - oauth_mock
-            - oauth_custom_mock
+          pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z]+$
         external_verification_redirect_url:
           type: string
         error:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/ClerkError'
+            - $ref: "#/components/schemas/ClerkError"
         expire_at:
           type: integer
         attempts:
@@ -5816,6 +6307,7 @@ components:
           nullable: true
         public_metadata:
           type: object
+          additionalProperties: true
         label:
           type: string
           nullable: true
@@ -5823,8 +6315,8 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Oauth'
-            - $ref: '#/components/schemas/GoogleOneTap'
+            - $ref: "#/components/schemas/Oauth"
+            - $ref: "#/components/schemas/GoogleOneTap"
         created_at:
           type: integer
           format: int64
@@ -5914,17 +6406,18 @@ components:
           nullable: true
         public_metadata:
           type: object
+          additionalProperties: true
         verification:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Stubs.Verification.SAML'
-            - $ref: '#/components/schemas/Stubs.Verification.Ticket'
+            - $ref: "#/components/schemas/Stubs.Verification.SAML"
+            - $ref: "#/components/schemas/Stubs.Verification.Ticket"
         saml_connection:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Stubs.SAMLConnection.SAMLAccount'
+            - $ref: "#/components/schemas/Stubs.SAMLConnection.SAMLAccount"
       required:
         - id
         - object
@@ -5973,31 +6466,34 @@ components:
           type: boolean
         public_metadata:
           type: object
+          additionalProperties: true
         private_metadata:
           nullable: true
           type: object
+          additionalProperties: true
         unsafe_metadata:
           type: object
+          additionalProperties: true
         email_addresses:
           type: array
           items:
-            $ref: '#/components/schemas/Client.EmailAddress'
+            $ref: "#/components/schemas/Client.EmailAddress"
         phone_numbers:
           type: array
           items:
-            $ref: '#/components/schemas/Client.PhoneNumber'
+            $ref: "#/components/schemas/Client.PhoneNumber"
         web3_wallets:
           type: array
           items:
-            $ref: '#/components/schemas/Client.Web3Wallet'
+            $ref: "#/components/schemas/Client.Web3Wallet"
         passkeys:
           type: array
           items:
-            $ref: '#/components/schemas/Client.Passkey'
+            $ref: "#/components/schemas/Client.Passkey"
         organization_memberships:
           type: array
           items:
-            $ref: '#/components/schemas/Client.OrganizationMembership'
+            $ref: "#/components/schemas/Client.OrganizationMembership"
         password_enabled:
           type: boolean
         two_factor_enabled:
@@ -6009,11 +6505,11 @@ components:
         external_accounts:
           type: array
           items:
-            $ref: '#/components/schemas/ExternalAccountWithVerification'
+            $ref: "#/components/schemas/ExternalAccountWithVerification"
         saml_accounts:
           type: array
           items:
-            $ref: '#/components/schemas/Client.SAMLAccount'
+            $ref: "#/components/schemas/Client.SAMLAccount"
         last_sign_in_at:
           type: integer
           format: int64
@@ -6069,16 +6565,23 @@ components:
           nullable: true
           description: |
             Unix timestamp of the latest session activity, with day precision.
+        legal_accepted_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp at which the user accepted the legal requirements.
+          example: 1700690400000
     Client.Session:
       allOf:
-        - $ref: '#/components/schemas/Client.SessionBase'
+        - $ref: "#/components/schemas/Client.SessionBase"
         - type: object
           properties:
             user:
               type: object
               nullable: true
               allOf:
-                - $ref: '#/components/schemas/Client.User'
+                - $ref: "#/components/schemas/Client.User"
             public_user_data:
               type: object
               additionalProperties: false
@@ -6101,6 +6604,12 @@ components:
                 identifier:
                   type: string
                   nullable: true
+            factor_verification_age:
+              type: array
+              description: |
+                Each item represents the minutes that have passed since the last time a first or second factor were verified.
+              items:
+                type: integer
     Client.Client:
       type: object
       nullable: true
@@ -6119,21 +6628,26 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/Client.SignIn'
+            - $ref: "#/components/schemas/Client.SignIn"
         sign_up:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/Client.SignUp'
+            - $ref: "#/components/schemas/Client.SignUp"
         sessions:
           type: array
           items:
-            $ref: '#/components/schemas/Client.Session'
+            $ref: "#/components/schemas/Client.Session"
         last_active_session_id:
           nullable: true
           type: string
           description: |
             Last active session_id.
+        captcha_bypass:
+          nullable: true
+          type: boolean
+          description: |
+            Whether the client can bypass CAPTCHA.
         updated_at:
           type: integer
           format: int64
@@ -6160,7 +6674,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
         client:
           type: object
           nullable: true
@@ -6172,9 +6686,9 @@ components:
       additionalProperties: false
       properties:
         response:
-          $ref: '#/components/schemas/Client.SignIn'
+          $ref: "#/components/schemas/Client.SignIn"
         client:
-          $ref: '#/components/schemas/Client.Client'
+          $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6183,9 +6697,9 @@ components:
       additionalProperties: false
       properties:
         response:
-          $ref: '#/components/schemas/Client.SignUp'
+          $ref: "#/components/schemas/Client.SignUp"
         client:
-          $ref: '#/components/schemas/Client.Client'
+          $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6194,9 +6708,9 @@ components:
       additionalProperties: false
       properties:
         response:
-          $ref: '#/components/schemas/Client.Session'
+          $ref: "#/components/schemas/Client.Session"
         client:
-          $ref: '#/components/schemas/Client.Client'
+          $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6226,23 +6740,85 @@ components:
           type: string
     Client.ActiveSession:
       allOf:
-        - $ref: '#/components/schemas/Client.Session'
+        - $ref: "#/components/schemas/Client.SessionBase"
         - type: object
           properties:
             latest_activity:
-              $ref: '#/components/schemas/Client.Activity'
+              $ref: "#/components/schemas/Client.Activity"
     Client.ActiveSessions:
       type: array
       items:
-        $ref: '#/components/schemas/Client.ActiveSession'
+        $ref: "#/components/schemas/Client.ActiveSession"
+    Client.SessionReverification:
+      type: object
+      properties:
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - session_verification
+        level:
+          type: string
+          description: The level used for the session reverification
+        status:
+          type: string
+          enum:
+            - needs_first_factor
+            - needs_second_factor
+            - complete
+        supported_first_factors:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/Stubs.SignInFactor"
+        supported_second_factors:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/Stubs.SignInFactor"
+        first_factor_verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: "#/components/schemas/Stubs.Verification.Password"
+            - $ref: "#/components/schemas/Stubs.Verification.OTP"
+        second_factor_verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: "#/components/schemas/Stubs.Verification.OTP"
+            - $ref: "#/components/schemas/Stubs.Verification.TOTP"
+            - $ref: "#/components/schemas/Stubs.Verification.BackupCode"
+        session:
+          type: object
+          oneOf:
+            - $ref: "#/components/schemas/Client.SessionBase"
+      required:
+        - object
+        - level
+        - status
+        - supported_first_factors
+        - supported_second_factors
+        - session
+    Responses.Client.SessionReverification:
+      type: object
+      properties:
+        response:
+          $ref: "#/components/schemas/Client.SessionReverification"
+        client:
+          $ref: "#/components/schemas/Client.Client"
+      required:
+        - response
+        - client
     Server.Sessions:
       type: array
       items:
-        $ref: '#/components/schemas/Client.Session'
+        $ref: "#/components/schemas/Client.Session"
     Server.UserEmailAddresses:
       type: array
       items:
-        $ref: '#/components/schemas/Client.EmailAddress'
+        $ref: "#/components/schemas/Client.EmailAddress"
     Client.ClientWrappedEmailAddress:
       type: object
       additionalProperties: false
@@ -6251,12 +6827,12 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.EmailAddress'
+            - $ref: "#/components/schemas/Client.EmailAddress"
         client:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6275,19 +6851,19 @@ components:
       additionalProperties: false
       properties:
         response:
-          $ref: '#/components/schemas/Client.DeletedObject'
+          $ref: "#/components/schemas/Client.DeletedObject"
         client:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
     Server.UserPhoneNumbers:
       type: array
       items:
-        $ref: '#/components/schemas/Client.PhoneNumber'
+        $ref: "#/components/schemas/Client.PhoneNumber"
     Client.ClientWrappedPhoneNumber:
       type: object
       additionalProperties: false
@@ -6296,19 +6872,19 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.PhoneNumber'
+            - $ref: "#/components/schemas/Client.PhoneNumber"
         client:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
     Server.UserWeb3Wallets:
       type: array
       items:
-        $ref: '#/components/schemas/Client.Web3Wallet'
+        $ref: "#/components/schemas/Client.Web3Wallet"
     Client.ClientWrappedWeb3Wallet:
       type: object
       additionalProperties: false
@@ -6317,12 +6893,12 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Web3Wallet'
+            - $ref: "#/components/schemas/Client.Web3Wallet"
         client:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6334,12 +6910,12 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Passkey'
+            - $ref: "#/components/schemas/Client.Passkey"
         client:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6351,12 +6927,12 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/ExternalAccountWithVerification'
+            - $ref: "#/components/schemas/ExternalAccountWithVerification"
         client:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6368,12 +6944,12 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.User'
+            - $ref: "#/components/schemas/Client.User"
         client:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6412,12 +6988,12 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/TOTP'
+            - $ref: "#/components/schemas/TOTP"
         client:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6445,12 +7021,12 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/BackupCodes'
+            - $ref: "#/components/schemas/BackupCodes"
         client:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6475,9 +7051,9 @@ components:
       type: object
       properties:
         response:
-          $ref: '#/components/schemas/Image'
+          $ref: "#/components/schemas/Image"
         client:
-          $ref: '#/components/schemas/Client.Client'
+          $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6493,18 +7069,18 @@ components:
                 data:
                   type: array
                   items:
-                    $ref: '#/components/schemas/Client.OrganizationMembership'
+                    $ref: "#/components/schemas/Client.OrganizationMembership"
                 total_count:
                   type: integer
                   format: int64
             - type: array
               items:
-                $ref: '#/components/schemas/Client.OrganizationMembership'
+                $ref: "#/components/schemas/Client.OrganizationMembership"
         client:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6563,9 +7139,9 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.PublicOrganizationData'
+            - $ref: "#/components/schemas/Client.PublicOrganizationData"
       allOf:
-        - $ref: '#/components/schemas/Client.OrganizationInvitation'
+        - $ref: "#/components/schemas/Client.OrganizationInvitation"
     Client.ClientWrappedOrganizationInvitationsUserContext:
       type: object
       additionalProperties: false
@@ -6576,7 +7152,7 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/Client.OrganizationInvitationUserContext'
+                $ref: "#/components/schemas/Client.OrganizationInvitationUserContext"
             total_count:
               type: integer
               format: int64
@@ -6584,7 +7160,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6594,12 +7170,12 @@ components:
       properties:
         response:
           allOf:
-            - $ref: '#/components/schemas/Client.OrganizationInvitationUserContext'
+            - $ref: "#/components/schemas/Client.OrganizationInvitationUserContext"
           type: object
           nullable: false
         client:
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
           type: object
           nullable: false
       required:
@@ -6627,7 +7203,7 @@ components:
           description: Unix timestamp of last update.
         public_organization_data:
           allOf:
-            - $ref: '#/components/schemas/Client.PublicOrganizationData'
+            - $ref: "#/components/schemas/Client.PublicOrganizationData"
           nullable: false
           type: object
     Client.ClientWrappedOrganizationSuggestions:
@@ -6640,7 +7216,7 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/Client.OrganizationSuggestion'
+                $ref: "#/components/schemas/Client.OrganizationSuggestion"
             total_count:
               type: integer
               format: int64
@@ -6648,7 +7224,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6660,12 +7236,12 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.OrganizationSuggestion'
+            - $ref: "#/components/schemas/Client.OrganizationSuggestion"
         client:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6677,12 +7253,12 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Organization'
+            - $ref: "#/components/schemas/Client.Organization"
         client:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6694,13 +7270,13 @@ components:
           oneOf:
             - type: array
               items:
-                $ref: '#/components/schemas/Client.OrganizationInvitation'
+                $ref: "#/components/schemas/Client.OrganizationInvitation"
             - type: object
               properties:
                 data:
                   type: array
                   items:
-                    $ref: '#/components/schemas/Client.OrganizationInvitation'
+                    $ref: "#/components/schemas/Client.OrganizationInvitation"
                 total:
                   type: integer
                   format: int64
@@ -6708,7 +7284,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6720,12 +7296,12 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.OrganizationInvitation'
+            - $ref: "#/components/schemas/Client.OrganizationInvitation"
         client:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6737,12 +7313,12 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.OrganizationMembership'
+            - $ref: "#/components/schemas/Client.OrganizationMembership"
         client:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6795,7 +7371,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/Client.OrganizationDomainVerification'
+            - $ref: "#/components/schemas/Client.OrganizationDomainVerification"
     Client.ClientWrappedOrganizationDomains:
       type: object
       additionalProperties: false
@@ -6806,7 +7382,7 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/Client.OrganizationDomain'
+                $ref: "#/components/schemas/Client.OrganizationDomain"
             total_count:
               type: integer
               format: int64
@@ -6814,7 +7390,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6826,12 +7402,12 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.OrganizationDomain'
+            - $ref: "#/components/schemas/Client.OrganizationDomain"
         client:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6878,7 +7454,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/Client.PublicUserData'
+            - $ref: "#/components/schemas/Client.PublicUserData"
     Client.ClientWrappedOrganizationMembershipRequests:
       type: object
       additionalProperties: false
@@ -6889,7 +7465,7 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/Client.OrganizationMembershipRequest'
+                $ref: "#/components/schemas/Client.OrganizationMembershipRequest"
             total_count:
               type: integer
               format: int64
@@ -6897,7 +7473,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6909,12 +7485,12 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.OrganizationMembershipRequest'
+            - $ref: "#/components/schemas/Client.OrganizationMembershipRequest"
         client:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
@@ -6968,7 +7544,7 @@ components:
         permissions:
           type: array
           items:
-            $ref: '#/components/schemas/Client.Permission'
+            $ref: "#/components/schemas/Client.Permission"
         created_at:
           type: integer
           format: int64
@@ -6987,7 +7563,7 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/Client.Role'
+                $ref: "#/components/schemas/Client.Role"
             total_count:
               type: integer
               format: int64
@@ -6995,59 +7571,75 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: "#/components/schemas/Client.Client"
       required:
         - response
         - client
+    Client.WaitlistEntry:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - waitlist_entry
+        id:
+          type: string
   responses:
     WellKnown.Assetlinks:
       description: Get Android asset links for universal/deep linking
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/WellKnown.Assetlinks'
+            $ref: "#/components/schemas/WellKnown.Assetlinks"
     WellKnown.JWKS:
       description: Get the JSON Web Key Set
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/WellKnown.JWKS'
+            $ref: "#/components/schemas/JWKS"
     WellKnown.OpenIDConfiguration:
       description: Get a basic openid configuration payload
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/WellKnown.OpenIDConfiguration'
-    ClerkErrors:
-      description: Request was not successful
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClerkErrors'
+            $ref: "#/components/schemas/WellKnown.OpenIDConfiguration"
     OAuth.Token:
       description: Fetch token for OAuth2 flow
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/OAuth.Token'
+            $ref: "#/components/schemas/OAuth.Token"
     OAuth.UserInfo:
       description: Get user info after successful OAuth2 flow
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/OAuth.UserInfo'
+            $ref: "#/components/schemas/OAuth.UserInfo"
+    ClerkErrors:
+      description: Request was not successful
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ClerkErrors"
+    OAuth.TokenInfo:
+      description: Get information for an access or refresh token
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuth.TokenInfo"
     Client.AccountPortal:
       description: Returns the account portal.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.AccountPortal'
+            $ref: "#/components/schemas/Client.AccountPortal"
     Client.Environment:
       description: Returns the environment.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.Environment'
+            $ref: "#/components/schemas/Client.Environment"
     Client.Client:
       description: Returns the current session object.
       content:
@@ -7063,241 +7655,253 @@ components:
                 type: object
                 nullable: true
                 allOf:
-                  - $ref: '#/components/schemas/Client.Client'
+                  - $ref: "#/components/schemas/Client.Client"
     Client.DeleteSession:
       description: Returns the response for DELETE session object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.DeleteSession'
+            $ref: "#/components/schemas/Client.DeleteSession"
     Client.SignIn:
       description: Returns the sign in object, as well as the updated session object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Responses.Client.SignIn'
+            $ref: "#/components/schemas/Responses.Client.SignIn"
     Client.SignUp:
       description: Returns the sign up object, as well as the updated session object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Responses.Client.SignUp'
+            $ref: "#/components/schemas/Responses.Client.SignUp"
     Client.Session:
       description: Returns a Session object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Responses.Client.Session'
+            $ref: "#/components/schemas/Responses.Client.Session"
     Client.ActiveSessions:
       description: Returns an Active Sessions array.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ActiveSessions'
+            $ref: "#/components/schemas/Client.ActiveSessions"
+    Client.SessionReverification:
+      description: Returns the session reverification object, as well as the session object.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Responses.Client.SessionReverification"
     Server.Sessions:
       description: Returns Sessions array.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Server.Sessions'
+            $ref: "#/components/schemas/Server.Sessions"
     Server.UserEmailAddresses:
       description: Returns UserEmailAddresses array.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Server.UserEmailAddresses'
+            $ref: "#/components/schemas/Server.UserEmailAddresses"
     Client.ClientWrappedEmailAddress:
       description: Returns the response for Session wrapped Email object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedEmailAddress'
+            $ref: "#/components/schemas/Client.ClientWrappedEmailAddress"
     Client.ClientWrappedDeletedObject:
       description: Returns a Deleted User object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedDeletedObject'
+            $ref: "#/components/schemas/Client.ClientWrappedDeletedObject"
     Server.UserPhoneNumbers:
       description: Returns UserPhoneNumbers array.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Server.UserPhoneNumbers'
+            $ref: "#/components/schemas/Server.UserPhoneNumbers"
     Client.ClientWrappedPhoneNumber:
       description: Returns the response for Session wrapped Email object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedPhoneNumber'
+            $ref: "#/components/schemas/Client.ClientWrappedPhoneNumber"
     Client.DeletedPhoneNumber:
       description: Returns single DeletedPhoneNumber.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedDeletedObject'
+            $ref: "#/components/schemas/Client.ClientWrappedDeletedObject"
     Server.UserWeb3Wallets:
       description: Returns UserWeb3Wallets array.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Server.UserWeb3Wallets'
+            $ref: "#/components/schemas/Server.UserWeb3Wallets"
     Client.ClientWrappedWeb3Wallet:
       description: Returns the response for Session wrapped Web3 wallet object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedWeb3Wallet'
+            $ref: "#/components/schemas/Client.ClientWrappedWeb3Wallet"
     Client.ClientWrappedPasskey:
       description: Returns the response for Session wrapped Passkey object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedPasskey'
+            $ref: "#/components/schemas/Client.ClientWrappedPasskey"
     Client.DeletedPasskey:
       description: Returns a Deleted Passkey object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedDeletedObject'
+            $ref: "#/components/schemas/Client.ClientWrappedDeletedObject"
     Client.ClientWrappedExternalAccount:
       description: Returns the response for Session wrapped Verification object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedExternalAccount'
+            $ref: "#/components/schemas/Client.ClientWrappedExternalAccount"
     Client.DeletedExternalAccount:
       description: Returns a deleted external account.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedDeletedObject'
+            $ref: "#/components/schemas/Client.ClientWrappedDeletedObject"
     Client.ClientWrappedUser:
       description: Returns the response for Session wrapped User object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedUser'
+            $ref: "#/components/schemas/Client.ClientWrappedUser"
     Client.ClientWrappedTOTP:
       description: Returns the response for Session wrapped TOTP object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedTOTP'
+            $ref: "#/components/schemas/Client.ClientWrappedTOTP"
     Client.DeletedTOTP:
       description: Returns a deleted TOTP.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedDeletedObject'
+            $ref: "#/components/schemas/Client.ClientWrappedDeletedObject"
     Client.ClientWrappedBackupCodes:
       description: Returns the response for Session wrapped Backup code object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedBackupCodes'
+            $ref: "#/components/schemas/Client.ClientWrappedBackupCodes"
     Token:
       description: Success
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Token'
+            $ref: "#/components/schemas/Token"
     Client.ClientWrappedImage:
       description: Returns an Image object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Responses.Client.ClientWrappedImage'
+            $ref: "#/components/schemas/Responses.Client.ClientWrappedImage"
     Client.ClientWrappedOrganizationMemberships:
       description: Returns the response for Client wrapped array of OrganizationMembership objects.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedOrganizationMemberships'
+            $ref: "#/components/schemas/Client.ClientWrappedOrganizationMemberships"
     Client.ClientWrappedOrganizationInvitationsUserContext:
       description: Returns the response for Client wrapped array of OrganizationInvitation objects with user context.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedOrganizationInvitationsUserContext'
+            $ref: "#/components/schemas/Client.ClientWrappedOrganizationInvitationsUserContext"
     Client.ClientWrappedOrganizationInvitationUserContext:
       description: Returns the response for Client wrapped OrganizationInvitation object with user context.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedOrganizationInvitationUserContext'
+            $ref: "#/components/schemas/Client.ClientWrappedOrganizationInvitationUserContext"
     Client.ClientWrappedOrganizationSuggestions:
       description: Returns the response for Client wrapped array of OrganizationSuggestion objects with user context.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedOrganizationSuggestions'
+            $ref: "#/components/schemas/Client.ClientWrappedOrganizationSuggestions"
     Client.ClientWrappedOrganizationSuggestion:
       description: Returns the response for Client wrapped OrganizationSuggestion object with user context.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedOrganizationSuggestion'
+            $ref: "#/components/schemas/Client.ClientWrappedOrganizationSuggestion"
     Client.ClientWrappedOrganization:
       description: Returns the response for Client wrapped Organization object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedOrganization'
+            $ref: "#/components/schemas/Client.ClientWrappedOrganization"
     Client.ClientWrappedOrganizationInvitations:
       description: Returns the response for Client wrapped array of OrganizationInvitation objects.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedOrganizationInvitations'
+            $ref: "#/components/schemas/Client.ClientWrappedOrganizationInvitations"
     Client.ClientWrappedOrganizationInvitation:
       description: Returns the response for Client wrapped OrganizationInvitation object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedOrganizationInvitation'
+            $ref: "#/components/schemas/Client.ClientWrappedOrganizationInvitation"
     Client.ClientWrappedOrganizationMembership:
       description: Returns the response for Client wrapped OrganizationMembership object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedOrganizationMembership'
+            $ref: "#/components/schemas/Client.ClientWrappedOrganizationMembership"
     Client.ClientWrappedOrganizationDomains:
       description: Returns the response for Client wrapped array of OrganizationDomain objects.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedOrganizationDomains'
+            $ref: "#/components/schemas/Client.ClientWrappedOrganizationDomains"
     Client.ClientWrappedOrganizationDomain:
       description: Returns the response for Client wrapped OrganizationDomain object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedOrganizationDomain'
+            $ref: "#/components/schemas/Client.ClientWrappedOrganizationDomain"
     Client.DeletedOrganizationDomain:
       description: Returns a deleted organization domain.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedDeletedObject'
+            $ref: "#/components/schemas/Client.ClientWrappedDeletedObject"
     Client.ClientWrappedOrganizationMembershipRequests:
       description: Returns the response for Client wrapped OrganizationMembershipRequest objects.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedOrganizationMembershipRequests'
+            $ref: "#/components/schemas/Client.ClientWrappedOrganizationMembershipRequests"
     Client.ClientWrappedOrganizationMembershipRequest:
       description: Returns the response for Client wrapped OrganizationMembershipRequest object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedOrganizationMembershipRequest'
+            $ref: "#/components/schemas/Client.ClientWrappedOrganizationMembershipRequest"
     Client.ClientWrappedRoles:
       description: Returns the response for Client wrapped Roles objects.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Client.ClientWrappedRoles'
+            $ref: "#/components/schemas/Client.ClientWrappedRoles"
+    Client.WaitlistEntry:
+      description: Returns the waitlist object.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Client.WaitlistEntry"
 x-tagGroups:
   - name: Environment
     tags:
@@ -7336,3 +7940,4 @@ x-tagGroups:
       - OAuth2 Identify Provider
       - OAuth2 Callbacks
       - SAML
+      - Waitlist
