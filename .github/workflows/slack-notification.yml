@@ -9,7 +9,7 @@ jobs:
     name: Slack Notification
     runs-on: ubuntu-latest
     env:
-      PULL_REQUEST_BODY: ${{ github.event.pull_request.body }}
+      PULL_REQUEST_BODY: ${{ github.event.pull_request.body || 'The person did not write a PR description 😢' }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
