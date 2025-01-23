@@ -20,12 +20,3 @@ jobs:
           linear-issue-description: ${{ github.event.pull_request.body }}
           linear-attachment-url: ${{ github.event.pull_request.html_url }}
           linear-attachment-title: ${{ github.event.pull_request.title }}
-
-      - name: Create comment for Linear ticket link
-        uses: marocchino/sticky-pull-request-comment@v2.9.1
-        with:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-          number: ${{ github.event.issue.number }}
-          header: linear-issue-url
-          message: |
-            A Linear ticket has been created for this PR: ${{ steps.createIssue.outputs.linear-issue-url }}

@@ -16,19 +16,19 @@ jobs:
         with:
           fetch-depth: 0
           show-progress: false
-      - name: Debug body
-        run: echo $PULL_REQUEST_BODY
       - name: Convert PR body to Slack format
         id: slackify
         uses: LoveToKnow/slackify-markdown-action@v1.1.1
         with:
-          text: ${{ github.event.pull_request.body }}
+          text: ${{ env.PULL_REQUEST_BODY }}
       - name: Generate notification payload
         id: notification
         env:
-          PULL_REQUEST_DATA: ${{ toJson(github.event.pull_request) }}
+          TITLE: ${{ github.event.pull_request.title }}
+          USER_LOGIN: ${{ github.event.pull_request.user.login }}
+          HTML_URL: ${{ github.event.pull_request.html_url }}
         run: |
-          payload=$(node ./.github/utils/slack-notify.mjs '${{ env.PULL_REQUEST_DATA }}' '${{ steps.slackify.outputs.text }}')
+          payload=$(node ./.github/utils/slack-notify.mjs '${{ env.TITLE }}' '${{ env.USER_LOGIN }}' '${{ env.HTML_URL }}' '${{ steps.slackify.outputs.text }}')
           echo "payload=${payload//$'\n'/'%0A'}" >> $GITHUB_OUTPUT
       - name: Send PR to Slack
         id: slack

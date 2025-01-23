@@ -62,9 +62,11 @@ const createActor = username => {
 };
 
 const run = async () => {
-  const { title, user, html_url } = JSON.parse(process.argv[2]);
-  const body = process.argv[3];
-  const actor = createActor(user.login);
+  // Input arguments order will be: title actor html_url body
+  const title = process.argv[2];
+  const actor = process.argv[3];
+  const html_url = process.argv[4];
+  const body = process.argv[5];
 
   const formatter = formatters['slack'];
   if (!formatter) {
