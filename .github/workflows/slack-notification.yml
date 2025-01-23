@@ -8,6 +8,8 @@ jobs:
   slack-notify:
     name: Slack Notification
     runs-on: ubuntu-latest
+    env:
+      PULL_REQUEST_BODY: ${{ github.event.pull_request.body }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -18,13 +20,15 @@ jobs:
         id: slackify
         uses: LoveToKnow/slackify-markdown-action@v1.1.1
         with:
-          text: ${{ github.event.pull_request.body }}
+          text: ${{ env.PULL_REQUEST_BODY }}
       - name: Generate notification payload
         id: notification
         env:
-          PULL_REQUEST_DATA: ${{ toJson(github.event.pull_request) }}
+          TITLE: ${{ github.event.pull_request.title }}
+          USER_LOGIN: ${{ github.event.pull_request.user.login }}
+          HTML_URL: ${{ github.event.pull_request.html_url }}
         run: |
-          payload=$(node ./.github/utils/slack-notify.mjs '${{ env.PULL_REQUEST_DATA }}' '${{ steps.slackify.outputs.text }}')
+          payload=$(node ./.github/utils/slack-notify.mjs '${{ env.TITLE }}' '${{ env.USER_LOGIN }}' '${{ env.HTML_URL }}' '${{ steps.slackify.outputs.text }}')
           echo "payload=${payload//$'\n'/'%0A'}" >> $GITHUB_OUTPUT
       - name: Send PR to Slack
         id: slack
@@ -32,5 +36,5 @@ jobs:
         with:
           payload: ${{ steps.notification.outputs.payload }}
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CHANGELOG_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
