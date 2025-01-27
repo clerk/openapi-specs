@@ -5426,10 +5426,6 @@ components:
       properties:
         type:
           type: string
-          enum:
-            - oauth_google
-            - oauth_mock
-            - saml
         id:
           type: string
       required:
