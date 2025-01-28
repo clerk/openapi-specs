@@ -150,11 +150,11 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: The interstitial page markup
-        "400":
+        '400':
           description: A required query parameter is missing
-        "500":
+        '500':
           description: An infinite redirect loop was detected
   /jwks:
     get:
@@ -164,8 +164,8 @@ paths:
       tags:
         - JWKS
       responses:
-        "200":
-          $ref: "#/components/responses/WellKnown.JWKS"
+        '200':
+          $ref: '#/components/responses/WellKnown.JWKS'
   /clients:
     get:
       deprecated: true
@@ -178,19 +178,19 @@ paths:
         with the newest clients appearing first.
         Warning: the endpoint is being deprecated and will be removed in future versions.
       parameters:
-        - $ref: "#/components/parameters/LimitParameter"
-        - $ref: "#/components/parameters/OffsetParameter"
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
       responses:
-        "200":
-          $ref: "#/components/responses/Client.List"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "410":
-          $ref: "#/components/responses/DeprecatedEndpoint"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/Client.List'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '410':
+          $ref: '#/components/responses/DeprecatedEndpoint'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /clients/verify:
     post:
       operationId: VerifyClient
@@ -210,14 +210,14 @@ paths:
                   type: string
                   description: A JWT that represents the active client.
       responses:
-        "200":
-          $ref: "#/components/responses/Client"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/Client'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /clients/{client_id}:
     get:
       operationId: GetClient
@@ -233,14 +233,14 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/Client"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/Client'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /email_addresses:
     post:
       operationId: CreateEmailAddress
@@ -271,18 +271,18 @@ paths:
                     Default: false, unless it is the first email address.
                   nullable: true
       responses:
-        "200":
-          $ref: "#/components/responses/EmailAddress"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/EmailAddress'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /email_addresses/{email_address_id}:
     get:
       operationId: GetEmailAddress
@@ -298,16 +298,16 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/EmailAddress"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/EmailAddress'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
     delete:
       operationId: DeleteEmailAddress
       tags:
@@ -322,16 +322,16 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/DeletedObject"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateEmailAddress
       tags:
@@ -360,16 +360,16 @@ paths:
                   description: Set this email address as the primary email address for the user.
                   nullable: true
       responses:
-        "200":
-          $ref: "#/components/responses/EmailAddress"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/EmailAddress'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /phone_numbers:
     post:
       operationId: CreatePhoneNumber
@@ -407,18 +407,18 @@ paths:
                     If there are no other reserved second factors, the phone number will be set as the default second factor.
                   nullable: true
       responses:
-        "200":
-          $ref: "#/components/responses/PhoneNumber"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/PhoneNumber'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /phone_numbers/{phone_number_id}:
     get:
       operationId: GetPhoneNumber
@@ -434,16 +434,16 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/PhoneNumber"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/PhoneNumber'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
     delete:
       operationId: DeletePhoneNumber
       tags:
@@ -458,16 +458,16 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/DeletedObject"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdatePhoneNumber
       tags:
@@ -503,16 +503,16 @@ paths:
                     If there are no other reserved second factors, the phone number will be set as the default second factor.
                   nullable: true
       responses:
-        "200":
-          $ref: "#/components/responses/PhoneNumber"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/PhoneNumber'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /sessions:
     get:
       operationId: GetSessionList
@@ -551,17 +551,17 @@ paths:
               - removed
               - replaced
               - revoked
-        - $ref: "#/components/parameters/LimitParameter"
-        - $ref: "#/components/parameters/OffsetParameter"
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
       responses:
-        "200":
-          $ref: "#/components/responses/Session.List"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/Session.List'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     post:
       operationId: createSession
       tags:
@@ -581,16 +581,16 @@ paths:
                   type: string
                   description: The ID representing the user
       responses:
-        "200":
-          $ref: "#/components/responses/Session"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ClerkErrors"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/Session'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /sessions/{session_id}:
     get:
       operationId: GetSession
@@ -606,14 +606,14 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/Session"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/Session'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /sessions/{session_id}/revoke:
     post:
       operationId: RevokeSession
@@ -631,14 +631,14 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/Session"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/Session'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /sessions/{session_id}/verify:
     post:
       deprecated: true
@@ -672,16 +672,16 @@ paths:
                     The JWT that is sent via the `__session` cookie from your frontend.
                     Note: this JWT must be associated with the supplied session ID.
       responses:
-        "200":
-          $ref: "#/components/responses/Session"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "410":
-          $ref: "#/components/responses/DeprecatedEndpoint"
+        '200':
+          $ref: '#/components/responses/Session'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '410':
+          $ref: '#/components/responses/DeprecatedEndpoint'
   /sessions/{session_id}/tokens:
     post:
       operationId: CreateSessionToken
@@ -709,7 +709,7 @@ paths:
                   description: Use this parameter to override the default session token lifetime.
                   nullable: true
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -722,10 +722,10 @@ paths:
                       - token
                   jwt:
                     type: string
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /sessions/{session_id}/tokens/{template_name}:
     post:
       operationId: CreateSessionTokenFromTemplate
@@ -759,7 +759,7 @@ paths:
                   description: Use this parameter to override the JWT token lifetime.
                   nullable: true
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -772,10 +772,10 @@ paths:
                       - token
                   jwt:
                     type: string
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /templates/{template_type}:
     get:
       deprecated: true
@@ -797,14 +797,14 @@ paths:
               - email
               - sms
       responses:
-        "200":
-          $ref: "#/components/responses/Template.List"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/Template.List'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /templates/{template_type}/{slug}:
     get:
       deprecated: true
@@ -830,14 +830,14 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/Template"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/Template'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
     put:
       deprecated: true
       operationId: UpsertTemplate
@@ -901,20 +901,20 @@ paths:
                     For example, in the address 'hello@example.com', the local part is 'hello'.
                     Applicable only to email templates.
       responses:
-        "200":
-          $ref: "#/components/responses/Template"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
-        "403":
-          $ref: "#/components/responses/ClerkErrors"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/Template'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /templates/{template_type}/{slug}/revert:
     post:
       deprecated: true
@@ -940,16 +940,16 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/Template"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/Template'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /templates/{template_type}/{slug}/preview:
     post:
       deprecated: true
@@ -1001,20 +1001,20 @@ paths:
                     For example, in the address 'hello@example.com', the local part is 'hello'.
                     Applicable only to email templates.
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 type: object
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /templates/{template_type}/{slug}/toggle_delivery:
     post:
       deprecated: true
@@ -1054,14 +1054,14 @@ paths:
                   description: Whether Clerk should deliver emails or SMS messages based on the current template
                   nullable: true
       responses:
-        "200":
-          $ref: "#/components/responses/Template"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/Template'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /users:
     get:
       operationId: GetUserList
@@ -1245,8 +1245,8 @@ paths:
           example: 1730160000000
           schema:
             type: integer
-        - $ref: "#/components/parameters/LimitParameter"
-        - $ref: "#/components/parameters/OffsetParameter"
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - name: order_by
           in: query
           description: |-
@@ -1258,17 +1258,17 @@ paths:
             if you pass `order_by=username&order_by=created_at`, we will consider only the first `order_by` parameter, which is `username`. The `created_at` parameter will be ignored in this case.
           schema:
             type: string
-            default: "-created_at"
+            default: '-created_at'
           required: false
       responses:
-        "200":
-          $ref: "#/components/responses/User.List"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/User.List'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     post:
       operationId: CreateUser
       summary: Create a new user
@@ -1347,7 +1347,7 @@ paths:
                     The digests should be generated with one of the supported algorithms.
                     The hashing algorithm can be specified using the `password_hasher` property.
                 password_hasher:
-                  $ref: "#/components/schemas/PasswordHasher"
+                  $ref: '#/components/schemas/PasswordHasher'
                 skip_password_checks:
                   type: boolean
                   description: |-
@@ -1418,16 +1418,16 @@ paths:
                   type: string
                   description: A custom date/time denoting _when_ the user signed up to the application, specified in RFC3339 format (e.g. `2012-10-20T07:15:20.902Z`).
       responses:
-        "200":
-          $ref: "#/components/responses/User"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "403":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/User'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /users/count:
     get:
       operationId: GetUsersCount
@@ -1542,10 +1542,10 @@ paths:
             type: string
             minLength: 3
       responses:
-        "200":
-          $ref: "#/components/responses/User.Count"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/User.Count'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /users/{user_id}:
     get:
       operationId: GetUser
@@ -1561,14 +1561,14 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/User"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/User'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateUser
       summary: Update a user
@@ -1660,7 +1660,7 @@ paths:
                     The digests should be generated with one of the supported algorithms.
                     The hashing algorithm can be specified using the `password_hasher` property.
                 password_hasher:
-                  $ref: "#/components/schemas/PasswordHasher"
+                  $ref: '#/components/schemas/PasswordHasher'
                 skip_password_checks:
                   type: boolean
                   description: Set it to `true` if you're updating the user's password and want to skip any password policy settings check. This parameter can only be used when providing a `password`.
@@ -1724,16 +1724,16 @@ paths:
                   type: string
                   description: A custom date/time denoting _when_ the user signed up to the application, specified in RFC3339 format (e.g. `2012-10-20T07:15:20.902Z`).
       responses:
-        "200":
-          $ref: "#/components/responses/User"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/User'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteUser
       summary: Delete a user
@@ -1748,14 +1748,14 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/DeletedObject"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /users/{user_id}/ban:
     post:
       operationId: BanUser
@@ -1771,10 +1771,10 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/User"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
+        '200':
+          $ref: '#/components/responses/User'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
   /users/{user_id}/unban:
     post:
       operationId: UnbanUser
@@ -1790,10 +1790,10 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/User"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
+        '200':
+          $ref: '#/components/responses/User'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
   /users/{user_id}/lock:
     post:
       operationId: LockUser
@@ -1811,10 +1811,10 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/User"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
+        '200':
+          $ref: '#/components/responses/User'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
   /users/{user_id}/unlock:
     post:
       operationId: UnlockUser
@@ -1830,10 +1830,10 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/User"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
+        '200':
+          $ref: '#/components/responses/User'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
   /users/{user_id}/profile_image:
     post:
       operationId: SetUserProfileImage
@@ -1859,14 +1859,14 @@ paths:
                   type: string
                   format: binary
       responses:
-        "200":
-          $ref: "#/components/responses/User"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/ClerkErrors"
-        "404":
-          $ref: "#/components/responses/ClerkErrors"
+        '200':
+          $ref: '#/components/responses/User'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
     delete:
       operationId: DeleteUserProfileImage
       summary: Delete user profile image
@@ -1881,10 +1881,10 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/User"
-        "404":
-          $ref: "#/components/responses/ClerkErrors"
+        '200':
+          $ref: '#/components/responses/User'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/metadata:
     patch:
       operationId: UpdateUserMetadata
@@ -1935,16 +1935,16 @@ paths:
 
                     Note: Since this data can be modified from the frontend, it is not guaranteed to be safe.
       responses:
-        "200":
-          $ref: "#/components/responses/User"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/User'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /users/{user_id}/oauth_access_tokens/{provider}:
     get:
       operationId: GetOAuthAccessToken
@@ -1968,7 +1968,7 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: The OAuth access token of the user, if any.
           content:
             application/json:
@@ -2013,12 +2013,12 @@ paths:
                       format: int64
                       nullable: true
                       description: Unix timestamp of the access token expiration.
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /users/{user_id}/organization_memberships:
     get:
       operationId: UsersGetOrganizationMemberships
@@ -2033,13 +2033,13 @@ paths:
           required: true
           schema:
             type: string
-        - $ref: "#/components/parameters/LimitParameter"
-        - $ref: "#/components/parameters/OffsetParameter"
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationMemberships"
-        "403":
-          $ref: "#/components/responses/ClerkErrors"
+        '200':
+          $ref: '#/components/responses/OrganizationMemberships'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/organization_invitations:
     get:
       operationId: UsersGetOrganizationInvitations
@@ -2054,8 +2054,8 @@ paths:
           required: true
           schema:
             type: string
-        - $ref: "#/components/parameters/LimitParameter"
-        - $ref: "#/components/parameters/OffsetParameter"
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: query
           name: status
           description: Filter organization invitations based on their status
@@ -2067,14 +2067,14 @@ paths:
               - accepted
               - revoked
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationInvitationsWithPublicOrganizationData"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "403":
-          $ref: "#/components/responses/ClerkErrors"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/OrganizationInvitationsWithPublicOrganizationData'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /users/{user_id}/verify_password:
     post:
       operationId: VerifyPassword
@@ -2104,7 +2104,7 @@ paths:
               required:
                 - password
       responses:
-        "200":
+        '200':
           description: The provided password was correct.
           content:
             application/json:
@@ -2115,14 +2115,14 @@ paths:
                   verified:
                     type: boolean
                     nullable: false
-        "400":
+        '400':
           description: The user does not have a password set.
-        "404":
+        '404':
           description: The user does not exist.
-        "422":
+        '422':
           description: The provided password was incorrect.
-        "500":
-          $ref: "#/components/responses/ClerkErrors"
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/verify_totp:
     post:
       operationId: VerifyTOTP
@@ -2154,7 +2154,7 @@ paths:
               required:
                 - code
       responses:
-        "200":
+        '200':
           description: The provided TOTP or backup code was correct.
           content:
             application/json:
@@ -2171,14 +2171,14 @@ paths:
                     enum:
                       - totp
                       - backup_code
-        "400":
+        '400':
           description: The user does not have TOTP configured for their account.
-        "404":
+        '404':
           description: The user does not exist.
-        "422":
+        '422':
           description: The provided TOTP or backup code was incorrect.
-        "500":
-          $ref: "#/components/responses/ClerkErrors"
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/mfa:
     delete:
       operationId: DisableMFA
@@ -2194,7 +2194,7 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Successful operation.
           content:
             application/json:
@@ -2205,10 +2205,10 @@ paths:
                   user_id:
                     type: string
                     nullable: false
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "500":
-          $ref: "#/components/responses/ClerkErrors"
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/backup_code:
     delete:
       operationId: DeleteBackupCode
@@ -2224,7 +2224,7 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Successful operation.
           content:
             application/json:
@@ -2235,10 +2235,10 @@ paths:
                   user_id:
                     type: string
                     nullable: false
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "500":
-          $ref: "#/components/responses/ClerkErrors"
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/passkeys/{passkey_identification_id}:
     delete:
       operationId: UserPasskeyDelete
@@ -2260,14 +2260,14 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/DeletedObject"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "500":
-          $ref: "#/components/responses/ClerkErrors"
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/web3_wallets/{web3_wallet_identification_id}:
     delete:
       operationId: UserWeb3WalletDelete
@@ -2289,16 +2289,16 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/DeletedObject"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "500":
-          $ref: "#/components/responses/ClerkErrors"
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/totp:
     post:
       operationId: CreateUserTOTP
@@ -2315,14 +2315,14 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/TOTP"
-        "403":
-          $ref: "#/components/responses/ClerkErrors"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "500":
-          $ref: "#/components/responses/ClerkErrors"
+        '200':
+          $ref: '#/components/responses/TOTP'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
     delete:
       operationId: DeleteTOTP
       summary: Delete all the user's TOTPs
@@ -2337,7 +2337,7 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Successful operation.
           content:
             application/json:
@@ -2348,10 +2348,10 @@ paths:
                   user_id:
                     type: string
                     nullable: false
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "500":
-          $ref: "#/components/responses/ClerkErrors"
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/external_accounts/{external_account_id}:
     delete:
       operationId: DeleteExternalAccount
@@ -2373,16 +2373,16 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/DeletedObject"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "403":
-          $ref: "#/components/responses/ClerkErrors"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "500":
-          $ref: "#/components/responses/ClerkErrors"
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /invitations:
     post:
       operationId: CreateInvitation
@@ -2446,19 +2446,19 @@ paths:
               required:
                 - email_address
       responses:
-        "200":
-          $ref: "#/components/responses/Invitation"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/Invitation'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     get:
       summary: List all invitations
       description: Returns all non-revoked invitations for your application, sorted by creation date
       operationId: ListInvitations
       parameters:
-        - $ref: "#/components/parameters/LimitParameter"
-        - $ref: "#/components/parameters/OffsetParameter"
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: query
           name: status
           description: Filter invitations based on their status
@@ -2479,8 +2479,8 @@ paths:
       tags:
         - Invitations
       responses:
-        "200":
-          $ref: "#/components/responses/Invitation.List"
+        '200':
+          $ref: '#/components/responses/Invitation.List'
   /invitations/bulk:
     post:
       operationId: CreateBulkInvitations
@@ -2538,12 +2538,12 @@ paths:
                 required:
                   - email_address
       responses:
-        "200":
-          $ref: "#/components/responses/Invitation.List"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/Invitation.List'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /invitations/{invitation_id}/revoke:
     post:
       operationId: RevokeInvitation
@@ -2563,12 +2563,12 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/Invitation.Revoked"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/Invitation.Revoked'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /organization_invitations:
     get:
       operationId: ListInstanceOrganizationInvitations
@@ -2583,8 +2583,8 @@ paths:
       tags:
         - Organization Invitations
       parameters:
-        - $ref: "#/components/parameters/LimitParameter"
-        - $ref: "#/components/parameters/OffsetParameter"
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: query
           name: order_by
           required: false
@@ -2597,7 +2597,7 @@ paths:
             Defaults to `-created_at`.
           schema:
             type: string
-            default: "-created_at"
+            default: '-created_at'
         - in: query
           name: status
           description: Filter organization invitations based on their status
@@ -2615,16 +2615,16 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationInvitationsWithPublicOrganizationData"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/ClerkErrors"
-        "500":
-          $ref: "#/components/responses/ClerkErrors"
+        '200':
+          $ref: '#/components/responses/OrganizationInvitationsWithPublicOrganizationData'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /allowlist_identifiers:
     get:
       operationId: ListAllowlistIdentifiers
@@ -2633,12 +2633,12 @@ paths:
       tags:
         - Allow-list / Block-list
       responses:
-        "200":
-          $ref: "#/components/responses/AllowlistIdentifier.List"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
+        '200':
+          $ref: '#/components/responses/AllowlistIdentifier.List'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
     post:
       operationId: CreateAllowlistIdentifier
       summary: Add identifier to the allow-list
@@ -2666,14 +2666,14 @@ paths:
               required:
                 - identifier
       responses:
-        "200":
-          $ref: "#/components/responses/AllowlistIdentifier"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/AllowlistIdentifier'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /allowlist_identifiers/{identifier_id}:
     delete:
       operationId: DeleteAllowlistIdentifier
@@ -2689,12 +2689,12 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/DeletedObject"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /blocklist_identifiers:
     get:
       operationId: ListBlocklistIdentifiers
@@ -2703,12 +2703,12 @@ paths:
       tags:
         - Allow-list / Block-list
       responses:
-        "200":
-          $ref: "#/components/responses/BlocklistIdentifier.List"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
+        '200':
+          $ref: '#/components/responses/BlocklistIdentifier.List'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
     post:
       operationId: CreateBlocklistIdentifier
       summary: Add identifier to the block-list
@@ -2730,14 +2730,14 @@ paths:
               required:
                 - identifier
       responses:
-        "200":
-          $ref: "#/components/responses/BlocklistIdentifier"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/BlocklistIdentifier'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /blocklist_identifiers/{identifier_id}:
     delete:
       operationId: DeleteBlocklistIdentifier
@@ -2753,12 +2753,12 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/DeletedObject"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /beta_features/instance_settings:
     patch:
       operationId: UpdateInstanceAuthConfig
@@ -2806,12 +2806,12 @@ paths:
                     Defaults to true for development instances.
                   nullable: true
       responses:
-        "200":
-          $ref: "#/components/responses/InstanceSettings"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/InstanceSettings'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /beta_features/domain:
     put:
       deprecated: true
@@ -2836,12 +2836,12 @@ paths:
                   type: string
                   description: The new home URL of the production instance e.g. https://www.example.com
       responses:
-        "202":
+        '202':
           description: Accepted
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "422":
-          $ref: "#/components/responses/ClerkErrors"
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
   /actor_tokens:
     post:
       summary: Create actor token
@@ -2884,14 +2884,14 @@ paths:
                 - user_id
                 - actor
       responses:
-        "200":
-          $ref: "#/components/responses/ActorToken"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/ActorToken'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /actor_tokens/{actor_token_id}/revoke:
     post:
       summary: Revoke actor token
@@ -2907,12 +2907,12 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/ActorToken"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/ActorToken'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /domains:
     get:
       summary: List all instance domains
@@ -2923,8 +2923,8 @@ paths:
       tags:
         - Domains
       responses:
-        "200":
-          $ref: "#/components/responses/Domains"
+        '200':
+          $ref: '#/components/responses/Domains'
     post:
       summary: Add a domain
       description: |-
@@ -2957,14 +2957,14 @@ paths:
                 - name
                 - is_satellite
       responses:
-        "200":
-          $ref: "#/components/responses/Domain"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "402":
-          $ref: "#/components/responses/ClerkErrors"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/Domain'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /domains/{domain_id}:
     delete:
       operationId: DeleteDomain
@@ -2982,12 +2982,12 @@ paths:
             type: string
           description: The ID of the domain that will be deleted. Must be a satellite domain.
       responses:
-        "200":
-          $ref: "#/components/responses/DeletedObject"
-        "403":
-          $ref: "#/components/responses/ClerkErrors"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateDomain
       summary: Update a domain
@@ -3038,14 +3038,14 @@ paths:
                     multiple secondaries) on the same root domain (eTLD+1).
                   nullable: true
       responses:
-        "200":
-          $ref: "#/components/responses/Domain"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/Domain'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /instance:
     get:
       operationId: GetInstance
@@ -3054,8 +3054,8 @@ paths:
       tags:
         - Instance Settings
       responses:
-        "200":
-          $ref: "#/components/responses/Instance"
+        '200':
+          $ref: '#/components/responses/Instance'
     patch:
       operationId: UpdateInstance
       summary: Update instance settings
@@ -3111,10 +3111,10 @@ paths:
                   type: boolean
                   description: Whether the instance should use URL-based session syncing in development mode (i.e. without third-party cookies).
       responses:
-        "204":
+        '204':
           description: Accepted
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /instance/restrictions:
     patch:
       operationId: UpdateInstanceRestrictions
@@ -3145,12 +3145,12 @@ paths:
                   type: boolean
                   nullable: true
       responses:
-        "200":
-          $ref: "#/components/responses/InstanceRestrictions"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/InstanceRestrictions'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /instance/change_domain:
     post:
       operationId: ChangeProductionInstanceDomain
@@ -3180,12 +3180,12 @@ paths:
                     will be stored as part of the domain. This is useful for supporting multiple apps (one primary and
                     multiple secondaries) on the same root domain (eTLD+1).
       responses:
-        "202":
+        '202':
           description: Accepted
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "422":
-          $ref: "#/components/responses/ClerkErrors"
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
   /instance/organization_settings:
     patch:
       operationId: UpdateInstanceOrganizationSettings
@@ -3226,16 +3226,16 @@ paths:
                   type: string
                   description: Specify what the default organization role is for the organization domains.
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationSettings"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/OrganizationSettings'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /webhooks/svix:
     post:
       operationId: CreateSvixApp
@@ -3244,10 +3244,10 @@ paths:
       tags:
         - Webhooks
       responses:
-        "200":
-          $ref: "#/components/responses/SvixURL"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
+        '200':
+          $ref: '#/components/responses/SvixURL'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
     delete:
       operationId: DeleteSvixApp
       summary: Delete a Svix app
@@ -3255,10 +3255,10 @@ paths:
       tags:
         - Webhooks
       responses:
-        "204":
+        '204':
           description: Svix app was successfully deleted
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
   /webhooks/svix_url:
     post:
       operationId: GenerateSvixAuthURL
@@ -3267,10 +3267,10 @@ paths:
       tags:
         - Webhooks
       responses:
-        "200":
-          $ref: "#/components/responses/SvixURL"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
+        '200':
+          $ref: '#/components/responses/SvixURL'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
   /jwt_templates:
     get:
       summary: List all templates
@@ -3278,8 +3278,8 @@ paths:
       tags:
         - JWT Templates
       responses:
-        "200":
-          $ref: "#/components/responses/JWTTemplate.List"
+        '200':
+          $ref: '#/components/responses/JWTTemplate.List'
     post:
       operationId: CreateJWTTemplate
       summary: Create a JWT template
@@ -3325,14 +3325,14 @@ paths:
                   description: The custom signing private key to use when minting JWTs
                   nullable: true
       responses:
-        "200":
-          $ref: "#/components/responses/JWTTemplate"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/JWTTemplate'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /jwt_templates/{template_id}:
     get:
       operationId: GetJWTTemplate
@@ -3348,10 +3348,10 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/JWTTemplate"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/JWTTemplate'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateJWTTemplate
       summary: Update a JWT template
@@ -3404,18 +3404,18 @@ paths:
                   description: The custom signing private key to use when minting JWTs
                   nullable: true
       responses:
-        "200":
-          $ref: "#/components/responses/JWTTemplate"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/JWTTemplate'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteJWTTemplate
       summary: Delete a Template
-      description: ""
+      description: ''
       tags:
         - JWT Templates
       parameters:
@@ -3426,12 +3426,12 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/DeletedObject"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /organizations:
     get:
       operationId: ListOrganizations
@@ -3444,8 +3444,8 @@ paths:
       tags:
         - Organizations
       parameters:
-        - $ref: "#/components/parameters/LimitParameter"
-        - $ref: "#/components/parameters/OffsetParameter"
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: query
           required: false
           name: include_members_count
@@ -3471,17 +3471,17 @@ paths:
             Defaults to `-created_at`.
           schema:
             type: string
-            default: "-created_at"
+            default: '-created_at'
           required: false
       responses:
-        "200":
-          $ref: "#/components/responses/Organizations"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/Organizations'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     post:
       operationId: CreateOrganization
       summary: Create an organization
@@ -3535,14 +3535,14 @@ paths:
               required:
                 - name
       responses:
-        "200":
-          $ref: "#/components/responses/Organization"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/Organization'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /organizations/{organization_id}:
     get:
       operationId: GetOrganization
@@ -3564,12 +3564,12 @@ paths:
           schema:
             type: boolean
       responses:
-        "200":
-          $ref: "#/components/responses/Organization"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/Organization'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateOrganization
       summary: Update an organization
@@ -3621,14 +3621,14 @@ paths:
                   type: string
                   description: A custom date/time denoting _when_ the organization was created, specified in RFC3339 format (e.g. `2012-10-20T07:15:20.902Z`).
       responses:
-        "200":
-          $ref: "#/components/responses/Organization"
-        "402":
-          $ref: "#/components/responses/ResourceNotFound"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/Organization'
+        '402':
+          $ref: '#/components/responses/ResourceNotFound'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteOrganization
       summary: Delete an organization
@@ -3646,10 +3646,10 @@ paths:
             type: string
           description: The ID of the organization to delete
       responses:
-        "200":
-          $ref: "#/components/responses/DeletedObject"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /organizations/{organization_id}/metadata:
     patch:
       operationId: MergeOrganizationMetadata
@@ -3689,16 +3689,16 @@ paths:
                     The new object will be merged with the existing value.
                   additionalProperties: true
       responses:
-        "200":
-          $ref: "#/components/responses/Organization"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/Organization'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /organizations/{organization_id}/logo:
     put:
       operationId: UploadOrganizationLogo
@@ -3732,16 +3732,16 @@ paths:
               required:
                 - file
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationWithLogo"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "413":
-          $ref: "#/components/responses/ClerkErrors"
+        '200':
+          $ref: '#/components/responses/OrganizationWithLogo'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '413':
+          $ref: '#/components/responses/ClerkErrors'
     delete:
       operationId: DeleteOrganizationLogo
       description: Delete the organization's logo.
@@ -3755,10 +3755,10 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/Organization"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/Organization'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /organizations/{organization_id}/invitations:
     post:
       operationId: CreateOrganizationInvitation
@@ -3832,16 +3832,16 @@ paths:
                 - email_address
                 - role
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationInvitation"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/OrganizationInvitation'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     get:
       operationId: ListOrganizationInvitations
       summary: Get a list of organization invitations
@@ -3861,8 +3861,8 @@ paths:
           schema:
             type: string
           description: The organization ID.
-        - $ref: "#/components/parameters/LimitParameter"
-        - $ref: "#/components/parameters/OffsetParameter"
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: query
           name: status
           description: Filter organization invitations based on their status
@@ -3874,12 +3874,12 @@ paths:
               - accepted
               - revoked
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationInvitations"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/OrganizationInvitations'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /organizations/{organization_id}/invitations/bulk:
     post:
       operationId: CreateOrganizationInvitationBulk
@@ -3947,16 +3947,16 @@ paths:
                   - email_address
                   - role
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationInvitations"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/OrganizationInvitations'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /organizations/{organization_id}/invitations/pending:
     get:
       deprecated: true
@@ -3978,15 +3978,15 @@ paths:
           schema:
             type: string
           description: The organization ID.
-        - $ref: "#/components/parameters/LimitParameter"
-        - $ref: "#/components/parameters/OffsetParameter"
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationInvitations"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/OrganizationInvitations'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /organizations/{organization_id}/invitations/{invitation_id}:
     get:
       operationId: GetOrganizationInvitation
@@ -4008,14 +4008,14 @@ paths:
             type: string
           description: The organization invitation ID.
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationInvitation"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/OrganizationInvitation'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /organizations/{organization_id}/invitations/{invitation_id}/revoke:
     post:
       operationId: RevokeOrganizationInvitation
@@ -4055,14 +4055,14 @@ paths:
                     The ID of the user that revokes the invitation.
                     Must be an administrator in the organization.
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationInvitation"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/OrganizationInvitation'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /organizations/{organization_id}/memberships:
     post:
       operationId: CreateOrganizationMembership
@@ -4102,16 +4102,16 @@ paths:
                 - user_id
                 - role
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationMembership"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/OrganizationMembership'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     get:
       operationId: ListOrganizationMemberships
       summary: Get a list of all members of an organization
@@ -4125,8 +4125,8 @@ paths:
           schema:
             type: string
           description: The organization ID.
-        - $ref: "#/components/parameters/LimitParameter"
-        - $ref: "#/components/parameters/OffsetParameter"
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: query
           required: false
           name: order_by
@@ -4137,12 +4137,12 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationMemberships"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/OrganizationMemberships'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /organizations/{organization_id}/memberships/{user_id}:
     patch:
       operationId: UpdateOrganizationMembership
@@ -4176,12 +4176,12 @@ paths:
               required:
                 - role
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationMembership"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/OrganizationMembership'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteOrganizationMembership
       summary: Remove a member from an organization
@@ -4202,12 +4202,12 @@ paths:
             type: string
           description: The ID of the user that this membership belongs to
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationMembership"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/OrganizationMembership'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /organizations/{organization_id}/memberships/{user_id}/metadata:
     patch:
       operationId: UpdateOrganizationMembershipMetadata
@@ -4251,14 +4251,14 @@ paths:
                     The new object will be merged with the existing value.
                   additionalProperties: true
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationMembership"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/OrganizationMembership'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /organizations/{organization_id}/domains:
     post:
       operationId: CreateOrganizationDomain
@@ -4294,16 +4294,16 @@ paths:
                   description: The status of domain's verification. Defaults to true
                   nullable: true
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationDomain"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/OrganizationDomain'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     get:
       operationId: ListOrganizationDomains
       summary: Get a list of all domains of an organization.
@@ -4317,8 +4317,8 @@ paths:
           schema:
             type: string
           description: The organization ID.
-        - $ref: "#/components/parameters/LimitParameter"
-        - $ref: "#/components/parameters/OffsetParameter"
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: query
           required: false
           name: verified
@@ -4332,12 +4332,12 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationDomains"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/OrganizationDomains'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /organizations/{organization_id}/domains/{domain_id}:
     patch:
       operationId: UpdateOrganizationDomain
@@ -4374,14 +4374,14 @@ paths:
                   description: The status of the domain's verification
                   nullable: true
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationDomain"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/OrganizationDomain'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteOrganizationDomain
       summary: Remove a domain from an organization.
@@ -4402,14 +4402,14 @@ paths:
             type: string
           description: The ID of the domain
       responses:
-        "200":
-          $ref: "#/components/responses/DeletedObject"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /proxy_checks:
     post:
       summary: Verify the proxy configuration for your domain
@@ -4438,12 +4438,12 @@ paths:
                   type: string
                   description: The full URL of the proxy which will forward requests to the Clerk Frontend API for this domain. e.g. https://example.com/__clerk
       responses:
-        "200":
-          $ref: "#/components/responses/ProxyCheck"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/ProxyCheck'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /redirect_urls:
     get:
       summary: List all redirect URLs
@@ -4452,8 +4452,8 @@ paths:
       tags:
         - Redirect URLs
       responses:
-        "200":
-          $ref: "#/components/responses/RedirectURL.List"
+        '200':
+          $ref: '#/components/responses/RedirectURL.List'
     post:
       summary: Create a redirect URL
       description: Create a redirect URL
@@ -4471,12 +4471,12 @@ paths:
                   description: The full url value prefixed with `https://` or a custom scheme e.g. `"https://my-app.com/oauth-callback"` or `"my-app://oauth-callback"`
                   nullable: false
       responses:
-        "200":
-          $ref: "#/components/responses/RedirectURL"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/RedirectURL'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /redirect_urls/{id}:
     get:
       summary: Retrieve a redirect URL
@@ -4492,10 +4492,10 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/RedirectURL"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/RedirectURL'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
     delete:
       summary: Delete a redirect URL
       description: Remove the selected redirect URL from the whitelist of the instance
@@ -4510,10 +4510,10 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/DeletedObject"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /sign_in_tokens:
     post:
       summary: Create sign-in token
@@ -4540,12 +4540,12 @@ paths:
                     By default, the duration is 30 days.
                   default: 2592000
       responses:
-        "200":
-          $ref: "#/components/responses/SignInToken"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/SignInToken'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /sign_in_tokens/{sign_in_token_id}/revoke:
     post:
       summary: Revoke the given sign-in token
@@ -4561,12 +4561,12 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/SignInToken"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/SignInToken'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /sign_ups/{id}:
     patch:
       operationId: UpdateSignUp
@@ -4594,10 +4594,10 @@ paths:
                     This will be copied to the resulting user when the sign-up is completed.
                   nullable: true
       responses:
-        "200":
-          $ref: "#/components/responses/SignUp"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
+        '200':
+          $ref: '#/components/responses/SignUp'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
   /oauth_applications:
     get:
       operationId: ListOAuthApplications
@@ -4610,17 +4610,17 @@ paths:
       tags:
         - OAuth Applications
       parameters:
-        - $ref: "#/components/parameters/LimitParameter"
-        - $ref: "#/components/parameters/OffsetParameter"
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
       responses:
-        "200":
-          $ref: "#/components/responses/OAuthApplications"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/OAuthApplications'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     post:
       operationId: CreateOAuthApplication
       summary: Create an OAuth application
@@ -4656,14 +4656,14 @@ paths:
               required:
                 - name
       responses:
-        "200":
-          $ref: "#/components/responses/OAuthApplicationWithSecret"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/OAuthApplicationWithSecret'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /oauth_applications/{oauth_application_id}:
     get:
       operationId: GetOAuthApplication
@@ -4679,12 +4679,12 @@ paths:
             type: string
           description: The ID of the OAuth application
       responses:
-        "200":
-          $ref: "#/components/responses/OAuthApplication"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/OAuthApplication'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateOAuthApplication
       summary: Update an OAuth application
@@ -4718,14 +4718,14 @@ paths:
                   default: profile email
                   example: profile email public_metadata private_metadata
       responses:
-        "200":
-          $ref: "#/components/responses/OAuthApplication"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/OAuthApplication'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteOAuthApplication
       summary: Delete an OAuth application
@@ -4742,12 +4742,12 @@ paths:
             type: string
           description: The ID of the OAuth application to delete
       responses:
-        "200":
-          $ref: "#/components/responses/DeletedObject"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /oauth_applications/{oauth_application_id}/rotate_secret:
     post:
       operationId: RotateOAuthApplicationSecret
@@ -4765,12 +4765,12 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/OAuthApplicationWithSecret"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/OAuthApplicationWithSecret'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /saml_connections:
     get:
       operationId: ListSAMLConnections
@@ -4782,8 +4782,8 @@ paths:
       tags:
         - SAML Connections
       parameters:
-        - $ref: "#/components/parameters/LimitParameter"
-        - $ref: "#/components/parameters/OffsetParameter"
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - name: organization_id
           in: query
           schema:
@@ -4799,14 +4799,14 @@ paths:
             excluded from the result set.
             Accepts up to 100 organization ids.
       responses:
-        "200":
-          $ref: "#/components/responses/SAMLConnections"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/SAMLConnections'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     post:
       operationId: CreateSAMLConnection
       summary: Create a SAML Connection
@@ -4877,16 +4877,16 @@ paths:
                 - domain
                 - provider
       responses:
-        "200":
-          $ref: "#/components/responses/SAMLConnection"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/SAMLConnection'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /saml_connections/{saml_connection_id}:
     get:
       operationId: GetSAMLConnection
@@ -4902,14 +4902,14 @@ paths:
             type: string
           description: The ID of the SAML Connection
       responses:
-        "200":
-          $ref: "#/components/responses/SAMLConnection"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/SAMLConnection'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateSAMLConnection
       summary: Update a SAML Connection
@@ -4998,16 +4998,16 @@ paths:
                   description: Enable or deactivate additional identifications
                   nullable: true
       responses:
-        "200":
-          $ref: "#/components/responses/SAMLConnection"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/SAMLConnection'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteSAMLConnection
       summary: Delete a SAML Connection
@@ -5022,14 +5022,14 @@ paths:
             type: string
           description: The ID of the SAML Connection to delete
       responses:
-        "200":
-          $ref: "#/components/responses/DeletedObject"
-        "402":
-          $ref: "#/components/responses/PaymentRequired"
-        "403":
-          $ref: "#/components/responses/AuthorizationInvalid"
-        "404":
-          $ref: "#/components/responses/ResourceNotFound"
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /testing_tokens:
     post:
       operationId: CreateTestingToken
@@ -5038,8 +5038,8 @@ paths:
       tags:
         - Testing Tokens
       responses:
-        "200":
-          $ref: "#/components/responses/TestingToken"
+        '200':
+          $ref: '#/components/responses/TestingToken'
   /organization_memberships:
     get:
       operationId: InstanceGetOrganizationMemberships
@@ -5048,8 +5048,8 @@ paths:
       tags:
         - Organization Memberships
       parameters:
-        - $ref: "#/components/parameters/LimitParameter"
-        - $ref: "#/components/parameters/OffsetParameter"
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: query
           required: false
           name: order_by
@@ -5060,16 +5060,16 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          $ref: "#/components/responses/OrganizationMemberships"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "401":
-          $ref: "#/components/responses/AuthenticationInvalid"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        "500":
-          $ref: "#/components/responses/ClerkErrors"
+        '200':
+          $ref: '#/components/responses/OrganizationMemberships'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /waitlist_entries:
     get:
       operationId: ListWaitlistEntries
@@ -5081,8 +5081,8 @@ paths:
       tags:
         - Waitlist Entries
       parameters:
-        - $ref: "#/components/parameters/LimitParameter"
-        - $ref: "#/components/parameters/OffsetParameter"
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: query
           name: query
           description: Filter waitlist entries by email address
@@ -5112,10 +5112,10 @@ paths:
             Use `+` for ascending or `-` for descending order. Defaults to `-created_at`.
           schema:
             type: string
-            default: "-created_at"
+            default: '-created_at'
       responses:
-        "200":
-          $ref: "#/components/responses/WaitlistEntries"
+        '200':
+          $ref: '#/components/responses/WaitlistEntries'
     post:
       operationId: CreateWaitlistEntry
       summary: Create a waitlist entry
@@ -5141,12 +5141,12 @@ paths:
               required:
                 - email_address
       responses:
-        "200":
-          $ref: "#/components/responses/WaitlistEntry"
-        "400":
-          $ref: "#/components/responses/ClerkErrors"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '200':
+          $ref: '#/components/responses/WaitlistEntry'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
 components:
   securitySchemes:
     bearerAuth:
@@ -5173,7 +5173,7 @@ components:
                 type: string
               alg:
                 type: string
-              "n":
+              'n':
                 type: string
               e:
                 type: string
@@ -5286,7 +5286,7 @@ components:
         sessions:
           type: array
           items:
-            $ref: "#/components/schemas/Session"
+            $ref: '#/components/schemas/Session'
         sign_in_id:
           type: string
           nullable: true
@@ -5341,7 +5341,7 @@ components:
         errors:
           type: array
           items:
-            $ref: "#/components/schemas/ClerkError"
+            $ref: '#/components/schemas/ClerkError'
         meta:
           type: object
       required:
@@ -5409,7 +5409,7 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: "#/components/schemas/ClerkError"
+            - $ref: '#/components/schemas/ClerkError'
         expire_at:
           type: integer
           nullable: true
@@ -5451,13 +5451,13 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: "#/components/schemas/OTP"
-            - $ref: "#/components/schemas/Admin"
-            - $ref: "#/components/schemas/FromOAuth"
+            - $ref: '#/components/schemas/OTP'
+            - $ref: '#/components/schemas/Admin'
+            - $ref: '#/components/schemas/FromOAuth'
         linked_to:
           type: array
           items:
-            $ref: "#/components/schemas/IdentificationLink"
+            $ref: '#/components/schemas/IdentificationLink'
         matches_sso_connection:
           description: |
             Indicates whether this email address domain matches an active enterprise connection.
@@ -5519,12 +5519,12 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: "#/components/schemas/OTP"
-            - $ref: "#/components/schemas/Admin"
+            - $ref: '#/components/schemas/OTP'
+            - $ref: '#/components/schemas/Admin'
         linked_to:
           type: array
           items:
-            $ref: "#/components/schemas/IdentificationLink"
+            $ref: '#/components/schemas/IdentificationLink'
         backup_codes:
           type: array
           items:
@@ -5676,8 +5676,8 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: "#/components/schemas/Web3Signature"
-            - $ref: "#/components/schemas/Admin"
+            - $ref: '#/components/schemas/Web3Signature'
+            - $ref: '#/components/schemas/Admin'
         created_at:
           type: integer
           format: int64
@@ -5742,7 +5742,7 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: "#/components/schemas/Passkey"
+            - $ref: '#/components/schemas/Passkey'
       required:
         - object
         - name
@@ -5771,7 +5771,7 @@ components:
           nullable: true
           type: object
           oneOf:
-            - $ref: "#/components/schemas/ClerkError"
+            - $ref: '#/components/schemas/ClerkError'
         expire_at:
           type: integer
         attempts:
@@ -5880,13 +5880,13 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: "#/components/schemas/SAML"
-            - $ref: "#/components/schemas/Ticket"
+            - $ref: '#/components/schemas/SAML'
+            - $ref: '#/components/schemas/Ticket'
         saml_connection:
           type: object
           nullable: true
           oneOf:
-            - $ref: "#/components/schemas/SAMLConnection"
+            - $ref: '#/components/schemas/SAMLConnection'
       required:
         - id
         - object
@@ -5947,19 +5947,19 @@ components:
         email_addresses:
           type: array
           items:
-            $ref: "#/components/schemas/EmailAddress"
+            $ref: '#/components/schemas/EmailAddress'
         phone_numbers:
           type: array
           items:
-            $ref: "#/components/schemas/PhoneNumber"
+            $ref: '#/components/schemas/PhoneNumber'
         web3_wallets:
           type: array
           items:
-            $ref: "#/components/schemas/Web3Wallet"
+            $ref: '#/components/schemas/Web3Wallet'
         passkeys:
           type: array
           items:
-            $ref: "#/components/schemas/schemas-Passkey"
+            $ref: '#/components/schemas/schemas-Passkey'
         password_enabled:
           type: boolean
         two_factor_enabled:
@@ -5987,7 +5987,7 @@ components:
         saml_accounts:
           type: array
           items:
-            $ref: "#/components/schemas/SAMLAccount"
+            $ref: '#/components/schemas/SAMLAccount'
         last_sign_in_at:
           type: integer
           format: int64
@@ -6159,7 +6159,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: "#/components/schemas/Organization"
+            - $ref: '#/components/schemas/Organization'
         public_user_data:
           type: object
           additionalProperties: false
@@ -6199,7 +6199,7 @@ components:
         data:
           type: array
           items:
-            $ref: "#/components/schemas/OrganizationMembership"
+            $ref: '#/components/schemas/OrganizationMembership'
         total_count:
           type: integer
           format: int64
@@ -6268,7 +6268,7 @@ components:
         data:
           type: array
           items:
-            $ref: "#/components/schemas/OrganizationInvitationWithPublicOrganizationData"
+            $ref: '#/components/schemas/OrganizationInvitationWithPublicOrganizationData'
         total_count:
           type: integer
           format: int64
@@ -6434,7 +6434,7 @@ components:
         data:
           type: array
           items:
-            $ref: "#/components/schemas/BlocklistIdentifier"
+            $ref: '#/components/schemas/BlocklistIdentifier'
         total_count:
           type: integer
           format: int64
@@ -6531,7 +6531,7 @@ components:
         cname_targets:
           type: array
           items:
-            $ref: "#/components/schemas/CNameTarget"
+            $ref: '#/components/schemas/CNameTarget'
           nullable: true
       required:
         - object
@@ -6547,7 +6547,7 @@ components:
         data:
           type: array
           items:
-            $ref: "#/components/schemas/Domain"
+            $ref: '#/components/schemas/Domain'
         total_count:
           type: integer
           format: int64
@@ -6694,7 +6694,7 @@ components:
         data:
           type: array
           items:
-            $ref: "#/components/schemas/Organization"
+            $ref: '#/components/schemas/Organization'
         total_count:
           type: integer
           format: int64
@@ -6706,7 +6706,7 @@ components:
     OrganizationWithLogo:
       type: object
       allOf:
-        - $ref: "#/components/schemas/Organization"
+        - $ref: '#/components/schemas/Organization'
         - type: object
           properties:
             logo_url:
@@ -6770,7 +6770,7 @@ components:
         data:
           type: array
           items:
-            $ref: "#/components/schemas/OrganizationInvitation"
+            $ref: '#/components/schemas/OrganizationInvitation'
         total_count:
           type: integer
           format: int64
@@ -6834,7 +6834,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: "#/components/schemas/OrganizationDomainVerification"
+            - $ref: '#/components/schemas/OrganizationDomainVerification'
           description: Verification details for the domain
         total_pending_invitations:
           type: integer
@@ -6859,7 +6859,7 @@ components:
         data:
           type: array
           items:
-            $ref: "#/components/schemas/OrganizationDomain"
+            $ref: '#/components/schemas/OrganizationDomain'
         total_count:
           type: integer
           format: int64
@@ -7120,7 +7120,7 @@ components:
         data:
           type: array
           items:
-            $ref: "#/components/schemas/OAuthApplication"
+            $ref: '#/components/schemas/OAuthApplication'
         total_count:
           type: integer
           format: int64
@@ -7131,7 +7131,7 @@ components:
         - total_count
     OAuthApplicationWithSecret:
       allOf:
-        - $ref: "#/components/schemas/OAuthApplication"
+        - $ref: '#/components/schemas/OAuthApplication'
         - type: object
           properties:
             client_secret:
@@ -7235,7 +7235,7 @@ components:
         data:
           type: array
           items:
-            $ref: "#/components/schemas/schemas-SAMLConnection"
+            $ref: '#/components/schemas/schemas-SAMLConnection'
         total_count:
           type: integer
           format: int64
@@ -7304,7 +7304,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: "#/components/schemas/Invitation"
+            - $ref: '#/components/schemas/Invitation'
       required:
         - object
         - id
@@ -7318,7 +7318,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/JWKS"
+            $ref: '#/components/schemas/JWKS'
     Client.List:
       description: Success
       content:
@@ -7326,67 +7326,67 @@ components:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/Client"
+              $ref: '#/components/schemas/Client'
     ClerkErrors:
       description: Request was not successful
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ClerkErrors"
+            $ref: '#/components/schemas/ClerkErrors'
     AuthenticationInvalid:
       description: Authentication invalid
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ClerkErrors"
+            $ref: '#/components/schemas/ClerkErrors'
     DeprecatedEndpoint:
       description: The endpoint is considered deprecated and is pending removal.
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ClerkErrors"
+            $ref: '#/components/schemas/ClerkErrors'
     UnprocessableEntity:
       description: Invalid request parameters
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ClerkErrors"
+            $ref: '#/components/schemas/ClerkErrors'
     Client:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Client"
+            $ref: '#/components/schemas/Client'
     ResourceNotFound:
       description: Resource not found
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ClerkErrors"
+            $ref: '#/components/schemas/ClerkErrors'
     EmailAddress:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/EmailAddress"
+            $ref: '#/components/schemas/EmailAddress'
     AuthorizationInvalid:
       description: Authorization invalid
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ClerkErrors"
+            $ref: '#/components/schemas/ClerkErrors'
     DeletedObject:
       description: Deleted Object
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/DeletedObject"
+            $ref: '#/components/schemas/DeletedObject'
     PhoneNumber:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/PhoneNumber"
+            $ref: '#/components/schemas/PhoneNumber'
     Session.List:
       description: Success
       content:
@@ -7394,13 +7394,13 @@ components:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/Session"
+              $ref: '#/components/schemas/Session'
     Session:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Session"
+            $ref: '#/components/schemas/Session'
     Template.List:
       description: Success
       content:
@@ -7408,19 +7408,19 @@ components:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/Template"
+              $ref: '#/components/schemas/Template'
     Template:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Template"
+            $ref: '#/components/schemas/Template'
     PaymentRequired:
       description: Payment required
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ClerkErrors"
+            $ref: '#/components/schemas/ClerkErrors'
     User.List:
       description: Success
       content:
@@ -7428,37 +7428,37 @@ components:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/User"
+              $ref: '#/components/schemas/User'
     User:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/User"
+            $ref: '#/components/schemas/User'
     User.Count:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/TotalCount"
+            $ref: '#/components/schemas/TotalCount'
     OrganizationMemberships:
       description: A list of organization memberships
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/OrganizationMemberships"
+            $ref: '#/components/schemas/OrganizationMemberships'
     OrganizationInvitationsWithPublicOrganizationData:
       description: A list of organization invitations with public organization data
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/OrganizationInvitationsWithPublicOrganizationData"
+            $ref: '#/components/schemas/OrganizationInvitationsWithPublicOrganizationData'
     TOTP:
       description: A TOTP (Time-based One-Time Password)
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/TOTP"
+            $ref: '#/components/schemas/TOTP'
     Invitation.List:
       description: List of invitations
       content:
@@ -7466,20 +7466,20 @@ components:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/Invitation"
+              $ref: '#/components/schemas/Invitation'
     Invitation:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Invitation"
+            $ref: '#/components/schemas/Invitation'
     Invitation.Revoked:
       description: Success
       content:
         application/json:
           schema:
             allOf:
-              - $ref: "#/components/schemas/Invitation"
+              - $ref: '#/components/schemas/Invitation'
               - type: object
                 properties:
                   revoked:
@@ -7499,25 +7499,25 @@ components:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/AllowlistIdentifier"
+              $ref: '#/components/schemas/AllowlistIdentifier'
     AllowlistIdentifier:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/AllowlistIdentifier"
+            $ref: '#/components/schemas/AllowlistIdentifier'
     BlocklistIdentifier.List:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/BlocklistIdentifiers"
+            $ref: '#/components/schemas/BlocklistIdentifiers'
     BlocklistIdentifier:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/BlocklistIdentifier"
+            $ref: '#/components/schemas/BlocklistIdentifier'
     InstanceSettings:
       description: InstanceSettings Server API
       content:
@@ -7545,43 +7545,43 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ActorToken"
+            $ref: '#/components/schemas/ActorToken'
     Domains:
       description: A list of domains
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Domains"
+            $ref: '#/components/schemas/Domains'
     Domain:
       description: A domain
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Domain"
+            $ref: '#/components/schemas/Domain'
     Instance:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Instance"
+            $ref: '#/components/schemas/Instance'
     InstanceRestrictions:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/InstanceRestrictions"
+            $ref: '#/components/schemas/InstanceRestrictions'
     OrganizationSettings:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/OrganizationSettings"
+            $ref: '#/components/schemas/OrganizationSettings'
     SvixURL:
       description: Response that contains a temporary Svix URL to access management dashboard
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SvixURL"
+            $ref: '#/components/schemas/SvixURL'
     JWTTemplate.List:
       description: List of JWT templates
       content:
@@ -7589,67 +7589,67 @@ components:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/JWTTemplate"
+              $ref: '#/components/schemas/JWTTemplate'
     JWTTemplate:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/JWTTemplate"
+            $ref: '#/components/schemas/JWTTemplate'
     Organizations:
       description: A list of organizations
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Organizations"
+            $ref: '#/components/schemas/Organizations'
     Organization:
       description: An organization
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Organization"
+            $ref: '#/components/schemas/Organization'
     OrganizationWithLogo:
       description: An organization with a logo URL.
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/OrganizationWithLogo"
+            $ref: '#/components/schemas/OrganizationWithLogo'
     OrganizationInvitations:
       description: A list of organization invitations
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/OrganizationInvitations"
+            $ref: '#/components/schemas/OrganizationInvitations'
     OrganizationInvitation:
       description: An organization invitation
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/OrganizationInvitation"
+            $ref: '#/components/schemas/OrganizationInvitation'
     OrganizationMembership:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/OrganizationMembership"
+            $ref: '#/components/schemas/OrganizationMembership'
     OrganizationDomains:
       description: A list of organization domains
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/OrganizationDomains"
+            $ref: '#/components/schemas/OrganizationDomains'
     OrganizationDomain:
       description: An organization domain
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/OrganizationDomain"
+            $ref: '#/components/schemas/OrganizationDomain'
     ProxyCheck:
       description: Health check information about a domain's proxy configuration validation attempt.
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ProxyCheck"
+            $ref: '#/components/schemas/ProxyCheck'
     RedirectURL.List:
       description: List of Redirect URLs
       content:
@@ -7657,61 +7657,61 @@ components:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/RedirectURL"
+              $ref: '#/components/schemas/RedirectURL'
     RedirectURL:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/RedirectURL"
+            $ref: '#/components/schemas/RedirectURL'
     SignInToken:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SignInToken"
+            $ref: '#/components/schemas/SignInToken'
     SignUp:
       description: Success
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SignUp"
+            $ref: '#/components/schemas/SignUp'
     OAuthApplications:
       description: A list of OAuth applications
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/OAuthApplications"
+            $ref: '#/components/schemas/OAuthApplications'
     OAuthApplicationWithSecret:
       description: An OAuth application with client secret
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/OAuthApplicationWithSecret"
+            $ref: '#/components/schemas/OAuthApplicationWithSecret'
     OAuthApplication:
       description: An OAuth application
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/OAuthApplication"
+            $ref: '#/components/schemas/OAuthApplication'
     SAMLConnections:
       description: A list of SAML Connections
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SAMLConnections"
+            $ref: '#/components/schemas/SAMLConnections'
     SAMLConnection:
       description: A SAML Connection
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/schemas-SAMLConnection"
+            $ref: '#/components/schemas/schemas-SAMLConnection'
     TestingToken:
       description: A Testing Token
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/TestingToken"
+            $ref: '#/components/schemas/TestingToken'
     WaitlistEntries:
       description: List of waitlist entries
       content:
@@ -7722,7 +7722,7 @@ components:
               data:
                 type: array
                 items:
-                  $ref: "#/components/schemas/WaitlistEntry"
+                  $ref: '#/components/schemas/WaitlistEntry'
               total_count:
                 type: integer
                 description: Total number of waitlist entries
@@ -7734,7 +7734,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/WaitlistEntry"
+            $ref: '#/components/schemas/WaitlistEntry'
   parameters:
     LimitParameter:
       name: limit
