@@ -41,6 +41,11 @@ tags:
       address or phone number.
     externalDocs:
       url: https://clerk.com/docs/authentication/allowlist
+  - name: AWS Credentials
+    x-internal: true
+    description: |-
+      AWS Credentials store data from AWS Cognito, that facilitate migrating
+      users from Cognito to your Clerk instance.
   - name: Clients
     description: The Client object tracks sessions, as well as the state of any sign in and sign up attempts, for a given device.
     externalDocs:
@@ -103,6 +108,9 @@ tags:
       Sessions are created when a user successfully goes through the sign in or sign up flows.
     externalDocs:
       url: https://clerk.com/docs/reference/clerkjs/session
+  - name: Machine Tokens
+    x-internal: true
+    description: Machine tokens are used to sign JWT tokens for machine-to-machine communication.
   - name: Sign-in Tokens
     description: |-
       Sign-in tokens are JWTs that can be used to sign in to an application without specifying any credentials.
@@ -166,6 +174,144 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/WellKnown.JWKS'
+  /aws_credentials:
+    x-internal: true
+    get:
+      operationId: GetAWSCredentialList
+      tags:
+        - AWS Credentials
+      summary: List all AWS Credentials
+      description: Returns a list of all AWS Credentials.
+      responses:
+        '200':
+          $ref: '#/components/responses/AWSCredential.List'
+    post:
+      operationId: CreateAWSCredential
+      tags:
+        - AWS Credentials
+      summary: Create an AWS Credential
+      description: Create a new AWS Credential
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                access_key_id:
+                  type: string
+                  description: The Access Key ID from AWS
+                secret_access_key:
+                  type: string
+                  description: The Secret Access Key from AWS.
+                user_pool_ids:
+                  type: array
+                  items:
+                    type: string
+                  description: The User Pool IDs from AWS.
+      responses:
+        '200':
+          $ref: '#/components/responses/AWSCredential'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /aws_credentials/{id}:
+    x-internal: true
+    get:
+      operationId: GetAWSCredential
+      tags:
+        - AWS Credentials
+      summary: Retrieve an AWS Credential
+      description: Returns the details of an AWS Credential.
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the AWS Credential to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/AWSCredential'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    delete:
+      operationId: DeleteAWSCredential
+      tags:
+        - AWS Credentials
+      summary: Delete an AWS Credential
+      description: Delete the AWS Credential with the given ID
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the AWS Credential to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    patch:
+      operationId: UpdateAWSCredential
+      tags:
+        - AWS Credentials
+      summary: Update an AWS Credential
+      description: Updates an AWS credential.
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the AWS Credential to update
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                access_key_id:
+                  type: string
+                  nullable: true
+                user_pool_ids:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                secret_access_key:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          $ref: '#/components/responses/AWSCredential'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /clients:
     get:
       deprecated: true
@@ -2300,29 +2446,6 @@ paths:
         '500':
           $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/totp:
-    post:
-      operationId: CreateUserTOTP
-      summary: Create a TOTP for a user
-      description: |
-        Creates a TOTP (Time-based One-Time Password) for a given user, returning both the TOTP secret and the URI.
-      tags:
-        - Users
-      parameters:
-        - name: user_id
-          in: path
-          description: The ID of the user for whom the TOTP is being created.
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          $ref: '#/components/responses/TOTP'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ResourceNotFound'
-        '500':
-          $ref: '#/components/responses/ClerkErrors'
     delete:
       operationId: DeleteTOTP
       summary: Delete all the user's TOTPs
@@ -3432,6 +3555,59 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /machine_tokens:
+    x-internal: true
+    post:
+      operationId: CreateMachineToken
+      summary: Create a machine token
+      description: Create a new machine token
+      tags:
+        - Machine Tokens
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                machine_id:
+                  type: string
+                  maxLength: 96
+                  description: ID of the machine creating the token. Must be be prefixed with `mch_`. Must only contain lowercase letters, numbers, and underscores.
+                claims:
+                  type: object
+                  description: Claims to include in the JWT
+                expires_in_seconds:
+                  type: integer
+                  minimum: 30
+                  maximum: 315360000
+                  description: Token lifetime in seconds. Defaults to 30 seconds if not specified.
+                  nullable: true
+                allowed_clock_skew:
+                  type: integer
+                  minimum: 0
+                  maximum: 300
+                  description: Allowed clock skew in seconds. Defaults to 5 seconds if not specified.
+                  nullable: true
+              required:
+                - machine_id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum:
+                      - token
+                  jwt:
+                    type: string
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /organizations:
     get:
       operationId: ListOrganizations
@@ -4653,10 +4829,7 @@ paths:
                   example: profile email public_metadata
                 public:
                   type: boolean
-                  description: |-
-                    If true, this client is public and cannot securely store a client secret.
-                    Only the authorization code flow with proof key for code exchange (PKCE) may be used.
-                    Public clients cannot be updated to be confidential clients, and vice versa.
+                  description: If true, this client is public and you can use the Proof Key of Code Exchange (PKCE) flow.
               required:
                 - name
       responses:
@@ -4721,6 +4894,9 @@ paths:
                   description: Define the allowed scopes for the new OAuth applications that dictate the user payload of the OAuth user info endpoint. Available scopes are `profile`, `email`, `public_metadata`, `private_metadata`. Provide the requested scopes as a string, separated by spaces.
                   default: profile email
                   example: profile email public_metadata private_metadata
+                public:
+                  type: boolean
+                  description: If true, this client is public and you can use the Proof Key of Code Exchange (PKCE) flow.
       responses:
         '200':
           $ref: '#/components/responses/OAuthApplication'
@@ -5185,6 +5361,84 @@ components:
                 type: string
               crv:
                 type: string
+    AWSCredential:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - aws_credential
+        access_key_id:
+          type: string
+        user_pool_ids:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+      required:
+        - id
+        - object
+        - access_key_id
+        - user_pool_ids
+        - created_at
+        - updated_at
+    ClerkError:
+      type: object
+      properties:
+        message:
+          type: string
+        long_message:
+          type: string
+        code:
+          type: string
+        meta:
+          type: object
+        clerk_trace_id:
+          type: string
+      required:
+        - message
+        - long_message
+        - code
+    ClerkErrors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClerkError'
+        meta:
+          type: object
+      required:
+        - errors
+    DeletedObject:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+        id:
+          type: string
+        slug:
+          type: string
+        deleted:
+          type: boolean
+      required:
+        - object
+        - deleted
     Session:
       type: object
       additionalProperties: false
@@ -5322,34 +5576,6 @@ components:
         - last_active_session_id
         - updated_at
         - created_at
-    ClerkError:
-      type: object
-      properties:
-        message:
-          type: string
-        long_message:
-          type: string
-        code:
-          type: string
-        meta:
-          type: object
-        clerk_trace_id:
-          type: string
-      required:
-        - message
-        - long_message
-        - code
-    ClerkErrors:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/ClerkError'
-        meta:
-          type: object
-      required:
-        - errors
     OTP:
       type: object
       additionalProperties: false
@@ -5484,21 +5710,6 @@ components:
         - reserved
         - created_at
         - updated_at
-    DeletedObject:
-      type: object
-      additionalProperties: false
-      properties:
-        object:
-          type: string
-        id:
-          type: string
-        slug:
-          type: string
-        deleted:
-          type: boolean
-      required:
-        - object
-        - deleted
     PhoneNumber:
       type: object
       additionalProperties: false
@@ -5898,6 +6109,145 @@ components:
         - active
         - email_address
         - verification
+    Oauth:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+            - transferable
+        strategy:
+          type: string
+          pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z]+$
+        external_verification_redirect_url:
+          type: string
+        error:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/ClerkError'
+        expire_at:
+          type: integer
+        attempts:
+          type: integer
+          nullable: true
+      required:
+        - status
+        - strategy
+        - expire_at
+    EnterpriseConnection:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        protocol:
+          type: string
+        provider:
+          type: string
+        name:
+          type: string
+        logo_public_url:
+          type: string
+          nullable: true
+        domain:
+          type: string
+        active:
+          type: boolean
+        sync_user_attributes:
+          type: boolean
+        allow_subdomains:
+          type: boolean
+        allow_idp_initiated:
+          type: boolean
+        disable_additional_identifications:
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - id
+        - protocol
+        - name
+        - logo_public_url
+        - domain
+        - active
+        - provider
+        - sync_user_attributes
+        - allow_subdomains
+        - disable_additional_identifications
+        - created_at
+        - disable_additional_identifications
+        - updated_at
+    EnterpriseAccount:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - enterprise_account
+        protocol:
+          type: string
+          description: |
+            The authentication protocol used to sign in.
+          enum:
+            - oauth
+            - saml
+        provider:
+          type: string
+        active:
+          type: boolean
+        email_address:
+          type: string
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        provider_user_id:
+          description: The unique ID of the user in the external provider's system
+          type: string
+          nullable: true
+        public_metadata:
+          type: object
+          additionalProperties: true
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Ticket'
+            - $ref: '#/components/schemas/SAML'
+            - $ref: '#/components/schemas/Oauth'
+        enterprise_connection:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/EnterpriseConnection'
+      required:
+        - id
+        - object
+        - provider
+        - active
+        - email_address
+        - verification
     User:
       type: object
       additionalProperties: false
@@ -5992,6 +6342,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SAMLAccount'
+        enterprise_accounts:
+          type: array
+          x-internal: true
+          items:
+            $ref: '#/components/schemas/EnterpriseAccount'
         last_sign_in_at:
           type: integer
           format: int64
@@ -6281,33 +6636,6 @@ components:
       required:
         - data
         - total_count
-    TOTP:
-      type: object
-      additionalProperties: true
-      properties:
-        object:
-          type: string
-        id:
-          type: string
-        secret:
-          type: string
-          nullable: true
-        uri:
-          type: string
-          nullable: true
-        verified:
-          type: boolean
-        backup_codes:
-          type: array
-          items:
-            type: string
-          nullable: true
-      required:
-        - object
-        - id
-        - secret
-        - uri
-        - verified
     Invitation:
       type: object
       additionalProperties: false
@@ -7323,14 +7651,20 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/JWKS'
-    Client.List:
+    AWSCredential.List:
       description: Success
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/Client'
+              $ref: '#/components/schemas/AWSCredential'
+    AWSCredential:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AWSCredential'
     ClerkErrors:
       description: Request was not successful
       content:
@@ -7343,8 +7677,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ClerkErrors'
-    DeprecatedEndpoint:
-      description: The endpoint is considered deprecated and is pending removal.
+    AuthorizationInvalid:
+      description: Authorization invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    ResourceNotFound:
+      description: Resource not found
       content:
         application/json:
           schema:
@@ -7355,36 +7695,38 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ClerkErrors'
-    Client:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Client'
-    ResourceNotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClerkErrors'
-    EmailAddress:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/EmailAddress'
-    AuthorizationInvalid:
-      description: Authorization invalid
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClerkErrors'
     DeletedObject:
       description: Deleted Object
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/DeletedObject'
+    Client.List:
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Client'
+    DeprecatedEndpoint:
+      description: The endpoint is considered deprecated and is pending removal.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    Client:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client'
+    EmailAddress:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EmailAddress'
     PhoneNumber:
       description: Success
       content:
@@ -7457,12 +7799,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/OrganizationInvitationsWithPublicOrganizationData'
-    TOTP:
-      description: A TOTP (Time-based One-Time Password)
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/TOTP'
     Invitation.List:
       description: List of invitations
       content:
