@@ -2300,29 +2300,6 @@ paths:
         '500':
           $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/totp:
-    post:
-      operationId: CreateUserTOTP
-      summary: Create a TOTP for a user
-      description: |
-        Creates a TOTP (Time-based One-Time Password) for a given user, returning both the TOTP secret and the URI.
-      tags:
-        - Users
-      parameters:
-        - name: user_id
-          in: path
-          description: The ID of the user for whom the TOTP is being created.
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          $ref: '#/components/responses/TOTP'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ResourceNotFound'
-        '500':
-          $ref: '#/components/responses/ClerkErrors'
     delete:
       operationId: DeleteTOTP
       summary: Delete all the user's TOTPs
@@ -4649,10 +4626,7 @@ paths:
                   example: profile email public_metadata
                 public:
                   type: boolean
-                  description: |-
-                    If true, this client is public and cannot securely store a client secret.
-                    Only the authorization code flow with proof key for code exchange (PKCE) may be used.
-                    Public clients cannot be updated to be confidential clients, and vice versa.
+                  description: If true, this client is public and you can use the Proof Key of Code Exchange (PKCE) flow.
               required:
                 - name
       responses:
@@ -4717,6 +4691,9 @@ paths:
                   description: Define the allowed scopes for the new OAuth applications that dictate the user payload of the OAuth user info endpoint. Available scopes are `profile`, `email`, `public_metadata`, `private_metadata`. Provide the requested scopes as a string, separated by spaces.
                   default: profile email
                   example: profile email public_metadata private_metadata
+                public:
+                  type: boolean
+                  description: If true, this client is public and you can use the Proof Key of Code Exchange (PKCE) flow.
       responses:
         '200':
           $ref: '#/components/responses/OAuthApplication'
@@ -6277,33 +6254,6 @@ components:
       required:
         - data
         - total_count
-    TOTP:
-      type: object
-      additionalProperties: true
-      properties:
-        object:
-          type: string
-        id:
-          type: string
-        secret:
-          type: string
-          nullable: true
-        uri:
-          type: string
-          nullable: true
-        verified:
-          type: boolean
-        backup_codes:
-          type: array
-          items:
-            type: string
-          nullable: true
-      required:
-        - object
-        - id
-        - secret
-        - uri
-        - verified
     Invitation:
       type: object
       additionalProperties: false
@@ -7453,12 +7403,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/OrganizationInvitationsWithPublicOrganizationData'
-    TOTP:
-      description: A TOTP (Time-based One-Time Password)
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/TOTP'
     Invitation.List:
       description: List of invitations
       content:
