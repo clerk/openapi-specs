@@ -4878,6 +4878,19 @@ components:
           type: boolean
         deprecated:
           type: boolean
+        name:
+          type: string
+          x-internal: true
+          description: |
+            A human readable name for the social provider.
+          example: Google
+        logo_url:
+          type: string
+          nullable: true
+          x-internal: true
+          description: |
+            A URL pointing to the logo of the social provider.
+          example: https://img.clerk.com/static/google.png
       required:
         - enabled
         - required
@@ -5171,6 +5184,9 @@ components:
           $ref: '#/components/schemas/UserSettings.Socials'
         saml:
           $ref: '#/components/schemas/UserSettings.EnterpriseSSO'
+        enterprise_sso:
+          $ref: '#/components/schemas/UserSettings.EnterpriseSSO'
+          x-internal: true
         sign_in:
           $ref: '#/components/schemas/UserSettings.SignIn'
         sign_up:
@@ -6425,6 +6441,114 @@ components:
         - active
         - email_address
         - verification
+    Stubs.EnterpriseConnection.EnterpriseAccount:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        protocol:
+          type: string
+        provider:
+          type: string
+        name:
+          type: string
+        logo_public_url:
+          type: string
+          nullable: true
+        domain:
+          type: string
+        active:
+          type: boolean
+        sync_user_attributes:
+          type: boolean
+        allow_subdomains:
+          type: boolean
+        allow_idp_initiated:
+          type: boolean
+        disable_additional_identifications:
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - id
+        - protocol
+        - name
+        - logo_public_url
+        - domain
+        - active
+        - provider
+        - sync_user_attributes
+        - allow_subdomains
+        - disable_additional_identifications
+        - created_at
+        - disable_additional_identifications
+        - updated_at
+    Client.EnterpriseAccount:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - enterprise_account
+        protocol:
+          type: string
+          description: |
+            The authentication protocol used to sign in.
+          enum:
+            - oauth
+            - saml
+        provider:
+          type: string
+        active:
+          type: boolean
+        email_address:
+          type: string
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        provider_user_id:
+          description: The unique ID of the user in the external provider's system
+          type: string
+          nullable: true
+        public_metadata:
+          type: object
+          additionalProperties: true
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Stubs.Verification.Ticket'
+            - $ref: '#/components/schemas/Stubs.Verification.SAML'
+            - $ref: '#/components/schemas/Stubs.Verification.Oauth'
+        enterprise_connection:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Stubs.EnterpriseConnection.EnterpriseAccount'
+      required:
+        - id
+        - object
+        - provider
+        - active
+        - email_address
+        - verification
     Client.User:
       type: object
       properties:
@@ -6510,6 +6634,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Client.SAMLAccount'
+        enterprise_accounts:
+          type: array
+          x-internal: true
+          items:
+            $ref: '#/components/schemas/Client.EnterpriseAccount'
         last_sign_in_at:
           type: integer
           format: int64
