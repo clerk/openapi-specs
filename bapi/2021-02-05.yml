@@ -1203,6 +1203,12 @@ paths:
           schema:
             type: string
             minLength: 3
+        - name: banned
+          in: query
+          required: false
+          description: Returns users which are either banned (`banned=true`) or not banned (`banned=false`).
+          schema:
+            type: boolean
         - name: last_active_at_before
           in: query
           description: |-
@@ -1541,6 +1547,12 @@ paths:
           schema:
             type: string
             minLength: 3
+        - name: banned
+          in: query
+          required: false
+          description: Counts users which are either banned (`banned=true`) or not banned (`banned=false`).
+          schema:
+            type: boolean
       responses:
         '200':
           $ref: '#/components/responses/User.Count'
@@ -4620,17 +4632,27 @@ paths:
                 name:
                   type: string
                   description: The name of the new OAuth application
+                redirect_uris:
+                  type: array
+                  items:
+                    type: string
+                  description: An array of redirect URIs of the new OAuth application
+                  nullable: true
                 callback_url:
                   type: string
                   description: The callback URL of the new OAuth application
+                  nullable: true
+                  deprecated: true
                 scopes:
                   type: string
                   description: Define the allowed scopes for the new OAuth applications that dictate the user payload of the OAuth user info endpoint. Available scopes are `profile`, `email`, `public_metadata`, `private_metadata`. Provide the requested scopes as a string, separated by spaces.
                   default: profile email
                   example: profile email public_metadata
+                  nullable: true
                 public:
                   type: boolean
                   description: If true, this client is public and you can use the Proof Key of Code Exchange (PKCE) flow.
+                  nullable: true
               required:
                 - name
       responses:
@@ -4687,20 +4709,32 @@ paths:
                 name:
                   type: string
                   description: The new name of the OAuth application
+                  nullable: true
+                redirect_uris:
+                  type: array
+                  items:
+                    type: string
+                  description: An array of redirect URIs of the new OAuth application
+                  nullable: true
                 callback_url:
                   type: string
                   description: The new callback URL of the OAuth application
+                  nullable: true
+                  deprecated: true
                 scopes:
                   type: string
                   description: Define the allowed scopes for the new OAuth applications that dictate the user payload of the OAuth user info endpoint. Available scopes are `profile`, `email`, `public_metadata`, `private_metadata`. Provide the requested scopes as a string, separated by spaces.
                   default: profile email
                   example: profile email public_metadata private_metadata
+                  nullable: true
                 public:
                   type: boolean
                   description: If true, this client is public and you can use the Proof Key of Code Exchange (PKCE) flow.
       responses:
         '200':
           $ref: '#/components/responses/OAuthApplication'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
@@ -7029,8 +7063,13 @@ components:
           type: boolean
         scopes:
           type: string
+        redirect_uris:
+          type: array
+          items:
+            type: string
         callback_url:
           type: string
+          deprecated: true
         authorize_url:
           type: string
         token_fetch_url:
@@ -7059,6 +7098,7 @@ components:
         - public
         - client_id
         - scopes
+        - redirect_uris
         - callback_url
         - authorize_url
         - token_fetch_url
