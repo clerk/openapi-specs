@@ -263,7 +263,7 @@ paths:
           $ref: '#/components/responses/OAuth.TokenInfo'
         '401':
           description: Unauthorized error, for example the provided client is invalid.
-        '403':
+        '422':
           description: You are currently using the legacy OAuth 2.0 provider, please migrate to the new one via Clerk Dashboard.
   /v1/account_portal:
     get:
@@ -5243,6 +5243,22 @@ components:
       required:
         - enabled
         - max_allowed_memberships
+    FraudSettings.NativeSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        require_device_attestation:
+          type: boolean
+      required:
+        - require_device_attestation
+    Client.FraudSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        native:
+          $ref: '#/components/schemas/FraudSettings.NativeSettings'
+      required:
+        - native
     Client.Environment:
       type: object
       additionalProperties: false
@@ -5255,6 +5271,8 @@ components:
           $ref: '#/components/schemas/Client.UserSettings'
         organization_settings:
           $ref: '#/components/schemas/Client.OrganizationSettings'
+        fraud_settings:
+          $ref: '#/components/schemas/Client.FraudSettings'
         maintenance_mode:
           type: boolean
     Stubs.SignInFactor:
