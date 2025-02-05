@@ -4522,6 +4522,28 @@ components:
           type: string
         logo_link_url:
           type: string
+        customization:
+          type: object
+          properties:
+            appearance:
+              type: string
+              enum:
+                - auto
+                - dark
+                - light
+              nullable: true
+            background_color_dark:
+              type: string
+              nullable: true
+            background_color_light:
+              type: string
+              nullable: true
+            primary_color_dark:
+              type: string
+              nullable: true
+            primary_color_light:
+              type: string
+              nullable: true
       required:
         - object
         - enabled
@@ -4531,6 +4553,7 @@ components:
         - after_create_organization_url
         - after_leave_organization_url
         - logo_link_url
+        - customization
     Client.AuthConfig:
       type: object
       additionalProperties: false
@@ -5255,6 +5278,11 @@ components:
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - fraud_settings
         native:
           $ref: '#/components/schemas/FraudSettings.NativeSettings'
       required:

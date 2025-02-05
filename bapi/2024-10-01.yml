@@ -1169,7 +1169,6 @@ paths:
             The query value doesn't need to match the exact value you are looking for, it is capable of partial matches as well.
           schema:
             type: string
-            minLength: 3
           required: false
         - name: email_address_query
           in: query
@@ -1178,7 +1177,6 @@ paths:
             For example, `email_address_query=ello` will match a user with the email `HELLO@example.com`.
           schema:
             type: string
-            minLength: 3
           required: false
         - name: phone_number_query
           in: query
@@ -1187,7 +1185,6 @@ paths:
             For example, `phone_number_query=555` will match a user with the phone number `+1555xxxxxxx`.
           schema:
             type: string
-            minLength: 3
           required: false
         - name: username_query
           in: query
@@ -1196,13 +1193,11 @@ paths:
             For example, `username_query=CoolUser` will match a user with the username `SomeCoolUser`.
           schema:
             type: string
-            minLength: 3
         - name: name_query
           in: query
           description: Returns users with names that match the given query, via case-insensitive partial match.
           schema:
             type: string
-            minLength: 3
         - name: banned
           in: query
           required: false
@@ -1516,7 +1511,6 @@ paths:
             The query value doesn't need to match the exact value you are looking for, it is capable of partial matches as well.
           schema:
             type: string
-            minLength: 3
           required: false
         - name: email_address_query
           in: query
@@ -1526,7 +1520,6 @@ paths:
             and will be included in the resulting count.
           schema:
             type: string
-            minLength: 3
           required: false
         - name: phone_number_query
           in: query
@@ -1536,7 +1529,6 @@ paths:
             and will be included in the resulting count.
           schema:
             type: string
-            minLength: 3
           required: false
         - name: username_query
           in: query
@@ -1546,7 +1538,6 @@ paths:
             and will be included in the resulting count.
           schema:
             type: string
-            minLength: 3
         - name: banned
           in: query
           required: false
@@ -3449,6 +3440,22 @@ paths:
             Uses exact match for organization ID and partial match for name and slug.
           schema:
             type: string
+        - in: query
+          name: organization_id
+          description: |-
+            Returns organizations with the organization ids specified.
+            Any organization ids not found are ignored.
+            For each organization id, the `+` and `-` can be
+            prepended to the id, which denote whether the
+            respective organization should be included or
+            excluded from the result set.
+            Accepts up to 100 organization ids.
+            Example: ?organization_id=+org_1&organization_id=-org_2
+          schema:
+            type: array
+            items:
+              type: string
+          required: false
         - in: query
           name: order_by
           description: |-
