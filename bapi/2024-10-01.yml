@@ -570,7 +570,8 @@ paths:
       description: |-
         Create a new active session for the provided user ID.
 
-        This operation is only available for Clerk Development instances.
+        **This operation is intended only for use in testing, and is not available for production instances.** If you are looking to generate a user session from the backend,
+        we recommend using the [Sign-in Tokens](https://clerk.com/docs/reference/backend-api/tag/Sign-in-Tokens#operation/CreateSignInToken) resource instead.
       requestBody:
         content:
           application/json:
@@ -1169,7 +1170,6 @@ paths:
             The query value doesn't need to match the exact value you are looking for, it is capable of partial matches as well.
           schema:
             type: string
-            minLength: 3
           required: false
         - name: email_address_query
           in: query
@@ -1178,7 +1178,6 @@ paths:
             For example, `email_address_query=ello` will match a user with the email `HELLO@example.com`.
           schema:
             type: string
-            minLength: 3
           required: false
         - name: phone_number_query
           in: query
@@ -1187,7 +1186,6 @@ paths:
             For example, `phone_number_query=555` will match a user with the phone number `+1555xxxxxxx`.
           schema:
             type: string
-            minLength: 3
           required: false
         - name: username_query
           in: query
@@ -1196,13 +1194,11 @@ paths:
             For example, `username_query=CoolUser` will match a user with the username `SomeCoolUser`.
           schema:
             type: string
-            minLength: 3
         - name: name_query
           in: query
           description: Returns users with names that match the given query, via case-insensitive partial match.
           schema:
             type: string
-            minLength: 3
         - name: banned
           in: query
           required: false
@@ -1516,7 +1512,6 @@ paths:
             The query value doesn't need to match the exact value you are looking for, it is capable of partial matches as well.
           schema:
             type: string
-            minLength: 3
           required: false
         - name: email_address_query
           in: query
@@ -1526,7 +1521,6 @@ paths:
             and will be included in the resulting count.
           schema:
             type: string
-            minLength: 3
           required: false
         - name: phone_number_query
           in: query
@@ -1536,7 +1530,6 @@ paths:
             and will be included in the resulting count.
           schema:
             type: string
-            minLength: 3
           required: false
         - name: username_query
           in: query
@@ -1546,7 +1539,6 @@ paths:
             and will be included in the resulting count.
           schema:
             type: string
-            minLength: 3
         - name: banned
           in: query
           required: false
@@ -3450,6 +3442,22 @@ paths:
           schema:
             type: string
         - in: query
+          name: organization_id
+          description: |-
+            Returns organizations with the organization ids specified.
+            Any organization ids not found are ignored.
+            For each organization id, the `+` and `-` can be
+            prepended to the id, which denote whether the
+            respective organization should be included or
+            excluded from the result set.
+            Accepts up to 100 organization ids.
+            Example: ?organization_id=+org_1&organization_id=-org_2
+          schema:
+            type: array
+            items:
+              type: string
+          required: false
+        - in: query
           name: order_by
           description: |-
             Allows to return organizations in a particular order.
@@ -5096,7 +5104,7 @@ paths:
         - $ref: '#/components/parameters/OffsetParameter'
         - in: query
           name: query
-          description: Filter waitlist entries by email address
+          description: Filter waitlist entries by `email_address` or `id`
           required: false
           schema:
             type: string
@@ -5147,7 +5155,7 @@ paths:
                 notify:
                   type: boolean
                   description: |-
-                    Optional flag which denotes whether an email invitation should be sent to the given email address.
+                    Optional flag which denotes whether a confirmation email should be sent to the given email address.
                     Defaults to `true`.
               required:
                 - email_address
@@ -5376,12 +5384,17 @@ components:
             - reset_password_email_code
         attempts:
           type: integer
+          nullable: true
         expire_at:
           type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
       required:
         - status
-        - attempts
         - strategy
+        - attempts
         - expire_at
     Admin:
       type: object
@@ -5401,9 +5414,14 @@ components:
         expire_at:
           type: integer
           nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
       required:
         - status
         - strategy
+        - attempts
+        - expire_at
     FromOAuth:
       type: object
       additionalProperties: false
@@ -5427,9 +5445,13 @@ components:
         attempts:
           type: integer
           nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
       required:
         - status
         - strategy
+        - attempts
         - expire_at
     IdentificationLink:
       type: object
@@ -5666,9 +5688,14 @@ components:
         expire_at:
           type: integer
           nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
       required:
         - status
         - strategy
+        - attempts
+        - expire_at
     Web3Wallet:
       type: object
       additionalProperties: false
@@ -5721,15 +5748,23 @@ components:
           type: string
           enum:
             - nonce
+        message:
+          type: string
+          nullable: true
         attempts:
           type: integer
           nullable: true
         expire_at:
           type: integer
           nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
       required:
         - status
         - strategy
+        - attempts
+        - expire_at
     schemas-Passkey:
       type: object
       additionalProperties: false
@@ -5788,10 +5823,14 @@ components:
         attempts:
           type: integer
           nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
       required:
         - status
         - strategy
         - external_verification_redirect_url
+        - attempts
         - expire_at
     Ticket:
       type: object
@@ -5813,9 +5852,14 @@ components:
         expire_at:
           type: integer
           nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
       required:
         - status
         - strategy
+        - attempts
+        - expire_at
     SAMLConnection:
       type: object
       additionalProperties: false

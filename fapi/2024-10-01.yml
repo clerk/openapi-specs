@@ -2678,6 +2678,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
   /v1/me/external_accounts/{external_account_id}:
     delete:
       summary: Delete External Account
@@ -4522,6 +4524,28 @@ components:
           type: string
         logo_link_url:
           type: string
+        customization:
+          type: object
+          properties:
+            appearance:
+              type: string
+              enum:
+                - auto
+                - dark
+                - light
+              nullable: true
+            background_color_dark:
+              type: string
+              nullable: true
+            background_color_light:
+              type: string
+              nullable: true
+            primary_color_dark:
+              type: string
+              nullable: true
+            primary_color_light:
+              type: string
+              nullable: true
       required:
         - object
         - enabled
@@ -4531,6 +4555,7 @@ components:
         - after_create_organization_url
         - after_leave_organization_url
         - logo_link_url
+        - customization
     Client.AuthConfig:
       type: object
       additionalProperties: false
@@ -5247,14 +5272,23 @@ components:
       type: object
       additionalProperties: false
       properties:
-        require_device_attestation:
-          type: boolean
+        device_attestation_mode:
+          type: string
+          enum:
+            - disabled
+            - onboarding
+            - enforced
       required:
-        - require_device_attestation
+        - device_attestation_mode
     Client.FraudSettings:
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - fraud_settings
         native:
           $ref: '#/components/schemas/FraudSettings.NativeSettings'
       required:
@@ -6262,9 +6296,13 @@ components:
         attempts:
           type: integer
           nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
       required:
         - status
         - strategy
+        - attempts
         - expire_at
     GoogleOneTap:
       type: object
@@ -6285,9 +6323,19 @@ components:
         attempts:
           type: integer
           nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+        error:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/ClerkError'
       required:
         - status
         - strategy
+        - attempts
+        - expire_at
     ExternalAccountWithVerification:
       type: object
       additionalProperties: true
