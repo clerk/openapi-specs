@@ -6275,6 +6275,7 @@ components:
       properties:
         status:
           type: string
+          x-speakeasy-unknown-values: allow
           enum:
             - unverified
             - verified
@@ -6283,6 +6284,7 @@ components:
             - transferable
         strategy:
           type: string
+          x-speakeasy-unknown-values: allow
           pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z]+$
         external_verification_redirect_url:
           type: string
