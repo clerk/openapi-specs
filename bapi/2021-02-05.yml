@@ -128,12 +128,14 @@ externalDocs:
 paths:
   /public/interstitial:
     get:
+      operationId: GetPublicInterstitial
+      x-speakeasy-group: miscellaneous
+      x-speakeasy-name-override: getPublicInterstitial
       security: []
       summary: Returns the markup for the interstitial page
       description: |-
         The Clerk interstitial endpoint serves an html page that loads clerk.js in order to check the user's authentication state.
         It is used by Clerk SDKs when the user's authentication state cannot be immediately determined.
-      operationId: GetPublicInterstitial
       tags:
         - Miscellaneous
       parameters:
@@ -159,6 +161,8 @@ paths:
   /jwks:
     get:
       operationId: GetJWKS
+      x-speakeasy-group: jwks
+      x-speakeasy-name-override: getJWKS
       summary: Retrieve the JSON Web Key Set of the instance
       description: Retrieve the JSON Web Key Set of the instance
       tags:
@@ -170,6 +174,8 @@ paths:
     get:
       deprecated: true
       operationId: GetClientList
+      x-speakeasy-group: clients
+      x-speakeasy-name-override: list
       tags:
         - Clients
       summary: List all clients
@@ -194,6 +200,8 @@ paths:
   /clients/verify:
     post:
       operationId: VerifyClient
+      x-speakeasy-group: clients
+      x-speakeasy-name-override: verify
       tags:
         - Clients
       summary: Verify a client
@@ -221,6 +229,8 @@ paths:
   /clients/{client_id}:
     get:
       operationId: GetClient
+      x-speakeasy-group: clients
+      x-speakeasy-name-override: get
       tags:
         - Clients
       summary: Get a client
@@ -244,6 +254,8 @@ paths:
   /email_addresses:
     post:
       operationId: CreateEmailAddress
+      x-speakeasy-group: emailAddresses
+      x-speakeasy-name-override: create
       tags:
         - Email Addresses
       summary: Create an email address
@@ -284,8 +296,11 @@ paths:
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /email_addresses/{email_address_id}:
+    x-speakeasy-usage-example: true
     get:
       operationId: GetEmailAddress
+      x-speakeasy-group: emailAddresses
+      x-speakeasy-name-override: get
       tags:
         - Email Addresses
       summary: Retrieve an email address
@@ -310,6 +325,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     delete:
       operationId: DeleteEmailAddress
+      x-speakeasy-group: emailAddresses
+      x-speakeasy-name-override: delete
       tags:
         - Email Addresses
       summary: Delete an email address
@@ -334,6 +351,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateEmailAddress
+      x-speakeasy-group: emailAddresses
+      x-speakeasy-name-override: update
       tags:
         - Email Addresses
       summary: Update an email address
@@ -373,6 +392,8 @@ paths:
   /phone_numbers:
     post:
       operationId: CreatePhoneNumber
+      x-speakeasy-group: phoneNumbers
+      x-speakeasy-name-override: create
       tags:
         - Phone Numbers
       summary: Create a phone number
@@ -422,6 +443,8 @@ paths:
   /phone_numbers/{phone_number_id}:
     get:
       operationId: GetPhoneNumber
+      x-speakeasy-group: phoneNumbers
+      x-speakeasy-name-override: get
       tags:
         - Phone Numbers
       summary: Retrieve a phone number
@@ -446,6 +469,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     delete:
       operationId: DeletePhoneNumber
+      x-speakeasy-group: phoneNumbers
+      x-speakeasy-name-override: delete
       tags:
         - Phone Numbers
       summary: Delete a phone number
@@ -470,6 +495,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdatePhoneNumber
+      x-speakeasy-group: phoneNumbers
+      x-speakeasy-name-override: update
       tags:
         - Phone Numbers
       summary: Update a phone number
@@ -516,6 +543,8 @@ paths:
   /sessions:
     get:
       operationId: GetSessionList
+      x-speakeasy-group: sessions
+      x-speakeasy-name-override: list
       tags:
         - Sessions
       summary: List all sessions
@@ -564,6 +593,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     post:
       operationId: createSession
+      x-speakeasy-group: sessions
+      x-speakeasy-name-override: create
       tags:
         - Sessions
       summary: Create a new active session
@@ -595,6 +626,8 @@ paths:
   /sessions/{session_id}:
     get:
       operationId: GetSession
+      x-speakeasy-group: sessions
+      x-speakeasy-name-override: get
       tags:
         - Sessions
       summary: Retrieve a session
@@ -618,6 +651,8 @@ paths:
   /sessions/{session_id}/revoke:
     post:
       operationId: RevokeSession
+      x-speakeasy-group: sessions
+      x-speakeasy-name-override: revoke
       tags:
         - Sessions
       summary: Revoke a session
@@ -644,6 +679,8 @@ paths:
     post:
       deprecated: true
       operationId: VerifySession
+      x-speakeasy-group: sessions
+      x-speakeasy-name-override: verify
       tags:
         - Sessions
       summary: Verify a session
@@ -686,6 +723,8 @@ paths:
   /sessions/{session_id}/tokens:
     post:
       operationId: CreateSessionToken
+      x-speakeasy-group: sessions
+      x-speakeasy-name-override: createToken
       tags:
         - Sessions
       summary: Create a session token
@@ -730,6 +769,8 @@ paths:
   /sessions/{session_id}/tokens/{template_name}:
     post:
       operationId: CreateSessionTokenFromTemplate
+      x-speakeasy-group: sessions
+      x-speakeasy-name-override: createTokenFromTemplate
       tags:
         - Sessions
       summary: Create a session token from a jwt template
@@ -781,6 +822,8 @@ paths:
     get:
       deprecated: true
       operationId: GetTemplateList
+      x-speakeasy-group: emailSMSTemplates
+      x-speakeasy-name-override: list
       summary: List all templates
       description: |-
         Returns a list of all templates.
@@ -810,6 +853,8 @@ paths:
     get:
       deprecated: true
       operationId: GetTemplate
+      x-speakeasy-group: emailSMSTemplates
+      x-speakeasy-name-override: get
       summary: Retrieve a template
       description: Returns the details of a template
       tags:
@@ -842,6 +887,8 @@ paths:
     put:
       deprecated: true
       operationId: UpsertTemplate
+      x-speakeasy-group: emailAndSmsTemplates
+      x-speakeasy-name-override: upsert
       summary: Update a template for a given type and slug
       description: Updates the existing template of the given type and slug
       tags:
@@ -920,6 +967,8 @@ paths:
     post:
       deprecated: true
       operationId: RevertTemplate
+      x-speakeasy-group: emailSMSTemplates
+      x-speakeasy-name-override: revert
       summary: Revert a template
       description: Reverts an updated template to its default state
       tags:
@@ -955,6 +1004,8 @@ paths:
     post:
       deprecated: true
       operationId: PreviewTemplate
+      x-speakeasy-group: templates
+      x-speakeasy-name-override: preview
       summary: Preview changes to a template
       description: Returns a preview of a template for a given template_type, slug and body
       tags:
@@ -1020,6 +1071,8 @@ paths:
     post:
       deprecated: true
       operationId: ToggleTemplateDelivery
+      x-speakeasy-group: emailSMSTemplates
+      x-speakeasy-name-override: toggleTemplateDelivery
       summary: Toggle the delivery by Clerk for a template of a given type and slug
       description: |-
         Toggles the delivery by Clerk for a template of a given type and slug.
@@ -1066,6 +1119,8 @@ paths:
   /users:
     get:
       operationId: GetUserList
+      x-speakeasy-group: users
+      x-speakeasy-name-override: list
       summary: List all users
       description: |-
         Returns a list of all users.
@@ -1273,6 +1328,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     post:
       operationId: CreateUser
+      x-speakeasy-group: users
+      x-speakeasy-name-override: create
       summary: Create a new user
       description: |-
         Creates a new user. Your user management settings determine how you should setup your user model.
@@ -1433,6 +1490,8 @@ paths:
   /users/count:
     get:
       operationId: GetUsersCount
+      x-speakeasy-group: users
+      x-speakeasy-name-override: count
       summary: Count users
       description: Returns a total count of all users that match the given filtering criteria.
       tags:
@@ -1553,6 +1612,8 @@ paths:
   /users/{user_id}:
     get:
       operationId: GetUser
+      x-speakeasy-group: users
+      x-speakeasy-name-override: get
       summary: Retrieve a user
       description: Retrieve the details of a user
       tags:
@@ -1575,6 +1636,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateUser
+      x-speakeasy-group: users
+      x-speakeasy-name-override: update
       summary: Update a user
       description: |-
         Update a user's attributes.
@@ -1740,6 +1803,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteUser
+      x-speakeasy-group: users
+      x-speakeasy-name-override: delete
       summary: Delete a user
       description: Delete the specified user
       tags:
@@ -1763,6 +1828,8 @@ paths:
   /users/{user_id}/ban:
     post:
       operationId: BanUser
+      x-speakeasy-group: users
+      x-speakeasy-name-override: ban
       summary: Ban a user
       description: Marks the given user as banned, which means that all their sessions are revoked and they are not allowed to sign in again.
       tags:
@@ -1782,6 +1849,8 @@ paths:
   /users/{user_id}/unban:
     post:
       operationId: UnbanUser
+      x-speakeasy-group: users
+      x-speakeasy-name-override: unban
       summary: Unban a user
       description: Removes the ban mark from the given user.
       tags:
@@ -1801,6 +1870,8 @@ paths:
   /users/{user_id}/lock:
     post:
       operationId: LockUser
+      x-speakeasy-group: users
+      x-speakeasy-name-override: lock
       summary: Lock a user
       description: |-
         Marks the given user as locked, which means they are not allowed to sign in again until the lock expires.
@@ -1822,6 +1893,8 @@ paths:
   /users/{user_id}/unlock:
     post:
       operationId: UnlockUser
+      x-speakeasy-group: users
+      x-speakeasy-name-override: unlock
       summary: Unlock a user
       description: Removes the lock from the given user.
       tags:
@@ -1841,6 +1914,8 @@ paths:
   /users/{user_id}/profile_image:
     post:
       operationId: SetUserProfileImage
+      x-speakeasy-group: users
+      x-speakeasy-name-override: setProfileImage
       summary: Set user profile image
       description: Update a user's profile image
       tags:
@@ -1873,6 +1948,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
     delete:
       operationId: DeleteUserProfileImage
+      x-speakeasy-group: users
+      x-speakeasy-name-override: deleteProfileImage
       summary: Delete user profile image
       description: Delete a user's profile image
       tags:
@@ -1892,6 +1969,8 @@ paths:
   /users/{user_id}/metadata:
     patch:
       operationId: UpdateUserMetadata
+      x-speakeasy-group: users
+      x-speakeasy-name-override: updateMetadata
       summary: Merge and update a user's metadata
       description: |-
         Update a user's metadata attributes by merging existing values with the provided parameters.
@@ -1952,6 +2031,8 @@ paths:
   /users/{user_id}/oauth_access_tokens/{provider}:
     get:
       operationId: GetOAuthAccessToken
+      x-speakeasy-group: users
+      x-speakeasy-name-override: getOAuthAccessToken
       summary: Retrieve the OAuth access token of a user
       description: |-
         Fetch the corresponding OAuth access token for a user that has previously authenticated with a particular OAuth provider.
@@ -2026,6 +2107,8 @@ paths:
   /users/{user_id}/organization_memberships:
     get:
       operationId: UsersGetOrganizationMemberships
+      x-speakeasy-group: users
+      x-speakeasy-name-override: getOrganizationMemberships
       summary: Retrieve all memberships for a user
       description: Retrieve a paginated list of the user's organization memberships
       tags:
@@ -2047,6 +2130,8 @@ paths:
   /users/{user_id}/organization_invitations:
     get:
       operationId: UsersGetOrganizationInvitations
+      x-speakeasy-group: users
+      x-speakeasy-name-override: getOrganizationInvitations
       summary: Retrieve all invitations for a user
       description: Retrieve a paginated list of the user's organization invitations
       tags:
@@ -2082,6 +2167,8 @@ paths:
   /users/{user_id}/verify_password:
     post:
       operationId: VerifyPassword
+      x-speakeasy-group: users
+      x-speakeasy-name-override: verifyPassword
       summary: Verify the password of a user
       description: |-
         Check that the user's password matches the supplied input.
@@ -2130,6 +2217,8 @@ paths:
   /users/{user_id}/verify_totp:
     post:
       operationId: VerifyTOTP
+      x-speakeasy-group: users
+      x-speakeasy-name-override: verifyTotp
       summary: Verify a TOTP or backup code for a user
       description: |-
         Verify that the provided TOTP or backup code is valid for the user.
@@ -2186,6 +2275,8 @@ paths:
   /users/{user_id}/mfa:
     delete:
       operationId: DisableMFA
+      x-speakeasy-group: users
+      x-speakeasy-name-override: disableMfa
       summary: Disable a user's MFA methods
       description: Disable all of a user's MFA methods (e.g. OTP sent via SMS, TOTP on their authenticator app) at once.
       tags:
@@ -2216,6 +2307,8 @@ paths:
   /users/{user_id}/backup_code:
     delete:
       operationId: DeleteBackupCode
+      x-speakeasy-group: users
+      x-speakeasy-name-override: deleteBackupCodes
       summary: Disable all user's Backup codes
       description: Disable all of a user's backup codes.
       tags:
@@ -2246,6 +2339,8 @@ paths:
   /users/{user_id}/passkeys/{passkey_identification_id}:
     delete:
       operationId: UserPasskeyDelete
+      x-speakeasy-group: users
+      x-speakeasy-name-override: deletePasskey
       summary: Delete a user passkey
       description: Delete the passkey identification for a given user and notify them through email.
       tags:
@@ -2275,6 +2370,8 @@ paths:
   /users/{user_id}/web3_wallets/{web3_wallet_identification_id}:
     delete:
       operationId: UserWeb3WalletDelete
+      x-speakeasy-group: users
+      x-speakeasy-name-override: deleteWeb3Wallet
       summary: Delete a user web3 wallet
       description: Delete the web3 wallet identification for a given user.
       tags:
@@ -2306,6 +2403,8 @@ paths:
   /users/{user_id}/totp:
     delete:
       operationId: DeleteTOTP
+      x-speakeasy-group: users
+      x-speakeasy-name-override: deleteTOTP
       summary: Delete all the user's TOTPs
       description: Deletes all of the user's TOTPs.
       tags:
@@ -2336,6 +2435,8 @@ paths:
   /users/{user_id}/external_accounts/{external_account_id}:
     delete:
       operationId: DeleteExternalAccount
+      x-speakeasy-group: users
+      x-speakeasy-name-override: deleteExternalAccount
       summary: Delete External Account
       description: Delete an external account by ID.
       tags:
@@ -2367,6 +2468,8 @@ paths:
   /invitations:
     post:
       operationId: CreateInvitation
+      x-speakeasy-group: invitations
+      x-speakeasy-name-override: create
       summary: Create an invitation
       description: |-
         Creates a new invitation for the given email address and sends the invitation email.
@@ -2435,6 +2538,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     get:
       summary: List all invitations
+      x-speakeasy-group: invitations
+      x-speakeasy-name-override: list
       description: Returns all non-revoked invitations for your application, sorted by creation date
       operationId: ListInvitations
       parameters:
@@ -2465,6 +2570,8 @@ paths:
   /invitations/bulk:
     post:
       operationId: CreateBulkInvitations
+      x-speakeasy-group: invitations
+      x-speakeasy-name-override: bulkCreate
       summary: Create multiple invitations
       description: |-
         Use this API operation to create multiple invitations for the provided email addresses. You can choose to send the
@@ -2528,6 +2635,8 @@ paths:
   /invitations/{invitation_id}/revoke:
     post:
       operationId: RevokeInvitation
+      x-speakeasy-group: invitations
+      x-speakeasy-name-override: revoke
       summary: Revokes an invitation
       description: |-
         Revokes the given invitation.
@@ -2553,6 +2662,8 @@ paths:
   /organization_invitations:
     get:
       operationId: ListInstanceOrganizationInvitations
+      x-speakeasy-group: organizationInvitations
+      x-speakeasy-name-override: getAll
       summary: Get a list of organization invitations for the current instance
       description: |-
         This request returns the list of organization invitations for the instance.
@@ -2609,6 +2720,8 @@ paths:
   /allowlist_identifiers:
     get:
       operationId: ListAllowlistIdentifiers
+      x-speakeasy-group: allowlistIdentifiers
+      x-speakeasy-name-override: list
       summary: List all identifiers on the allow-list
       description: Get a list of all identifiers allowed to sign up to an instance
       tags:
@@ -2622,6 +2735,8 @@ paths:
           $ref: '#/components/responses/PaymentRequired'
     post:
       operationId: CreateAllowlistIdentifier
+      x-speakeasy-group: allowlistIdentifiers
+      x-speakeasy-name-override: create
       summary: Add identifier to the allow-list
       description: Create an identifier allowed to sign up to an instance
       tags:
@@ -2658,6 +2773,8 @@ paths:
   /allowlist_identifiers/{identifier_id}:
     delete:
       operationId: DeleteAllowlistIdentifier
+      x-speakeasy-group: allowlistIdentifiers
+      x-speakeasy-name-override: delete
       summary: Delete identifier from allow-list
       description: Delete an identifier from the instance allow-list
       tags:
@@ -2679,6 +2796,8 @@ paths:
   /blocklist_identifiers:
     get:
       operationId: ListBlocklistIdentifiers
+      x-speakeasy-group: blocklistIdentifiers
+      x-speakeasy-name-override: list
       summary: List all identifiers on the block-list
       description: Get a list of all identifiers which are not allowed to access an instance
       tags:
@@ -2692,6 +2811,8 @@ paths:
           $ref: '#/components/responses/PaymentRequired'
     post:
       operationId: CreateBlocklistIdentifier
+      x-speakeasy-group: blocklistIdentifiers
+      x-speakeasy-name-override: create
       summary: Add identifier to the block-list
       description: Create an identifier that is blocked from accessing an instance
       tags:
@@ -2722,6 +2843,8 @@ paths:
   /blocklist_identifiers/{identifier_id}:
     delete:
       operationId: DeleteBlocklistIdentifier
+      x-speakeasy-group: blocklistIdentifiers
+      x-speakeasy-name-override: delete
       summary: Delete identifier from block-list
       description: Delete an identifier from the instance block-list
       tags:
@@ -2743,6 +2866,8 @@ paths:
   /beta_features/instance_settings:
     patch:
       operationId: UpdateInstanceAuthConfig
+      x-speakeasy-group: betaFeatures
+      x-speakeasy-name-override: updateInstanceSettings
       summary: Update instance settings
       description: Updates the settings of an instance
       tags:
@@ -2797,6 +2922,8 @@ paths:
     put:
       deprecated: true
       operationId: UpdateProductionInstanceDomain
+      x-speakeasy-group: betaFeatures
+      x-speakeasy-name-override: updateProductionInstanceDomain
       summary: Update production instance domain
       description: |-
         Change the domain of a production instance.
@@ -2825,11 +2952,13 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
   /actor_tokens:
     post:
+      operationId: CreateActorToken
+      x-speakeasy-group: actorTokens
+      x-speakeasy-name-override: create
       summary: Create actor token
       description: |-
         Create an actor token that can be used to impersonate the given user.
         The `actor` parameter needs to include at least a "sub" key whose value is the ID of the actor (impersonating) user.
-      operationId: CreateActorToken
       tags:
         - Actor Tokens
       requestBody:
@@ -2875,6 +3004,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
   /actor_tokens/{actor_token_id}/revoke:
     post:
+      x-speakeasy-group: actorTokens
+      x-speakeasy-name-override: revoke
       summary: Revoke actor token
       description: Revokes a pending actor token.
       operationId: RevokeActorToken
@@ -2896,11 +3027,13 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
   /domains:
     get:
+      operationId: ListDomains
+      x-speakeasy-group: domains
+      x-speakeasy-name-override: list
       summary: List all instance domains
       description: |-
         Use this endpoint to get a list of all domains for an instance.
         The response will contain the primary domain for the instance and any satellite domains. Each domain in the response contains information about the URLs where Clerk operates and the required CNAME targets.
-      operationId: ListDomains
       tags:
         - Domains
       responses:
@@ -2908,13 +3041,15 @@ paths:
           $ref: '#/components/responses/Domains'
     post:
       summary: Add a domain
+      operationId: AddDomain
+      x-speakeasy-group: domains
+      x-speakeasy-name-override: add
       description: |-
         Add a new domain for your instance.
         Useful in the case of multi-domain instances, allows adding satellite domains to an instance.
         The new domain must have a `name`. The domain name can contain the port for development instances, like `localhost:3000`.
         At the moment, instances can have only one primary domain, so the `is_satellite` parameter must be set to `true`.
         If you're planning to configure the new satellite domain to run behind a proxy, pass the `proxy_url` parameter accordingly.
-      operationId: AddDomain
       tags:
         - Domains
       requestBody:
@@ -2949,6 +3084,8 @@ paths:
   /domains/{domain_id}:
     delete:
       operationId: DeleteDomain
+      x-speakeasy-group: domains
+      x-speakeasy-name-override: delete
       summary: Delete a satellite domain
       description: |-
         Deletes a satellite domain for the instance.
@@ -2971,6 +3108,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateDomain
+      x-speakeasy-group: domains
+      x-speakeasy-name-override: update
       summary: Update a domain
       description: |-
         The `proxy_url` can be updated only for production instances.
@@ -3030,6 +3169,8 @@ paths:
   /instance:
     get:
       operationId: GetInstance
+      x-speakeasy-group: instanceSettings
+      x-speakeasy-name-override: get
       summary: Fetch the current instance
       description: Fetches the current instance
       tags:
@@ -3039,6 +3180,8 @@ paths:
           $ref: '#/components/responses/Instance'
     patch:
       operationId: UpdateInstance
+      x-speakeasy-group: instanceSettings
+      x-speakeasy-name-override: update
       summary: Update instance settings
       description: Updates the settings of an instance
       tags:
@@ -3099,6 +3242,8 @@ paths:
   /instance/restrictions:
     patch:
       operationId: UpdateInstanceRestrictions
+      x-speakeasy-group: instanceSettings
+      x-speakeasy-name-override: updateRestrictions
       summary: Update instance restrictions
       description: Updates the restriction settings of an instance
       tags:
@@ -3135,6 +3280,8 @@ paths:
   /instance/change_domain:
     post:
       operationId: ChangeProductionInstanceDomain
+      x-speakeasy-group: instanceSettings
+      x-speakeasy-name-override: changeDomain
       summary: Update production instance domain
       description: |-
         Change the domain of a production instance.
@@ -3170,6 +3317,8 @@ paths:
   /instance/organization_settings:
     patch:
       operationId: UpdateInstanceOrganizationSettings
+      x-speakeasy-group: instanceSettings
+      x-speakeasy-name-override: updateOrganizationSettings
       summary: Update instance organization settings
       description: Updates the organization settings of the instance
       tags:
@@ -3220,6 +3369,8 @@ paths:
   /webhooks/svix:
     post:
       operationId: CreateSvixApp
+      x-speakeasy-group: webhooks
+      x-speakeasy-name-override: createSvixApp
       summary: Create a Svix app
       description: Create a Svix app and associate it with the current instance
       tags:
@@ -3231,6 +3382,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
     delete:
       operationId: DeleteSvixApp
+      x-speakeasy-group: webhooks
+      x-speakeasy-name-override: deleteSvixApp
       summary: Delete a Svix app
       description: Delete a Svix app and disassociate it from the current instance
       tags:
@@ -3243,6 +3396,8 @@ paths:
   /webhooks/svix_url:
     post:
       operationId: GenerateSvixAuthURL
+      x-speakeasy-group: webhooks
+      x-speakeasy-name-override: generateSvixAuthURL
       summary: Create a Svix Dashboard URL
       description: Generate a new url for accessing the Svix's management dashboard for that particular instance
       tags:
@@ -3254,8 +3409,10 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
   /jwt_templates:
     get:
-      summary: List all templates
       operationId: ListJWTTemplates
+      x-speakeasy-group: jwtTemplates
+      x-speakeasy-name-override: list
+      summary: List all templates
       tags:
         - JWT Templates
       responses:
@@ -3263,6 +3420,8 @@ paths:
           $ref: '#/components/responses/JWTTemplate.List'
     post:
       operationId: CreateJWTTemplate
+      x-speakeasy-group: jwtTemplates
+      x-speakeasy-name-override: create
       summary: Create a JWT template
       description: Create a new JWT template
       tags:
@@ -3317,6 +3476,8 @@ paths:
   /jwt_templates/{template_id}:
     get:
       operationId: GetJWTTemplate
+      x-speakeasy-group: jwtTemplates
+      x-speakeasy-name-override: get
       summary: Retrieve a template
       description: Retrieve the details of a given JWT template
       tags:
@@ -3335,6 +3496,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateJWTTemplate
+      x-speakeasy-group: jwtTemplates
+      x-speakeasy-name-override: update
       summary: Update a JWT template
       description: Updates an existing JWT template
       tags:
@@ -3395,6 +3558,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteJWTTemplate
+      x-speakeasy-group: jwtTemplates
+      x-speakeasy-name-override: delete
       summary: Delete a Template
       description: ''
       tags:
@@ -3416,6 +3581,8 @@ paths:
   /organizations:
     get:
       operationId: ListOrganizations
+      x-speakeasy-group: organizations
+      x-speakeasy-name-override: list
       summary: Get a list of organizations for an instance
       description: |-
         This request returns the list of organizations for an instance.
@@ -3481,6 +3648,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     post:
       operationId: CreateOrganization
+      x-speakeasy-group: organizations
+      x-speakeasy-name-override: create
       summary: Create an organization
       description: |-
         Creates a new organization with the given name for an instance.
@@ -3543,6 +3712,8 @@ paths:
   /organizations/{organization_id}:
     get:
       operationId: GetOrganization
+      x-speakeasy-group: organizations
+      x-speakeasy-name-override: get
       summary: Retrieve an organization by ID or slug
       description: Fetches the organization whose ID or slug matches the provided `id_or_slug` URL query parameter.
       tags:
@@ -3569,6 +3740,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateOrganization
+      x-speakeasy-group: organizations
+      x-speakeasy-name-override: update
       summary: Update an organization
       description: Updates an existing organization
       tags:
@@ -3628,6 +3801,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteOrganization
+      x-speakeasy-group: organizations
+      x-speakeasy-name-override: delete
       summary: Delete an organization
       description: |-
         Deletes the given organization.
@@ -3650,6 +3825,8 @@ paths:
   /organizations/{organization_id}/metadata:
     patch:
       operationId: MergeOrganizationMetadata
+      x-speakeasy-group: organizations
+      x-speakeasy-name-override: mergeMetadata
       summary: Merge and update metadata for an organization
       description: |-
         Update organization metadata attributes by merging existing values with the provided parameters.
@@ -3699,6 +3876,8 @@ paths:
   /organizations/{organization_id}/logo:
     put:
       operationId: UploadOrganizationLogo
+      x-speakeasy-group: organizations
+      x-speakeasy-name-override: uploadLogo
       summary: Upload a logo for the organization
       description: |-
         Set or replace an organization's logo, by uploading an image file.
@@ -3741,6 +3920,9 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
     delete:
       operationId: DeleteOrganizationLogo
+      x-speakeasy-group: organizations
+      x-speakeasy-name-override: deleteLogo
+      summary: Delete the organization's logo.
       description: Delete the organization's logo.
       tags:
         - Organizations
@@ -3759,6 +3941,8 @@ paths:
   /organizations/{organization_id}/invitations:
     post:
       operationId: CreateOrganizationInvitation
+      x-speakeasy-group: organizationInvitations
+      x-speakeasy-name-override: create
       summary: Create and send an organization invitation
       description: |-
         Creates a new organization invitation and sends an email to the provided `email_address` with a link to accept the invitation and join the organization.
@@ -3841,6 +4025,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     get:
       operationId: ListOrganizationInvitations
+      x-speakeasy-group: organizationInvitations
+      x-speakeasy-name-override: list
       summary: Get a list of organization invitations
       description: |-
         This request returns the list of organization invitations.
@@ -3880,6 +4066,8 @@ paths:
   /organizations/{organization_id}/invitations/bulk:
     post:
       operationId: CreateOrganizationInvitationBulk
+      x-speakeasy-group: organizationInvitations
+      x-speakeasy-name-override: bulkCreate
       summary: Bulk create and send organization invitations
       description: |-
         Creates new organization invitations in bulk and sends out emails to the provided email addresses with a link to accept the invitation and join the organization.
@@ -3958,6 +4146,8 @@ paths:
     get:
       deprecated: true
       operationId: ListPendingOrganizationInvitations
+      x-speakeasy-group: organizationInvitations
+      x-speakeasy-name-override: listPending
       summary: Get a list of pending organization invitations
       description: |-
         This request returns the list of organization invitations with "pending" status.
@@ -3987,6 +4177,8 @@ paths:
   /organizations/{organization_id}/invitations/{invitation_id}:
     get:
       operationId: GetOrganizationInvitation
+      x-speakeasy-group: organizationInvitations
+      x-speakeasy-name-override: get
       summary: Retrieve an organization invitation by ID
       description: Use this request to get an existing organization invitation by ID.
       tags:
@@ -4016,6 +4208,8 @@ paths:
   /organizations/{organization_id}/invitations/{invitation_id}/revoke:
     post:
       operationId: RevokeOrganizationInvitation
+      x-speakeasy-group: organizationInvitations
+      x-speakeasy-name-override: revoke
       summary: Revoke a pending organization invitation
       description: |-
         Use this request to revoke a previously issued organization invitation.
@@ -4063,6 +4257,8 @@ paths:
   /organizations/{organization_id}/memberships:
     post:
       operationId: CreateOrganizationMembership
+      x-speakeasy-group: organizationMemberships
+      x-speakeasy-name-override: create
       summary: Create a new organization membership
       description: |-
         Adds a user as a member to the given organization.
@@ -4111,6 +4307,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     get:
       operationId: ListOrganizationMemberships
+      x-speakeasy-group: organizationMemberships
+      x-speakeasy-name-override: list
       summary: Get a list of all members of an organization
       description: Retrieves all user memberships for the given organization
       tags:
@@ -4133,6 +4331,66 @@ paths:
             we can choose to sort in ascending (ASC) or descending (DESC) order."
           schema:
             type: string
+        - name: email_address_query
+          in: query
+          description: |-
+            Returns users with emails that match the given query, via case-insensitive partial match.
+            For example, `email_address_query=ello` will match a user with the email `HELLO@example.com`.
+          schema:
+            type: string
+          required: false
+        - name: phone_number_query
+          in: query
+          description: |-
+            Returns users with phone numbers that match the given query, via case-insensitive partial match.
+            For example, `phone_number_query=555` will match a user with the phone number `+1555xxxxxxx`.
+          schema:
+            type: string
+          required: false
+        - name: username_query
+          in: query
+          description: |-
+            Returns users with usernames that match the given query, via case-insensitive partial match.
+            For example, `username_query=CoolUser` will match a user with the username `SomeCoolUser`.
+          schema:
+            type: string
+        - name: name_query
+          in: query
+          description: Returns users with names that match the given query, via case-insensitive partial match.
+          schema:
+            type: string
+        - name: last_active_at_before
+          in: query
+          description: |-
+            Returns users whose last session activity was before the given date (with millisecond precision).
+            Example: use 1700690400000 to retrieve users whose last session activity was before 2023-11-23.
+          example: 1700690400000
+          schema:
+            type: integer
+        - name: last_active_at_after
+          in: query
+          description: |-
+            Returns users whose last session activity was after the given date (with millisecond precision).
+            Example: use 1700690400000 to retrieve users whose last session activity was after 2023-11-23.
+          example: 1700690400000
+          schema:
+            type: integer
+        - name: created_at_before
+          in: query
+          description: |-
+            Returns users who have been created before the given date (with millisecond precision).
+            Example: use 1730160000000 to retrieve users who have been created before 2024-10-29.
+          example: 1730160000000
+          schema:
+            type: integer
+        - name: created_at_after
+          in: query
+          description: |-
+            Returns users who have been created after the given date (with millisecond precision).
+            Example: use 1730160000000 to retrieve users who have been created after 2024-10-29.
+          example: 1730160000000
+          schema:
+            type: integer
       responses:
         '200':
           $ref: '#/components/responses/OrganizationMemberships'
@@ -4143,6 +4401,8 @@ paths:
   /organizations/{organization_id}/memberships/{user_id}:
     patch:
       operationId: UpdateOrganizationMembership
+      x-speakeasy-group: organizationMemberships
+      x-speakeasy-name-override: update
       summary: Update an organization membership
       description: Updates the properties of an existing organization membership
       tags:
@@ -4183,6 +4443,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteOrganizationMembership
+      x-speakeasy-group: organizationMemberships
+      x-speakeasy-name-override: delete
       summary: Remove a member from an organization
       description: Removes the given membership from the organization
       tags:
@@ -4212,6 +4474,8 @@ paths:
   /organizations/{organization_id}/memberships/{user_id}/metadata:
     patch:
       operationId: UpdateOrganizationMembershipMetadata
+      x-speakeasy-group: organizationMemberships
+      x-speakeasy-name-override: updateMetadata
       summary: Merge and update organization membership metadata
       description: |-
         Update an organization membership's metadata attributes by merging existing values with the provided parameters.
@@ -4263,6 +4527,8 @@ paths:
   /organizations/{organization_id}/domains:
     post:
       operationId: CreateOrganizationDomain
+      x-speakeasy-group: organizationDomains
+      x-speakeasy-name-override: create
       summary: Create a new organization domain.
       description: Creates a new organization domain. By default the domain is verified, but can be optionally set to unverified.
       tags:
@@ -4307,6 +4573,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     get:
       operationId: ListOrganizationDomains
+      x-speakeasy-group: organizationDomains
+      x-speakeasy-name-override: list
       summary: Get a list of all domains of an organization.
       description: Get a list of all domains of an organization.
       tags:
@@ -4342,6 +4610,8 @@ paths:
   /organizations/{organization_id}/domains/{domain_id}:
     patch:
       operationId: UpdateOrganizationDomain
+      x-speakeasy-group: organizationDomains
+      x-speakeasy-name-override: update
       summary: Update an organization domain.
       description: Updates the properties of an existing organization domain.
       tags:
@@ -4385,6 +4655,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteOrganizationDomain
+      x-speakeasy-group: organizationDomains
+      x-speakeasy-name-override: delete
       summary: Remove a domain from an organization.
       description: Removes the given domain from the organization.
       tags:
@@ -4414,6 +4686,8 @@ paths:
   /proxy_checks:
     post:
       summary: Verify the proxy configuration for your domain
+      x-speakeasy-group: proxyChecks
+      x-speakeasy-name-override: verify
       description: |-
         This endpoint can be used to validate that a proxy-enabled domain is operational.
         It tries to verify that the proxy URL provided in the parameters maps to a functional proxy that can reach the Clerk Frontend API.
@@ -4448,6 +4722,8 @@ paths:
   /redirect_urls:
     get:
       summary: List all redirect URLs
+      x-speakeasy-group: redirectUrls
+      x-speakeasy-name-override: list
       description: Lists all whitelisted redirect_urls for the instance
       operationId: ListRedirectURLs
       tags:
@@ -4457,6 +4733,8 @@ paths:
           $ref: '#/components/responses/RedirectURL.List'
     post:
       summary: Create a redirect URL
+      x-speakeasy-group: redirectUrls
+      x-speakeasy-name-override: create
       description: Create a redirect URL
       operationId: CreateRedirectURL
       tags:
@@ -4481,6 +4759,8 @@ paths:
   /redirect_urls/{id}:
     get:
       summary: Retrieve a redirect URL
+      x-speakeasy-group: redirectUrls
+      x-speakeasy-name-override: get
       description: Retrieve the details of the redirect URL with the given ID
       operationId: GetRedirectURL
       tags:
@@ -4499,6 +4779,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     delete:
       summary: Delete a redirect URL
+      x-speakeasy-group: redirectUrls
+      x-speakeasy-name-override: delete
       description: Remove the selected redirect URL from the whitelist of the instance
       operationId: DeleteRedirectURL
       tags:
@@ -4518,6 +4800,8 @@ paths:
   /sign_in_tokens:
     post:
       summary: Create sign-in token
+      x-speakeasy-group: signInTokens
+      x-speakeasy-name-override: create
       description: |-
         Creates a new sign-in token and associates it with the given user.
         By default, sign-in tokens expire in 30 days.
@@ -4549,9 +4833,11 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
   /sign_in_tokens/{sign_in_token_id}/revoke:
     post:
+      operationId: RevokeSignInToken
+      x-speakeasy-group: signInTokens
+      x-speakeasy-name-override: revoke
       summary: Revoke the given sign-in token
       description: Revokes a pending sign-in token
-      operationId: RevokeSignInToken
       tags:
         - Sign-in Tokens
       parameters:
@@ -4571,6 +4857,8 @@ paths:
   /sign_ups/{id}:
     patch:
       operationId: UpdateSignUp
+      x-speakeasy-group: signUps
+      x-speakeasy-name-override: update
       summary: Update a sign-up
       description: Update the sign-up with the given ID
       tags:
@@ -4602,6 +4890,8 @@ paths:
   /oauth_applications:
     get:
       operationId: ListOAuthApplications
+      x-speakeasy-group: oauthApplications
+      x-speakeasy-name-override: list
       summary: Get a list of OAuth applications for an instance
       description: |-
         This request returns the list of OAuth applications for an instance.
@@ -4624,6 +4914,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     post:
       operationId: CreateOAuthApplication
+      x-speakeasy-group: oauthApplications
+      x-speakeasy-name-override: create
       summary: Create an OAuth application
       description: |-
         Creates a new OAuth application with the given name and callback URL for an instance.
@@ -4675,6 +4967,8 @@ paths:
   /oauth_applications/{oauth_application_id}:
     get:
       operationId: GetOAuthApplication
+      x-speakeasy-group: oauthApplications
+      x-speakeasy-name-override: get
       summary: Retrieve an OAuth application by ID
       description: Fetches the OAuth application whose ID matches the provided `id` in the path.
       tags:
@@ -4695,6 +4989,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateOAuthApplication
+      x-speakeasy-group: oauthApplications
+      x-speakeasy-name-override: update
       summary: Update an OAuth application
       description: Updates an existing OAuth application
       tags:
@@ -4751,6 +5047,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteOAuthApplication
+      x-speakeasy-group: oauthApplications
+      x-speakeasy-name-override: delete
       summary: Delete an OAuth application
       description: |-
         Deletes the given OAuth application.
@@ -4774,6 +5072,8 @@ paths:
   /oauth_applications/{oauth_application_id}/rotate_secret:
     post:
       operationId: RotateOAuthApplicationSecret
+      x-speakeasy-group: oauthApplications
+      x-speakeasy-name-override: rotateSecret
       summary: Rotate the client secret of the given OAuth application
       description: |-
         Rotates the OAuth application's client secret.
@@ -4797,6 +5097,8 @@ paths:
   /saml_connections:
     get:
       operationId: ListSAMLConnections
+      x-speakeasy-group: samlConnections
+      x-speakeasy-name-override: list
       summary: Get a list of SAML Connections for an instance
       description: |-
         Returns the list of SAML Connections for an instance.
@@ -4832,6 +5134,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     post:
       operationId: CreateSAMLConnection
+      x-speakeasy-group: samlConnections
+      x-speakeasy-name-override: create
       summary: Create a SAML Connection
       description: Create a new SAML Connection.
       tags:
@@ -4913,6 +5217,8 @@ paths:
   /saml_connections/{saml_connection_id}:
     get:
       operationId: GetSAMLConnection
+      x-speakeasy-group: samlConnections
+      x-speakeasy-name-override: get
       summary: Retrieve a SAML Connection by ID
       description: Fetches the SAML Connection whose ID matches the provided `saml_connection_id` in the path.
       tags:
@@ -4935,6 +5241,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
     patch:
       operationId: UpdateSAMLConnection
+      x-speakeasy-group: samlConnections
+      x-speakeasy-name-override: update
       summary: Update a SAML Connection
       description: Updates the SAML Connection whose ID matches the provided `id` in the path.
       tags:
@@ -5033,6 +5341,8 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: DeleteSAMLConnection
+      x-speakeasy-group: samlConnections
+      x-speakeasy-name-override: delete
       summary: Delete a SAML Connection
       description: Deletes the SAML Connection whose ID matches the provided `id` in the path.
       tags:
@@ -5056,6 +5366,8 @@ paths:
   /testing_tokens:
     post:
       operationId: CreateTestingToken
+      x-speakeasy-group: testingTokens
+      x-speakeasy-name-override: create
       summary: Retrieve a new testing token
       description: Retrieve a new testing token.
       tags:
@@ -5066,6 +5378,8 @@ paths:
   /organization_memberships:
     get:
       operationId: InstanceGetOrganizationMemberships
+      x-speakeasy-group: users
+      x-speakeasy-name-override: getOrganizationMemberships
       summary: Get a list of all organization memberships within an instance.
       description: Retrieves all organization user memberships for the given instance.
       tags:
@@ -5096,6 +5410,8 @@ paths:
   /waitlist_entries:
     get:
       operationId: ListWaitlistEntries
+      x-speakeasy-group: waitlistEntries
+      x-speakeasy-name-override: list
       summary: List all waitlist entries
       description: |-
         Retrieve a list of waitlist entries for the instance.
@@ -5141,6 +5457,8 @@ paths:
           $ref: '#/components/responses/WaitlistEntries'
     post:
       operationId: CreateWaitlistEntry
+      x-speakeasy-group: waitlistEntries
+      x-speakeasy-name-override: create
       summary: Create a waitlist entry
       description: |-
         Creates a new waitlist entry for the given email address.
@@ -5204,6 +5522,32 @@ components:
                 type: string
               crv:
                 type: string
+    SessionActivityResponse:
+      type: object
+      nullable: true
+      properties:
+        object:
+          type: string
+        id:
+          type: string
+        device_type:
+          type: string
+        is_mobile:
+          type: boolean
+        browser_name:
+          type: string
+        browser_version:
+          type: string
+        ip_address:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+      required:
+        - id
+        - object
+        - is_mobile
     Session:
       type: object
       additionalProperties: false
@@ -5239,34 +5583,17 @@ components:
         last_active_at:
           type: integer
         latest_activity:
-          type: object
-          nullable: true
-          required:
-            - id
-            - object
-          properties:
-            object:
-              type: string
-            id:
-              type: string
-            device_type:
-              type: string
-            is_mobile:
-              type: boolean
-            browser_name:
-              type: string
-            browser_version:
-              type: string
-            ip_address:
-              type: string
-            city:
-              type: string
-            country:
-              type: string
+          $ref: '#/components/schemas/SessionActivityResponse'
         expire_at:
           type: integer
+          format: int64
+          description: |
+            Unix timestamp of expiration.
         abandon_at:
           type: integer
+          format: int64
+          description: |
+            Unix timestamp of abandonment.
         updated_at:
           type: integer
           format: int64
@@ -5381,6 +5708,7 @@ components:
             - failed
             - expired
         strategy:
+          x-speakeasy-unknown-values: allow
           type: string
           enum:
             - phone_code
@@ -5409,6 +5737,7 @@ components:
           enum:
             - verified
         strategy:
+          x-speakeasy-unknown-values: allow
           type: string
           enum:
             - admin
@@ -5462,6 +5791,7 @@ components:
       additionalProperties: false
       properties:
         type:
+          x-speakeasy-unknown-values: allow
           type: string
         id:
           type: string
@@ -5476,6 +5806,7 @@ components:
           type: string
         object:
           type: string
+          x-speakeasy-unknown-values: allow
           description: |
             String representing the object's type. Objects of the same type share the same value.
           enum:
@@ -6152,7 +6483,10 @@ components:
           type: string
         members_count:
           type: integer
-          nullable: true
+        missing_member_with_elevated_permissions:
+          type: boolean
+        pending_invitations_count:
+          type: integer
         max_allowed_memberships:
           type: integer
         admin_delete_enabled:
@@ -6165,7 +6499,6 @@ components:
           additionalProperties: true
         created_by:
           type: string
-          nullable: true
         created_at:
           type: integer
           format: int64
@@ -6182,10 +6515,43 @@ components:
         - name
         - slug
         - max_allowed_memberships
+        - admin_delete_enabled
         - public_metadata
         - private_metadata
         - created_at
         - updated_at
+    OrganizationMembershipPublicUserData:
+      description: An organization membership with public user data populated
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          type: string
+          nullable: false
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        profile_image_url:
+          type: string
+          nullable: true
+          deprecated: true
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+        identifier:
+          type: string
+          nullable: true
+      required:
+        - user_id
+        - first_name
+        - last_name
+        - profile_image_url
+        - image_url
+        - has_image
     OrganizationMembership:
       description: Hello world
       type: object
@@ -6220,29 +6586,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/Organization'
         public_user_data:
-          type: object
-          additionalProperties: false
-          properties:
-            user_id:
-              type: string
-              nullable: false
-            first_name:
-              type: string
-              nullable: true
-            last_name:
-              type: string
-              nullable: true
-            profile_image_url:
-              type: string
-              nullable: true
-              deprecated: true
-            image_url:
-              type: string
-            has_image:
-              type: boolean
-            identifier:
-              type: string
-              nullable: true
+          $ref: '#/components/schemas/OrganizationMembershipPublicUserData'
         created_at:
           type: integer
           format: int64
@@ -6251,6 +6595,16 @@ components:
           type: integer
           format: int64
           description: Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - role
+        - permissions
+        - public_metadata
+        - permissions
+        - created_at
+        - updated_at
+        - organization
     OrganizationMemberships:
       type: object
       additionalProperties: false
@@ -6267,59 +6621,84 @@ components:
       required:
         - data
         - total_count
-    OrganizationInvitationWithPublicOrganizationData:
-      description: An organization invitation with public organization data populated
+    OrganizationInvitationPublicOrganizationData:
       type: object
+      additionalProperties: false
       properties:
         id:
           type: string
-        object:
+        name:
           type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - organization_invitation
-        email_address:
+        slug:
           type: string
-        role:
+        image_url:
           type: string
-        role_name:
-          type: string
-        organization_id:
-          type: string
-        status:
-          type: string
-        public_metadata:
-          type: object
-          additionalProperties: true
-        private_metadata:
-          type: object
-          additionalProperties: true
-        url:
-          type: string
-          nullable: true
-        public_organization_data:
-          type: object
-          additionalProperties: false
-          properties:
+        has_image:
+          type: boolean
+      required:
+        - id
+        - name
+        - slug
+        - has_image
+    OrganizationInvitationWithPublicOrganizationData:
+      description: An organization invitation with public organization data populated
+      type: object
+      allOf:
+        - properties:
+            object:
+              type: string
+              description: |
+                String representing the object's type. Objects of the same type share the same value.
+              enum:
+                - organization_invitation
             id:
               type: string
-            name:
+            email_address:
               type: string
-            slug:
+            role:
               type: string
-            image_url:
+            role_name:
               type: string
-            has_image:
-              type: boolean
-        created_at:
-          type: integer
-          format: int64
-          description: Unix timestamp of creation.
-        updated_at:
-          type: integer
-          format: int64
-          description: Unix timestamp of last update.
+            organization_id:
+              type: string
+            status:
+              type: string
+            public_metadata:
+              type: object
+              additionalProperties: true
+            private_metadata:
+              type: object
+              additionalProperties: true
+            url:
+              type: string
+              nullable: true
+            expires_at:
+              type: integer
+              format: int64
+              nullable: true
+              description: Unix timestamp of expiration.
+            created_at:
+              type: integer
+              format: int64
+              description: Unix timestamp of creation.
+            updated_at:
+              type: integer
+              format: int64
+              description: Unix timestamp of last update.
+        - properties:
+            public_organization_data:
+              $ref: '#/components/schemas/OrganizationInvitationPublicOrganizationData'
+      required:
+        - object
+        - id
+        - email_address
+        - role
+        - role_name
+        - public_metadata
+        - url
+        - expires_at
+        - created_at
+        - updated_at
     OrganizationInvitationsWithPublicOrganizationData:
       type: object
       additionalProperties: false
@@ -6365,7 +6744,6 @@ components:
           example: pending
         url:
           type: string
-          nullable: true
         expires_at:
           type: integer
           format: int64
@@ -6386,6 +6764,7 @@ components:
         - object
         - id
         - email_address
+        - public_metadata
         - status
         - created_at
         - updated_at
@@ -6497,10 +6876,8 @@ components:
           type: object
         token:
           type: string
-          nullable: true
         url:
           type: string
-          nullable: true
         created_at:
           type: integer
           format: int64
@@ -6609,6 +6986,11 @@ components:
           example:
             - http://localhost:3000
             - https://some-domain
+      required:
+        - object
+        - id
+        - environment_type
+        - allowed_origins
     InstanceRestrictions:
       type: object
       properties:
@@ -6623,8 +7005,17 @@ components:
           type: boolean
         block_email_subaddresses:
           type: boolean
+        block_disposable_email_domains:
+          type: boolean
         ignore_dots_for_gmail_addresses:
           type: boolean
+      required:
+        - object
+        - allowlist
+        - blocklist
+        - block_email_subaddresses
+        - block_disposable_email_domains
+        - ignore_dots_for_gmail_addresses
     OrganizationSettings:
       type: object
       additionalProperties: false
@@ -6665,6 +7056,8 @@ components:
         - object
         - enabled
         - max_allowed_memberships
+        - max_allowed_roles
+        - max_allowed_permissions
         - creator_role
         - admin_delete_enabled
         - domains_enabled
@@ -6717,6 +7110,8 @@ components:
         - claims
         - lifetime
         - allowed_clock_skew
+        - custom_signing_key
+        - signing_algorithm
         - created_at
         - updated_at
     Organizations:
@@ -6750,18 +7145,19 @@ components:
               type: boolean
           required:
             - image_url
+            - has_image
     OrganizationInvitation:
       description: An organization invitation
       type: object
       properties:
-        id:
-          type: string
         object:
           type: string
           description: |
             String representing the object's type. Objects of the same type share the same value.
           enum:
             - organization_invitation
+        id:
+          type: string
         email_address:
           type: string
         role:
@@ -6785,8 +7181,7 @@ components:
           type: integer
           format: int64
           nullable: true
-          description: |
-            Unix timestamp of expiration.
+          description: Unix timestamp of expiration.
         created_at:
           type: integer
           format: int64
@@ -6795,6 +7190,17 @@ components:
           type: integer
           format: int64
           description: Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - email_address
+        - role
+        - role_name
+        - public_metadata
+        - url
+        - expires_at
+        - created_at
+        - updated_at
     OrganizationInvitations:
       type: object
       additionalProperties: false
@@ -6827,24 +7233,30 @@ components:
         attempts:
           type: integer
           description: How many attempts have been made to verify the domain
+          nullable: true
         expire_at:
           type: integer
           nullable: true
           format: int64
           description: Unix timestamp of when the verification will expire
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
     OrganizationDomain:
       description: An organization domain
       type: object
       properties:
-        id:
-          type: string
-          description: Unique identifier for the organization domain
         object:
           type: string
           description: |
             String representing the object's type. Objects of the same type share the same value. Always `organization_domain`
           enum:
             - organization_domain
+        id:
+          type: string
+          description: Unique identifier for the organization domain
         organization_id:
           type: string
           description: Unique identifier for the organization
@@ -6884,6 +7296,18 @@ components:
           type: integer
           format: int64
           description: Unix timestamp of the last update to the domain
+      required:
+        - object
+        - id
+        - organization_id
+        - name
+        - enrollment_mode
+        - affiliation_email_address
+        - verification
+        - total_pending_invitations
+        - total_pending_suggestions
+        - created_at
+        - updated_at
     OrganizationDomains:
       type: object
       additionalProperties: false
@@ -6914,14 +7338,24 @@ components:
           type: string
         last_run_at:
           type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp of last run.
         proxy_url:
           type: string
         successful:
           type: boolean
         created_at:
           type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
         updated_at:
           type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
       required:
         - object
         - id
@@ -6999,6 +7433,39 @@ components:
         - status
         - created_at
         - updated_at
+    SignUpVerification:
+      type: object
+      nullable: true
+      additionalProperties: true
+      properties:
+        next_action:
+          type: string
+          enum:
+            - needs_prepare
+            - needs_attempt
+            - ''
+        supported_strategies:
+          type: array
+          items:
+            type: string
+    SignUpVerifications:
+      type: object
+      additionalProperties: false
+      properties:
+        email_address:
+          $ref: '#/components/schemas/SignUpVerification'
+        phone_number:
+          $ref: '#/components/schemas/SignUpVerification'
+        web3_wallet:
+          $ref: '#/components/schemas/SignUpVerification'
+        external_account:
+          type: object
+          nullable: true
+      required:
+        - email_address
+        - phone_number
+        - web3_wallet
+        - external_account
     SignUp:
       type: object
       additionalProperties: false
@@ -7032,7 +7499,7 @@ components:
           items:
             type: string
         verifications:
-          type: object
+          $ref: '#/components/schemas/SignUpVerifications'
         username:
           type: string
           nullable: true
@@ -7072,6 +7539,10 @@ components:
           nullable: true
         abandon_at:
           type: integer
+          format: int64
+          description: |
+            Unix timestamp at which the user abandoned the sign up attempt.
+          example: 1700690400000
         legal_accepted_at:
           type: integer
           format: int64
@@ -7081,13 +7552,29 @@ components:
           example: 1700690400000
         external_account:
           type: object
+          deprecated: true
       required:
         - object
         - id
         - status
+        - required_fields
+        - optional_fields
+        - missing_fields
+        - unverified_fields
+        - verifications
+        - username
+        - email_address
+        - phone_number
+        - web3_wallet
         - password_enabled
+        - first_name
+        - last_name
         - custom_action
+        - external_id
+        - created_session_id
+        - created_user_id
         - abandon_at
+        - legal_accepted_at
     OAuthApplication:
       type: object
       properties:
@@ -7114,6 +7601,8 @@ components:
         callback_url:
           type: string
           deprecated: true
+          description: |
+            Deprecated: Use redirect_uris instead.
         authorize_url:
           type: string
         token_fetch_url:
@@ -7176,6 +7665,23 @@ components:
               type: string
               description: |
                 Empty if public client.
+    SAMLConnectionAttributeMapping:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          type: string
+        email_address:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+      required:
+        - user_id
+        - email_address
+        - first_name
+        - last_name
     schemas-SAMLConnection:
       type: object
       properties:
@@ -7214,17 +7720,7 @@ components:
           type: string
           nullable: true
         attribute_mapping:
-          type: object
-          additionalProperties: false
-          properties:
-            user_id:
-              type: string
-            email_address:
-              type: string
-            first_name:
-              type: string
-            last_name:
-              type: string
+          $ref: '#/components/schemas/SAMLConnectionAttributeMapping'
         active:
           type: boolean
         provider:
@@ -7776,7 +8272,7 @@ components:
         Can be used for paginating the results together with `offset`.
       required: false
       schema:
-        type: number
+        type: integer
         default: 10
         minimum: 1
         maximum: 500
@@ -7789,6 +8285,6 @@ components:
         To be used in conjunction with `limit`.
       required: false
       schema:
-        type: number
+        type: integer
         default: 0
         minimum: 0
