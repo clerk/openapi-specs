@@ -4409,6 +4409,8 @@ components:
           type: string
         user_id:
           type: string
+        sub:
+          type: string
         email:
           type: string
           nullable: true
@@ -4450,6 +4452,7 @@ components:
         - object
         - instance_id
         - user_id
+        - sub
     ClerkError:
       type: object
       properties:
@@ -6275,6 +6278,7 @@ components:
       properties:
         status:
           type: string
+          x-speakeasy-unknown-values: allow
           enum:
             - unverified
             - verified
@@ -6283,6 +6287,7 @@ components:
             - transferable
         strategy:
           type: string
+          x-speakeasy-unknown-values: allow
           pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z]+$
         external_verification_redirect_url:
           type: string
@@ -6823,7 +6828,7 @@ components:
           description: |
             String representing the object's type. Objects of the same type share the same value.
           enum:
-            - session_verification
+            - session_reverification
         level:
           type: string
           description: The level used for the session reverification
