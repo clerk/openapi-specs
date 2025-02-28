@@ -121,6 +121,14 @@ tags:
     description: Various endpoints that do not belong in any particular category.
   - name: Beta Features
     description: Modify instance settings that are currently in beta.
+  - name: Waitlist Entries
+    description: Manage waitlist entries.
+  - name: Proxy Checks
+    description: Check if a user is using a proxy.
+  - name: Organization Memberships
+    description: Manage organization memberships.
+  - name: Organization Domains
+    description: Manage organization domains.
 externalDocs:
   url: https://clerk.com/docs
 paths:
@@ -5701,7 +5709,7 @@ paths:
     get:
       operationId: InstanceGetOrganizationMemberships
       x-speakeasy-group: users
-      x-speakeasy-name-override: getOrganizationMemberships
+      x-speakeasy-name-override: getInstanceOrganizationMemberships
       summary: Get a list of all organization memberships within an instance.
       description: Retrieves all organization user memberships for the given instance.
       tags:
@@ -6927,7 +6935,6 @@ components:
         - role
         - permissions
         - public_metadata
-        - permissions
         - created_at
         - updated_at
         - organization
