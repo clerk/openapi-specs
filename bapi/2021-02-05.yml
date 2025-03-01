@@ -125,8 +125,6 @@ tags:
     description: Manage waitlist entries.
   - name: Proxy Checks
     description: Check if a user is using a proxy.
-  - name: Organization Memberships
-    description: Manage organization memberships.
   - name: Organization Domains
     description: Manage organization domains.
 externalDocs:
