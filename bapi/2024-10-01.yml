@@ -105,6 +105,10 @@ tags:
     description: |-
       Sign-in tokens are JWTs that can be used to sign in to an application without specifying any credentials.
       A sign-in token can be used at most once and they can be consumed from the Frontend API using the `ticket` strategy.
+  - name: Sign Ups
+    description: Sign-up objects track the progress of a sign-up attempt and store any field collected from user input.
+    externalDocs:
+      url: https://clerk.com/docs/reference/clerkjs/signup
   - name: Testing Tokens
     description: Tokens meant for use by end-to-end test suites in requests to the Frontend API, so as to bypass bot detection measures.
     externalDocs:
@@ -4966,7 +4970,7 @@ paths:
         a different proxy URL than the one provided. It can also be used to re-validate a domain that is already configured to work with a proxy.
       operationId: VerifyDomainProxy
       tags:
-        - Proxy checks
+        - Proxy Checks
       requestBody:
         content:
           application/json:
@@ -5138,7 +5142,7 @@ paths:
       summary: Retrieve a sign-up by ID
       description: Retrieve the details of the sign-up with the given ID
       tags:
-        - Sign-ups
+        - Sign Ups
       parameters:
         - name: id
           in: path
@@ -5158,7 +5162,7 @@ paths:
       summary: Update a sign-up
       description: Update the sign-up with the given ID
       tags:
-        - Sign-ups
+        - Sign Ups
       parameters:
         - name: id
           in: path
