@@ -6024,6 +6024,8 @@ components:
             $ref: '#/components/schemas/ClerkError'
         meta:
           type: object
+        clerk_trace_id:
+          type: string
       required:
         - errors
     OTP:
