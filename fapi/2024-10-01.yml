@@ -382,6 +382,29 @@ paths:
             application/json:
               schema:
                 type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - healthy
+                required:
+                  - status
+        '503':
+          description: Service is unavailable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - unhealthy
+                  message:
+                    type: string
+                required:
+                  - status
+                  - message
   /v1/proxy-health:
     get:
       summary: Get Proxy Health
@@ -395,14 +418,32 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
+                oneOf:
+                  - type: object
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                          - healthy
+                      x_forwarded_for:
+                        type: string
+                    required:
+                      - status
+                      - x_forwarded_for
+                  - type: object
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                          - unhealthy
+                      message:
+                        type: string
+                    required:
+                      - status
+                      - message
         '400':
           description: Bad request
-        '404':
-          description: Not found
+          $ref: '#/components/responses/ClerkErrors'
         '503':
           description: Configuration is invalid or service is unavailable
           content:
@@ -412,8 +453,13 @@ paths:
                 properties:
                   status:
                     type: string
+                    enum:
+                      - unhealthy
                   message:
                     type: string
+                required:
+                  - status
+                  - message
   /v1/client:
     get:
       summary: Get Current Client
@@ -4236,6 +4282,8 @@ paths:
                 email_address:
                   type: string
                   nullable: false
+              required:
+                - email_address
       responses:
         '200':
           $ref: '#/components/responses/Client.WaitlistEntry'
@@ -4479,6 +4527,8 @@ components:
             $ref: '#/components/schemas/ClerkError'
         meta:
           type: object
+        clerk_trace_id:
+          type: string
       required:
         - errors
     OAuth.TokenInfo:
@@ -4642,6 +4692,8 @@ components:
           deprecated: true
         url_based_session_syncing:
           type: boolean
+        reverification:
+          type: boolean
       required:
         - id
         - object
@@ -4659,6 +4711,7 @@ components:
         - single_session_mode
         - enhanced_email_deliverability
         - test_mode
+        - reverification
     Image:
       type: object
       properties:
@@ -6222,6 +6275,17 @@ components:
           format: int64
           description: |
             Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - name
+        - slug
+        - has_image
+        - max_allowed_memberships
+        - admin_delete_enabled
+        - public_metadata
+        - created_at
+        - updated_at
     Client.OrganizationMembership:
       type: object
       properties:
