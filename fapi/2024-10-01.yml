@@ -6222,6 +6222,17 @@ components:
           format: int64
           description: |
             Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - name
+        - slug
+        - has_image
+        - max_allowed_memberships
+        - admin_delete_enabled
+        - public_metadata
+        - created_at
+        - updated_at
     Client.OrganizationMembership:
       type: object
       properties:
