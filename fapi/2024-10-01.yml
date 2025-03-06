@@ -120,6 +120,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/WellKnown.JWKS'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /.well-known/apple-app-site-association:
     get:
       summary: Apple App Site Association
@@ -130,7 +132,9 @@ paths:
         - Well Known
       responses:
         '200':
-          description: The Apple App Site Association file
+          $ref: '#/components/responses/WellKnown.AppleAppSiteAssociation'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /.well-known/openid-configuration:
     get:
       summary: Basic OpenID Configuration Payload
@@ -310,7 +314,7 @@ paths:
           $ref: '#/components/responses/Client.Environment'
         '400':
           $ref: '#/components/responses/ClerkErrors'
-  /v1/saml/metadata/{saml_connection_id}:
+  /v1/saml/metadata/{saml_connection_id}.xml:
     get:
       summary: SAML Metadata
       description: The Service Provider's SAML metadata
@@ -382,6 +386,29 @@ paths:
             application/json:
               schema:
                 type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - healthy
+                required:
+                  - status
+        '503':
+          description: Service is unavailable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - unhealthy
+                  message:
+                    type: string
+                required:
+                  - status
+                  - message
   /v1/proxy-health:
     get:
       summary: Get Proxy Health
@@ -395,14 +422,32 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
+                oneOf:
+                  - type: object
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                          - healthy
+                      x_forwarded_for:
+                        type: string
+                    required:
+                      - status
+                      - x_forwarded_for
+                  - type: object
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                          - unhealthy
+                      message:
+                        type: string
+                    required:
+                      - status
+                      - message
         '400':
           description: Bad request
-        '404':
-          description: Not found
+          $ref: '#/components/responses/ClerkErrors'
         '503':
           description: Configuration is invalid or service is unavailable
           content:
@@ -412,8 +457,13 @@ paths:
                 properties:
                   status:
                     type: string
+                    enum:
+                      - unhealthy
                   message:
                     type: string
+                required:
+                  - status
+                  - message
   /v1/client:
     get:
       summary: Get Current Client
@@ -1610,6 +1660,8 @@ paths:
                   jwt:
                     type: string
         '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
           $ref: '#/components/responses/ClerkErrors'
   /v1/client/sessions/{session_id}/verify:
     post:
@@ -4236,6 +4288,8 @@ paths:
                 email_address:
                   type: string
                   nullable: false
+              required:
+                - email_address
       responses:
         '200':
           $ref: '#/components/responses/Client.WaitlistEntry'
@@ -4305,6 +4359,273 @@ components:
                 type: array
                 items:
                   type: string
+    JWKS.ed25519.PublicKey:
+      type: object
+      properties:
+        kid:
+          type: string
+        alg:
+          type: string
+        use:
+          type: string
+        kty:
+          type: string
+          enum:
+            - OKP
+        crv:
+          type: string
+          enum:
+            - Ed25519
+        x:
+          type: string
+        x5c:
+          type: array
+          items:
+            type: string
+        x5t:
+          type: string
+        x5t#S256:
+          type: string
+        x5u:
+          type: string
+      required:
+        - kid
+        - alg
+        - use
+        - kty
+        - crv
+        - x
+    JWKS.ecdsa.PublicKey:
+      type: object
+      properties:
+        kid:
+          type: string
+        alg:
+          type: string
+        use:
+          type: string
+        kty:
+          type: string
+          enum:
+            - EC
+        crv:
+          type: string
+        x:
+          type: string
+        'y':
+          type: string
+        x5c:
+          type: array
+          items:
+            type: string
+        x5t:
+          type: string
+        x5t#S256:
+          type: string
+        x5u:
+          type: string
+      required:
+        - kid
+        - alg
+        - use
+        - kty
+        - crv
+        - x
+        - 'y'
+    JWKS.rsa.PublicKey:
+      type: object
+      properties:
+        kid:
+          type: string
+        alg:
+          type: string
+        use:
+          type: string
+        kty:
+          type: string
+          enum:
+            - RSA
+        'n':
+          type: string
+        e:
+          type: string
+        x5c:
+          type: array
+          items:
+            type: string
+        x5t:
+          type: string
+        x5t#S256:
+          type: string
+        x5u:
+          type: string
+      required:
+        - kid
+        - alg
+        - use
+        - kty
+        - 'n'
+        - e
+    JWKS.ed25519.PrivateKey:
+      type: object
+      properties:
+        kid:
+          type: string
+        alg:
+          type: string
+        use:
+          type: string
+        kty:
+          type: string
+          enum:
+            - OKP
+        crv:
+          type: string
+          enum:
+            - Ed25519
+        x:
+          type: string
+        d:
+          type: string
+        x5c:
+          type: array
+          items:
+            type: string
+        x5t:
+          type: string
+        x5t#S256:
+          type: string
+        x5u:
+          type: string
+      required:
+        - kid
+        - alg
+        - use
+        - kty
+        - crv
+        - x
+        - d
+    JWKS.ecdsa.PrivateKey:
+      type: object
+      properties:
+        kid:
+          type: string
+        alg:
+          type: string
+        use:
+          type: string
+        kty:
+          type: string
+          enum:
+            - EC
+        crv:
+          type: string
+        x:
+          type: string
+        'y':
+          type: string
+        d:
+          type: string
+        x5c:
+          type: array
+          items:
+            type: string
+        x5t:
+          type: string
+        x5t#S256:
+          type: string
+        x5u:
+          type: string
+      required:
+        - kid
+        - alg
+        - use
+        - kty
+        - crv
+        - x
+        - 'y'
+        - d
+    JWKS.rsa.PrivateKey:
+      type: object
+      properties:
+        kid:
+          type: string
+        alg:
+          type: string
+        use:
+          type: string
+        kty:
+          type: string
+          enum:
+            - RSA
+        'n':
+          type: string
+        e:
+          type: string
+        d:
+          type: string
+        p:
+          type: string
+        q:
+          type: string
+        dp:
+          type: string
+        dq:
+          type: string
+        qi:
+          type: string
+        x5c:
+          type: array
+          items:
+            type: string
+        x5t:
+          type: string
+        x5t#S256:
+          type: string
+        x5u:
+          type: string
+      required:
+        - kid
+        - alg
+        - use
+        - kty
+        - crv
+        - 'n'
+        - e
+        - d
+        - p
+        - q
+    JWKS.symmetric.Key:
+      type: object
+      properties:
+        kid:
+          type: string
+        alg:
+          type: string
+        use:
+          type: string
+        kty:
+          type: string
+          enum:
+            - oct
+        k:
+          type: string
+        x5c:
+          type: array
+          items:
+            type: string
+        x5t:
+          type: string
+        x5t#S256:
+          type: string
+        x5u:
+          type: string
+      required:
+        - kid
+        - alg
+        - use
+        - kty
+        - k
     JWKS:
       type: object
       additionalProperties: false
@@ -4312,24 +4633,55 @@ components:
         keys:
           type: array
           items:
-            type: object
-            additionalProperties: false
-            properties:
-              use:
-                type: string
-              kty:
-                type: string
-              kid:
-                type: string
-              alg:
-                type: string
-              'n':
-                type: string
-              e:
-                type: string
-              x:
-                type: string
-              crv:
+            oneOf:
+              - $ref: '#/components/schemas/JWKS.ed25519.PublicKey'
+              - $ref: '#/components/schemas/JWKS.ecdsa.PublicKey'
+              - $ref: '#/components/schemas/JWKS.rsa.PublicKey'
+              - $ref: '#/components/schemas/JWKS.ed25519.PrivateKey'
+              - $ref: '#/components/schemas/JWKS.ecdsa.PrivateKey'
+              - $ref: '#/components/schemas/JWKS.rsa.PrivateKey'
+              - $ref: '#/components/schemas/JWKS.symmetric.Key'
+    ClerkError:
+      type: object
+      properties:
+        message:
+          type: string
+        long_message:
+          type: string
+        code:
+          type: string
+        meta:
+          type: object
+        clerk_trace_id:
+          type: string
+      required:
+        - message
+        - long_message
+        - code
+    ClerkErrors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClerkError'
+        meta:
+          type: object
+        clerk_trace_id:
+          type: string
+      required:
+        - errors
+    WellKnown.AppleAppSiteAssociation:
+      type: object
+      additionalProperties: false
+      properties:
+        webcredentials:
+          type: object
+          additionalProperties: false
+          properties:
+            apps:
+              type: array
+              items:
                 type: string
     WellKnown.OpenIDConfiguration:
       type: object
@@ -4385,6 +4737,23 @@ components:
           type: boolean
         frontchannel_logout_supported:
           type: boolean
+      required:
+        - issuer
+        - authorization_endpoint
+        - token_endpoint
+        - userinfo_endpoint
+        - jwks_uri
+        - scopes_supported
+        - response_types_supported
+        - response_modes_supported
+        - grant_types_supported
+        - subject_types_supported
+        - id_token_signing_alg_values_supported
+        - token_endpoint_auth_methods_supported
+        - claims_supported
+        - code_challenge_methods_supported
+        - backchannel_logout_supported
+        - frontchannel_logout_supported
     OAuth.Token:
       type: object
       additionalProperties: false
@@ -4453,34 +4822,6 @@ components:
         - instance_id
         - user_id
         - sub
-    ClerkError:
-      type: object
-      properties:
-        message:
-          type: string
-        long_message:
-          type: string
-        code:
-          type: string
-        meta:
-          type: object
-        clerk_trace_id:
-          type: string
-      required:
-        - message
-        - long_message
-        - code
-    ClerkErrors:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/ClerkError'
-        meta:
-          type: object
-      required:
-        - errors
     OAuth.TokenInfo:
       type: object
       additionalProperties: false
@@ -4633,32 +4974,38 @@ components:
           type: boolean
         test_mode:
           type: boolean
+        cookieless_dev:
+          type: boolean
+          description: Please use `url_based_session_syncing` instead
+          deprecated: true
+        url_based_session_syncing:
+          type: boolean
         claimed_at:
           type: integer
           format: int64
           nullable: true
-        cookieless_dev:
-          type: boolean
-          deprecated: true
-        url_based_session_syncing:
+        reverification:
           type: boolean
       required:
-        - id
         - object
+        - id
         - first_name
         - last_name
         - email_address
         - phone_number
         - username
         - password
-        - identification_strategies
         - identification_requirements
+        - identification_strategies
         - first_factors
         - second_factors
         - email_address_verification_strategies
         - single_session_mode
         - enhanced_email_deliverability
         - test_mode
+        - url_based_session_syncing
+        - claimed_at
+        - reverification
     Image:
       type: object
       properties:
@@ -4686,6 +5033,10 @@ components:
           type: string
         instance_environment_type:
           type: string
+          enum:
+            - production
+            - development
+            - staging
         application_name:
           type: string
         theme:
@@ -4695,29 +5046,9 @@ components:
           enum:
             - password
             - otp
-        logo_image:
-          type: object
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/Image'
-          deprecated: true
-        logo_url:
-          nullable: true
-          type: string
-          deprecated: true
         logo_image_url:
           nullable: true
           type: string
-        favicon_image:
-          type: object
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/Image'
-          deprecated: true
-        favicon_url:
-          nullable: true
-          type: string
-          deprecated: true
         favicon_image_url:
           nullable: true
           type: string
@@ -4747,12 +5078,27 @@ components:
           type: string
         create_organization_url:
           type: string
-        after_create_organization_url:
-          type: string
         after_leave_organization_url:
+          type: string
+        after_create_organization_url:
           type: string
         logo_link_url:
           type: string
+        support_email:
+          type: string
+          nullable: true
+        branded:
+          type: boolean
+        experimental_force_oauth_first:
+          type: boolean
+        clerk_js_version:
+          type: string
+          nullable: true
+        show_devmode_warning:
+          type: boolean
+        google_one_tap_client_id:
+          type: string
+          nullable: true
         help_url:
           type: string
           nullable: true
@@ -4762,20 +5108,31 @@ components:
         terms_url:
           type: string
           nullable: true
-        support_email:
-          type: string
+        logo_url:
           nullable: true
-        clerk_js_version:
           type: string
+          deprecated: true
+          description: Use `logo_image_url` instead
+        favicon_url:
           nullable: true
-        branded:
-          type: boolean
-        experimental_force_oauth_first:
-          type: boolean
+          type: string
+          deprecated: true
+          description: Use `favicon_image_url` instead
+        logo_image:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Image'
+          deprecated: true
+          description: Use `logo_image_url` instead
+        favicon_image:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Image'
+          deprecated: true
+          description: Use `favicon_image_url` instead
         captcha_public_key:
-          type: string
-          nullable: true
-        captcha_public_key_invisible:
           type: string
           nullable: true
         captcha_widget_type:
@@ -4784,6 +5141,9 @@ components:
           enum:
             - smart
             - invisible
+        captcha_public_key_invisible:
+          type: string
+          nullable: true
         captcha_provider:
           type: string
           nullable: true
@@ -4796,11 +5156,6 @@ components:
         captcha_heartbeat:
           type: boolean
           nullable: true
-        google_one_tap_client_id:
-          type: string
-          nullable: true
-        show_devmode_warning:
-          type: boolean
       required:
         - object
         - id
@@ -4808,21 +5163,39 @@ components:
         - application_name
         - theme
         - preferred_sign_in_strategy
-        - logo_image_url
-        - favicon_url
         - home_url
         - sign_in_url
         - sign_up_url
         - user_profile_url
+        - waitlist_url
         - after_sign_in_url
         - after_sign_up_url
         - after_sign_out_one_url
+        - after_sign_out_all_url
         - after_switch_session_url
+        - after_join_waitlist_url
+        - organization_profile_url
+        - create_organization_url
+        - after_leave_organization_url
+        - after_create_organization_url
+        - logo_link_url
         - support_email
+        - branded
         - experimental_force_oauth_first
+        - clerk_js_version
+        - show_devmode_warning
+        - google_one_tap_client_id
+        - help_url
+        - privacy_policy_url
+        - terms_url
+        - logo_url
+        - favicon_url
+        - logo_image
+        - favicon_image
         - captcha_public_key
         - captcha_widget_type
         - captcha_public_key_invisible
+        - captcha_provider
         - captcha_oauth_bypass
     UserSettings.Attribute:
       type: object
@@ -4850,6 +5223,15 @@ components:
             type: string
         verify_at_sign_up:
           type: boolean
+      required:
+        - enabled
+        - required
+        - used_for_first_factor
+        - first_factors
+        - used_for_second_factor
+        - second_factors
+        - verifications
+        - verify_at_sign_up
     UserSettings.Attributes:
       type: object
       additionalProperties: false
@@ -4860,17 +5242,17 @@ components:
           $ref: '#/components/schemas/UserSettings.Attribute'
         username:
           $ref: '#/components/schemas/UserSettings.Attribute'
-        password:
+        web3_wallet:
           $ref: '#/components/schemas/UserSettings.Attribute'
         first_name:
           $ref: '#/components/schemas/UserSettings.Attribute'
         last_name:
           $ref: '#/components/schemas/UserSettings.Attribute'
-        ticket:
-          $ref: '#/components/schemas/UserSettings.Attribute'
-        web3_wallet:
+        password:
           $ref: '#/components/schemas/UserSettings.Attribute'
         authenticator_app:
+          $ref: '#/components/schemas/UserSettings.Attribute'
+        ticket:
           $ref: '#/components/schemas/UserSettings.Attribute'
         backup_code:
           $ref: '#/components/schemas/UserSettings.Attribute'
@@ -4880,12 +5262,12 @@ components:
         - email_address
         - phone_number
         - username
-        - password
+        - web3_wallet
         - first_name
         - last_name
-        - ticket
-        - web3_wallet
+        - password
         - authenticator_app
+        - ticket
         - backup_code
         - passkey
     UserSettings.Social:
@@ -4906,22 +5288,46 @@ components:
           type: boolean
         deprecated:
           type: boolean
+        name:
+          type: string
+          description: A human readable name for the social provider.
+          example: Google
+        logo_url:
+          type: string
+          nullable: true
+          description: A URL pointing to the logo of the social provider.
+          example: https://img.clerk.com/static/google.png
       required:
         - enabled
         - required
         - authenticatable
+        - block_email_subaddresses
         - strategy
+        - not_selectable
+        - deprecated
     UserSettings.Socials:
       type: object
       additionalProperties: false
       properties:
+        oauth_apple:
+          $ref: '#/components/schemas/UserSettings.Social'
         oauth_atlassian:
           $ref: '#/components/schemas/UserSettings.Social'
         oauth_bitbucket:
           $ref: '#/components/schemas/UserSettings.Social'
+        oauth_box:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_coinbase:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_custom_mock:
+          $ref: '#/components/schemas/UserSettings.Social'
         oauth_discord:
           $ref: '#/components/schemas/UserSettings.Social'
         oauth_dropbox:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_enstall:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_expressen:
           $ref: '#/components/schemas/UserSettings.Social'
         oauth_facebook:
           $ref: '#/components/schemas/UserSettings.Social'
@@ -4933,7 +5339,27 @@ components:
           $ref: '#/components/schemas/UserSettings.Social'
         oauth_hubspot:
           $ref: '#/components/schemas/UserSettings.Social'
+        oauth_huggingface:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_instagram:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_line:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_linear:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_linkedin:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_linkedin_oidc:
+          $ref: '#/components/schemas/UserSettings.Social'
         oauth_microsoft:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_mock:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_notion:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_slack:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_spotify:
           $ref: '#/components/schemas/UserSettings.Social'
         oauth_tiktok:
           $ref: '#/components/schemas/UserSettings.Social'
@@ -4941,33 +5367,9 @@ components:
           $ref: '#/components/schemas/UserSettings.Social'
         oauth_twitter:
           $ref: '#/components/schemas/UserSettings.Social'
-        oauth_linkedin:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_linkedin_oidc:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_notion:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_apple:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_line:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_coinbase:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_box:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_xero:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_spotify:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_slack:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_linear:
-          $ref: '#/components/schemas/UserSettings.Social'
         oauth_x:
           $ref: '#/components/schemas/UserSettings.Social'
-        oauth_mock:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_custom_mock:
+        oauth_xero:
           $ref: '#/components/schemas/UserSettings.Social'
     UserSettings.EnterpriseSSO:
       type: object
@@ -4975,20 +5377,20 @@ components:
       properties:
         enabled:
           type: boolean
-    UserSettings.SecondFactor:
-      type: object
-      additionalProperties: false
-      properties:
-        required:
-          type: boolean
       required:
-        - required
+        - enabled
     UserSettings.SignIn:
       type: object
       additionalProperties: false
       properties:
         second_factor:
-          $ref: '#/components/schemas/UserSettings.SecondFactor'
+          type: object
+          additionalProperties: false
+          properties:
+            required:
+              type: boolean
+          required:
+            - required
       required:
         - second_factor
     UserSettings.SignUp:
@@ -4999,6 +5401,9 @@ components:
           type: boolean
         captcha_widget_type:
           type: string
+          enum:
+            - smart
+            - invisible
         custom_action_required:
           type: boolean
         progressive:
@@ -5008,21 +5413,17 @@ components:
           enum:
             - public
             - restricted
+            - waitlist
         legal_consent_enabled:
           type: boolean
       required:
         - captcha_enabled
+        - captcha_widget_type
         - custom_action_required
         - progressive
-    UserSettings.Restrictions.Allowlist:
-      type: object
-      additionalProperties: false
-      properties:
-        enabled:
-          type: boolean
-      required:
-        - enabled
-    UserSettings.Restrictions.Blocklist:
+        - mode
+        - legal_consent_enabled
+    UserSettings.Restrictions.Enabled:
       type: object
       additionalProperties: false
       properties:
@@ -5035,47 +5436,21 @@ components:
       additionalProperties: false
       properties:
         allowlist:
-          $ref: '#/components/schemas/UserSettings.Restrictions.Allowlist'
+          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
         blocklist:
-          $ref: '#/components/schemas/UserSettings.Restrictions.Blocklist'
+          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
         block_email_subaddresses:
-          type: object
-          properties:
-            enabled:
-              type: boolean
-          required:
-            - enabled
+          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
         block_disposable_email_domains:
-          type: object
-          properties:
-            enabled:
-              type: boolean
-          required:
-            - enabled
+          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
         ignore_dots_for_gmail_addresses:
-          type: object
-          properties:
-            enabled:
-              type: boolean
-          required:
-            - enabled
+          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
       required:
         - allowlist
         - blocklist
         - block_email_subaddresses
         - block_disposable_email_domains
         - ignore_dots_for_gmail_addresses
-    UserSettings.UsernameSettings:
-      type: object
-      additionalProperties: false
-      properties:
-        min_length:
-          type: integer
-        max_length:
-          type: integer
-      required:
-        - min_length
-        - max_length
     UserSettings.PasswordSettings:
       type: object
       additionalProperties: false
@@ -5118,6 +5493,19 @@ components:
         - min_zxcvbn_strength
         - enforce_hibp_on_sign_in
         - allowed_special_characters
+    UserSettings.UsernameSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        min_length:
+          type: integer
+          nullable: true
+        max_length:
+          type: integer
+          nullable: true
+      required:
+        - min_length
+        - max_length
     UserSettings.ActionsSettings:
       type: object
       additionalProperties: false
@@ -5132,22 +5520,21 @@ components:
       required:
         - delete_self
         - create_organization
+        - create_organizations_limit
     UserSettings.AttackProtectionSettings.UserLockout:
       type: object
       additionalProperties: false
       properties:
         enabled:
           type: boolean
-        duration_in_minutes:
-          type: integer
-          nullable: true
         max_attempts:
           type: integer
-          nullable: true
+        duration_in_minutes:
+          type: integer
       required:
         - enabled
-        - duration_in_minutes
         - max_attempts
+        - duration_in_minutes
     UserSettings.AttackProtectionSettings.PII:
       type: object
       additionalProperties: false
@@ -5174,18 +5561,22 @@ components:
           $ref: '#/components/schemas/UserSettings.AttackProtectionSettings.PII'
         email_link:
           $ref: '#/components/schemas/UserSettings.AttackProtectionSettings.EmailLink'
+      required:
+        - user_lockout
+        - pii
+        - email_link
     UserSettings.PasskeySettings:
       type: object
       additionalProperties: false
       properties:
         allow_autofill:
           type: boolean
-          description: |
-            Passkey UI will be shown when user interacts with the text input. Defaults to true.
+          description: Passkey UI will be shown when user interacts with the text input.
+          default: true
         show_sign_in_button:
           type: boolean
-          description: |
-            Passkey UI will be shown when user clicks on a button. Defaults to true.
+          description: Passkey UI will be shown when user clicks on a button.
+          default: true
       required:
         - allow_autofill
         - show_sign_in_button
@@ -5199,16 +5590,18 @@ components:
           $ref: '#/components/schemas/UserSettings.Socials'
         saml:
           $ref: '#/components/schemas/UserSettings.EnterpriseSSO'
+        enterprise_sso:
+          $ref: '#/components/schemas/UserSettings.EnterpriseSSO'
         sign_in:
           $ref: '#/components/schemas/UserSettings.SignIn'
         sign_up:
           $ref: '#/components/schemas/UserSettings.SignUp'
         restrictions:
           $ref: '#/components/schemas/UserSettings.Restrictions'
-        username_settings:
-          $ref: '#/components/schemas/UserSettings.UsernameSettings'
         password_settings:
           $ref: '#/components/schemas/UserSettings.PasswordSettings'
+        username_settings:
+          $ref: '#/components/schemas/UserSettings.UsernameSettings'
         actions:
           $ref: '#/components/schemas/UserSettings.ActionsSettings'
         attack_protection:
@@ -5218,10 +5611,14 @@ components:
       required:
         - attributes
         - social
+        - saml
+        - enterprise_sso
         - sign_in
         - sign_up
         - restrictions
         - password_settings
+        - username_settings
+        - actions
         - attack_protection
         - passkey_settings
     OrganizationSettings.ActionsSettings:
@@ -5271,6 +5668,9 @@ components:
       required:
         - enabled
         - max_allowed_memberships
+        - actions
+        - domains
+        - creator_role
     FraudSettings.NativeSettings:
       type: object
       additionalProperties: false
@@ -5296,6 +5696,14 @@ components:
           $ref: '#/components/schemas/FraudSettings.NativeSettings'
       required:
         - native
+    Client.CommerceSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        stripe_publishable_key:
+          type: string
+      required:
+        - stripe_publishable_key
     Client.Environment:
       type: object
       additionalProperties: false
@@ -5310,6 +5718,8 @@ components:
           $ref: '#/components/schemas/Client.OrganizationSettings'
         fraud_settings:
           $ref: '#/components/schemas/Client.FraudSettings'
+        commerce_settings:
+          $ref: '#/components/schemas/Client.CommerceSettings'
         maintenance_mode:
           type: boolean
     Stubs.SignInFactor:
@@ -6222,6 +6632,17 @@ components:
           format: int64
           description: |
             Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - name
+        - slug
+        - has_image
+        - max_allowed_memberships
+        - admin_delete_enabled
+        - public_metadata
+        - created_at
+        - updated_at
     Client.OrganizationMembership:
       type: object
       properties:
@@ -7669,6 +8090,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/JWKS'
+    ClerkErrors:
+      description: Request was not successful
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    WellKnown.AppleAppSiteAssociation:
+      description: Get the Apple App Site Association file
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WellKnown.AppleAppSiteAssociation'
     WellKnown.OpenIDConfiguration:
       description: Get a basic openid configuration payload
       content:
@@ -7687,12 +8120,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/OAuth.UserInfo'
-    ClerkErrors:
-      description: Request was not successful
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClerkErrors'
     OAuth.TokenInfo:
       description: Get information for an access or refresh token
       content:
