@@ -5830,6 +5830,273 @@ components:
       description: Secret key, obtained under "API Keys" in the Clerk Dashboard.
       bearerFormat: sk_<environment>_<secret value>
   schemas:
+    JWKS.ed25519.PublicKey:
+      type: object
+      properties:
+        kid:
+          type: string
+        alg:
+          type: string
+        use:
+          type: string
+        kty:
+          type: string
+          enum:
+            - OKP
+        crv:
+          type: string
+          enum:
+            - Ed25519
+        x:
+          type: string
+        x5c:
+          type: array
+          items:
+            type: string
+        x5t:
+          type: string
+        x5t#S256:
+          type: string
+        x5u:
+          type: string
+      required:
+        - kid
+        - alg
+        - use
+        - kty
+        - crv
+        - x
+    JWKS.ecdsa.PublicKey:
+      type: object
+      properties:
+        kid:
+          type: string
+        alg:
+          type: string
+        use:
+          type: string
+        kty:
+          type: string
+          enum:
+            - EC
+        crv:
+          type: string
+        x:
+          type: string
+        'y':
+          type: string
+        x5c:
+          type: array
+          items:
+            type: string
+        x5t:
+          type: string
+        x5t#S256:
+          type: string
+        x5u:
+          type: string
+      required:
+        - kid
+        - alg
+        - use
+        - kty
+        - crv
+        - x
+        - 'y'
+    JWKS.rsa.PublicKey:
+      type: object
+      properties:
+        kid:
+          type: string
+        alg:
+          type: string
+        use:
+          type: string
+        kty:
+          type: string
+          enum:
+            - RSA
+        'n':
+          type: string
+        e:
+          type: string
+        x5c:
+          type: array
+          items:
+            type: string
+        x5t:
+          type: string
+        x5t#S256:
+          type: string
+        x5u:
+          type: string
+      required:
+        - kid
+        - alg
+        - use
+        - kty
+        - 'n'
+        - e
+    JWKS.ed25519.PrivateKey:
+      type: object
+      properties:
+        kid:
+          type: string
+        alg:
+          type: string
+        use:
+          type: string
+        kty:
+          type: string
+          enum:
+            - OKP
+        crv:
+          type: string
+          enum:
+            - Ed25519
+        x:
+          type: string
+        d:
+          type: string
+        x5c:
+          type: array
+          items:
+            type: string
+        x5t:
+          type: string
+        x5t#S256:
+          type: string
+        x5u:
+          type: string
+      required:
+        - kid
+        - alg
+        - use
+        - kty
+        - crv
+        - x
+        - d
+    JWKS.ecdsa.PrivateKey:
+      type: object
+      properties:
+        kid:
+          type: string
+        alg:
+          type: string
+        use:
+          type: string
+        kty:
+          type: string
+          enum:
+            - EC
+        crv:
+          type: string
+        x:
+          type: string
+        'y':
+          type: string
+        d:
+          type: string
+        x5c:
+          type: array
+          items:
+            type: string
+        x5t:
+          type: string
+        x5t#S256:
+          type: string
+        x5u:
+          type: string
+      required:
+        - kid
+        - alg
+        - use
+        - kty
+        - crv
+        - x
+        - 'y'
+        - d
+    JWKS.rsa.PrivateKey:
+      type: object
+      properties:
+        kid:
+          type: string
+        alg:
+          type: string
+        use:
+          type: string
+        kty:
+          type: string
+          enum:
+            - RSA
+        'n':
+          type: string
+        e:
+          type: string
+        d:
+          type: string
+        p:
+          type: string
+        q:
+          type: string
+        dp:
+          type: string
+        dq:
+          type: string
+        qi:
+          type: string
+        x5c:
+          type: array
+          items:
+            type: string
+        x5t:
+          type: string
+        x5t#S256:
+          type: string
+        x5u:
+          type: string
+      required:
+        - kid
+        - alg
+        - use
+        - kty
+        - crv
+        - 'n'
+        - e
+        - d
+        - p
+        - q
+    JWKS.symmetric.Key:
+      type: object
+      properties:
+        kid:
+          type: string
+        alg:
+          type: string
+        use:
+          type: string
+        kty:
+          type: string
+          enum:
+            - oct
+        k:
+          type: string
+        x5c:
+          type: array
+          items:
+            type: string
+        x5t:
+          type: string
+        x5t#S256:
+          type: string
+        x5u:
+          type: string
+      required:
+        - kid
+        - alg
+        - use
+        - kty
+        - k
     JWKS:
       type: object
       additionalProperties: false
@@ -5837,25 +6104,14 @@ components:
         keys:
           type: array
           items:
-            type: object
-            additionalProperties: false
-            properties:
-              use:
-                type: string
-              kty:
-                type: string
-              kid:
-                type: string
-              alg:
-                type: string
-              'n':
-                type: string
-              e:
-                type: string
-              x:
-                type: string
-              crv:
-                type: string
+            oneOf:
+              - $ref: '#/components/schemas/JWKS.ed25519.PublicKey'
+              - $ref: '#/components/schemas/JWKS.ecdsa.PublicKey'
+              - $ref: '#/components/schemas/JWKS.rsa.PublicKey'
+              - $ref: '#/components/schemas/JWKS.ed25519.PrivateKey'
+              - $ref: '#/components/schemas/JWKS.ecdsa.PrivateKey'
+              - $ref: '#/components/schemas/JWKS.rsa.PrivateKey'
+              - $ref: '#/components/schemas/JWKS.symmetric.Key'
     SessionActivityResponse:
       type: object
       nullable: true
@@ -6028,6 +6284,8 @@ components:
             $ref: '#/components/schemas/ClerkError'
         meta:
           type: object
+        clerk_trace_id:
+          type: string
       required:
         - errors
     OTP:
