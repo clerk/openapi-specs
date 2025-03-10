@@ -3053,14 +3053,8 @@ paths:
       tags:
         - Organizations Memberships
       parameters:
-        - in: query
-          name: limit
-          schema:
-            type: integer
-        - in: query
-          name: offset
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedOrganizationMemberships'
@@ -3099,14 +3093,8 @@ paths:
       tags:
         - Organizations Memberships
       parameters:
-        - in: query
-          name: limit
-          schema:
-            type: integer
-        - in: query
-          name: offset
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedOrganizationInvitationsUserContext'
@@ -3145,14 +3133,8 @@ paths:
       tags:
         - Organizations Memberships
       parameters:
-        - in: query
-          name: limit
-          schema:
-            type: integer
-        - in: query
-          name: offset
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: query
           name: status
           schema:
@@ -3449,22 +3431,14 @@ paths:
       tags:
         - Invitations
       parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: path
           name: organization_id
           required: true
           schema:
             type: string
           description: The id of the organization for which the invitation will be retrieved.
-        - in: query
-          required: false
-          name: limit
-          schema:
-            type: number
-        - in: query
-          required: false
-          name: offset
-          schema:
-            type: number
         - in: query
           name: status
           required: false
@@ -3668,22 +3642,14 @@ paths:
       tags:
         - Members
       parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: path
           required: true
           name: organization_id
           schema:
             type: string
           description: The organization ID.
-        - in: query
-          required: false
-          name: limit
-          schema:
-            type: number
-        - in: query
-          required: false
-          name: offset
-          schema:
-            type: number
         - in: query
           required: false
           name: query
@@ -3834,22 +3800,14 @@ paths:
         - Domains
       operationId: ListOrganizationDomains
       parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: path
           required: true
           name: organization_id
           schema:
             type: string
           description: The organization ID.
-        - in: query
-          required: false
-          name: limit
-          schema:
-            type: number
-        - in: query
-          required: false
-          name: offset
-          schema:
-            type: number
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedOrganizationDomains'
@@ -4085,22 +4043,14 @@ paths:
         - Membership Requests
       operationId: listOrganizationMembershipRequests
       parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: path
           required: true
           name: organization_id
           schema:
             type: string
           description: The organization ID.
-        - in: query
-          required: false
-          name: limit
-          schema:
-            type: number
-        - in: query
-          required: false
-          name: offset
-          schema:
-            type: number
         - in: query
           required: false
           name: status
@@ -4193,22 +4143,14 @@ paths:
         - Roles
       operationId: ListOrganizationRoles
       parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: path
           required: true
           name: organization_id
           schema:
             type: string
           description: The organization ID.
-        - in: query
-          required: false
-          name: limit
-          schema:
-            type: number
-        - in: query
-          required: false
-          name: offset
-          schema:
-            type: number
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedRoles'
@@ -6304,9 +6246,6 @@ components:
             String representing the object's type. Objects of the same type share the same value.
           enum:
             - session
-        actor:
-          type: object
-          nullable: true
         status:
           type: string
           enum:
@@ -6316,12 +6255,26 @@ components:
             - expired
             - removed
             - abandoned
-        last_active_at:
-          type: integer
         expire_at:
           type: integer
+          format: int64
         abandon_at:
           type: integer
+          format: int64
+        last_active_at:
+          type: integer
+          format: int64
+        actor:
+          type: object
+          nullable: true
+          additionalProperties: true
+      required:
+        - id
+        - object
+        - status
+        - expire_at
+        - abandon_at
+        - last_active_at
     Stubs.Verification.Invitation:
       type: object
       additionalProperties: false
@@ -6452,6 +6405,7 @@ components:
           description: |
             Unix timestamp of creation
       required:
+        - id
         - object
         - email_address
         - verification
@@ -6505,6 +6459,7 @@ components:
           description: |
             Unix timestamp of creation
       required:
+        - id
         - object
         - phone_number
         - verification
@@ -6543,6 +6498,7 @@ components:
           description: |
             Unix timestamp of creation
       required:
+        - id
         - object
         - web3_wallet
         - verification
@@ -6567,6 +6523,7 @@ components:
           format: int64
           description: |
             Unix timestamp of when the passkey was last used.
+          nullable: true
         verification:
           nullable: true
           type: object
@@ -6601,16 +6558,8 @@ components:
             - organization
         name:
           type: string
-        max_allowed_memberships:
-          type: integer
-        admin_delete_enabled:
-          type: boolean
         slug:
           type: string
-        logo_url:
-          type: string
-          nullable: true
-          deprecated: true
         image_url:
           type: string
         has_image:
@@ -6619,6 +6568,10 @@ components:
           type: integer
         pending_invitations_count:
           type: integer
+        max_allowed_memberships:
+          type: integer
+        admin_delete_enabled:
+          type: boolean
         public_metadata:
           type: object
           additionalProperties: true
@@ -6632,6 +6585,11 @@ components:
           format: int64
           description: |
             Unix timestamp of last update.
+        logo_url:
+          type: string
+          nullable: true
+          deprecated: true
+          description: Deprecated. Use `image_url` instead.
       required:
         - object
         - id
@@ -6643,6 +6601,36 @@ components:
         - public_metadata
         - created_at
         - updated_at
+    Client.PublicUserData:
+      type: object
+      additionalProperties: false
+      properties:
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        image_url:
+          type: string
+          nullable: true
+        has_image:
+          type: boolean
+        identifier:
+          type: string
+        profile_image_url:
+          type: string
+          nullable: true
+          deprecated: true
+          description: Use `image_url` instead.
+        user_id:
+          type: string
+          nullable: true
+      required:
+        - first_name
+        - last_name
+        - identifier
+        - has_image
     Client.OrganizationMembership:
       type: object
       properties:
@@ -6654,8 +6642,18 @@ components:
             String representing the object's type. Objects of the same type share the same value.
           enum:
             - organization_membership
+        public_metadata:
+          type: object
+          additionalProperties: true
         role:
           type: string
+        role_name:
+          type: string
+        permissions:
+          type: array
+          nullable: true
+          items:
+            type: string
         created_at:
           type: integer
           format: int64
@@ -6665,34 +6663,22 @@ components:
           format: int64
           description: Unix timestamp of last update.
         organization:
-          type: object
-          nullable: false
-          allOf:
-            - $ref: '#/components/schemas/Client.Organization'
+          $ref: '#/components/schemas/Client.Organization'
         public_user_data:
           type: object
-          additionalProperties: false
-          properties:
-            user_id:
-              type: string
-              nullable: false
-            first_name:
-              type: string
-              nullable: true
-            last_name:
-              type: string
-              nullable: true
-            profile_image_url:
-              type: string
-              nullable: true
-              deprecated: true
-            image_url:
-              type: string
-            has_image:
-              type: boolean
-            identifier:
-              type: string
-              nullable: true
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.PublicUserData'
+      required:
+        - object
+        - id
+        - public_metadata
+        - role
+        - role_name
+        - permissions
+        - created_at
+        - updated_at
+        - organization
     Oauth:
       type: object
       additionalProperties: false
@@ -6777,6 +6763,8 @@ components:
           type: string
         provider:
           type: string
+        identification_id:
+          type: string
         provider_user_id:
           description: The unique ID of the user in the external provider's system
           type: string
@@ -6791,6 +6779,7 @@ components:
         avatar_url:
           type: string
           deprecated: true
+          description: Please use `image_url` instead
         image_url:
           type: string
           nullable: true
@@ -6803,12 +6792,6 @@ components:
         label:
           type: string
           nullable: true
-        verification:
-          type: object
-          nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/Oauth'
-            - $ref: '#/components/schemas/GoogleOneTap'
         created_at:
           type: integer
           format: int64
@@ -6819,14 +6802,26 @@ components:
           format: int64
           description: |
             Unix timestamp of creation
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Oauth'
+            - $ref: '#/components/schemas/GoogleOneTap'
       required:
         - object
         - id
+        - provider
+        - identification_id
+        - provider_user_id
         - approved_scopes
         - email_address
+        - first_name
+        - last_name
         - public_metadata
         - created_at
         - updated_at
+        - verification
     Stubs.SAMLConnection.SAMLAccount:
       type: object
       additionalProperties: false
@@ -6916,6 +6911,11 @@ components:
         - provider
         - active
         - email_address
+        - first_name
+        - last_name
+        - provider_user_id
+        - public_metadata
+        - saml_connection
         - verification
     Client.User:
       type: object
@@ -6928,18 +6928,6 @@ components:
             String representing the object's type. Objects of the same type share the same value.
           enum:
             - user
-        external_id:
-          nullable: true
-          type: string
-        primary_email_address_id:
-          nullable: true
-          type: string
-        primary_phone_number_id:
-          nullable: true
-          type: string
-        primary_web3_wallet_id:
-          nullable: true
-          type: string
         username:
           nullable: true
           type: string
@@ -6949,23 +6937,27 @@ components:
         last_name:
           nullable: true
           type: string
-        profile_image_url:
-          type: string
-          deprecated: true
         image_url:
           type: string
         has_image:
           type: boolean
-        public_metadata:
-          type: object
-          additionalProperties: true
-        private_metadata:
+        primary_email_address_id:
           nullable: true
-          type: object
-          additionalProperties: true
-        unsafe_metadata:
-          type: object
-          additionalProperties: true
+          type: string
+        primary_phone_number_id:
+          nullable: true
+          type: string
+        primary_web3_wallet_id:
+          nullable: true
+          type: string
+        password_enabled:
+          type: boolean
+        two_factor_enabled:
+          type: boolean
+        totp_enabled:
+          type: boolean
+        backup_code_enabled:
+          type: boolean
         email_addresses:
           type: array
           items:
@@ -6986,14 +6978,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Client.OrganizationMembership'
-        password_enabled:
-          type: boolean
-        two_factor_enabled:
-          type: boolean
-        totp_enabled:
-          type: boolean
-        backup_code_enabled:
-          type: boolean
         external_accounts:
           type: array
           items:
@@ -7002,16 +6986,33 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Client.SAMLAccount'
+        password_last_updated_at:
+          nullable: true
+          type: integer
+          format: int64
+          description: Unix timestamp of last update.
+          example: 1700690400000
+        public_metadata:
+          type: object
+          additionalProperties: true
+        private_metadata:
+          type: object
+          additionalProperties: true
+        unsafe_metadata:
+          type: object
+          additionalProperties: true
+        external_id:
+          nullable: true
+          type: string
         last_sign_in_at:
           type: integer
           format: int64
           nullable: true
-          description: |
-            Unix timestamp of last sign-in.
+          description: Unix timestamp of last sign-in.
+          example: 1700690400000
         banned:
           type: boolean
-          description: |
-            Flag to denote whether user is banned or not.
+          description: Flag to denote whether user is banned or not.
         locked:
           type: boolean
           description: |
@@ -7022,86 +7023,132 @@ components:
           nullable: true
           description: |
             The number of seconds remaining until the lockout period expires for a locked user. A null value for a locked user indicates that lockout never expires.
+          example: 300
         verification_attempts_remaining:
           type: integer
           format: int64
           nullable: true
           description: |
             The number of verification attempts remaining until the user is locked. Null if account lockout is not enabled. Note: if a user is locked explicitly via the Backend API, they may still have verification attempts remaining.
-        updated_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of last update.
         created_at:
           type: integer
           format: int64
-          description: |
-            Unix timestamp of creation.
+          description: Unix timestamp of creation.
+          example: 1700690400000
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of last update.
+          example: 1700690400000
         delete_self_enabled:
           type: boolean
-          description: |
-            If enabled, user can delete themselves via FAPI.
+          description: If enabled, user can delete themselves via FAPI.
         create_organization_enabled:
           type: boolean
-          description: |
-            If enabled, user can create organizations via FAPI.
+          description: If enabled, user can create organizations via FAPI.
         create_organizations_limit:
           type: integer
-          description: |
-            The maximum number of organizations the user can create. 0 means unlimited.
-          nullable: true
+          description: The maximum number of organizations the user can create. 0 means unlimited.
         last_active_at:
           type: integer
           format: int64
           nullable: true
-          description: |
-            Unix timestamp of the latest session activity, with day precision.
+          description: Unix timestamp of the latest session activity, with day precision.
+          example: 1700690400000
+        mfa_enabled_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp at which the user enabled MFA.
+          example: 1700690400000
+        mfa_disabled_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp at which the user disabled MFA.
+          example: 1700690400000
         legal_accepted_at:
           type: integer
           format: int64
           nullable: true
-          description: |
-            Unix timestamp at which the user accepted the legal requirements.
+          description: Unix timestamp at which the user accepted the legal requirements.
           example: 1700690400000
+        profile_image_url:
+          type: string
+          deprecated: true
+          description: Deprecated. Use `image_url` instead.
+      required:
+        - id
+        - object
+        - username
+        - first_name
+        - last_name
+        - has_image
+        - primary_email_address_id
+        - primary_phone_number_id
+        - primary_web3_wallet_id
+        - password_enabled
+        - two_factor_enabled
+        - totp_enabled
+        - backup_code_enabled
+        - email_addresses
+        - phone_numbers
+        - web3_wallets
+        - passkeys
+        - external_accounts
+        - saml_accounts
+        - enterprise_accounts
+        - public_metadata
+        - external_id
+        - last_sign_in_at
+        - banned
+        - locked
+        - lockout_expires_in_seconds
+        - verification_attempts_remaining
+        - created_at
+        - updated_at
+        - delete_self_enabled
+        - create_organization_enabled
+        - last_active_at
+        - mfa_enabled_at
+        - mfa_disabled_at
+        - legal_accepted_at
     Client.Session:
       allOf:
         - $ref: '#/components/schemas/Client.SessionBase'
         - type: object
           properties:
+            last_active_organization_id:
+              type: string
+              nullable: true
             user:
+              $ref: '#/components/schemas/Client.User'
+            public_user_data:
               type: object
               nullable: true
               allOf:
-                - $ref: '#/components/schemas/Client.User'
-            public_user_data:
-              type: object
-              additionalProperties: false
-              nullable: true
-              properties:
-                first_name:
-                  type: string
-                  nullable: true
-                last_name:
-                  type: string
-                  nullable: true
-                profile_image_url:
-                  type: string
-                  nullable: true
-                  deprecated: true
-                image_url:
-                  type: string
-                has_image:
-                  type: boolean
-                identifier:
-                  type: string
-                  nullable: true
+                - $ref: '#/components/schemas/Client.PublicUserData'
             factor_verification_age:
               type: array
-              description: |
-                Each item represents the minutes that have passed since the last time a first or second factor were verified.
+              description: Each item represents the minutes that have passed since the last time a first or second factor were verified.
               items:
                 type: integer
+            created_at:
+              type: integer
+              format: int64
+              description: Unix timestamp of creation.
+              example: 1700690400000
+            updated_at:
+              type: integer
+              format: int64
+              description: Unix timestamp of last update.
+              example: 1700690400000
+          required:
+            - last_active_organization_id
+            - public_user_data
+            - factor_verification_age
+            - created_at
+            - updated_at
     Client.Client:
       type: object
       nullable: true
@@ -7135,8 +7182,13 @@ components:
           type: string
           description: |
             Last active session_id.
-        captcha_bypass:
+        cookie_expires_at:
           nullable: true
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of the cookie expiration.
+        captcha_bypass:
           type: boolean
           description: |
             Whether the client can bypass CAPTCHA.
@@ -7152,10 +7204,13 @@ components:
             Unix timestamp of creation.
       required:
         - object
+        - id
         - sign_in
         - sign_up
         - sessions
         - last_active_session_id
+        - cookie_expires_at
+        - captcha_bypass
         - updated_at
         - created_at
     Client.DeleteSession:
@@ -7334,10 +7389,15 @@ components:
       properties:
         id:
           type: string
+        slug:
+          type: string
         object:
           type: string
         deleted:
           type: boolean
+      required:
+        - object
+        - deleted
     Client.ClientWrappedDeletedObject:
       type: object
       additionalProperties: false
@@ -7769,7 +7829,7 @@ components:
                   type: array
                   items:
                     $ref: '#/components/schemas/Client.OrganizationInvitation'
-                total:
+                total_count:
                   type: integer
                   format: int64
         client:
@@ -7903,23 +7963,6 @@ components:
       required:
         - response
         - client
-    Client.PublicUserData:
-      type: object
-      additionalProperties: false
-      properties:
-        first_name:
-          type: string
-        last_name:
-          type: string
-        image_url:
-          type: string
-        has_image:
-          type: boolean
-        identifier:
-          type: string
-        profile_image_url:
-          type: string
-          nullable: true
     Client.OrganizationMembershipRequest:
       type: object
       additionalProperties: false
@@ -8209,7 +8252,7 @@ components:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedEmailAddress'
     Client.ClientWrappedDeletedObject:
-      description: Returns a Deleted User object.
+      description: Returns a deleted generic object.
       content:
         application/json:
           schema:
@@ -8251,7 +8294,7 @@ components:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedPasskey'
     Client.DeletedPasskey:
-      description: Returns a Deleted Passkey object.
+      description: Returns a deleted Passkey object.
       content:
         application/json:
           schema:
@@ -8400,6 +8443,31 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.WaitlistEntry'
+  parameters:
+    LimitParameter:
+      name: limit
+      in: query
+      description: |-
+        Applies a limit to the number of results returned.
+        Can be used for paginating the results together with `offset`.
+      required: false
+      schema:
+        type: integer
+        default: 10
+        minimum: 1
+        maximum: 500
+    OffsetParameter:
+      name: offset
+      in: query
+      description: |-
+        Skip the first `offset` results when paginating.
+        Needs to be an integer greater or equal to zero.
+        To be used in conjunction with `limit`.
+      required: false
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
 x-tagGroups:
   - name: Environment
     tags:
