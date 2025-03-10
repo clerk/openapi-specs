@@ -1,0 +1,49 @@
+overlay: 1.0.0
+x-speakeasy-jsonpath: rfc9535
+info:
+  title: JWKS Reversal Overlay
+  version: 0.0.0
+actions:
+  - target: $["components"]["schemas"]["JWKS"]["properties"]["keys"]["items"]
+    update:
+      type: object
+  - target: $["components"]["schemas"]["JWKS"]["properties"]["keys"]["items"]
+    update:
+      additionalProperties: false
+  - target: $["components"]["schemas"]["JWKS"]["properties"]["keys"]["items"]
+    update:
+      properties:
+        use:
+          type: string
+        kty:
+          type: string
+        kid:
+          type: string
+        alg:
+          type: string
+        'n':
+          type: string
+        e:
+          type: string
+        x:
+          type: string
+        crv:
+          type: string
+  - target: $["components"]["schemas"]["JWKS"]["properties"]["keys"]["items"]["oneOf"]
+    remove: true
+  - target: $["components"]["schemas"]["ClerkErrors"]["properties"]["clerk_trace_id"]
+    remove: true
+  - target: $["components"]["schemas"]["JWKS.ed25519.PublicKey"]
+    remove: true
+  - target: $["components"]["schemas"]["JWKS.ecdsa.PublicKey"]
+    remove: true
+  - target: $["components"]["schemas"]["JWKS.rsa.PublicKey"]
+    remove: true
+  - target: $["components"]["schemas"]["JWKS.ed25519.PrivateKey"]
+    remove: true
+  - target: $["components"]["schemas"]["JWKS.ecdsa.PrivateKey"]
+    remove: true
+  - target: $["components"]["schemas"]["JWKS.rsa.PrivateKey"]
+    remove: true
+  - target: $["components"]["schemas"]["JWKS.symmetric.Key"]
+    remove: true
