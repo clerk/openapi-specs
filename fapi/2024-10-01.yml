@@ -262,6 +262,8 @@ paths:
                   type: string
                   description: The granted scopes for the token to check against
                   nullable: true
+              required:
+                - token
       responses:
         '200':
           $ref: '#/components/responses/OAuth.TokenInfo'
@@ -309,6 +311,13 @@ paths:
         - DevBrowser: []
       tags:
         - Environment
+      parameters:
+        - in: header
+          name: Origin
+          description: The origin of the request
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/Client.Environment'
@@ -416,6 +425,31 @@ paths:
         Use this endpoint to check the validity of a proxy configuration for a domain.
         Pass the instance ID and domain ID as query parameters.
       operationId: getProxyHealth
+      parameters:
+        - in: query
+          name: domain_id
+          description: The ID of the domain
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: Clerk-Proxy-Url
+          description: The URL of the proxy
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: Clerk-Secret-Key
+          description: The secret key of the proxy
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Forwarded-For
+          description: The IP address of the client
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Configuration is valid
@@ -552,6 +586,12 @@ paths:
       tags:
         - Sign Ins
       operationId: createSignIn
+      parameters:
+        - in: header
+          name: Origin
+          description: The origin of the request
+          schema:
+            type: string
       requestBody:
         required: false
         content:
@@ -649,6 +689,13 @@ paths:
       tags:
         - Sign Ins
       operationId: resetPassword
+      parameters:
+        - in: path
+          name: sign_in_id
+          required: true
+          schema:
+            type: string
+          description: The id of the sign in to be retrieved.
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -661,13 +708,8 @@ paths:
                 sign_out_of_other_sessions:
                   type: boolean
                   nullable: true
-      parameters:
-        - in: path
-          name: sign_in_id
-          required: true
-          schema:
-            type: string
-          description: The id of the sign in to be retrieved.
+              required:
+                - password
       responses:
         '200':
           $ref: '#/components/responses/Client.SignIn'
@@ -701,6 +743,11 @@ paths:
           schema:
             type: string
           description: The id of the sign in to be retrieved.
+        - in: header
+          name: Origin
+          description: The origin of the request
+          schema:
+            type: string
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -748,6 +795,8 @@ paths:
                   type: string
                   description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `prompt` parameter of the generated redirect url. When using shared credentials this value might be adjusted for security reasons.
                   nullable: true
+              required:
+                - strategy
       responses:
         '200':
           $ref: '#/components/responses/Client.SignIn'
@@ -781,6 +830,11 @@ paths:
           schema:
             type: string
           description: The id of the sign in.
+        - in: header
+          name: Origin
+          description: The origin of the request
+          schema:
+            type: string
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -815,6 +869,12 @@ paths:
                   type: string
                   deprecated: true
                   nullable: true
+                public_key_credential:
+                  type: string
+                  description: Used with the `passkey` strategy.
+                  nullable: true
+              required:
+                - strategy
       responses:
         '200':
           $ref: '#/components/responses/Client.SignIn'
@@ -921,6 +981,12 @@ paths:
       tags:
         - Sign Ups
       operationId: createSignUps
+      parameters:
+        - in: header
+          name: Origin
+          description: The origin of the request
+          schema:
+            type: string
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -972,25 +1038,27 @@ paths:
                 web3_wallet:
                   type: string
                   nullable: true
+                token:
+                  type: string
+                  description: The ID token from an OpenID Connect flow. Only used with `oauth_token_[provider]` and `google_one_tap` strategies.
+                  nullable: true
+                code:
+                  type: string
+                  description: The authorization or grant code for an OAuth exchange. Only used with `oauth_token_[provider]` strategies.
+                  nullable: true
                 captcha_token:
                   type: string
                   nullable: true
                 captcha_error:
                   type: string
                   nullable: true
-                code:
+                captcha_widget_type:
                   type: string
-                  description: The authorization or grant code for an OAuth exchange. Only used with `oauth_token_[provider]` strategies.
-                  nullable: true
-                token:
-                  type: string
-                  description: The ID token from an OpenID Connect flow. Only used with `oauth_token_[provider]` and `google_one_tap` strategies.
                   nullable: true
                 legal_accepted:
                   type: boolean
                   nullable: true
-                  description: |
-                    Has the value `true` if the user has accepted the legal requirements.
+                  description: Has the value `true` if the user has accepted the legal requirements.
                 oidc_login_hint:
                   type: string
                   description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect url.
@@ -1014,7 +1082,7 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
-  /v1/client/sign_ups/{id}:
+  /v1/client/sign_ups/{sign_up_id}:
     get:
       summary: Get Sign-up
       description: Returns the sign-up by ID. Must be associated with the current Client object.
@@ -1023,7 +1091,7 @@ paths:
       operationId: getSignUps
       parameters:
         - in: path
-          name: id
+          name: sign_up_id
           required: true
           schema:
             type: string
@@ -1045,11 +1113,16 @@ paths:
       operationId: updateSignUps
       parameters:
         - in: path
-          name: id
+          name: sign_up_id
           required: true
           schema:
             type: string
           description: The sign up unique identifier.
+        - in: header
+          name: Origin
+          description: The origin of the request
+          schema:
+            type: string
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1098,19 +1171,27 @@ paths:
                 web3_wallet:
                   type: string
                   nullable: true
-                code:
-                  type: string
-                  description: The authorization or grant code for an OAuth exchange. Only used with `oauth_token_[provider]` strategies.
-                  nullable: true
                 token:
                   type: string
                   description: The ID token from an OpenID Connect flow. Only used with `oauth_token_[provider]` and `google_one_tap` strategies.
+                  nullable: true
+                code:
+                  type: string
+                  description: The authorization or grant code for an OAuth exchange. Only used with `oauth_token_[provider]` strategies.
                   nullable: true
                 legal_accepted:
                   type: boolean
                   nullable: true
                   description: |
                     Has the value `true` if the user has accepted the legal requirements.
+                oidc_login_hint:
+                  type: string
+                  description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect url.
+                  nullable: true
+                oidc_prompt:
+                  type: string
+                  description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `prompt` parameter of the generated redirect url. When using shared credentials this value might be adjusted for security reasons.
+                  nullable: true
       responses:
         '200':
           $ref: '#/components/responses/Client.SignUp'
@@ -1124,7 +1205,7 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
-  /v1/client/sign_ups/{id}/prepare_verification:
+  /v1/client/sign_ups/{sign_up_id}/prepare_verification:
     post:
       summary: Prepare Sign-up Identification Verification
       description: |
@@ -1137,6 +1218,18 @@ paths:
       tags:
         - Sign Ups
       operationId: prepareSignUpsVerification
+      parameters:
+        - in: path
+          name: sign_up_id
+          required: true
+          schema:
+            type: string
+          description: The sign up unique identifier.
+        - in: header
+          name: Origin
+          description: The origin of the request
+          schema:
+            type: string
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1171,13 +1264,6 @@ paths:
                   type: string
                   description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `prompt` parameter of the generated redirect url. When using shared credentials this value might be adjusted for security reasons.
                   nullable: true
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: The sign up unique identifier.
       responses:
         '200':
           $ref: '#/components/responses/Client.SignUp'
@@ -1189,13 +1275,25 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '429':
           $ref: '#/components/responses/ClerkErrors'
-  /v1/client/sign_ups/{id}/attempt_verification:
+  /v1/client/sign_ups/{sign_up_id}/attempt_verification:
     post:
       summary: Attempt Sign-up Identification Verification
       description: Attempts to verify the identification that corresponds to the given strategy using the given verification code.
       tags:
         - Sign Ups
       operationId: attemptSignUpsVerification
+      parameters:
+        - in: path
+          name: sign_up_id
+          required: true
+          schema:
+            type: string
+          description: The sign up unique identifier.
+        - in: header
+          name: Origin
+          description: The origin of the request
+          schema:
+            type: string
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1226,13 +1324,6 @@ paths:
                   type: string
                   description: The ID token from an OpenID Connect flow. Only used with `oauth_token_[provider]` and `google_one_tap` strategies.
                   nullable: true
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: The sign up unique identifier.
       responses:
         '200':
           $ref: '#/components/responses/Client.SignUp'
@@ -1299,6 +1390,16 @@ paths:
         - Client
       operationId: handshakeClient
       parameters:
+        - in: header
+          name: Clerk-Proxy-Url
+          description: The URL of the proxy
+          schema:
+            type: string
+        - in: header
+          name: Clerk-Secret-Key
+          description: The secret key of the proxy
+          schema:
+            type: string
         - in: query
           name: redirect_url
           schema:
@@ -1313,6 +1414,11 @@ paths:
             The organization ID or slug to attempt to set as active for the session. If this param is present but has no value,
             the personal workspace will be set as active. If the organization cannot be set as active (because it does not
             exist, or the user is not a member), the active organization for the session will not change.
+        - in: query
+          name: satellite_fapi
+          description: The Frontend API of the satellite domain
+          schema:
+            type: string
       responses:
         '307':
           description: Redirect
@@ -1356,6 +1462,12 @@ paths:
       summary: Initialize dev browser for development and staging instances
       description: get dev_browser/init
       operationId: getDevBrowserInit
+      parameters:
+        - in: query
+          name: origin
+          description: The origin of the request
+          schema:
+            type: string
       responses:
         '200':
           description: Successfully initialized the dev browser.
@@ -1386,6 +1498,11 @@ paths:
           schema:
             type: string
           description: returned state from oauth provider.
+        - in: query
+          name: error
+          schema:
+            type: string
+          description: returned error state from oauth provider, if applicable
       responses:
         '200':
           description: '[AuthV2] HTML-based redirection in dev instances'
@@ -1415,9 +1532,17 @@ paths:
                 code:
                   description: returned exchange code from oauth provider.
                   type: string
+                scope:
+                  description: returned scopes from oauth provider.
+                  type: string
+                  nullable: true
                 state:
                   description: returned state from oauth provider.
                   type: string
+                error:
+                  description: returned error state from oauth provider, if applicable
+                  type: string
+                  nullable: true
       responses:
         '303':
           description: Redirect to GET /v1/oauth_callback with same parameters
@@ -1717,6 +1842,11 @@ paths:
         - Sessions
       operationId: prepareSessionReverificationFirstFactor
       parameters:
+        - in: header
+          name: Origin
+          description: The origin of the request
+          schema:
+            type: string
         - in: path
           name: session_id
           required: true
@@ -1735,6 +1865,7 @@ paths:
                   enum:
                     - email_code
                     - phone_code
+                    - passkey
                 email_address_id:
                   type: string
                   description: Used with the `email_code` strategy.
@@ -1766,6 +1897,11 @@ paths:
         - Sessions
       operationId: attemptSessionReverificationFirstFactor
       parameters:
+        - in: header
+          name: Origin
+          description: The origin of the request
+          schema:
+            type: string
         - in: path
           name: session_id
           required: true
@@ -1785,6 +1921,7 @@ paths:
                     - email_code
                     - password
                     - phone_code
+                    - passkey
                 code:
                   type: string
                   description: The code the was sent to the email. Used with the `email_code` and `phone_code` strategies.
@@ -1793,6 +1930,12 @@ paths:
                   type: string
                   description: Used with the `password` strategy.
                   nullable: true
+                public_key_credential:
+                  type: string
+                  description: Used with the `passkey` strategy.
+                  nullable: true
+              required:
+                - strategy
       responses:
         '200':
           $ref: '#/components/responses/Client.SessionReverification'
@@ -2522,9 +2665,19 @@ paths:
       parameters:
         - in: query
           name: _clerk_session_id
+          description: The session_id associated with the requesting user.
           schema:
             type: string
-          description: The session_id associated with the requesting user.
+        - in: header
+          name: Origin
+          description: The origin of the request.
+          schema:
+            type: string
+        - in: header
+          name: X-Original-Host
+          description: The original host of the request.
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedPasskey'
@@ -2574,6 +2727,7 @@ paths:
                 name:
                   type: string
                   nullable: true
+                  description: The name of the passkey.
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedPasskey'
@@ -2615,6 +2769,28 @@ paths:
           schema:
             type: string
           description: The passkey identification ID.
+        - in: header
+          name: Origin
+          description: The origin of the request.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                strategy:
+                  type: string
+                  description: The strategy used to connect the external account.
+                  nullable: true
+                  enum:
+                    - passkey
+                public_key_credential:
+                  type: string
+                  description: The public key credential of the passkey.
+                  nullable: true
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedPasskey'
@@ -2635,6 +2811,12 @@ paths:
       tags:
         - External Accounts
       operationId: postOAuthAccounts
+      parameters:
+        - in: header
+          name: Origin
+          description: The origin of the request.
+          schema:
+            type: string
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2656,6 +2838,9 @@ paths:
                 action_complete_redirect_url:
                   type: string
                   nullable: true
+                additional_scope:
+                  type: string
+                  nullable: true
                 code:
                   type: string
                   description: The authorization or grant code that an OAuth provider returns during authentication. Can be used with `oauth_token_[provider]` strategies.
@@ -2672,6 +2857,8 @@ paths:
                   type: string
                   description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `prompt` parameter of the generated redirect url. When using shared credentials this value might be adjusted for security reasons.
                   nullable: true
+              required:
+                - strategy
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedExternalAccount'
@@ -2723,6 +2910,8 @@ paths:
                   type: string
                   description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `prompt` parameter of the generated redirect url. When using shared credentials this value might be adjusted for security reasons.
                   nullable: true
+              required:
+                - redirect_url
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedExternalAccount'
@@ -3053,14 +3242,9 @@ paths:
       tags:
         - Organizations Memberships
       parameters:
-        - in: query
-          name: limit
-          schema:
-            type: integer
-        - in: query
-          name: offset
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/Paginated'
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedOrganizationMemberships'
@@ -3099,14 +3283,13 @@ paths:
       tags:
         - Organizations Memberships
       parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: query
-          name: limit
+          name: status
           schema:
-            type: integer
-        - in: query
-          name: offset
-          schema:
-            type: integer
+            type: string
+          description: The status of the organization invitations to filter by
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedOrganizationInvitationsUserContext'
@@ -3145,14 +3328,8 @@ paths:
       tags:
         - Organizations Memberships
       parameters:
-        - in: query
-          name: limit
-          schema:
-            type: integer
-        - in: query
-          name: offset
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: query
           name: status
           schema:
@@ -3398,16 +3575,6 @@ paths:
           schema:
             type: string
           description: The id of the organization for which the invitation will be created.
-        - in: query
-          name: user_id
-          schema:
-            type: string
-            nullable: true
-        - in: query
-          name: role
-          schema:
-            type: string
-            nullable: true
       requestBody:
         required: true
         content:
@@ -3424,8 +3591,11 @@ paths:
                   type: string
                   description: |-
                     The role that will be assigned to the user after joining.
-                    This can be one of the predefined roles (`admin`, `basic_member`) or a custom role.
+                    This can be one of the predefined roles (`org:admin`, `org:basic_member`) or a custom role.
                   nullable: false
+              required:
+                - email_address
+                - role
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedOrganizationInvitation'
@@ -3449,22 +3619,14 @@ paths:
       tags:
         - Invitations
       parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: path
           name: organization_id
           required: true
           schema:
             type: string
           description: The id of the organization for which the invitation will be retrieved.
-        - in: query
-          required: false
-          name: limit
-          schema:
-            type: number
-        - in: query
-          required: false
-          name: offset
-          schema:
-            type: number
         - in: query
           name: status
           required: false
@@ -3514,7 +3676,7 @@ paths:
               type: object
               additionalProperties: false
               properties:
-                email_addresses:
+                email_address:
                   type: array
                   description: An array of email addresses the invitations will be sent to.
                   nullable: false
@@ -3523,9 +3685,12 @@ paths:
                 role:
                   type: string
                   description: |-
-                    The role that will be assigned to the user after joining.
-                    This can be one of the predefined roles (`admin`, `basic_member`) or a custom role.
+                    The role that will be assigned to each of the users after joining.
+                    This can be one of the predefined roles (`org:admin`, `org:basic_member`) or a custom role.
                   nullable: false
+              required:
+                - email_address
+                - role
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedOrganizationInvitations'
@@ -3616,19 +3781,6 @@ paths:
           schema:
             type: string
           description: The organization ID.
-        - in: query
-          name: user_id
-          required: false
-          schema:
-            type: string
-            nullable: true
-          description: The user id to be added as a member.
-        - in: query
-          name: role
-          required: false
-          schema:
-            type: string
-            nullable: true
       requestBody:
         required: true
         content:
@@ -3637,16 +3789,19 @@ paths:
               type: object
               additionalProperties: false
               properties:
-                email_address:
+                user_id:
                   type: string
-                  description: The email address the invitation will be sent to.
+                  description: The id of the user to be added as a member.
                   nullable: true
                 role:
                   type: string
                   description: |-
                     The role that will be assigned to the user after joining.
-                    This can be one of the predefined roles (`admin`, `basic_member`) or a custom role defined.
+                    This can be one of the predefined roles (`org:admin`, `org:basic_member`) or a custom role defined.
                   nullable: true
+              required:
+                - user_id
+                - role
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedOrganizationMembership'
@@ -3668,22 +3823,15 @@ paths:
       tags:
         - Members
       parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/Paginated'
         - in: path
           required: true
           name: organization_id
           schema:
             type: string
           description: The organization ID.
-        - in: query
-          required: false
-          name: limit
-          schema:
-            type: number
-        - in: query
-          required: false
-          name: offset
-          schema:
-            type: number
         - in: query
           required: false
           name: query
@@ -3693,6 +3841,12 @@ paths:
             Returns members that match the given query.
             For possible matches, we check for any of the user's identifier, usernames, user ids, first and last names.
             The query value doesn't need to match the exact value you are looking for, it is capable of partial matches as well.
+        - in: query
+          required: false
+          name: role
+          description: Filter by roles. This can be one of the predefined roles (`org:admin`, `org:basic_member`) or a custom role defined.
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedOrganizationMemberships'
@@ -3736,7 +3890,7 @@ paths:
                   type: string
                   description: |-
                     The role that new role that will be assigned to the member.
-                    This can be one of the predefined roles (`admin`, `basic_member`) or a custom role defined.
+                    This can be one of the predefined roles (`org:admin`, `org:basic_member`) or a custom role defined.
                   nullable: false
       responses:
         '200':
@@ -3813,6 +3967,8 @@ paths:
                   type: string
                   description: The name of the new domain
                   nullable: false
+              required:
+                - name
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedOrganizationDomain'
@@ -3834,22 +3990,26 @@ paths:
         - Domains
       operationId: ListOrganizationDomains
       parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: path
-          required: true
           name: organization_id
+          description: The organization ID.
+          required: true
           schema:
             type: string
-          description: The organization ID.
         - in: query
+          name: verified
+          description: Filter by whether a domain is verified
           required: false
-          name: limit
           schema:
-            type: number
+            type: boolean
         - in: query
+          name: enrollment_mode
+          description: Filter by enrollment mode
           required: false
-          name: offset
           schema:
-            type: number
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedOrganizationDomains'
@@ -3869,15 +4029,6 @@ paths:
       tags:
         - Domains
       operationId: GetOrganizationDomain
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              additionalProperties: false
-              properties:
-                name:
-                  type: string
       parameters:
         - in: path
           required: true
@@ -3947,19 +4098,6 @@ paths:
       tags:
         - Domains
       operationId: UpdateOrganizationDomainEnrollmentMode
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              additionalProperties: false
-              properties:
-                enrollment_mode:
-                  type: string
-                  nullable: false
-                delete_pending:
-                  type: boolean
-                  nullable: true
       parameters:
         - in: path
           required: true
@@ -3973,6 +4111,21 @@ paths:
           schema:
             type: string
           description: The domain ID.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                enrollment_mode:
+                  type: string
+                  nullable: false
+                delete_pending:
+                  type: boolean
+                  nullable: true
+              required:
+                - enrollment_mode
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedOrganizationDomain'
@@ -4016,6 +4169,9 @@ paths:
               properties:
                 affiliation_email_address:
                   type: string
+                  nullable: false
+              required:
+                - affiliation_email_address
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedOrganizationDomain'
@@ -4061,6 +4217,8 @@ paths:
                   type: string
                   description: The code that was sent to the email address.
                   nullable: false
+              required:
+                - code
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedOrganizationDomain'
@@ -4085,22 +4243,14 @@ paths:
         - Membership Requests
       operationId: listOrganizationMembershipRequests
       parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: path
           required: true
           name: organization_id
           schema:
             type: string
           description: The organization ID.
-        - in: query
-          required: false
-          name: limit
-          schema:
-            type: number
-        - in: query
-          required: false
-          name: offset
-          schema:
-            type: number
         - in: query
           required: false
           name: status
@@ -4193,22 +4343,14 @@ paths:
         - Roles
       operationId: ListOrganizationRoles
       parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
         - in: path
           required: true
           name: organization_id
           schema:
             type: string
           description: The organization ID.
-        - in: query
-          required: false
-          name: limit
-          schema:
-            type: number
-        - in: query
-          required: false
-          name: offset
-          schema:
-            type: number
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedRoles'
@@ -4760,14 +4902,17 @@ components:
       properties:
         access_token:
           type: string
+        token_type:
+          type: string
         expires_in:
           type: integer
         refresh_token:
           type: string
         scope:
           type: string
-        token_type:
-          type: string
+      required:
+        - access_token
+        - token_type
     OAuth.UserInfo:
       type: object
       additionalProperties: false
@@ -4799,6 +4944,7 @@ components:
           type: string
           nullable: true
           deprecated: true
+          description: Deprecated. Use `preferred_username` instead.
         preferred_username:
           type: string
           nullable: true
@@ -4828,17 +4974,22 @@ components:
       properties:
         active:
           type: boolean
+          description: Boolean indicator of whether or not the presented token is currently active.
         client_id:
           type: string
+          description: Client identifier for the OAuth 2.0 client that requested this token.
           nullable: true
         iat:
           type: integer
+          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this token was originally issued, as defined in JWT [RFC7519].
           nullable: true
         scope:
           type: string
+          description: A JSON string containing a space-separated list of scopes associated with this token, in the format described in Section 3.3 of OAuth 2.0 [RFC6749].
           nullable: true
         sub:
           type: string
+          description: Subject of the token, as defined in JWT [RFC7519].
           nullable: true
       required:
         - active
@@ -4890,12 +5041,20 @@ components:
             primary_color_light:
               type: string
               nullable: true
+          required:
+            - appearance
+            - background_color_dark
+            - background_color_light
+            - primary_color_dark
+            - primary_color_light
       required:
         - object
+        - allowed
         - enabled
         - internal_linking
         - after_sign_in_url
         - after_sign_up_url
+        - after_join_waitlist_url
         - after_create_organization_url
         - after_leave_organization_url
         - logo_link_url
@@ -5722,6 +5881,1109 @@ components:
           $ref: '#/components/schemas/Client.CommerceSettings'
         maintenance_mode:
           type: boolean
+    Token:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - token
+        jwt:
+          type: string
+          description: |
+            String representing the encoded jwt value.
+      required:
+        - object
+        - jwt
+    Client.SessionBase:
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - session
+        status:
+          type: string
+          enum:
+            - active
+            - revoked
+            - ended
+            - expired
+            - removed
+            - abandoned
+        expire_at:
+          type: integer
+          format: int64
+        abandon_at:
+          type: integer
+          format: int64
+        last_active_at:
+          type: integer
+          format: int64
+        last_active_token:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Token'
+        actor:
+          type: object
+          nullable: true
+          additionalProperties: true
+      required:
+        - id
+        - object
+        - status
+        - expire_at
+        - abandon_at
+        - last_active_at
+    Stubs.Verification.OTP:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+        strategy:
+          type: string
+          enum:
+            - phone_code
+            - email_code
+            - reset_password_email_code
+            - reset_password_phone_code
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+      required:
+        - status
+        - strategy
+        - expire_at
+    Stubs.Verification.Invitation:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - verified
+        strategy:
+          type: string
+          enum:
+            - invitation
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+      required:
+        - status
+        - strategy
+    Stubs.Verification.Link:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+        strategy:
+          type: string
+          enum:
+            - email_link
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+        verified_at_client:
+          type: string
+      required:
+        - status
+        - strategy
+        - expire_at
+    Stubs.Verification.Ticket:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - expired
+        strategy:
+          type: string
+          enum:
+            - ticket
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+      required:
+        - status
+        - strategy
+    Stubs.Verification.Admin:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - verified
+        strategy:
+          type: string
+          enum:
+            - admin
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+      required:
+        - status
+        - strategy
+    Stubs.Verification.FromOauth:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - verified
+            - unverified
+        strategy:
+          type: string
+          enum:
+            - from_oauth_apple
+            - from_oauth_google
+            - from_oauth_mock
+            - from_oauth_custom_mock
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+      required:
+        - status
+        - strategy
+    Stubs.Verification.SAML:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+            - transferable
+        strategy:
+          type: string
+          enum:
+            - saml
+        external_verification_redirect_url:
+          nullable: true
+          type: string
+        error:
+          allOf:
+            - $ref: '#/components/schemas/ClerkError'
+            - type: object
+              nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        attempts:
+          type: integer
+          nullable: true
+      required:
+        - status
+        - strategy
+    Stubs.Identification.Link:
+      type: object
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+          enum:
+            - oauth_apple
+            - oauth_google
+            - oauth_mock
+            - oauth_custom_mock
+            - saml
+        id:
+          type: string
+      required:
+        - type
+        - id
+    Client.EmailAddress:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - email_address
+        email_address:
+          type: string
+        reserved:
+          type: boolean
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Stubs.Verification.OTP'
+            - $ref: '#/components/schemas/Stubs.Verification.Invitation'
+            - $ref: '#/components/schemas/Stubs.Verification.Link'
+            - $ref: '#/components/schemas/Stubs.Verification.Ticket'
+            - $ref: '#/components/schemas/Stubs.Verification.Admin'
+            - $ref: '#/components/schemas/Stubs.Verification.FromOauth'
+            - $ref: '#/components/schemas/Stubs.Verification.SAML'
+        linked_to:
+          type: array
+          items:
+            $ref: '#/components/schemas/Stubs.Identification.Link'
+        matches_sso_connection:
+          description: |
+            Indicates whether this email address domain matches an active enterprise connection.
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+      required:
+        - id
+        - object
+        - email_address
+        - verification
+        - linked_to
+        - reserved
+        - created_at
+        - updated_at
+    Client.PhoneNumber:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - phone_number
+        phone_number:
+          type: string
+        reserved_for_second_factor:
+          type: boolean
+        default_second_factor:
+          type: boolean
+        reserved:
+          type: boolean
+        verification:
+          nullable: true
+          type: object
+          oneOf:
+            - $ref: '#/components/schemas/Stubs.Verification.OTP'
+            - $ref: '#/components/schemas/Stubs.Verification.Admin'
+        linked_to:
+          type: array
+          items:
+            $ref: '#/components/schemas/Stubs.Identification.Link'
+        backup_codes:
+          type: array
+          items:
+            type: string
+          nullable: true
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+      required:
+        - id
+        - object
+        - phone_number
+        - verification
+        - linked_to
+        - reserved
+        - created_at
+        - updated_at
+    Stubs.Verification.Web3Signature:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+        strategy:
+          type: string
+          enum:
+            - web3_metamask_signature
+            - web3_coinbase_wallet_signature
+            - web3_okx_wallet_signature
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        nonce:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+    Client.Web3Wallet:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - web3_wallet
+        web3_wallet:
+          type: string
+        verification:
+          nullable: true
+          type: object
+          oneOf:
+            - $ref: '#/components/schemas/Stubs.Verification.Web3Signature'
+            - $ref: '#/components/schemas/Stubs.Verification.Admin'
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+      required:
+        - id
+        - object
+        - web3_wallet
+        - verification
+        - created_at
+        - updated_at
+    Stubs.Verification.Passkey:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+        strategy:
+          type: string
+          enum:
+            - passkey
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+        nonce:
+          type: string
+      required:
+        - status
+        - strategy
+        - expire_at
+    Client.Passkey:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - passkey
+        name:
+          type: string
+        last_used_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of when the passkey was last used.
+          nullable: true
+        verification:
+          nullable: true
+          type: object
+          oneOf:
+            - $ref: '#/components/schemas/Stubs.Verification.Passkey'
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of update
+      required:
+        - id
+        - object
+        - name
+        - verification
+    Client.Organization:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - organization
+        name:
+          type: string
+        slug:
+          type: string
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+        members_count:
+          type: integer
+        pending_invitations_count:
+          type: integer
+        max_allowed_memberships:
+          type: integer
+        admin_delete_enabled:
+          type: boolean
+        public_metadata:
+          type: object
+          additionalProperties: true
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+        logo_url:
+          type: string
+          nullable: true
+          deprecated: true
+          description: Deprecated. Use `image_url` instead.
+      required:
+        - object
+        - id
+        - name
+        - slug
+        - has_image
+        - max_allowed_memberships
+        - admin_delete_enabled
+        - public_metadata
+        - created_at
+        - updated_at
+    Client.PublicUserData:
+      type: object
+      additionalProperties: false
+      properties:
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        image_url:
+          type: string
+          nullable: true
+        has_image:
+          type: boolean
+        identifier:
+          type: string
+        profile_image_url:
+          type: string
+          nullable: true
+          deprecated: true
+          description: Use `image_url` instead.
+        user_id:
+          type: string
+          nullable: true
+      required:
+        - first_name
+        - last_name
+        - identifier
+        - has_image
+    Client.OrganizationMembership:
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - organization_membership
+        public_metadata:
+          type: object
+          additionalProperties: true
+        role:
+          type: string
+        role_name:
+          type: string
+        permissions:
+          type: array
+          nullable: true
+          items:
+            type: string
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of last update.
+        organization:
+          $ref: '#/components/schemas/Client.Organization'
+        public_user_data:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.PublicUserData'
+      required:
+        - object
+        - id
+        - public_metadata
+        - role
+        - role_name
+        - permissions
+        - created_at
+        - updated_at
+        - organization
+    Oauth:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          x-speakeasy-unknown-values: allow
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+            - transferable
+        strategy:
+          type: string
+          x-speakeasy-unknown-values: allow
+          pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z]+$
+        external_verification_redirect_url:
+          type: string
+        error:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/ClerkError'
+        expire_at:
+          type: integer
+        attempts:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    GoogleOneTap:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+        strategy:
+          type: string
+          enum:
+            - google_one_tap
+        expire_at:
+          type: integer
+          nullable: true
+        attempts:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+        error:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/ClerkError'
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    ExternalAccountWithVerification:
+      type: object
+      additionalProperties: true
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - external_account
+            - facebook_account
+            - google_account
+        id:
+          type: string
+        provider:
+          type: string
+        identification_id:
+          type: string
+        provider_user_id:
+          description: The unique ID of the user in the external provider's system
+          type: string
+        approved_scopes:
+          type: string
+        email_address:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        avatar_url:
+          type: string
+          deprecated: true
+          description: Please use `image_url` instead
+        image_url:
+          type: string
+          nullable: true
+        username:
+          type: string
+          nullable: true
+        public_metadata:
+          type: object
+          additionalProperties: true
+        label:
+          type: string
+          nullable: true
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Oauth'
+            - $ref: '#/components/schemas/GoogleOneTap'
+      required:
+        - object
+        - id
+        - provider
+        - identification_id
+        - provider_user_id
+        - approved_scopes
+        - email_address
+        - first_name
+        - last_name
+        - public_metadata
+        - created_at
+        - updated_at
+        - verification
+    Stubs.SAMLConnection.SAMLAccount:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        domain:
+          type: string
+        active:
+          type: boolean
+        provider:
+          type: string
+        sync_user_attributes:
+          type: boolean
+        allow_subdomains:
+          type: boolean
+        allow_idp_initiated:
+          type: boolean
+        disable_additional_identifications:
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - id
+        - name
+        - domain
+        - active
+        - provider
+        - sync_user_attributes
+        - created_at
+        - updated_at
+    Client.SAMLAccount:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - saml_account
+        provider:
+          type: string
+        active:
+          type: boolean
+        email_address:
+          type: string
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        provider_user_id:
+          description: The unique ID of the user in the external provider's system
+          type: string
+          nullable: true
+        public_metadata:
+          type: object
+          additionalProperties: true
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Stubs.Verification.SAML'
+            - $ref: '#/components/schemas/Stubs.Verification.Ticket'
+        saml_connection:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Stubs.SAMLConnection.SAMLAccount'
+      required:
+        - id
+        - object
+        - provider
+        - active
+        - email_address
+        - first_name
+        - last_name
+        - provider_user_id
+        - public_metadata
+        - saml_connection
+        - verification
+    Client.User:
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - user
+        username:
+          nullable: true
+          type: string
+        first_name:
+          nullable: true
+          type: string
+        last_name:
+          nullable: true
+          type: string
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+        primary_email_address_id:
+          nullable: true
+          type: string
+        primary_phone_number_id:
+          nullable: true
+          type: string
+        primary_web3_wallet_id:
+          nullable: true
+          type: string
+        password_enabled:
+          type: boolean
+        two_factor_enabled:
+          type: boolean
+        totp_enabled:
+          type: boolean
+        backup_code_enabled:
+          type: boolean
+        email_addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Client.EmailAddress'
+        phone_numbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Client.PhoneNumber'
+        web3_wallets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Client.Web3Wallet'
+        passkeys:
+          type: array
+          items:
+            $ref: '#/components/schemas/Client.Passkey'
+        organization_memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/Client.OrganizationMembership'
+        external_accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalAccountWithVerification'
+        saml_accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Client.SAMLAccount'
+        password_last_updated_at:
+          nullable: true
+          type: integer
+          format: int64
+          description: Unix timestamp of last update.
+          example: 1700690400000
+        public_metadata:
+          type: object
+          additionalProperties: true
+        private_metadata:
+          type: object
+          additionalProperties: true
+        unsafe_metadata:
+          type: object
+          additionalProperties: true
+        external_id:
+          nullable: true
+          type: string
+        last_sign_in_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp of last sign-in.
+          example: 1700690400000
+        banned:
+          type: boolean
+          description: Flag to denote whether user is banned or not.
+        locked:
+          type: boolean
+          description: |
+            Flag to denote whether user is currently locked, i.e. restricted from signing in or not.
+        lockout_expires_in_seconds:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            The number of seconds remaining until the lockout period expires for a locked user. A null value for a locked user indicates that lockout never expires.
+          example: 300
+        verification_attempts_remaining:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            The number of verification attempts remaining until the user is locked. Null if account lockout is not enabled. Note: if a user is locked explicitly via the Backend API, they may still have verification attempts remaining.
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of creation.
+          example: 1700690400000
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of last update.
+          example: 1700690400000
+        delete_self_enabled:
+          type: boolean
+          description: If enabled, user can delete themselves via FAPI.
+        create_organization_enabled:
+          type: boolean
+          description: If enabled, user can create organizations via FAPI.
+        create_organizations_limit:
+          type: integer
+          description: The maximum number of organizations the user can create. 0 means unlimited.
+        last_active_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp of the latest session activity, with day precision.
+          example: 1700690400000
+        mfa_enabled_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp at which the user enabled MFA.
+          example: 1700690400000
+        mfa_disabled_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp at which the user disabled MFA.
+          example: 1700690400000
+        legal_accepted_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp at which the user accepted the legal requirements.
+          example: 1700690400000
+        profile_image_url:
+          type: string
+          deprecated: true
+          description: Deprecated. Use `image_url` instead.
+      required:
+        - id
+        - object
+        - username
+        - first_name
+        - last_name
+        - has_image
+        - primary_email_address_id
+        - primary_phone_number_id
+        - primary_web3_wallet_id
+        - password_enabled
+        - two_factor_enabled
+        - totp_enabled
+        - backup_code_enabled
+        - email_addresses
+        - phone_numbers
+        - web3_wallets
+        - passkeys
+        - external_accounts
+        - saml_accounts
+        - enterprise_accounts
+        - public_metadata
+        - external_id
+        - last_sign_in_at
+        - banned
+        - locked
+        - lockout_expires_in_seconds
+        - verification_attempts_remaining
+        - created_at
+        - updated_at
+        - delete_self_enabled
+        - create_organization_enabled
+        - last_active_at
+        - mfa_enabled_at
+        - mfa_disabled_at
+        - legal_accepted_at
+    Client.Session:
+      allOf:
+        - $ref: '#/components/schemas/Client.SessionBase'
+        - type: object
+          properties:
+            last_active_organization_id:
+              type: string
+              nullable: true
+            user:
+              $ref: '#/components/schemas/Client.User'
+            public_user_data:
+              type: object
+              nullable: true
+              allOf:
+                - $ref: '#/components/schemas/Client.PublicUserData'
+            factor_verification_age:
+              type: array
+              description: Each item represents the minutes that have passed since the last time a first or second factor were verified.
+              items:
+                type: integer
+            created_at:
+              type: integer
+              format: int64
+              description: Unix timestamp of creation.
+              example: 1700690400000
+            updated_at:
+              type: integer
+              format: int64
+              description: Unix timestamp of last update.
+              example: 1700690400000
+          required:
+            - last_active_organization_id
+            - public_user_data
+            - factor_verification_age
+            - created_at
+            - updated_at
     Stubs.SignInFactor:
       type: object
       additionalProperties: false
@@ -5827,173 +7089,6 @@ components:
         - status
         - strategy
         - expire_at
-    Stubs.Verification.OTP:
-      type: object
-      additionalProperties: false
-      properties:
-        status:
-          type: string
-          enum:
-            - unverified
-            - verified
-            - failed
-            - expired
-        strategy:
-          type: string
-          enum:
-            - phone_code
-            - email_code
-            - reset_password_email_code
-            - reset_password_phone_code
-        attempts:
-          type: integer
-          nullable: true
-        expire_at:
-          type: integer
-      required:
-        - status
-        - strategy
-        - expire_at
-    Stubs.Verification.Link:
-      type: object
-      additionalProperties: false
-      properties:
-        status:
-          type: string
-          enum:
-            - unverified
-            - verified
-            - failed
-            - expired
-        strategy:
-          type: string
-          enum:
-            - email_link
-        attempts:
-          type: integer
-          nullable: true
-        expire_at:
-          type: integer
-        verified_at_client:
-          type: string
-      required:
-        - status
-        - strategy
-        - expire_at
-    Stubs.Verification.Web3Signature:
-      type: object
-      additionalProperties: false
-      properties:
-        status:
-          type: string
-          enum:
-            - unverified
-            - verified
-            - failed
-            - expired
-        strategy:
-          type: string
-          enum:
-            - web3_metamask_signature
-            - web3_coinbase_wallet_signature
-            - web3_okx_wallet_signature
-        attempts:
-          type: integer
-          nullable: true
-        expire_at:
-          type: integer
-          nullable: true
-        nonce:
-          type: string
-          nullable: true
-        message:
-          type: string
-          nullable: true
-      required:
-        - status
-        - strategy
-    Stubs.Verification.Ticket:
-      type: object
-      additionalProperties: false
-      properties:
-        status:
-          type: string
-          enum:
-            - unverified
-            - verified
-            - expired
-        strategy:
-          type: string
-          enum:
-            - ticket
-        attempts:
-          type: integer
-          nullable: true
-        expire_at:
-          type: integer
-          nullable: true
-      required:
-        - status
-        - strategy
-    Stubs.Verification.SAML:
-      type: object
-      additionalProperties: false
-      properties:
-        status:
-          type: string
-          enum:
-            - unverified
-            - verified
-            - failed
-            - expired
-            - transferable
-        strategy:
-          type: string
-          enum:
-            - saml
-        external_verification_redirect_url:
-          nullable: true
-          type: string
-        error:
-          allOf:
-            - $ref: '#/components/schemas/ClerkError'
-            - type: object
-              nullable: true
-        expire_at:
-          type: integer
-          nullable: true
-        attempts:
-          type: integer
-          nullable: true
-      required:
-        - status
-        - strategy
-    Stubs.Verification.Passkey:
-      type: object
-      additionalProperties: false
-      properties:
-        status:
-          type: string
-          enum:
-            - unverified
-            - verified
-            - failed
-            - expired
-        strategy:
-          type: string
-          enum:
-            - passkey
-        attempts:
-          type: integer
-          nullable: true
-        expire_at:
-          type: integer
-        nonce:
-          type: string
-      required:
-        - status
-        - strategy
-        - expire_at
     Stubs.Verification.GoogleOneTap:
       type: object
       additionalProperties: false
@@ -6066,8 +7161,7 @@ components:
       properties:
         object:
           type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
+          description: String representing the object's type. Objects of the same type share the same value.
           enum:
             - sign_in_attempt
         id:
@@ -6083,8 +7177,7 @@ components:
             - complete
         supported_identifiers:
           type: array
-          description: |
-            List of supported identifiers that can be used to sign in.
+          description: List of supported identifiers that can be used to sign in.
           items:
             type: string
             enum:
@@ -6093,29 +7186,12 @@ components:
               - username
               - web3_wallet
               - passkey
-        identifier:
-          nullable: true
-          type: string
-        user_data:
-          type: object
-          additionalProperties: false
-          nullable: true
-          properties:
-            first_name:
-              type: string
-              nullable: true
-            last_name:
-              type: string
-              nullable: true
-            profile_image_url:
-              type: string
-              nullable: true
-              deprecated: true
-            image_url:
-              type: string
-            has_image:
-              type: boolean
         supported_first_factors:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/Stubs.SignInFactor'
+        supported_second_factors:
           type: array
           nullable: true
           items:
@@ -6133,11 +7209,6 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.SAML'
             - $ref: '#/components/schemas/Stubs.Verification.Passkey'
             - $ref: '#/components/schemas/Stubs.Verification.GoogleOneTap'
-        supported_second_factors:
-          type: array
-          nullable: true
-          items:
-            $ref: '#/components/schemas/Stubs.SignInFactor'
         second_factor_verification:
           type: object
           nullable: true
@@ -6146,20 +7217,52 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.TOTP'
             - $ref: '#/components/schemas/Stubs.Verification.Ticket'
             - $ref: '#/components/schemas/Stubs.Verification.BackupCode'
+        identifier:
+          nullable: true
+          type: string
+        user_data:
+          type: object
+          additionalProperties: false
+          nullable: true
+          properties:
+            first_name:
+              type: string
+              nullable: true
+            last_name:
+              type: string
+              nullable: true
+            image_url:
+              type: string
+            has_image:
+              type: boolean
+            profile_image_url:
+              type: string
+              nullable: true
+              deprecated: true
+              description: Use `image_url` instead.
+          required:
+            - first_name
+            - last_name
+            - has_image
         created_session_id:
           nullable: true
           type: string
         abandon_at:
           type: integer
+          format: int64
+          description: Unix timestamp at which the sign in will be abandoned.
+          example: 1700690400000
       required:
         - object
         - id
         - status
         - supported_identifiers
-        - identifier
         - supported_first_factors
         - supported_second_factors
         - first_factor_verification
+        - second_factor_verification
+        - identifier
+        - user_data
         - created_session_id
         - abandon_at
     Stubs.SignUpVerification:
@@ -6175,6 +7278,9 @@ components:
           type: array
           items:
             type: string
+      required:
+        - next_action
+        - supported_strategies
     Client.SignUp.Verifications:
       type: object
       properties:
@@ -6188,6 +7294,11 @@ components:
           nullable: true
           oneOf:
             - $ref: '#/components/schemas/Stubs.SignUpVerification'
+        web3_wallet:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Stubs.SignUpVerification'
         external_account:
           type: object
           nullable: true
@@ -6196,6 +7307,11 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.SAML'
             - $ref: '#/components/schemas/Stubs.Verification.Ticket'
             - $ref: '#/components/schemas/Stubs.Verification.GoogleOneTap'
+      required:
+        - email_address
+        - phone_number
+        - web3_wallet
+        - external_account
     Client.SignUp:
       type: object
       properties:
@@ -6257,7 +7373,6 @@ components:
           nullable: true
         password_enabled:
           type: boolean
-          nullable: true
         first_name:
           type: string
           nullable: true
@@ -6274,6 +7389,8 @@ components:
             Custom JSON that can be used to store arbitrary values which will end up in the user's public metadata. This field can only be populated from the application's BE. At this point, this can be done via invitations.
           type: object
           additionalProperties: true
+        custom_action:
+          type: boolean
         external_id:
           type: string
           nullable: true
@@ -6285,837 +7402,53 @@ components:
           nullable: true
         abandon_at:
           type: integer
-          nullable: true
+          format: int64
+          description: Unix timestamp at which the sign up will be abandoned.
+          example: 1700690400000
         legal_accepted_at:
           type: integer
           format: int64
           nullable: true
-          description: |
-            Unix timestamp at which the user accepted the legal requirements.
+          description: Unix timestamp at which the user accepted the legal requirements.
           example: 1700690400000
-    Client.SessionBase:
-      type: object
-      properties:
-        id:
-          type: string
-        object:
-          type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - session
-        actor:
-          type: object
-          nullable: true
-        status:
-          type: string
-          enum:
-            - active
-            - revoked
-            - ended
-            - expired
-            - removed
-            - abandoned
-        last_active_at:
-          type: integer
-        expire_at:
-          type: integer
-        abandon_at:
-          type: integer
-    Stubs.Verification.Invitation:
-      type: object
-      additionalProperties: false
-      properties:
-        status:
-          type: string
-          enum:
-            - verified
-        strategy:
-          type: string
-          enum:
-            - invitation
-        attempts:
-          type: integer
-          nullable: true
-        expire_at:
-          type: integer
-          nullable: true
       required:
-        - status
-        - strategy
-    Stubs.Verification.Admin:
-      type: object
-      additionalProperties: false
-      properties:
-        status:
-          type: string
-          enum:
-            - verified
-        strategy:
-          type: string
-          enum:
-            - admin
-        attempts:
-          type: integer
-          nullable: true
-        expire_at:
-          type: integer
-          nullable: true
-      required:
-        - status
-        - strategy
-    Stubs.Verification.FromOauth:
-      type: object
-      additionalProperties: false
-      properties:
-        status:
-          type: string
-          enum:
-            - verified
-            - unverified
-        strategy:
-          type: string
-          enum:
-            - from_oauth_apple
-            - from_oauth_google
-            - from_oauth_mock
-            - from_oauth_custom_mock
-        attempts:
-          type: integer
-          nullable: true
-        expire_at:
-          type: integer
-          nullable: true
-      required:
-        - status
-        - strategy
-    Stubs.Identification.Link:
-      type: object
-      additionalProperties: false
-      properties:
-        type:
-          type: string
-          enum:
-            - oauth_apple
-            - oauth_google
-            - oauth_mock
-            - oauth_custom_mock
-            - saml
-        id:
-          type: string
-      required:
-        - type
+        - object
         - id
-    Client.EmailAddress:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          type: string
-        object:
-          type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - email_address
-        email_address:
-          type: string
-        reserved:
-          type: boolean
-        verification:
-          type: object
-          nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/Stubs.Verification.OTP'
-            - $ref: '#/components/schemas/Stubs.Verification.Invitation'
-            - $ref: '#/components/schemas/Stubs.Verification.Link'
-            - $ref: '#/components/schemas/Stubs.Verification.Ticket'
-            - $ref: '#/components/schemas/Stubs.Verification.Admin'
-            - $ref: '#/components/schemas/Stubs.Verification.FromOauth'
-            - $ref: '#/components/schemas/Stubs.Verification.SAML'
-        linked_to:
-          type: array
-          items:
-            $ref: '#/components/schemas/Stubs.Identification.Link'
-        matches_sso_connection:
-          description: |
-            Indicates whether this email address domain matches an active enterprise connection.
-          type: boolean
-        created_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of creation
-        updated_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of creation
-      required:
-        - object
+        - status
+        - required_fields
+        - optional_fields
+        - missing_fields
+        - unverified_fields
+        - verifications
+        - username
         - email_address
-        - verification
-        - linked_to
-        - reserved
-        - created_at
-        - updated_at
-    Client.PhoneNumber:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          type: string
-        object:
-          type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - phone_number
-        phone_number:
-          type: string
-        reserved_for_second_factor:
-          type: boolean
-        default_second_factor:
-          type: boolean
-        reserved:
-          type: boolean
-        verification:
-          nullable: true
-          type: object
-          oneOf:
-            - $ref: '#/components/schemas/Stubs.Verification.OTP'
-            - $ref: '#/components/schemas/Stubs.Verification.Admin'
-        linked_to:
-          type: array
-          items:
-            $ref: '#/components/schemas/Stubs.Identification.Link'
-        backup_codes:
-          type: array
-          items:
-            type: string
-          nullable: true
-        created_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of creation
-        updated_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of creation
-      required:
-        - object
         - phone_number
-        - verification
-        - linked_to
-        - reserved
-        - created_at
-        - updated_at
-    Client.Web3Wallet:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          type: string
-        object:
-          type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - web3_wallet
-        web3_wallet:
-          type: string
-        verification:
-          nullable: true
-          type: object
-          oneOf:
-            - $ref: '#/components/schemas/Stubs.Verification.Web3Signature'
-            - $ref: '#/components/schemas/Stubs.Verification.Admin'
-        created_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of creation
-        updated_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of creation
-      required:
-        - object
         - web3_wallet
-        - verification
-        - created_at
-        - updated_at
-    Client.Passkey:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          type: string
-        object:
-          type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - passkey
-        name:
-          type: string
-        last_used_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of when the passkey was last used.
-        verification:
-          nullable: true
-          type: object
-          oneOf:
-            - $ref: '#/components/schemas/Stubs.Verification.Passkey'
-        created_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of creation
-        updated_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of update
-      required:
-        - id
-        - object
-        - name
-        - verification
-    Client.Organization:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          type: string
-        object:
-          type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - organization
-        name:
-          type: string
-        max_allowed_memberships:
-          type: integer
-        admin_delete_enabled:
-          type: boolean
-        slug:
-          type: string
-        logo_url:
-          type: string
-          nullable: true
-          deprecated: true
-        image_url:
-          type: string
-        has_image:
-          type: boolean
-        members_count:
-          type: integer
-        pending_invitations_count:
-          type: integer
-        public_metadata:
-          type: object
-          additionalProperties: true
-        created_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of creation.
-        updated_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of last update.
-      required:
-        - object
-        - id
-        - name
-        - slug
-        - has_image
-        - max_allowed_memberships
-        - admin_delete_enabled
-        - public_metadata
-        - created_at
-        - updated_at
-    Client.OrganizationMembership:
-      type: object
-      properties:
-        id:
-          type: string
-        object:
-          type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - organization_membership
-        role:
-          type: string
-        created_at:
-          type: integer
-          format: int64
-          description: Unix timestamp of creation.
-        updated_at:
-          type: integer
-          format: int64
-          description: Unix timestamp of last update.
-        organization:
-          type: object
-          nullable: false
-          allOf:
-            - $ref: '#/components/schemas/Client.Organization'
-        public_user_data:
-          type: object
-          additionalProperties: false
-          properties:
-            user_id:
-              type: string
-              nullable: false
-            first_name:
-              type: string
-              nullable: true
-            last_name:
-              type: string
-              nullable: true
-            profile_image_url:
-              type: string
-              nullable: true
-              deprecated: true
-            image_url:
-              type: string
-            has_image:
-              type: boolean
-            identifier:
-              type: string
-              nullable: true
-    Oauth:
-      type: object
-      additionalProperties: false
-      properties:
-        status:
-          type: string
-          x-speakeasy-unknown-values: allow
-          enum:
-            - unverified
-            - verified
-            - failed
-            - expired
-            - transferable
-        strategy:
-          type: string
-          x-speakeasy-unknown-values: allow
-          pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z]+$
-        external_verification_redirect_url:
-          type: string
-        error:
-          type: object
-          nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/ClerkError'
-        expire_at:
-          type: integer
-        attempts:
-          type: integer
-          nullable: true
-        verified_at_client:
-          type: string
-          nullable: true
-      required:
-        - status
-        - strategy
-        - attempts
-        - expire_at
-    GoogleOneTap:
-      type: object
-      additionalProperties: false
-      properties:
-        status:
-          type: string
-          enum:
-            - unverified
-            - verified
-        strategy:
-          type: string
-          enum:
-            - google_one_tap
-        expire_at:
-          type: integer
-          nullable: true
-        attempts:
-          type: integer
-          nullable: true
-        verified_at_client:
-          type: string
-          nullable: true
-        error:
-          type: object
-          nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/ClerkError'
-      required:
-        - status
-        - strategy
-        - attempts
-        - expire_at
-    ExternalAccountWithVerification:
-      type: object
-      additionalProperties: true
-      properties:
-        object:
-          type: string
-          description: String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - external_account
-            - facebook_account
-            - google_account
-        id:
-          type: string
-        provider:
-          type: string
-        provider_user_id:
-          description: The unique ID of the user in the external provider's system
-          type: string
-        approved_scopes:
-          type: string
-        email_address:
-          type: string
-        first_name:
-          type: string
-        last_name:
-          type: string
-        avatar_url:
-          type: string
-          deprecated: true
-        image_url:
-          type: string
-          nullable: true
-        username:
-          type: string
-          nullable: true
-        public_metadata:
-          type: object
-          additionalProperties: true
-        label:
-          type: string
-          nullable: true
-        verification:
-          type: object
-          nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/Oauth'
-            - $ref: '#/components/schemas/GoogleOneTap'
-        created_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of creation
-        updated_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of creation
-      required:
-        - object
-        - id
-        - approved_scopes
-        - email_address
-        - public_metadata
-        - created_at
-        - updated_at
-    Stubs.SAMLConnection.SAMLAccount:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        domain:
-          type: string
-        active:
-          type: boolean
-        provider:
-          type: string
-        sync_user_attributes:
-          type: boolean
-        allow_subdomains:
-          type: boolean
-        allow_idp_initiated:
-          type: boolean
-        disable_additional_identifications:
-          type: boolean
-        created_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of creation.
-        updated_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of last update.
-      required:
-        - id
-        - name
-        - domain
-        - active
-        - provider
-        - sync_user_attributes
-        - created_at
-        - updated_at
-    Client.SAMLAccount:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          type: string
-        object:
-          type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - saml_account
-        provider:
-          type: string
-        active:
-          type: boolean
-        email_address:
-          type: string
-        first_name:
-          type: string
-          nullable: true
-        last_name:
-          type: string
-          nullable: true
-        provider_user_id:
-          description: The unique ID of the user in the external provider's system
-          type: string
-          nullable: true
-        public_metadata:
-          type: object
-          additionalProperties: true
-        verification:
-          type: object
-          nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/Stubs.Verification.SAML'
-            - $ref: '#/components/schemas/Stubs.Verification.Ticket'
-        saml_connection:
-          type: object
-          nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/Stubs.SAMLConnection.SAMLAccount'
-      required:
-        - id
-        - object
-        - provider
-        - active
-        - email_address
-        - verification
-    Client.User:
-      type: object
-      properties:
-        id:
-          type: string
-        object:
-          type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - user
-        external_id:
-          nullable: true
-          type: string
-        primary_email_address_id:
-          nullable: true
-          type: string
-        primary_phone_number_id:
-          nullable: true
-          type: string
-        primary_web3_wallet_id:
-          nullable: true
-          type: string
-        username:
-          nullable: true
-          type: string
-        first_name:
-          nullable: true
-          type: string
-        last_name:
-          nullable: true
-          type: string
-        profile_image_url:
-          type: string
-          deprecated: true
-        image_url:
-          type: string
-        has_image:
-          type: boolean
-        public_metadata:
-          type: object
-          additionalProperties: true
-        private_metadata:
-          nullable: true
-          type: object
-          additionalProperties: true
-        unsafe_metadata:
-          type: object
-          additionalProperties: true
-        email_addresses:
-          type: array
-          items:
-            $ref: '#/components/schemas/Client.EmailAddress'
-        phone_numbers:
-          type: array
-          items:
-            $ref: '#/components/schemas/Client.PhoneNumber'
-        web3_wallets:
-          type: array
-          items:
-            $ref: '#/components/schemas/Client.Web3Wallet'
-        passkeys:
-          type: array
-          items:
-            $ref: '#/components/schemas/Client.Passkey'
-        organization_memberships:
-          type: array
-          items:
-            $ref: '#/components/schemas/Client.OrganizationMembership'
-        password_enabled:
-          type: boolean
-        two_factor_enabled:
-          type: boolean
-        totp_enabled:
-          type: boolean
-        backup_code_enabled:
-          type: boolean
-        external_accounts:
-          type: array
-          items:
-            $ref: '#/components/schemas/ExternalAccountWithVerification'
-        saml_accounts:
-          type: array
-          items:
-            $ref: '#/components/schemas/Client.SAMLAccount'
-        last_sign_in_at:
-          type: integer
-          format: int64
-          nullable: true
-          description: |
-            Unix timestamp of last sign-in.
-        banned:
-          type: boolean
-          description: |
-            Flag to denote whether user is banned or not.
-        locked:
-          type: boolean
-          description: |
-            Flag to denote whether user is currently locked, i.e. restricted from signing in or not.
-        lockout_expires_in_seconds:
-          type: integer
-          format: int64
-          nullable: true
-          description: |
-            The number of seconds remaining until the lockout period expires for a locked user. A null value for a locked user indicates that lockout never expires.
-        verification_attempts_remaining:
-          type: integer
-          format: int64
-          nullable: true
-          description: |
-            The number of verification attempts remaining until the user is locked. Null if account lockout is not enabled. Note: if a user is locked explicitly via the Backend API, they may still have verification attempts remaining.
-        updated_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of last update.
-        created_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of creation.
-        delete_self_enabled:
-          type: boolean
-          description: |
-            If enabled, user can delete themselves via FAPI.
-        create_organization_enabled:
-          type: boolean
-          description: |
-            If enabled, user can create organizations via FAPI.
-        create_organizations_limit:
-          type: integer
-          description: |
-            The maximum number of organizations the user can create. 0 means unlimited.
-          nullable: true
-        last_active_at:
-          type: integer
-          format: int64
-          nullable: true
-          description: |
-            Unix timestamp of the latest session activity, with day precision.
-        legal_accepted_at:
-          type: integer
-          format: int64
-          nullable: true
-          description: |
-            Unix timestamp at which the user accepted the legal requirements.
-          example: 1700690400000
-    Client.Session:
-      allOf:
-        - $ref: '#/components/schemas/Client.SessionBase'
-        - type: object
-          properties:
-            user:
-              type: object
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/Client.User'
-            public_user_data:
-              type: object
-              additionalProperties: false
-              nullable: true
-              properties:
-                first_name:
-                  type: string
-                  nullable: true
-                last_name:
-                  type: string
-                  nullable: true
-                profile_image_url:
-                  type: string
-                  nullable: true
-                  deprecated: true
-                image_url:
-                  type: string
-                has_image:
-                  type: boolean
-                identifier:
-                  type: string
-                  nullable: true
-            factor_verification_age:
-              type: array
-              description: |
-                Each item represents the minutes that have passed since the last time a first or second factor were verified.
-              items:
-                type: integer
+        - password_enabled
+        - first_name
+        - last_name
+        - custom_action
+        - external_id
+        - created_session_id
+        - created_user_id
+        - abandon_at
+        - legal_accepted_at
     Client.Client:
       type: object
       nullable: true
       properties:
         object:
           type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
+          description: String representing the object's type. Objects of the same type share the same value.
           enum:
             - client
         id:
           type: string
-          description: |
-            String representing the identifier of the session.
+          description: String representing the identifier of the session.
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Client.Session'
         sign_in:
           type: object
           nullable: true
@@ -7126,38 +7459,54 @@ components:
           nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.SignUp'
-        sessions:
-          type: array
-          items:
-            $ref: '#/components/schemas/Client.Session'
         last_active_session_id:
           nullable: true
           type: string
-          description: |
-            Last active session_id.
-        captcha_bypass:
+          description: Last active session_id.
+        cookie_expires_at:
           nullable: true
-          type: boolean
-          description: |
-            Whether the client can bypass CAPTCHA.
-        updated_at:
           type: integer
           format: int64
-          description: |
-            Unix timestamp of last update.
+          description: Unix timestamp of the cookie expiration.
+        captcha_bypass:
+          type: boolean
+          description: Whether the client can bypass CAPTCHA.
         created_at:
           type: integer
           format: int64
-          description: |
-            Unix timestamp of creation.
+          description: Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of last update.
       required:
         - object
+        - id
+        - sessions
         - sign_in
         - sign_up
-        - sessions
         - last_active_session_id
-        - updated_at
+        - cookie_expires_at
+        - captcha_bypass
         - created_at
+        - updated_at
+    Client.ClientWrappedClient:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
     Client.DeleteSession:
       type: object
       additionalProperties: false
@@ -7173,7 +7522,7 @@ components:
       required:
         - response
         - client
-    Responses.Client.SignIn:
+    Client.ClientWrappedSignIn:
       type: object
       additionalProperties: false
       properties:
@@ -7184,7 +7533,7 @@ components:
       required:
         - response
         - client
-    Responses.Client.SignUp:
+    Client.ClientWrappedSignUp:
       type: object
       additionalProperties: false
       properties:
@@ -7195,7 +7544,7 @@ components:
       required:
         - response
         - client
-    Responses.Client.Session:
+    Client.ClientWrappedSession:
       type: object
       additionalProperties: false
       properties:
@@ -7206,11 +7555,8 @@ components:
       required:
         - response
         - client
-    Client.Activity:
+    Client.SessionActivity:
       type: object
-      required:
-        - id
-        - object
       properties:
         object:
           type: string
@@ -7230,13 +7576,17 @@ components:
           type: string
         country:
           type: string
+      required:
+        - id
+        - object
+        - is_mobile
     Client.ActiveSession:
       allOf:
         - $ref: '#/components/schemas/Client.SessionBase'
         - type: object
           properties:
             latest_activity:
-              $ref: '#/components/schemas/Client.Activity'
+              $ref: '#/components/schemas/Client.SessionActivity'
     Client.ActiveSessions:
       type: array
       items:
@@ -7246,8 +7596,7 @@ components:
       properties:
         object:
           type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
+          description: String representing the object's type. Objects of the same type share the same value.
           enum:
             - session_reverification
         level:
@@ -7275,6 +7624,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Stubs.Verification.Password'
             - $ref: '#/components/schemas/Stubs.Verification.OTP'
+            - $ref: '#/components/schemas/Stubs.Verification.Passkey'
         second_factor_verification:
           type: object
           nullable: true
@@ -7292,8 +7642,10 @@ components:
         - status
         - supported_first_factors
         - supported_second_factors
+        - first_factor_verification
+        - second_factor_verification
         - session
-    Responses.Client.SessionReverification:
+    Client.ClientWrappedSessionReverification:
       type: object
       properties:
         response:
@@ -7334,10 +7686,15 @@ components:
       properties:
         id:
           type: string
+        slug:
+          type: string
         object:
           type: string
         deleted:
           type: boolean
+      required:
+        - object
+        - deleted
     Client.ClientWrappedDeletedObject:
       type: object
       additionalProperties: false
@@ -7451,6 +7808,8 @@ components:
       properties:
         object:
           type: string
+          enum:
+            - totp
         id:
           type: string
         secret:
@@ -7466,12 +7825,20 @@ components:
           items:
             type: string
           nullable: true
+        created_at:
+          type: integer
+          format: int64
+        updated_at:
+          type: integer
+          format: int64
       required:
         - object
         - id
         - secret
         - uri
         - verified
+        - created_at
+        - updated_at
     Client.ClientWrappedTOTP:
       type: object
       additionalProperties: false
@@ -7494,6 +7861,8 @@ components:
       properties:
         object:
           type: string
+          enum:
+            - backup_code
         id:
           type: string
         codes:
@@ -7501,10 +7870,18 @@ components:
           items:
             type: string
             description: A list of backup codes
+        created_at:
+          type: integer
+          format: int64
+        updated_at:
+          type: integer
+          format: int64
       required:
         - object
         - id
         - codes
+        - created_at
+        - updated_at
     Client.ClientWrappedBackupCodes:
       type: object
       additionalProperties: false
@@ -7522,24 +7899,7 @@ components:
       required:
         - response
         - client
-    Token:
-      type: object
-      additionalProperties: false
-      properties:
-        object:
-          type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - token
-        jwt:
-          type: string
-          description: |
-            String representing the encoded jwt value.
-      required:
-        - object
-        - jwt
-    Responses.Client.ClientWrappedImage:
+    Client.ClientWrappedImage:
       type: object
       properties:
         response:
@@ -7576,40 +7936,6 @@ components:
       required:
         - response
         - client
-    Client.OrganizationInvitation:
-      type: object
-      properties:
-        id:
-          type: string
-        object:
-          type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - organization_invitation
-        email_address:
-          type: string
-        role:
-          type: string
-        status:
-          type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - pending
-            - revoked
-            - accepted
-            - completed
-        created_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of creation.
-        updated_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of last update.
     Client.PublicOrganizationData:
       type: object
       additionalProperties: false
@@ -7624,6 +7950,70 @@ components:
           type: string
         has_image:
           type: boolean
+      required:
+        - id
+        - name
+        - slug
+        - has_image
+    Client.OrganizationInvitation:
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - organization_invitation
+        email_address:
+          type: string
+        role:
+          type: string
+        role_name:
+          type: string
+        organization_id:
+          type: string
+        public_organization_data:
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/Client.PublicOrganizationData'
+        status:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - pending
+            - revoked
+            - accepted
+            - completed
+        public_metadata:
+          type: object
+          additionalProperties: true
+        url:
+          type: string
+          nullable: true
+        expires_at:
+          type: integer
+          nullable: true
+          format: int64
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - email_address
+        - role
+        - role_name
+        - public_metadata
+        - url
+        - expires_at
+        - created_at
+        - updated_at
     Client.OrganizationInvitationUserContext:
       type: object
       properties:
@@ -7683,6 +8073,10 @@ components:
             - organization_suggestion
         id:
           type: string
+        public_organization_data:
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/Client.PublicOrganizationData'
         status:
           type: string
         created_at:
@@ -7693,11 +8087,12 @@ components:
           type: integer
           format: int64
           description: Unix timestamp of last update.
-        public_organization_data:
-          allOf:
-            - $ref: '#/components/schemas/Client.PublicOrganizationData'
-          nullable: false
-          type: object
+      required:
+        - object
+        - id
+        - status
+        - created_at
+        - updated_at
     Client.ClientWrappedOrganizationSuggestions:
       type: object
       additionalProperties: false
@@ -7769,7 +8164,7 @@ components:
                   type: array
                   items:
                     $ref: '#/components/schemas/Client.OrganizationInvitation'
-                total:
+                total_count:
                   type: integer
                   format: int64
         client:
@@ -7824,10 +8219,16 @@ components:
           type: string
         attempts:
           type: integer
+          nullable: true
         expire_at:
           nullable: true
           type: integer
           format: int64
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
     Client.OrganizationDomain:
       type: object
       additionalProperties: false
@@ -7847,6 +8248,11 @@ components:
         affiliation_email_address:
           nullable: true
           type: string
+        verification:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.OrganizationDomainVerification'
         total_pending_invitations:
           type: integer
         total_pending_suggestions:
@@ -7859,11 +8265,18 @@ components:
           type: integer
           format: int64
           description: Unix timestamp of last update.
-        verification:
-          type: object
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/Client.OrganizationDomainVerification'
+      required:
+        - object
+        - id
+        - organization_id
+        - name
+        - enrollment_mode
+        - affiliation_email_address
+        - verification
+        - total_pending_invitations
+        - total_pending_suggestions
+        - created_at
+        - updated_at
     Client.ClientWrappedOrganizationDomains:
       type: object
       additionalProperties: false
@@ -7903,23 +8316,6 @@ components:
       required:
         - response
         - client
-    Client.PublicUserData:
-      type: object
-      additionalProperties: false
-      properties:
-        first_name:
-          type: string
-        last_name:
-          type: string
-        image_url:
-          type: string
-        has_image:
-          type: boolean
-        identifier:
-          type: string
-        profile_image_url:
-          type: string
-          nullable: true
     Client.OrganizationMembershipRequest:
       type: object
       additionalProperties: false
@@ -7934,6 +8330,11 @@ components:
           type: string
         status:
           type: string
+        public_user_data:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.PublicUserData'
         created_at:
           type: integer
           format: int64
@@ -7942,11 +8343,14 @@ components:
           type: integer
           format: int64
           description: Unix timestamp of last update.
-        public_user_data:
-          type: object
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/Client.PublicUserData'
+      required:
+        - object
+        - id
+        - organization_id
+        - status
+        - public_user_data
+        - created_at
+        - updated_at
     Client.ClientWrappedOrganizationMembershipRequests:
       type: object
       additionalProperties: false
@@ -8015,6 +8419,15 @@ components:
           type: integer
           format: int64
           description: Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - name
+        - key
+        - description
+        - type
+        - created_at
+        - updated_at
     Client.Role:
       type: object
       additionalProperties: false
@@ -8045,6 +8458,16 @@ components:
           type: integer
           format: int64
           description: Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - name
+        - key
+        - description
+        - is_creator_eligible
+        - permissions
+        - created_at
+        - updated_at
     Client.ClientWrappedRoles:
       type: object
       additionalProperties: false
@@ -8077,6 +8500,9 @@ components:
             - waitlist_entry
         id:
           type: string
+      required:
+        - object
+        - id
   responses:
     WellKnown.Assetlinks:
       description: Get Android asset links for universal/deep linking
@@ -8143,17 +8569,7 @@ components:
       content:
         application/json:
           schema:
-            type: object
-            additionalProperties: true
-            properties:
-              client:
-                type: object
-                nullable: true
-              response:
-                type: object
-                nullable: true
-                allOf:
-                  - $ref: '#/components/schemas/Client.Client'
+            $ref: '#/components/schemas/Client.ClientWrappedClient'
     Client.DeleteSession:
       description: Returns the response for DELETE session object.
       content:
@@ -8165,19 +8581,19 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Responses.Client.SignIn'
+            $ref: '#/components/schemas/Client.ClientWrappedSignIn'
     Client.SignUp:
       description: Returns the sign up object, as well as the updated session object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Responses.Client.SignUp'
+            $ref: '#/components/schemas/Client.ClientWrappedSignUp'
     Client.Session:
       description: Returns a Session object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Responses.Client.Session'
+            $ref: '#/components/schemas/Client.ClientWrappedSession'
     Client.ActiveSessions:
       description: Returns an Active Sessions array.
       content:
@@ -8189,7 +8605,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Responses.Client.SessionReverification'
+            $ref: '#/components/schemas/Client.ClientWrappedSessionReverification'
     Server.Sessions:
       description: Returns Sessions array.
       content:
@@ -8209,7 +8625,7 @@ components:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedEmailAddress'
     Client.ClientWrappedDeletedObject:
-      description: Returns a Deleted User object.
+      description: Returns a deleted generic object.
       content:
         application/json:
           schema:
@@ -8251,7 +8667,7 @@ components:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedPasskey'
     Client.DeletedPasskey:
-      description: Returns a Deleted Passkey object.
+      description: Returns a deleted Passkey object.
       content:
         application/json:
           schema:
@@ -8303,7 +8719,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Responses.Client.ClientWrappedImage'
+            $ref: '#/components/schemas/Client.ClientWrappedImage'
     Client.ClientWrappedOrganizationMemberships:
       description: Returns the response for Client wrapped array of OrganizationMembership objects.
       content:
@@ -8400,6 +8816,41 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.WaitlistEntry'
+  parameters:
+    LimitParameter:
+      name: limit
+      in: query
+      description: |-
+        Applies a limit to the number of results returned.
+        Can be used for paginating the results together with `offset`.
+      required: false
+      schema:
+        type: integer
+        default: 10
+        minimum: 1
+        maximum: 500
+    OffsetParameter:
+      name: offset
+      in: query
+      description: |-
+        Skip the first `offset` results when paginating.
+        Needs to be an integer greater or equal to zero.
+        To be used in conjunction with `limit`.
+      required: false
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+    Paginated:
+      name: paginated
+      in: query
+      description: |-
+        Whether to paginate the results.
+        If true, the results will be paginated.
+        If false, the results will not be paginated.
+      required: false
+      schema:
+        type: boolean
 x-tagGroups:
   - name: Environment
     tags:
