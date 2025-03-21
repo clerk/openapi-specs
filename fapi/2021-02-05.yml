@@ -2092,6 +2092,8 @@ paths:
                 email_address:
                   type: string
                   description: The email address to be added to the user.
+              required:
+                - email_address
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedEmailAddress'
@@ -2133,6 +2135,8 @@ paths:
                 code:
                   type: string
                   description: The code that was previously sent to the email address.
+              required:
+                - code
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedEmailAddress'
@@ -2188,6 +2192,8 @@ paths:
                   type: string
                   description: Used with `oauth_[provider]` and `saml` strategies.
                   nullable: true
+              required:
+                - strategy
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedEmailAddress'
@@ -2299,6 +2305,12 @@ paths:
                 phone_number:
                   type: string
                   description: The phone number to be added to the user.
+                reserved_for_second_factor:
+                  type: boolean
+                  description: Whether the phone number is reserved for multi-factor authentication.
+                  nullable: true
+              required:
+                - phone_number
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedPhoneNumber'
@@ -2340,6 +2352,8 @@ paths:
                 code:
                   type: string
                   description: Strategy used to verify the phone number.
+              required:
+                - code
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedPhoneNumber'
@@ -2385,6 +2399,8 @@ paths:
                   description: Strategy used to verify the phone number.
                   enum:
                     - phone_code
+              required:
+                - strategy
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedPhoneNumber'
@@ -2538,13 +2554,11 @@ paths:
             schema:
               type: object
               properties:
-                strategy:
+                web3_wallet:
                   type: string
-                  description: The strategy used to connect the external account.
-                  nullable: true
-                redirect_url:
-                  type: string
-                  nullable: true
+                  description: The web3 wallet to be added to the user.
+              required:
+                - web3_wallet
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedWeb3Wallet'
@@ -2612,11 +2626,32 @@ paths:
         - Web3 Wallets
       parameters:
         - in: path
-          name: web3_wallet_id
           required: true
+          name: web3_wallet_id
+          description: The web3 wallet ID.
           schema:
             type: string
-          description: The web3 wallet ID
+        - in: header
+          name: Origin
+          description: The origin of the request.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                strategy:
+                  type: string
+                  description: The strategy used to verify the web3 wallet.
+                  pattern: ^web3_\w+_signature$
+                redirect_url:
+                  type: string
+                  description: The redirect URL to redirect the user to after verification.
+                  nullable: true
+              required:
+                - strategy
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedWeb3Wallet'
@@ -2642,6 +2677,22 @@ paths:
           schema:
             type: string
           description: The web3 wallet ID.
+        - in: header
+          name: Origin
+          description: The origin of the request.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                signature:
+                  type: string
+                  description: The signature that was generated from your Web3 Wallet to sign the message
+              required:
+                - signature
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedWeb3Wallet'
@@ -3051,6 +3102,12 @@ paths:
       tags:
         - User
       operationId: getUser
+      parameters:
+        - in: query
+          name: _clerk_session_id
+          description: The session_id associated with the requesting user.
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedUser'
@@ -3066,19 +3123,27 @@ paths:
       tags:
         - User
       operationId: patchUser
+      parameters:
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
               type: object
               properties:
-                username:
-                  nullable: true
-                  type: string
                 first_name:
                   nullable: true
                   type: string
                 last_name:
+                  nullable: true
+                  type: string
+                username:
+                  nullable: true
+                  type: string
+                password:
                   nullable: true
                   type: string
                 primary_email_address_id:
@@ -3090,10 +3155,22 @@ paths:
                 primary_web3_wallet_id:
                   nullable: true
                   type: string
+                public_metadata:
+                  nullable: true
+                  type: string
+                  description: A stringified JSON containing the public metadata of the current user.
+                private_metadata:
+                  nullable: true
+                  type: string
+                  description: A stringified JSON containing the private metadata of the current user.
                 unsafe_metadata:
                   nullable: true
                   type: string
-                  description: A stringified JSON containing the unsafe medata of the current user.
+                  description: A stringified JSON containing the unsafe metadata of the current user.
+                profile_image_id:
+                  nullable: true
+                  type: string
+                  description: The profile image ID of the current user.
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedUser'
@@ -3113,6 +3190,11 @@ paths:
       tags:
         - User
       operationId: deleteUser
+      parameters:
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedDeletedObject'
@@ -3128,6 +3210,24 @@ paths:
     post:
       description: create a jwt for the requested user.
       operationId: createServiceToken
+      tags:
+        - User
+      parameters:
+        - in: query
+          name: _clerk_session_id
+          description: The session_id associated with the requesting user.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                service:
+                  type: string
+              required:
+                - service
       responses:
         '200':
           $ref: '#/components/responses/Token'
@@ -3141,9 +3241,15 @@ paths:
     post:
       summary: Update Profile Image
       description: Update the current user's profile image.
+      operationId: updateProfileImage
       tags:
         - User
-      operationId: updateProfileImage
+      parameters:
+        - in: query
+          name: _clerk_session_id
+          description: The session_id associated with the requesting user.
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -3172,6 +3278,12 @@ paths:
       operationId: deleteProfileImage
       tags:
         - User
+      parameters:
+        - in: query
+          name: _clerk_session_id
+          description: The session_id associated with the requesting user.
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedDeletedObject'
@@ -3186,6 +3298,12 @@ paths:
       operationId: changePassword
       tags:
         - User
+      parameters:
+        - in: query
+          name: _clerk_session_id
+          description: The session_id associated with the requesting user.
+          schema:
+            type: string
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3201,6 +3319,8 @@ paths:
                 sign_out_of_other_sessions:
                   type: boolean
                   nullable: true
+              required:
+                - new_password
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedUser'
@@ -3217,6 +3337,12 @@ paths:
       operationId: removePassword
       tags:
         - User
+      parameters:
+        - in: query
+          name: _clerk_session_id
+          description: The session_id associated with the requesting user.
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -3227,6 +3353,8 @@ paths:
               properties:
                 current_password:
                   type: string
+              required:
+                - current_password
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedUser'
