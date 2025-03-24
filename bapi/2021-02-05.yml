@@ -696,6 +696,71 @@ paths:
           $ref: '#/components/responses/AuthenticationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /sessions/{session_id}/refresh:
+    post:
+      operationId: RefreshSession
+      x-speakeasy-group: sessions
+      x-speakeasy-name-override: refresh
+      tags:
+        - Sessions
+      summary: Refresh a session
+      description: |-
+        Refreshes a session by creating a new session token. A 401 is returned when there
+        are validation errors, which signals the SDKs to fallback to the handshake flow.
+      parameters:
+        - name: session_id
+          in: path
+          description: The ID of the session
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Refresh session parameters
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                expired_token:
+                  type: string
+                  description: |-
+                    The JWT that is sent via the `__session` cookie from your frontend.
+                    Note: this JWT must be associated with the supplied session ID.
+                refresh_token:
+                  type: string
+                  description: The JWT that is sent via the `__session` cookie from your frontend.
+                request_origin:
+                  type: string
+                  description: The origin of the request.
+                request_headers:
+                  type: object
+                  additionalProperties: true
+                  description: The headers of the request.
+                  nullable: true
+                format:
+                  type: string
+                  description: The format of the response.
+                  nullable: true
+                  default: token
+                  enum:
+                    - token
+                    - cookie
+                request_originating_ip:
+                  type: string
+                  description: The IP address of the request.
+                  nullable: true
+              required:
+                - expired_token
+                - refresh_token
+                - request_origin
+      responses:
+        '200':
+          $ref: '#/components/responses/Session.Refresh'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
   /sessions/{session_id}/revoke:
     post:
       operationId: RevokeSession
@@ -8523,6 +8588,12 @@ components:
             items:
               $ref: '#/components/schemas/Session'
     Session:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Session'
+    Session.Refresh:
       description: Success
       content:
         application/json:
