@@ -6641,8 +6641,6 @@ components:
       oneOf:
         - $ref: '#/components/schemas/Token'
         - $ref: '#/components/schemas/Cookies'
-      discriminator:
-        propertyName: object
     Template:
       type: object
       additionalProperties: false
