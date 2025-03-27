@@ -2948,6 +2948,7 @@ paths:
                   type: array
                   items:
                     type: string
+                  nullable: true
                 redirect_url:
                   type: string
                 action_complete_redirect_url:
@@ -5987,10 +5988,13 @@ components:
       type: object
       additionalProperties: false
       properties:
+        enabled:
+          type: boolean
         stripe_publishable_key:
           type: string
+          nullable: true
       required:
-        - stripe_publishable_key
+        - enabled
     Client.Environment:
       type: object
       additionalProperties: false

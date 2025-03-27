@@ -6603,6 +6603,46 @@ components:
         - reserved
         - created_at
         - updated_at
+    Token:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - token
+        jwt:
+          type: string
+          description: |
+            String representing the encoded jwt value.
+      required:
+        - object
+        - jwt
+    Cookies:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - cookies
+        cookies:
+          type: array
+          description: Array of cookie directives.
+          items:
+            type: string
+      required:
+        - object
+        - cookies
+    SessionRefresh:
+      oneOf:
+        - $ref: '#/components/schemas/Token'
+        - $ref: '#/components/schemas/Cookies'
+      discriminator:
+        propertyName: object
     Template:
       type: object
       additionalProperties: false
@@ -6815,6 +6855,149 @@ components:
         - object
         - name
         - last_used_at
+        - verification
+    Oauth:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          x-speakeasy-unknown-values: allow
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+            - transferable
+        strategy:
+          type: string
+          x-speakeasy-unknown-values: allow
+          pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z]+$
+        external_verification_redirect_url:
+          type: string
+        error:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/ClerkError'
+        expire_at:
+          type: integer
+        attempts:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    GoogleOneTap:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+        strategy:
+          type: string
+          enum:
+            - google_one_tap
+        expire_at:
+          type: integer
+          nullable: true
+        attempts:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+        error:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/ClerkError'
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    ExternalAccountWithVerification:
+      type: object
+      additionalProperties: true
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - external_account
+            - facebook_account
+            - google_account
+        id:
+          type: string
+        provider:
+          type: string
+        identification_id:
+          type: string
+        provider_user_id:
+          description: The unique ID of the user in the external provider's system
+          type: string
+        approved_scopes:
+          type: string
+        email_address:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        avatar_url:
+          type: string
+          deprecated: true
+          description: Please use `image_url` instead
+        image_url:
+          type: string
+          nullable: true
+        username:
+          type: string
+          nullable: true
+        public_metadata:
+          type: object
+          additionalProperties: true
+        label:
+          type: string
+          nullable: true
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Oauth'
+            - $ref: '#/components/schemas/GoogleOneTap'
+      required:
+        - object
+        - id
+        - provider
+        - identification_id
+        - provider_user_id
+        - approved_scopes
+        - email_address
+        - first_name
+        - last_name
+        - public_metadata
+        - created_at
+        - updated_at
         - verification
     SAML:
       type: object
@@ -7032,7 +7215,7 @@ components:
         external_accounts:
           type: array
           items:
-            type: object
+            $ref: '#/components/schemas/ExternalAccountWithVerification'
         saml_accounts:
           type: array
           items:
@@ -8598,7 +8781,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Session'
+            $ref: '#/components/schemas/SessionRefresh'
     Template.List:
       description: Success
       content:
