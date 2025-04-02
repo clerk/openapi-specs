@@ -131,6 +131,8 @@ tags:
     description: Check if a user is using a proxy.
   - name: Organization Domains
     description: Manage organization domains.
+  - name: Accountless Applications
+    description: Create and complete accountless applications. Note that this is an experimental feature and subject to change or be removed without notice.
 externalDocs:
   url: https://clerk.com/docs
 paths:
@@ -2244,50 +2246,7 @@ paths:
         - $ref: '#/components/parameters/OffsetParameter'
       responses:
         '200':
-          description: The OAuth access token of the user, if any.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  additionalProperties: false
-                  properties:
-                    object:
-                      type: string
-                    external_account_id:
-                      description: External account ID
-                      type: string
-                    provider_user_id:
-                      description: The unique ID of the user in the external provider's system
-                      type: string
-                    token:
-                      type: string
-                      description: The access token
-                    provider:
-                      type: string
-                      description: The ID of the provider
-                    public_metadata:
-                      type: object
-                      additionalProperties: true
-                    label:
-                      type: string
-                      nullable: true
-                    scopes:
-                      type: array
-                      items:
-                        type: string
-                      description: |-
-                        The list of scopes that the token is valid for.
-                        Only present for OAuth 2.0 tokens.
-                    token_secret:
-                      type: string
-                      description: The token secret. Only present for OAuth 1.0 tokens.
-                    expires_at:
-                      type: integer
-                      format: int64
-                      nullable: true
-                      description: Unix timestamp of the access token expiration.
+          $ref: '#/components/responses/OAuthAccessToken'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '404':
@@ -5883,6 +5842,34 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+  /accountless_applications:
+    post:
+      operationId: CreateAccountlessApplication
+      x-speakeasy-group: experimentalAccountlessApplications
+      x-speakeasy-name-override: create
+      summary: Create an accountless application [EXPERIMENTAL]
+      description: Creates a new accountless application. [EXPERIMENTAL]
+      tags:
+        - Accountless Applications
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountlessApplication'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
+  /accountless_applications/complete:
+    post:
+      operationId: CompleteAccountlessApplication
+      x-speakeasy-group: experimentalAccountlessApplications
+      x-speakeasy-name-override: complete
+      summary: Complete an accountless application [EXPERIMENTAL]
+      description: Completes an accountless application. [EXPERIMENTAL]
+      tags:
+        - Accountless Applications
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountlessApplication'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
 components:
   securitySchemes:
     bearerAuth:
@@ -7304,6 +7291,56 @@ components:
       required:
         - object
         - total_count
+    OAuthAccessToken:
+      type: array
+      items:
+        type: object
+        additionalProperties: false
+        properties:
+          object:
+            type: string
+            enum:
+              - oauth_access_token
+          external_account_id:
+            type: string
+            description: External account ID
+          provider_user_id:
+            type: string
+            description: The unique ID of the user in the external provider's system
+          token:
+            type: string
+            description: The access token
+          expires_at:
+            type: integer
+            format: int64
+            nullable: true
+            description: Unix timestamp of the access token expiration.
+          provider:
+            type: string
+            description: The ID of the provider
+          public_metadata:
+            type: object
+            additionalProperties: true
+          label:
+            type: string
+            nullable: true
+          scopes:
+            type: array
+            items:
+              type: string
+            description: The list of scopes that the token is valid for. Only present for OAuth 2.0 tokens.
+          token_secret:
+            type: string
+            description: The token secret. Only present for OAuth 1.0 tokens.
+        required:
+          - object
+          - external_account_id
+          - provider_user_id
+          - token
+          - expires_at
+          - provider
+          - public_metadata
+          - label
     Organization:
       type: object
       properties:
@@ -8681,6 +8718,25 @@ components:
         - status
         - created_at
         - updated_at
+    AccountlessApplication:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - accountless_application
+        publishable_key:
+          type: string
+        secret_key:
+          type: string
+        claim_url:
+          type: string
+        api_keys_url:
+          type: string
+      required:
+        - object
+        - publishable_key
   responses:
     WellKnown.JWKS:
       description: Get the JSON Web Key Set
@@ -8816,6 +8872,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/TotalCount'
+    OAuthAccessToken:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OAuthAccessToken'
     OrganizationMemberships:
       description: A list of organization memberships
       content:
@@ -9104,6 +9166,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/WaitlistEntry'
+    AccountlessApplication:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountlessApplication'
   parameters:
     Paginated:
       name: paginated
