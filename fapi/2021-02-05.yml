@@ -5039,6 +5039,8 @@ components:
           type: string
         scope:
           type: string
+        id_token:
+          type: string
       required:
         - access_token
         - token_type
