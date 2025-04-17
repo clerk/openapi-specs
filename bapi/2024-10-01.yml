@@ -343,8 +343,8 @@ paths:
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /email_addresses/{email_address_id}:
-    x-speakeasy-usage-example: true
     get:
+      x-speakeasy-usage-example: true
       operationId: GetEmailAddress
       x-speakeasy-group: emailAddresses
       x-speakeasy-name-override: get
