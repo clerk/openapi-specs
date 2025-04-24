@@ -5039,6 +5039,8 @@ components:
           type: string
         scope:
           type: string
+        id_token:
+          type: string
       required:
         - access_token
         - token_type
@@ -5988,13 +5990,21 @@ components:
       type: object
       additionalProperties: false
       properties:
-        enabled:
-          type: boolean
-        stripe_publishable_key:
-          type: string
-          nullable: true
+        billing:
+          type: object
+          additionalProperties: false
+          properties:
+            enabled:
+              type: boolean
+            stripe_publishable_key:
+              type: string
+              nullable: true
+            has_paid_user_plans:
+              type: boolean
+            has_paid_org_plans:
+              type: boolean
       required:
-        - enabled
+        - billing
     Client.Environment:
       type: object
       additionalProperties: false
@@ -6751,6 +6761,9 @@ components:
           type: string
           nullable: true
         username:
+          type: string
+          nullable: true
+        phone_number:
           type: string
           nullable: true
         public_metadata:
