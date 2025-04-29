@@ -271,6 +271,90 @@ paths:
           description: Unauthorized error, for example the provided client is invalid.
         '422':
           description: You are currently using the legacy OAuth 2.0 provider, please migrate to the new one via Clerk Dashboard.
+  /v1/me/oauth/consent/{client_id}:
+    get:
+      summary: Get consent information
+      description: Get required consent information for a given OAuth Application Client ID and State
+      operationId: getOAuthConsent
+      security: []
+      tags:
+        - OAuth2 Identify Provider
+      parameters:
+        - in: path
+          name: client_id
+          required: true
+          schema:
+            type: string
+          description: The OAuth Application Client ID to get consent information for.
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      responses:
+        '200':
+          $ref: '#/components/responses/OAuth.ConsentInfo'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
+    post:
+      summary: Update OAuth2 consent
+      description: Update OAuth2 consent for a given session ID and state ID to help complete the /oauth/authorize flow.
+      operationId: updateOAuthConsent
+      security: []
+      tags:
+        - OAuth2 Identify Provider
+      parameters:
+        - in: path
+          name: client_id
+          required: true
+          schema:
+            type: string
+          description: The OAuth Application Client ID to update consent for.
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                scope:
+                  type: string
+                  description: Space delimited list of scopes to consent to
+                  nullable: false
+                state:
+                  type: string
+                  description: OAuth 2.0 state for the consent
+                  nullable: false
+              required:
+                - scope
+                - state
+      responses:
+        '200':
+          $ref: '#/components/responses/OAuth.ConsentInfo'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
   /v1/account_portal:
     get:
       summary: Get account portal
@@ -5039,6 +5123,8 @@ components:
           type: string
         scope:
           type: string
+        id_token:
+          type: string
       required:
         - access_token
         - token_type
@@ -5122,6 +5208,39 @@ components:
           nullable: true
       required:
         - active
+    OAuth.ScopeWithDescription:
+      type: object
+      additionalProperties: false
+      properties:
+        scope:
+          type: string
+        description:
+          type: string
+          nullable: true
+        consented:
+          type: boolean
+      required:
+        - scope
+        - consented
+    OAuth.ConsentInfo:
+      type: object
+      additionalProperties: false
+      properties:
+        oauth_application_name:
+          type: string
+        client_id:
+          type: string
+        state:
+          type: string
+        scopes:
+          type: array
+          items:
+            $ref: '#/components/schemas/OAuth.ScopeWithDescription'
+      required:
+        - oauth_application_name
+        - client_id
+        - state
+        - scopes
     Client.AccountPortal:
       type: object
       additionalProperties: false
@@ -5988,13 +6107,21 @@ components:
       type: object
       additionalProperties: false
       properties:
-        enabled:
-          type: boolean
-        stripe_publishable_key:
-          type: string
-          nullable: true
+        billing:
+          type: object
+          additionalProperties: false
+          properties:
+            enabled:
+              type: boolean
+            stripe_publishable_key:
+              type: string
+              nullable: true
+            has_paid_user_plans:
+              type: boolean
+            has_paid_org_plans:
+              type: boolean
       required:
-        - enabled
+        - billing
     Client.Environment:
       type: object
       additionalProperties: false
@@ -6751,6 +6878,9 @@ components:
           type: string
           nullable: true
         username:
+          type: string
+          nullable: true
+        phone_number:
           type: string
           nullable: true
         public_metadata:
@@ -8684,6 +8814,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/OAuth.TokenInfo'
+    OAuth.ConsentInfo:
+      description: OAuth2 consent information for a given OAuth Application Client ID and State
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OAuth.ConsentInfo'
     Client.AccountPortal:
       description: Returns the account portal.
       content:
