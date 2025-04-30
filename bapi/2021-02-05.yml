@@ -3400,9 +3400,7 @@ paths:
                   type: array
                   items:
                     type: string
-                  description: |-
-                    For browser-like stacks such as browser extensions, Electron, or Capacitor.js the instance allowed origins need to be updated with the request origin value.
-                    For Chrome extensions popup, background, or service worker pages the origin is chrome-extension://extension_uiid. For Electron apps the default origin is http://localhost:3000. For Capacitor, the origin is capacitor://localhost.
+                  description: For browser-like stacks such as browser extensions, Electron (not officially supported), or Capacitor.js (not officially supported), the instance allowed origins need to be updated with the request origin value. For Chrome extensions popup, background, or service worker pages, the origin is chrome-extension://extension_uiid. For Electron apps the default origin is http://localhost:3000. For Capacitor, the origin is capacitor://localhost.
                 cookieless_dev:
                   type: boolean
                   description: |-
@@ -6665,6 +6663,9 @@ components:
         can_delete:
           type: boolean
           description: whether this template can be deleted
+        can_edit_body:
+          type: boolean
+          description: whether the body of this template can be edited
         can_toggle:
           type: boolean
           description: whether this template can be enabled or disabled, true only for notification SMS templates
@@ -6946,6 +6947,9 @@ components:
           type: string
           nullable: true
         username:
+          type: string
+          nullable: true
+        phone_number:
           type: string
           nullable: true
         public_metadata:
@@ -7274,9 +7278,9 @@ components:
         The hashing algorithm that was used to generate the password digest.
 
         The algorithms we support at the moment are [`bcrypt`](https://en.wikipedia.org/wiki/Bcrypt), [`bcrypt_sha256_django`](https://docs.djangoproject.com/en/4.0/topics/auth/passwords/), [`md5`](https://en.wikipedia.org/wiki/MD5), `pbkdf2_sha1`, `pbkdf2_sha256`, [`pbkdf2_sha256_django`](https://docs.djangoproject.com/en/4.0/topics/auth/passwords/),
-        [`phpass`](https://www.openwall.com/phpass/), [`scrypt_firebase`](https://firebaseopensource.com/projects/firebase/scrypt/),
+        [`phpass`](https://www.openwall.com/phpass/), `md5_phpass`, [`scrypt_firebase`](https://firebaseopensource.com/projects/firebase/scrypt/),
         [`scrypt_werkzeug`](https://werkzeug.palletsprojects.com/en/3.0.x/utils/#werkzeug.security.generate_password_hash), [`sha256`](https://en.wikipedia.org/wiki/SHA-2),
-        and the [`argon2`](https://argon2.online/) variants: `argon2i` and `argon2id`.
+        [`ldap_ssha`](https://www.openldap.org/faq/data/cache/347.html) and the [`argon2`](https://argon2.online/) variants: `argon2i` and `argon2id`.
 
         Each of the supported hashers expects the incoming digest to be in a particular format. See the [Clerk docs](https://clerk.com/docs/references/backend/user/create-user) for more information.
     TotalCount:
@@ -7358,6 +7362,10 @@ components:
           type: string
         slug:
           type: string
+        image_url:
+          type: string
+        has_image:
+          type: boolean
         members_count:
           type: integer
         missing_member_with_elevated_permissions:
@@ -7391,10 +7399,10 @@ components:
         - id
         - name
         - slug
+        - has_image
         - max_allowed_memberships
         - admin_delete_enabled
         - public_metadata
-        - private_metadata
         - created_at
         - updated_at
     OrganizationMembershipPublicUserData:
