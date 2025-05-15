@@ -15,10 +15,10 @@ info:
     ### Versions
 
     When the API changes in a way that isn't compatible with older versions, a new version is released.
-    Each version is identified by its release date, e.g. `2024-10-01`. For more information, please see [Clerk API Versions](https://clerk.com/docs/versioning/available-versions).
+    Each version is identified by its release date, e.g. `2025-04-10`. For more information, please see [Clerk API Versions](https://clerk.com/docs/versioning/available-versions).
 
     Please see https://clerk.com/docs for more information.
-  version: '2024-10-01'
+  version: '2025-04-10'
   termsOfService: https://clerk.com/terms
   license:
     name: MIT
@@ -5883,6 +5883,10 @@ components:
       scheme: bearer
       description: Secret key, obtained under "API Keys" in the Clerk Dashboard.
       bearerFormat: sk_<environment>_<secret value>
+    managementToken:
+      type: http
+      scheme: bearer
+      description: Internal management token.
   schemas:
     JWKS.ed25519.PublicKey:
       type: object
@@ -6192,6 +6196,13 @@ components:
         - id
         - object
         - is_mobile
+    SessionTask:
+      type: object
+      properties:
+        key:
+          type: string
+      required:
+        - key
     Session:
       type: object
       additionalProperties: false
@@ -6221,6 +6232,7 @@ components:
             - removed
             - abandoned
             - replaced
+            - pending
         last_active_organization_id:
           type: string
           nullable: true
@@ -6248,6 +6260,11 @@ components:
           format: int64
           description: |
             Unix timestamp of creation.
+        tasks:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/SessionTask'
       required:
         - object
         - id
