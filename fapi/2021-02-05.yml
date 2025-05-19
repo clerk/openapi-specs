@@ -146,6 +146,17 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/WellKnown.OpenIDConfiguration'
+  /.well-known/oauth-authorization-server:
+    get:
+      summary: OAuth 2.0 Protected Resource Metadata
+      description: Get the OAuth 2.0 Protected Resource Metadata according to the spec
+      operationId: getOAuth2ProtectedResourceMetadata
+      security: []
+      tags:
+        - Well Known
+      responses:
+        '200':
+          $ref: '#/components/responses/WellKnown.OAuth2ProtectedResourceMetadata'
   /oauth/authorize:
     get:
       summary: Request OAuth2 authorization
@@ -271,6 +282,81 @@ paths:
           description: Unauthorized error, for example the provided client is invalid.
         '422':
           description: You are currently using the legacy OAuth 2.0 provider, please migrate to the new one via Clerk Dashboard.
+  /oauth/token/revoke:
+    post:
+      summary: Revoke OAuth2 token
+      description: Revoke OAuth2 token by token.
+      operationId: revokeOAuthToken
+      security: []
+      tags:
+        - OAuth2 Identify Provider
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                token:
+                  type: string
+                  description: The token to revoke.
+                  nullable: false
+                token_type_hint:
+                  type: string
+                  description: A hint about the type of the token to be revoked.
+                  nullable: true
+                  enum:
+                    - access_token
+                    - refresh_token
+      responses:
+        '200':
+          description: Success, no content.
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
+  /v1/me/oauth/consent/{client_id}:
+    get:
+      summary: Get consent information
+      description: Get required consent information for a given OAuth Application Client ID
+      operationId: getOAuthConsent
+      security:
+        - {}
+        - DevBrowser: []
+      tags:
+        - OAuth2 Identify Provider
+      parameters:
+        - in: path
+          name: client_id
+          required: true
+          schema:
+            type: string
+          description: The OAuth Application Client ID to get consent information for.
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      responses:
+        '200':
+          $ref: '#/components/responses/OAuth.ConsentInfo'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
   /v1/account_portal:
     get:
       summary: Get account portal
@@ -5025,6 +5111,70 @@ components:
         - code_challenge_methods_supported
         - backchannel_logout_supported
         - frontchannel_logout_supported
+    WellKnown.OAuth2ProtectedResourceMetadata:
+      type: object
+      additionalProperties: false
+      properties:
+        issuer:
+          type: string
+        jwks_uri:
+          type: string
+        token_endpoint:
+          type: string
+        introspection_endpoint:
+          type: string
+        authorization_endpoint:
+          type: string
+        userinfo_endpoint:
+          type: string
+        ui_locales_supported:
+          type: array
+          items:
+            type: string
+        op_tos_uri:
+          type: string
+        grant_types_supported:
+          type: array
+          items:
+            type: string
+        token_endpoint_auth_methods_supported:
+          type: array
+          items:
+            type: string
+        introspection_endpoint_auth_methods_supported:
+          type: array
+          items:
+            type: string
+        scopes_supported:
+          type: array
+          items:
+            type: string
+        token_types_supported:
+          type: array
+          items:
+            type: string
+        authorization_server:
+          type: string
+        signing_alg_values_supported:
+          type: array
+          items:
+            type: string
+      required:
+        - issuer
+        - jwks_uri
+        - token_endpoint
+        - introspection_endpoint
+        - authorization_endpoint
+        - userinfo_endpoint
+        - ui_locales_supported
+        - op_tos_uri
+        - grant_types_supported
+        - token_endpoint_auth_methods_supported
+        - introspection_endpoint_auth_methods_supported
+        - scopes_supported
+        - token_types_supported
+        - authorization_server
+        - signing_alg_values_supported
     OAuth.Token:
       type: object
       additionalProperties: false
@@ -5038,6 +5188,8 @@ components:
         refresh_token:
           type: string
         scope:
+          type: string
+        id_token:
           type: string
       required:
         - access_token
@@ -5122,6 +5274,37 @@ components:
           nullable: true
       required:
         - active
+    OAuth.ScopeWithDescription:
+      type: object
+      additionalProperties: false
+      properties:
+        scope:
+          type: string
+        description:
+          type: string
+          nullable: true
+        requires_consent:
+          type: boolean
+          description: Whether the scope requires user consent
+      required:
+        - scope
+        - requires_consent
+    OAuth.ConsentInfo:
+      type: object
+      additionalProperties: false
+      properties:
+        oauth_application_name:
+          type: string
+        client_id:
+          type: string
+        scopes:
+          type: array
+          items:
+            $ref: '#/components/schemas/OAuth.ScopeWithDescription'
+      required:
+        - oauth_application_name
+        - client_id
+        - scopes
     Client.AccountPortal:
       type: object
       additionalProperties: false
@@ -5988,13 +6171,21 @@ components:
       type: object
       additionalProperties: false
       properties:
-        enabled:
-          type: boolean
-        stripe_publishable_key:
-          type: string
-          nullable: true
+        billing:
+          type: object
+          additionalProperties: false
+          properties:
+            enabled:
+              type: boolean
+            stripe_publishable_key:
+              type: string
+              nullable: true
+            has_paid_user_plans:
+              type: boolean
+            has_paid_org_plans:
+              type: boolean
       required:
-        - enabled
+        - billing
     Client.Environment:
       type: object
       additionalProperties: false
@@ -6751,6 +6942,9 @@ components:
           type: string
           nullable: true
         username:
+          type: string
+          nullable: true
+        phone_number:
           type: string
           nullable: true
         public_metadata:
@@ -8666,6 +8860,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/WellKnown.OpenIDConfiguration'
+    WellKnown.OAuth2ProtectedResourceMetadata:
+      description: Get the OAuth 2.0 Protected Resource Metadata
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WellKnown.OAuth2ProtectedResourceMetadata'
     OAuth.Token:
       description: Fetch token for OAuth2 flow
       content:
@@ -8684,6 +8884,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/OAuth.TokenInfo'
+    OAuth.ConsentInfo:
+      description: OAuth2 consent information for a given OAuth Application Client ID and State
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OAuth.ConsentInfo'
     Client.AccountPortal:
       description: Returns the account portal.
       content:
