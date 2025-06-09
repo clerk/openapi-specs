@@ -7458,6 +7458,7 @@ components:
           type: array
           items:
             type: string
+          nullable: true
         public_metadata:
           type: object
           description: Metadata saved on the organization membership, accessible from both Frontend and Backend APIs
