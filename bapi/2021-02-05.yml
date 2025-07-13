@@ -4921,7 +4921,7 @@ paths:
           name: organization_id
           schema:
             type: string
-          description: The ID of the organization the domain belongs to
+          description: The ID of the organization to which the domain belongs
         - in: path
           required: true
           name: domain_id
@@ -4966,7 +4966,7 @@ paths:
           name: organization_id
           schema:
             type: string
-          description: The ID of the organization the domain belongs to
+          description: The ID of the organization to which the domain belongs
         - in: path
           required: true
           name: domain_id
