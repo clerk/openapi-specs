@@ -708,7 +708,7 @@ paths:
       summary: Refresh a session
       description: |-
         Refreshes a session by creating a new session token. A 401 is returned when there
-        are validation errors, which signals the SDKs to fallback to the handshake flow.
+        are validation errors, which signals the SDKs to fall back to the handshake flow.
       parameters:
         - name: session_id
           in: path

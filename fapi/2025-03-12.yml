@@ -1795,7 +1795,7 @@ paths:
         Start a new session reverification flow by providing a verification level.
 
         If the requested level equals 'secondFactor' or 'multiFactor' and the associated user
-        doesn't have any available second factor, then we fallback to 'firstFactor'
+        doesn't have any available second factor, then we fall back to 'firstFactor'
       tags:
         - Sessions
       operationId: startSessionReverification
