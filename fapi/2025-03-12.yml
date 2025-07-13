@@ -3083,7 +3083,7 @@ paths:
       summary: Create Backup Codes
       description: |-
         Create two factor authentication backup codes for the current user.
-        A two factor authentication method must be enabled for the environment. Otherwise the endpoint will return an error.
+        A two factor authentication method must be enabled for the environment. Otherwise, the endpoint will return an error.
       tags:
         - Backup Codes
       operationId: createBackupCodes
