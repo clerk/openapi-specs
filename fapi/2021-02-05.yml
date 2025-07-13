@@ -4589,7 +4589,7 @@ components:
 
         Used to authenticate only dev instances.
 
-        To generate an dev instance API token you must first make a request to `/v1/dev_browser`
+        To generate a dev instance API token you must first make a request to `/v1/dev_browser`
         and copy it from the response.
     ProductionNativeApp:
       type: http
