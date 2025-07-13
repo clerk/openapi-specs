@@ -2154,7 +2154,7 @@ paths:
     post:
       description: |-
         Depending on the given strategy, the API will prepare the verification for the email address.
-        In particular, * for `email_code`, the API will send a verification email to the address containing a code. * for `email_link`, the API will send a verification email to the address containg a link to the verification attempt endpoint. * for `enterprise_sso`, the API will send an external redirect URL to the browser containg a link to the SSO verification endpoint.
+        In particular, * for `email_code`, the API will send a verification email to the address containing a code. * for `email_link`, the API will send a verification email to the address containing a link to the verification attempt endpoint. * for `enterprise_sso`, the API will send an external redirect URL to the browser containing a link to the SSO verification endpoint.
       summary: Prepare Email Address Verification
       tags:
         - Email Addresses
