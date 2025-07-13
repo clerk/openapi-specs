@@ -84,7 +84,7 @@ tags:
   - name: Organizations Memberships
     description: Used to interact with the current user's organization memberships, invitations and suggestions.
   - name: Organization
-    description: Used to interact with the an organization and its properties. The current user must be an administrator to access them.
+    description: Used to interact with an organization and its properties. The current user must be an administrator to access them.
   - name: Invitations
     description: Used to interact with the invitations of an organization. The current user must be an administrator to access them.
   - name: Members
