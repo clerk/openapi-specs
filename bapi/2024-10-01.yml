@@ -4712,7 +4712,7 @@ paths:
           name: organization_id
           schema:
             type: string
-          description: The ID of the organization the membership belongs to
+          description: The ID of the organization to which the membership belongs
         - in: path
           required: true
           name: user_id
@@ -4752,7 +4752,7 @@ paths:
           name: organization_id
           schema:
             type: string
-          description: The ID of the organization the membership belongs to
+          description: The ID of the organization to which the membership belongs
         - in: path
           required: true
           name: user_id
@@ -4784,7 +4784,7 @@ paths:
           name: organization_id
           schema:
             type: string
-          description: The ID of the organization the membership belongs to
+          description: The ID of the organization to which the membership belongs
         - in: path
           required: true
           name: user_id
