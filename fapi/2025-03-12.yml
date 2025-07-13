@@ -3145,7 +3145,7 @@ paths:
                 unsafe_metadata:
                   nullable: true
                   type: string
-                  description: A stringified JSON containing the unsafe medata of the current user.
+                  description: A stringified JSON containing the unsafe metadata of the current user.
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedUser'
