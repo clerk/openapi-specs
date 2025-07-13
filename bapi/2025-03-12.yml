@@ -42,7 +42,7 @@ tags:
   - name: Clients
     description: The Client object tracks sessions, as well as the state of any sign in and sign up attempts, for a given device.
     externalDocs:
-      url: https://clerk.com/docs/reference/clerkjs/client
+      url: https://clerk.com/docs/references/javascript/client
   - name: Domains
     description: Domains represent each instance's URLs and DNS setup.
   - name: Email Addresses
@@ -100,7 +100,7 @@ tags:
       It models the period of information exchange between a user and the server.
       Sessions are created when a user successfully goes through the sign in or sign up flows.
     externalDocs:
-      url: https://clerk.com/docs/reference/clerkjs/session
+      url: https://clerk.com/docs/references/javascript/session
   - name: Sign-in Tokens
     description: |-
       Sign-in tokens are JWTs that can be used to sign in to an application without specifying any credentials.
@@ -108,7 +108,7 @@ tags:
   - name: Sign Ups
     description: Sign-up objects track the progress of a sign-up attempt and store any field collected from user input.
     externalDocs:
-      url: https://clerk.com/docs/reference/clerkjs/signup
+      url: https://clerk.com/docs/references/javascript/signup
   - name: Testing Tokens
     description: Tokens meant for use by end-to-end test suites in requests to the Frontend API, so as to bypass bot detection measures.
     externalDocs:
@@ -116,7 +116,7 @@ tags:
   - name: Users
     description: The user object represents a user that has successfully signed up to your application.
     externalDocs:
-      url: https://clerk.com/docs/reference/clerkjs/user
+      url: https://clerk.com/docs/references/javascript/user
   - name: Webhooks
     description: You can configure webhooks to be notified about various events that happen on your instance.
     externalDocs:
