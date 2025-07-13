@@ -2372,7 +2372,7 @@ paths:
   /v1/me/phone_numbers/{phone_number_id}/prepare_verification:
     post:
       summary: Prepare Phone Number Verification
-      description: Sends an sms to the phone number with the code needed to verify it.
+      description: Sends an SMS to the phone number with the code needed to verify it.
       tags:
         - Phone Numbers
       operationId: sendVerificationSMS
