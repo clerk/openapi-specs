@@ -108,7 +108,7 @@ tags:
   - name: Sign Ups
     description: Sign-up objects track the progress of a sign-up attempt and store any field collected from user input.
     externalDocs:
-      url: https://clerk.com/docs/references/javascript/signup
+      url: https://clerk.com/docs/references/javascript/sign-up
   - name: Testing Tokens
     description: Tokens meant for use by end-to-end test suites in requests to the Frontend API, so as to bypass bot detection measures.
     externalDocs:
