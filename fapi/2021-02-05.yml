@@ -1651,7 +1651,7 @@ paths:
     post:
       operationId: removeSession
       summary: Remove Session
-      description: Delete the the given session.
+      description: Delete the given session.
       tags:
         - Sessions
       parameters:
