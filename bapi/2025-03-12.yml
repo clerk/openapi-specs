@@ -85,7 +85,7 @@ tags:
   - name: Phone Numbers
     description: A user can be associated with one or more phone numbers, which allows them to be contacted via SMS.
     externalDocs:
-      url: https://clerk.com/docs/reference/clerkjs/phonenumber
+      url: https://clerk.com/docs/references/javascript/types/phone-number
   - name: Redirect URLs
     description: |-
       Redirect URLs are whitelisted URLs that facilitate secure authentication flows in native applications (e.g. React Native, Expo).
