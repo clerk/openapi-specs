@@ -48,7 +48,7 @@ tags:
   - name: Email Addresses
     description: A user can be associated with one or more email addresses, which allows them to be contacted via email.
     externalDocs:
-      url: https://clerk.com/docs/reference/clerkjs/emailaddress
+      url: https://clerk.com/docs/references/javascript/types/email-address
   - name: Email & SMS Templates
     description: Email & SMS templates allow you to customize the theming and wording of emails & SMS messages that are sent by your instance.
     externalDocs:
