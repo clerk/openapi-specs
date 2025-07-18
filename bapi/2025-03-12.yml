@@ -858,7 +858,7 @@ paths:
               type: object
               properties:
                 expires_in_seconds:
-                  type: number
+                  type: integer
                   minimum: 30
                   maximum: 315360000
                   description: Use this parameter to override the default session token lifetime.
@@ -910,7 +910,7 @@ paths:
               type: object
               properties:
                 expires_in_seconds:
-                  type: number
+                  type: integer
                   minimum: 30
                   maximum: 315360000
                   description: Use this parameter to override the JWT token lifetime.
@@ -3627,13 +3627,13 @@ paths:
                   description: JWT template claims in JSON format
                   nullable: false
                 lifetime:
-                  type: number
+                  type: integer
                   minimum: 30
                   maximum: 315360000
                   description: JWT token lifetime
                   nullable: true
                 allowed_clock_skew:
-                  type: number
+                  type: integer
                   minimum: 0
                   maximum: 300
                   description: JWT token allowed clock skew
@@ -3712,13 +3712,13 @@ paths:
                   description: JWT template claims in JSON format
                   nullable: false
                 lifetime:
-                  type: number
+                  type: integer
                   minimum: 30
                   maximum: 315360000
                   description: JWT token lifetime
                   nullable: true
                 allowed_clock_skew:
-                  type: number
+                  type: integer
                   minimum: 0
                   maximum: 300
                   description: JWT token allowed clock skew
