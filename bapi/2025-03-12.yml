@@ -6353,6 +6353,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        type:
+          type: string
+          enum:
+            - otp
         status:
           type: string
           enum:
@@ -6385,6 +6389,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        type:
+          type: string
+          enum:
+            - admin
         status:
           type: string
           enum:
@@ -6412,6 +6420,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        type:
+          type: string
+          enum:
+            - from_oauth
         status:
           type: string
           enum:
@@ -6443,6 +6455,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        type:
+          type: string
+          enum:
+            - ticket
         status:
           type: string
           enum:
@@ -6505,6 +6521,14 @@ components:
             - $ref: '#/components/schemas/Admin'
             - $ref: '#/components/schemas/FromOAuth'
             - $ref: '#/components/schemas/Ticket'
+          decrimniator:
+            type: string
+            propertyName: type
+            mapping:
+              otp: '#/components/schemas/OTP'
+              admin: '#/components/schemas/Admin'
+              from_oauth: '#/components/schemas/FromOAuth'
+              ticket: '#/components/schemas/Ticket'
         linked_to:
           type: array
           items:
