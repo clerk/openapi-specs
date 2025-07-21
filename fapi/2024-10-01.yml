@@ -146,6 +146,17 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/WellKnown.OpenIDConfiguration'
+  /.well-known/oauth-authorization-server:
+    get:
+      summary: OAuth 2.0 Authorization Server Metadata
+      description: Get the OAuth 2.0 Authorization Server Metadata according to RFC 8414
+      operationId: getOAuth2AuthorizationServerMetadata
+      security: []
+      tags:
+        - Well Known
+      responses:
+        '200':
+          $ref: '#/components/responses/WellKnown.OAuth2AuthorizationServerMetadata'
   /oauth/authorize:
     get:
       summary: Request OAuth2 authorization
@@ -271,6 +282,41 @@ paths:
           description: Unauthorized error, for example the provided client is invalid.
         '422':
           description: You are currently using the legacy OAuth 2.0 provider, please migrate to the new one via Clerk Dashboard.
+  /v1/oauth/consent/{client_id}:
+    get:
+      summary: Get consent information
+      description: Get required consent information for a given OAuth Application Client ID
+      operationId: getOAuthConsent
+      security:
+        - {}
+        - DevBrowser: []
+      tags:
+        - OAuth2 Identify Provider
+      parameters:
+        - in: path
+          name: client_id
+          required: true
+          schema:
+            type: string
+          description: The OAuth Application Client ID to get consent information for.
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      responses:
+        '200':
+          $ref: '#/components/responses/OAuth.ConsentInfo'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
   /v1/account_portal:
     get:
       summary: Get account portal
@@ -1406,6 +1452,17 @@ paths:
             type: string
           description: The URL to redirect back to after the handshake
         - in: query
+          name: format
+          allowEmptyValue: false
+          required: false
+          schema:
+            type: string
+            enum:
+              - nonce
+              - token
+            default: token
+          description: The supported format of the handshake payload.
+        - in: query
           name: organization_id
           schema:
             type: string
@@ -1719,7 +1776,11 @@ paths:
   /v1/client/sessions/{session_id}/tokens:
     post:
       summary: Create Session Token
-      description: Create a session jwt for the authenticated requested user.
+      description: |-
+        Create a session jwt for the authenticated requested user.
+
+        When force organization selection is enabled and `organization_id` is sent as null or empty string,
+        the token will be created with the previous active organization and will not attempt to switch to a personal workspace.
       operationId: createSessionToken
       tags:
         - Sessions
@@ -1738,7 +1799,13 @@ paths:
               properties:
                 organization_id:
                   type: string
-                  description: The organization id to associate with the token. The user must be a member of the organization. If present but empty, the personal workspace will be set as active. If absent, the previous active organization for the session will be used.
+                  description: |-
+                    The organization id to associate with the token. The user must be a member of the organization.
+                    If present but empty, the personal workspace will be set as active.
+                    If absent, the previous active organization for the session will be used.
+
+                    When force organization selection is enabled and this value is sent as null or empty string,
+                    the token will be created with the previous active organization and will not attempt to switch to a personal workspace.
                   nullable: true
       responses:
         '200':
@@ -3404,6 +3471,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
   /v1/me/organization_invitations:
     get:
       summary: Get Current User's Organization Invitations
@@ -3616,6 +3685,8 @@ paths:
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
           $ref: '#/components/responses/ClerkErrors'
   /v1/organizations/{organization_id}/logo:
     put:
@@ -4066,6 +4137,8 @@ paths:
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
           $ref: '#/components/responses/ClerkErrors'
   /v1/organizations/{organization_id}/domains:
     post:
@@ -4619,6 +4692,7 @@ components:
               type: string
               enum:
                 - delegate_permission/common.handle_all_urls
+                - delegate_permission/common.get_login_creds
           target:
             type: object
             properties:
@@ -5025,6 +5099,73 @@ components:
         - code_challenge_methods_supported
         - backchannel_logout_supported
         - frontchannel_logout_supported
+    WellKnown.OAuth2AuthorizationServerMetadata:
+      type: object
+      additionalProperties: false
+      properties:
+        issuer:
+          type: string
+        authorization_endpoint:
+          type: string
+        token_endpoint:
+          type: string
+        jwks_uri:
+          type: string
+        registration_endpoint:
+          type: string
+        response_types_supported:
+          type: array
+          items:
+            type: string
+        grant_types_supported:
+          type: array
+          items:
+            type: string
+        token_endpoint_auth_methods_supported:
+          type: array
+          items:
+            type: string
+        scopes_supported:
+          type: array
+          items:
+            type: string
+        subject_types_supported:
+          type: array
+          items:
+            type: string
+        id_token_signing_alg_values_supported:
+          type: array
+          items:
+            type: string
+        claims_supported:
+          type: array
+          items:
+            type: string
+        service_documentation:
+          type: string
+        ui_locales_supported:
+          type: array
+          items:
+            type: string
+        op_tos_uri:
+          type: string
+        code_challenge_methods_supported:
+          type: array
+          items:
+            type: string
+      required:
+        - issuer
+        - authorization_endpoint
+        - token_endpoint
+        - jwks_uri
+        - response_types_supported
+        - grant_types_supported
+        - token_endpoint_auth_methods_supported
+        - scopes_supported
+        - subject_types_supported
+        - id_token_signing_alg_values_supported
+        - claims_supported
+        - code_challenge_methods_supported
     OAuth.Token:
       type: object
       additionalProperties: false
@@ -5038,6 +5179,8 @@ components:
         refresh_token:
           type: string
         scope:
+          type: string
+        id_token:
           type: string
       required:
         - access_token
@@ -5122,6 +5265,37 @@ components:
           nullable: true
       required:
         - active
+    OAuth.ScopeWithDescription:
+      type: object
+      additionalProperties: false
+      properties:
+        scope:
+          type: string
+        description:
+          type: string
+          nullable: true
+        requires_consent:
+          type: boolean
+          description: Whether the scope requires user consent
+      required:
+        - scope
+        - requires_consent
+    OAuth.ConsentInfo:
+      type: object
+      additionalProperties: false
+      properties:
+        oauth_application_name:
+          type: string
+        client_id:
+          type: string
+        scopes:
+          type: array
+          items:
+            $ref: '#/components/schemas/OAuth.ScopeWithDescription'
+      required:
+        - oauth_application_name
+        - client_id
+        - scopes
     Client.AccountPortal:
       type: object
       additionalProperties: false
@@ -5731,14 +5905,11 @@ components:
           $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
         block_disposable_email_domains:
           $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
-        ignore_dots_for_gmail_addresses:
-          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
       required:
         - allowlist
         - blocklist
         - block_email_subaddresses
         - block_disposable_email_domains
-        - ignore_dots_for_gmail_addresses
     UserSettings.PasswordSettings:
       type: object
       additionalProperties: false
@@ -5791,9 +5962,12 @@ components:
         max_length:
           type: integer
           nullable: true
+        allow_extended_special_characters:
+          type: boolean
       required:
         - min_length
         - max_length
+        - allow_extended_special_characters
     UserSettings.ActionsSettings:
       type: object
       additionalProperties: false
@@ -5988,11 +6162,44 @@ components:
       type: object
       additionalProperties: false
       properties:
+        billing:
+          type: object
+          additionalProperties: false
+          properties:
+            enabled:
+              type: boolean
+            stripe_publishable_key:
+              type: string
+              nullable: true
+            has_paid_user_plans:
+              type: boolean
+            has_paid_org_plans:
+              type: boolean
+            user:
+              type: object
+              additionalProperties: false
+              properties:
+                enabled:
+                  type: boolean
+                has_paid_plans:
+                  type: boolean
+            organization:
+              type: object
+              additionalProperties: false
+              properties:
+                enabled:
+                  type: boolean
+                has_paid_plans:
+                  type: boolean
+      required:
+        - billing
+    Client.ApiKeysSettings:
+      type: object
+      additionalProperties: false
+      properties:
         enabled:
           type: boolean
-        stripe_publishable_key:
-          type: string
-          nullable: true
+          description: Indicates whether the API Keys feature is enabled.
       required:
         - enabled
     Client.Environment:
@@ -6011,6 +6218,8 @@ components:
           $ref: '#/components/schemas/Client.FraudSettings'
         commerce_settings:
           $ref: '#/components/schemas/Client.CommerceSettings'
+        api_keys_settings:
+          $ref: '#/components/schemas/Client.ApiKeysSettings'
         maintenance_mode:
           type: boolean
     Token:
@@ -6753,6 +6962,9 @@ components:
         username:
           type: string
           nullable: true
+        phone_number:
+          type: string
+          nullable: true
         public_metadata:
           type: object
           additionalProperties: true
@@ -6799,6 +7011,11 @@ components:
           type: string
         domain:
           type: string
+          deprecated: true
+        domains:
+          type: array
+          items:
+            type: string
         active:
           type: boolean
         provider:
@@ -6824,12 +7041,16 @@ components:
       required:
         - id
         - name
-        - domain
         - active
         - provider
         - sync_user_attributes
         - created_at
         - updated_at
+      anyOf:
+        - required:
+            - domain
+        - required:
+            - domains
     Client.SAMLAccount:
       type: object
       additionalProperties: false
@@ -8666,6 +8887,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/WellKnown.OpenIDConfiguration'
+    WellKnown.OAuth2AuthorizationServerMetadata:
+      description: Get the OAuth 2.0 Authorization Server Metadata
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WellKnown.OAuth2AuthorizationServerMetadata'
     OAuth.Token:
       description: Fetch token for OAuth2 flow
       content:
@@ -8684,6 +8911,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/OAuth.TokenInfo'
+    OAuth.ConsentInfo:
+      description: OAuth2 consent information for a given OAuth Application Client ID and State
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OAuth.ConsentInfo'
     Client.AccountPortal:
       description: Returns the account portal.
       content:
