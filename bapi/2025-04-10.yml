@@ -15,10 +15,10 @@ info:
     ### Versions
 
     When the API changes in a way that isn't compatible with older versions, a new version is released.
-    Each version is identified by its release date, e.g. `2021-02-05`. For more information, please see [Clerk API Versions](https://clerk.com/docs/versioning/available-versions).
+    Each version is identified by its release date, e.g. `2025-04-10`. For more information, please see [Clerk API Versions](https://clerk.com/docs/versioning/available-versions).
 
     Please see https://clerk.com/docs for more information.
-  version: '2021-02-05'
+  version: '2025-04-10'
   termsOfService: https://clerk.com/terms
   license:
     name: MIT
@@ -450,6 +450,7 @@ paths:
           $ref: '#/components/responses/AuthenticationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /clients/handshake_payload: {}
   /email_addresses:
     post:
       operationId: CreateEmailAddress
@@ -945,51 +946,6 @@ paths:
           $ref: '#/components/responses/AuthenticationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
-  /sessions/{session_id}/verify:
-    post:
-      deprecated: true
-      operationId: VerifySession
-      x-speakeasy-group: sessions
-      x-speakeasy-name-override: verify
-      tags:
-        - Sessions
-      summary: Verify a session
-      description: |-
-        Returns the session if it is authenticated, otherwise returns an error.
-        WARNING: This endpoint is deprecated and will be removed in future versions. We strongly recommend switching to networkless verification using short-lived session tokens,
-                 which is implemented transparently in all recent SDK versions (e.g. [NodeJS SDK](https://clerk.com/docs/backend-requests/handling/nodejs#clerk-express-require-auth)).
-                 For more details on how networkless verification works, refer to our [Session Tokens documentation](https://clerk.com/docs/backend-requests/resources/session-tokens).
-      parameters:
-        - name: session_id
-          in: path
-          description: The ID of the session
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: Parameters.
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties:
-                token:
-                  type: string
-                  description: |-
-                    The JWT that is sent via the `__session` cookie from your frontend.
-                    Note: this JWT must be associated with the supplied session ID.
-      responses:
-        '200':
-          $ref: '#/components/responses/Session'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/AuthenticationInvalid'
-        '404':
-          $ref: '#/components/responses/ResourceNotFound'
-        '410':
-          $ref: '#/components/responses/DeprecatedEndpoint'
   /sessions/{session_id}/tokens:
     post:
       operationId: CreateSessionToken
@@ -5267,8 +5223,6 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/OrganizationMembership'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
         '422':
@@ -5297,8 +5251,6 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/OrganizationMembership'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
         '401':
           $ref: '#/components/responses/AuthenticationInvalid'
         '404':
@@ -6543,6 +6495,106 @@ paths:
           $ref: '#/components/responses/AccountlessApplication'
         '500':
           $ref: '#/components/responses/ClerkErrors'
+  /management/users:
+    x-internal: true
+    post:
+      operationId: ManagementUpsertUser
+      x-speakeasy-group: management
+      x-speakeasy-name-override: upsertUser
+      tags:
+        - Management
+      summary: Upsert a user
+      description: |
+        Upsert a user using the provided information. If a user with the same email_address exists, it will be updated. Otherwise, a new user will be created.
+        This endpoint is internal and requires a specific management token for authorization.
+      security:
+        - managementToken: []
+      requestBody:
+        description: User data to upsert.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManagementUpsertUserRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/User'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /management/organizations:
+    x-internal: true
+    post:
+      operationId: ManagementCreateOrganization
+      x-speakeasy-group: management
+      x-speakeasy-name-override: createOrganization
+      tags:
+        - Management
+      summary: Create an organization
+      description: |
+        Create a new organization.
+        This endpoint is internal and requires a specific management token for authorization.
+      security:
+        - managementToken: []
+      requestBody:
+        description: Organization data to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManagementCreateOrganizationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/Organization'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /management/applications:
+    x-internal: true
+    post:
+      operationId: ManagementCreateApplication
+      x-speakeasy-group: management
+      x-speakeasy-name-override: createApplication
+      tags:
+        - Management
+      summary: Create an application (instance)
+      description: |
+        Create a new application (instance).
+        This endpoint is internal and requires a specific management token for authorization.
+      security:
+        - managementToken: []
+      requestBody:
+        description: Application data to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManagementCreateApplicationRequest'
+      responses:
+        '200':
+          description: Application created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementApplicationResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /oauth_applications/access_tokens/verify:
     post:
       x-speakeasy-group: oauthAccessTokens
@@ -6692,6 +6744,10 @@ components:
       scheme: bearer
       description: Secret key, obtained under "API Keys" in the Clerk Dashboard.
       bearerFormat: sk_<environment>_<secret value>
+    managementToken:
+      type: http
+      scheme: bearer
+      description: Internal management token.
   schemas:
     JWKS.ed25519.PublicKey:
       type: object
@@ -7081,6 +7137,13 @@ components:
         - id
         - object
         - is_mobile
+    SessionTask:
+      type: object
+      properties:
+        key:
+          type: string
+      required:
+        - key
     Session:
       type: object
       additionalProperties: false
@@ -7110,6 +7173,7 @@ components:
             - removed
             - abandoned
             - replaced
+            - pending
         last_active_organization_id:
           type: string
           nullable: true
@@ -7137,6 +7201,11 @@ components:
           format: int64
           description: |
             Unix timestamp of creation.
+        tasks:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/SessionTask'
       required:
         - object
         - id
@@ -9709,6 +9778,149 @@ components:
       required:
         - object
         - publishable_key
+    ManagementUpsertUserRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        email_address:
+          type: string
+          description: The email address of the user.
+        first_name:
+          type: string
+          description: The first name of the user.
+        last_name:
+          type: string
+          description: The last name of the user.
+      required:
+        - email_address
+        - first_name
+        - last_name
+    ManagementCreateOrganizationRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: The name of the organization.
+        slug:
+          type: string
+          description: The slug of the organization.
+        created_by:
+          type: string
+          description: The ID of the user who created the organization.
+        max_allowed_memberships:
+          type: integer
+          description: The maximum allowed memberships for the organization.
+        public_metadata:
+          type: object
+          description: Public metadata for the organization.
+        private_metadata:
+          type: object
+          description: Private metadata for the organization.
+        created_at:
+          type: string
+          format: date-time
+          description: The creation timestamp in RFC3339 format.
+      required:
+        - name
+        - slug
+    ManagementCreateApplicationRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: The name of the application.
+        owner_id:
+          type: string
+          description: The owner ID (organization ID) of the application.
+        plan_id:
+          type: string
+          description: The plan ID for the application (e.g., "free_2022_06", "pro_2023_11").
+        addon_ids:
+          type: array
+          items:
+            type: string
+          description: List of add-on IDs (e.g., ["enhanced_auth_2023_11", "enhanced_orgs_2023_11"]).
+        paid_externally:
+          type: boolean
+          description: Whether the application is paid externally.
+        test_mode:
+          type: boolean
+          description: Whether the application is in test mode.
+        max_allowed_users:
+          type: integer
+          description: Maximum allowed users for the application.
+        max_allowed_organizations:
+          type: integer
+          description: Maximum allowed organizations for the application.
+        subscription_metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: Subscription metadata for the application.
+        environment_types:
+          type: array
+          items:
+            type: string
+            enum:
+              - development
+              - staging
+              - production
+          description: List of environment types to create instances for.
+      required:
+        - name
+        - owner_id
+        - plan_id
+    ManagementApplicationSubscription:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        stripe_subscription_id:
+          type: string
+          nullable: true
+      required:
+        - id
+    ManagementApplicationInstance:
+      type: object
+      additionalProperties: false
+      properties:
+        instance_id:
+          type: string
+          description: The ID of the instance.
+        environment_type:
+          type: string
+          description: The environment type of the instance.
+        secret_key:
+          type: string
+          description: The secret key of the instance.
+        publishable_key:
+          type: string
+          description: The publishable key of the instance.
+      required:
+        - instance_id
+        - environment_type
+        - secret_key
+        - publishable_key
+    ManagementApplicationResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        application_id:
+          type: string
+          description: The ID of the application.
+        subscription:
+          $ref: '#/components/schemas/ManagementApplicationSubscription'
+        instances:
+          type: array
+          description: List of instances associated with this application.
+          items:
+            $ref: '#/components/schemas/ManagementApplicationInstance'
+      required:
+        - application_id
+        - instances
   responses:
     WellKnown.JWKS:
       description: Get the JSON Web Key Set
