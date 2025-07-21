@@ -6521,7 +6521,7 @@ components:
             - $ref: '#/components/schemas/Admin'
             - $ref: '#/components/schemas/FromOAuth'
             - $ref: '#/components/schemas/Ticket'
-          decrimniator:
+          discriminator:
             type: string
             propertyName: type
             mapping:
