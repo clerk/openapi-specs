@@ -84,7 +84,7 @@ tags:
   - name: Organizations Memberships
     description: Used to interact with the current user's organization memberships, invitations and suggestions.
   - name: Organization
-    description: Used to interact with the an organization and its properties. The current user must be an administrator to access them.
+    description: Used to interact with an organization and its properties. The current user must be an administrator to access them.
   - name: Invitations
     description: Used to interact with the invitations of an organization. The current user must be an administrator to access them.
   - name: Members
@@ -1548,7 +1548,7 @@ paths:
           description: The hostname is invalid.
   /v1/dev_browser/set_first_party_cookie:
     post:
-      summary: Post Dev Broswer init set cookie
+      summary: Post Dev Browser init set cookie
       description: post dev_browser/set_first_party_cookie
       operationId: postDevBrowserInitSetCookie
       responses:
@@ -1756,7 +1756,7 @@ paths:
     post:
       operationId: removeSession
       summary: Remove Session
-      description: Delete the the given session.
+      description: Delete the given session.
       tags:
         - Sessions
       parameters:
@@ -1910,7 +1910,7 @@ paths:
         Start a new session reverification flow by providing a verification level.
 
         If the requested level equals 'secondFactor' or 'multiFactor' and the associated user
-        doesn't have any available second factor, then we fallback to 'firstFactor'
+        doesn't have any available second factor, then we fall back to 'firstFactor'
       tags:
         - Sessions
       operationId: startSessionReverification
@@ -2269,7 +2269,7 @@ paths:
     post:
       description: |-
         Depending on the given strategy, the API will prepare the verification for the email address.
-        In particular, * for `email_code`, the API will send a verification email to the address containing a code. * for `email_link`, the API will send a verification email to the address containg a link to the verification attempt endpoint. * for `enterprise_sso`, the API will send an external redirect URL to the browser containg a link to the SSO verification endpoint.
+        In particular, * for `email_code`, the API will send a verification email to the address containing a code. * for `email_link`, the API will send a verification email to the address containing a link to the verification attempt endpoint. * for `enterprise_sso`, the API will send an external redirect URL to the browser containing a link to the SSO verification endpoint.
       summary: Prepare Email Address Verification
       tags:
         - Email Addresses
@@ -2487,7 +2487,7 @@ paths:
   /v1/me/phone_numbers/{phone_number_id}/prepare_verification:
     post:
       summary: Prepare Phone Number Verification
-      description: Sends an sms to the phone number with the code needed to verify it.
+      description: Sends an SMS to the phone number with the code needed to verify it.
       tags:
         - Phone Numbers
       operationId: sendVerificationSMS
@@ -3198,7 +3198,7 @@ paths:
       summary: Create Backup Codes
       description: |-
         Create two factor authentication backup codes for the current user.
-        A two factor authenitcation method must be enabled for the environment. Otherwise the endpoint will return an error.
+        A two factor authentication method must be enabled for the environment. Otherwise the endpoint will return an error.
       tags:
         - Backup Codes
       operationId: createBackupCodes
@@ -3260,7 +3260,7 @@ paths:
                 unsafe_metadata:
                   nullable: true
                   type: string
-                  description: A stringified JSON containing the unsafe medata of the current user.
+                  description: A stringified JSON containing the unsafe metadata of the current user.
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedUser'
@@ -4651,7 +4651,7 @@ components:
 
         Used to authenticate only dev instances.
 
-        To generate an dev instance API token you must first make a request to `/v1/dev_browser`
+        To generate a dev instance API token you must first make a request to `/v1/dev_browser`
         and copy it from the response.
     ProductionNativeApp:
       type: http
@@ -6002,6 +6002,14 @@ components:
           type: boolean
       required:
         - require_same_client
+    UserSettings.AttackProtectionSettings.EnumerationProtection:
+      type: object
+      additionalProperties: false
+      properties:
+        enabled:
+          type: boolean
+      required:
+        - enabled
     UserSettings.AttackProtectionSettings:
       type: object
       additionalProperties: false
@@ -6012,10 +6020,13 @@ components:
           $ref: '#/components/schemas/UserSettings.AttackProtectionSettings.PII'
         email_link:
           $ref: '#/components/schemas/UserSettings.AttackProtectionSettings.EmailLink'
+        enumeration_protection:
+          $ref: '#/components/schemas/UserSettings.AttackProtectionSettings.EnumerationProtection'
       required:
         - user_lockout
         - pii
         - email_link
+        - enumeration_protection
     UserSettings.PasskeySettings:
       type: object
       additionalProperties: false
