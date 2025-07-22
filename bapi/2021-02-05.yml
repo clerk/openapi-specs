@@ -42,13 +42,13 @@ tags:
   - name: Clients
     description: The Client object tracks sessions, as well as the state of any sign in and sign up attempts, for a given device.
     externalDocs:
-      url: https://clerk.com/docs/reference/clerkjs/client
+      url: https://clerk.com/docs/references/javascript/client
   - name: Domains
     description: Domains represent each instance's URLs and DNS setup.
   - name: Email Addresses
     description: A user can be associated with one or more email addresses, which allows them to be contacted via email.
     externalDocs:
-      url: https://clerk.com/docs/reference/clerkjs/emailaddress
+      url: https://clerk.com/docs/references/javascript/types/email-address
   - name: Email & SMS Templates
     description: Email & SMS templates allow you to customize the theming and wording of emails & SMS messages that are sent by your instance.
     externalDocs:
@@ -87,7 +87,7 @@ tags:
   - name: Phone Numbers
     description: A user can be associated with one or more phone numbers, which allows them to be contacted via SMS.
     externalDocs:
-      url: https://clerk.com/docs/reference/clerkjs/phonenumber
+      url: https://clerk.com/docs/references/javascript/types/phone-number
   - name: Redirect URLs
     description: |-
       Redirect URLs are whitelisted URLs that facilitate secure authentication flows in native applications (e.g. React Native, Expo).
@@ -102,7 +102,7 @@ tags:
       It models the period of information exchange between a user and the server.
       Sessions are created when a user successfully goes through the sign in or sign up flows.
     externalDocs:
-      url: https://clerk.com/docs/reference/clerkjs/session
+      url: https://clerk.com/docs/references/javascript/session
   - name: Machines
     description: A Machine represents a machine/server/service which can be used in machine-to-machine authentication.
   - name: Sign-in Tokens
@@ -112,7 +112,7 @@ tags:
   - name: Sign Ups
     description: Sign-up objects track the progress of a sign-up attempt and store any field collected from user input.
     externalDocs:
-      url: https://clerk.com/docs/reference/clerkjs/signup
+      url: https://clerk.com/docs/references/javascript/sign-up
   - name: Testing Tokens
     description: Tokens meant for use by end-to-end test suites in requests to the Frontend API, so as to bypass bot detection measures.
     externalDocs:
@@ -120,7 +120,7 @@ tags:
   - name: Users
     description: The user object represents a user that has successfully signed up to your application.
     externalDocs:
-      url: https://clerk.com/docs/reference/clerkjs/user
+      url: https://clerk.com/docs/references/javascript/user
   - name: Webhooks
     description: You can configure webhooks to be notified about various events that happen on your instance.
     externalDocs:
@@ -863,7 +863,7 @@ paths:
       summary: Refresh a session
       description: |-
         Refreshes a session by creating a new session token. A 401 is returned when there
-        are validation errors, which signals the SDKs to fallback to the handshake flow.
+        are validation errors, which signals the SDKs to fall back to the handshake flow.
       parameters:
         - name: session_id
           in: path
@@ -955,7 +955,7 @@ paths:
         - Sessions
       summary: Verify a session
       description: |-
-        Returns the session if it is authenticated, otherwise returns an error.
+        Returns the session if it is authenticated; otherwise, returns an error.
         WARNING: This endpoint is deprecated and will be removed in future versions. We strongly recommend switching to networkless verification using short-lived session tokens,
                  which is implemented transparently in all recent SDK versions (e.g. [NodeJS SDK](https://clerk.com/docs/backend-requests/handling/nodejs#clerk-express-require-auth)).
                  For more details on how networkless verification works, refer to our [Session Tokens documentation](https://clerk.com/docs/backend-requests/resources/session-tokens).
@@ -1013,7 +1013,7 @@ paths:
               type: object
               properties:
                 expires_in_seconds:
-                  type: number
+                  type: integer
                   minimum: 30
                   maximum: 315360000
                   description: Use this parameter to override the default session token lifetime.
@@ -1065,7 +1065,7 @@ paths:
               type: object
               properties:
                 expires_in_seconds:
-                  type: number
+                  type: integer
                   minimum: 30
                   maximum: 315360000
                   description: Use this parameter to override the JWT token lifetime.
@@ -1669,7 +1669,7 @@ paths:
                   type: string
                   description: |-
                     The plaintext password to give the user.
-                    Must be at least 8 characters long, and can not be in any list of hacked passwords.
+                    Must be at least 8 characters long, and cannot be in any list of hacked passwords.
                   nullable: true
                 password_digest:
                   type: string
@@ -2057,7 +2057,7 @@ paths:
                   type: string
                   description: |-
                     The plaintext password to give the user.
-                    Must be at least 8 characters long, and can not be in any list of hacked passwords.
+                    Must be at least 8 characters long, and cannot be in any list of hacked passwords.
                   nullable: true
                 password_digest:
                   type: string
@@ -3144,7 +3144,7 @@ paths:
                   type: string
                   description: |-
                     The identifier to be added in the allow-list.
-                    This can be an email address, a phone number or a web3 wallet.
+                    This can be an email address, a phone number, or a web3 wallet.
                 notify:
                   type: boolean
                   description: |-
@@ -3220,7 +3220,7 @@ paths:
                   type: string
                   description: |-
                     The identifier to be added in the block-list.
-                    This can be an email address, a phone number or a web3 wallet.
+                    This can be an email address, a phone number, or a web3 wallet.
               required:
                 - identifier
       responses:
@@ -3621,7 +3621,7 @@ paths:
                   type: array
                   items:
                     type: string
-                  description: For browser-like stacks such as browser extensions, Electron (not officially supported), or Capacitor.js (not officially supported), the instance allowed origins need to be updated with the request origin value. For Chrome extensions popup, background, or service worker pages, the origin is chrome-extension://extension_uiid. For Electron apps the default origin is http://localhost:3000. For Capacitor, the origin is capacitor://localhost.
+                  description: For browser-like stacks such as browser extensions, Electron (not officially supported), or Capacitor.js (not officially supported), the instance allowed origins need to be updated with the request origin value. For Chrome extensions popup, background, or service worker pages, the origin is chrome-extension://extension_uuid. For Electron apps the default origin is http://localhost:3000. For Capacitor, the origin is capacitor://localhost.
                 cookieless_dev:
                   type: boolean
                   description: |-
@@ -3843,13 +3843,13 @@ paths:
                   description: JWT template claims in JSON format
                   nullable: false
                 lifetime:
-                  type: number
+                  type: integer
                   minimum: 30
                   maximum: 315360000
                   description: JWT token lifetime
                   nullable: true
                 allowed_clock_skew:
-                  type: number
+                  type: integer
                   minimum: 0
                   maximum: 300
                   description: JWT token allowed clock skew
@@ -3928,13 +3928,13 @@ paths:
                   description: JWT template claims in JSON format
                   nullable: false
                 lifetime:
-                  type: number
+                  type: integer
                   minimum: 30
                   maximum: 315360000
                   description: JWT token lifetime
                   nullable: true
                 allowed_clock_skew:
-                  type: number
+                  type: integer
                   minimum: 0
                   maximum: 300
                   description: JWT token allowed clock skew
@@ -4092,9 +4092,15 @@ paths:
                     type: string
                   description: Array of machine IDs that this machine will have access to. Maximum of 25 scopes per machine.
                   maxItems: 25
+                default_token_ttl:
+                  type: integer
+                  description: The default time-to-live (TTL) in seconds for tokens created by this machine. Must be at least 1 second.
+                  minimum: 1
+                  maximum: 315360000
+                  default: 3600
       responses:
         '200':
-          $ref: '#/components/responses/Machine'
+          $ref: '#/components/responses/Machine.Created'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '401':
@@ -4160,6 +4166,11 @@ paths:
                   description: The name of the machine
                   minLength: 1
                   maxLength: 255
+                default_token_ttl:
+                  type: integer
+                  description: The default time-to-live (TTL) in seconds for tokens created by this machine. Must be at least 1 second.
+                  minimum: 1
+                  maximum: 315360000
       responses:
         '200':
           $ref: '#/components/responses/Machine'
@@ -4201,6 +4212,33 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+  /machines/{machine_id}/secret_key:
+    get:
+      operationId: GetMachineSecretKey
+      x-speakeasy-group: machines
+      x-speakeasy-name-override: getSecretKey
+      summary: Retrieve a machine secret key
+      description: Returns the secret key for a machine.
+      tags:
+        - Machines
+      parameters:
+        - name: machine_id
+          in: path
+          description: The ID of the machine to retrieve the secret key for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Machine.SecretKey'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /machines/{machine_id}/scopes:
     post:
       operationId: CreateMachineScope
@@ -5245,7 +5283,7 @@ paths:
           name: organization_id
           schema:
             type: string
-          description: The ID of the organization the membership belongs to
+          description: The ID of the organization to which the membership belongs
         - in: path
           required: true
           name: user_id
@@ -5287,7 +5325,7 @@ paths:
           name: organization_id
           schema:
             type: string
-          description: The ID of the organization the membership belongs to
+          description: The ID of the organization to which the membership belongs
         - in: path
           required: true
           name: user_id
@@ -5323,7 +5361,7 @@ paths:
           name: organization_id
           schema:
             type: string
-          description: The ID of the organization the membership belongs to
+          description: The ID of the organization to which the membership belongs
         - in: path
           required: true
           name: user_id
@@ -7489,7 +7527,7 @@ components:
         instance_id:
           nullable: true
           type: string
-          description: the id of the instance the template belongs to
+          description: The id of the instance to which this template belongs
         resource_type:
           type: string
           description: whether this is a system (default) or user overridden) template
@@ -8898,6 +8936,11 @@ components:
           type: integer
           format: int64
           description: Unix timestamp of last update.
+        default_token_ttl:
+          type: integer
+          description: The default time-to-live (TTL) in seconds for tokens created by this machine.
+          minimum: 1
+          default: 3600
     Machine:
       allOf:
         - $ref: '#/components/schemas/MachineWithoutScopedMachines'
@@ -10036,6 +10079,21 @@ components:
               total_count:
                 type: integer
                 description: Total number of machines
+    Machine.Created:
+      description: Success
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Machine'
+              - type: object
+                required:
+                  - secret_key
+                properties:
+                  secret_key:
+                    type: string
+                    readOnly: true
+                    description: The secret key for the machine, only returned upon creation.
     Machine:
       description: Success
       content:
@@ -10066,6 +10124,25 @@ components:
                 enum:
                   - true
                 description: Whether the machine was successfully deleted
+    Machine.SecretKey:
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - object
+              - secret
+            properties:
+              object:
+                type: string
+                enum:
+                  - machine_secret_key
+                description: String representing the object's type.
+              secret:
+                type: string
+                readOnly: true
+                description: The secret key for the machine.
     MachineScope:
       description: Machine scope created successfully for a machine
       content:
