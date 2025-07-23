@@ -8167,6 +8167,42 @@ components:
           description: |
             Unix timestamp of when the user accepted the legal requirements.
           example: 1700690400000
+      required:
+        - id
+        - object
+        - username
+        - first_name
+        - last_name
+        - has_image
+        - primary_email_address_id
+        - primary_phone_number_id
+        - primary_web3_wallet_id
+        - password_enabled
+        - two_factor_enabled
+        - totp_enabled
+        - backup_code_enabled
+        - email_addresses
+        - phone_numbers
+        - web3_wallets
+        - passkeys
+        - external_accounts
+        - saml_accounts
+        - enterprise_accounts
+        - public_metadata
+        - external_id
+        - last_sign_in_at
+        - banned
+        - locked
+        - lockout_expires_in_seconds
+        - verification_attempts_remaining
+        - created_at
+        - updated_at
+        - delete_self_enabled
+        - create_organization_enabled
+        - last_active_at
+        - mfa_enabled_at
+        - mfa_disabled_at
+        - legal_accepted_at
     PasswordHasher:
       type: string
       description: |-
