@@ -7243,6 +7243,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_otp
         status:
           type: string
           enum:
@@ -7275,6 +7279,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_admin
         status:
           type: string
           enum:
@@ -7302,6 +7310,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_from_oauth
         status:
           type: string
           enum:
@@ -7333,6 +7345,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_ticket
         status:
           type: string
           enum:
@@ -7597,6 +7613,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_web3
         status:
           type: string
           enum:
@@ -7670,6 +7690,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_passkey
         status:
           type: string
           enum:
@@ -7732,6 +7756,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_oauth
         status:
           type: string
           x-speakeasy-unknown-values: allow
@@ -7769,6 +7797,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_google_one_tap
         status:
           type: string
           enum:
@@ -7878,6 +7910,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_saml
         status:
           type: string
           enum:
