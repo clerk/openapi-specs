@@ -4611,7 +4611,7 @@ paths:
         Set or replace an organization's logo, by uploading an image file.
         This endpoint uses the `multipart/form-data` request content type and accepts a file of image type.
         The file size cannot exceed 10MB.
-        Only the following file content types are supported: `image/jpeg`, `image/png`, `image/gif`, `image/webp`, `image/x-icon`, `image/vnd.microsoft.icon`.
+        Only the following file content types are supported: `image/jpeg`, `image/png`, `image/gif`, `image/webp`.
       tags:
         - Organizations
       parameters:
@@ -7308,10 +7308,15 @@ components:
         - last_active_session_id
         - updated_at
         - created_at
-    OTP:
+    verification_otp:
+      x-speakeasy-name-override: OTP
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_otp
         status:
           type: string
           enum:
@@ -7340,10 +7345,15 @@ components:
         - strategy
         - attempts
         - expire_at
-    Admin:
+    verification_admin:
+      x-speakeasy-name-override: Admin
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_admin
         status:
           type: string
           enum:
@@ -7367,10 +7377,15 @@ components:
         - strategy
         - attempts
         - expire_at
-    FromOAuth:
+    verification_from_oauth:
+      x-speakeasy-name-override: FromOAuth
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_from_oauth
         status:
           type: string
           enum:
@@ -7398,10 +7413,15 @@ components:
         - strategy
         - attempts
         - expire_at
-    Ticket:
+    verification_ticket:
+      x-speakeasy-name-override: Ticket
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_ticket
         status:
           type: string
           enum:
@@ -7460,10 +7480,12 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/OTP'
-            - $ref: '#/components/schemas/Admin'
-            - $ref: '#/components/schemas/FromOAuth'
-            - $ref: '#/components/schemas/Ticket'
+            - $ref: '#/components/schemas/verification_otp'
+            - $ref: '#/components/schemas/verification_admin'
+            - $ref: '#/components/schemas/verification_from_oauth'
+            - $ref: '#/components/schemas/verification_ticket'
+          discriminator:
+            propertyName: object
         linked_to:
           type: array
           items:
@@ -7514,8 +7536,10 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/OTP'
-            - $ref: '#/components/schemas/Admin'
+            - $ref: '#/components/schemas/verification_otp'
+            - $ref: '#/components/schemas/verification_admin'
+          discriminator:
+            propertyName: object
         linked_to:
           type: array
           items:
@@ -7662,10 +7686,15 @@ components:
           format: int64
           description: |
             Unix timestamp of creation.
-    Web3Signature:
+    verification_web3:
+      x-speakeasy-name-override: Web3Signature
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_web3
         status:
           type: string
           enum:
@@ -7717,8 +7746,10 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Web3Signature'
-            - $ref: '#/components/schemas/Admin'
+            - $ref: '#/components/schemas/verification_web3'
+            - $ref: '#/components/schemas/verification_admin'
+          discriminator:
+            propertyName: object
         created_at:
           type: integer
           format: int64
@@ -7735,10 +7766,15 @@ components:
         - verification
         - created_at
         - updated_at
-    Passkey:
+    verification_passkey:
+      x-speakeasy-name-override: Passkey
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_passkey
         status:
           type: string
           enum:
@@ -7768,7 +7804,7 @@ components:
         - strategy
         - attempts
         - expire_at
-    schemas-Passkey:
+    Passkey:
       type: object
       additionalProperties: false
       properties:
@@ -7791,16 +7827,23 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Passkey'
+            - $ref: '#/components/schemas/verification_passkey'
+          discriminator:
+            propertyName: object
       required:
         - object
         - name
         - last_used_at
         - verification
-    Oauth:
+    verification_oauth:
+      x-speakeasy-name-override: Oauth
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_oauth
         status:
           type: string
           x-speakeasy-unknown-values: allow
@@ -7834,10 +7877,15 @@ components:
         - strategy
         - attempts
         - expire_at
-    GoogleOneTap:
+    verification_google_one_tap:
+      x-speakeasy-name-override: GoogleOneTap
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_google_one_tap
         status:
           type: string
           enum:
@@ -7927,8 +7975,10 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Oauth'
-            - $ref: '#/components/schemas/GoogleOneTap'
+            - $ref: '#/components/schemas/verification_oauth'
+            - $ref: '#/components/schemas/verification_google_one_tap'
+          discriminator:
+            propertyName: object
       required:
         - object
         - id
@@ -7943,10 +7993,15 @@ components:
         - created_at
         - updated_at
         - verification
-    SAML:
+    verification_saml:
+      x-speakeasy-name-override: SAML
       type: object
       additionalProperties: false
       properties:
+        object:
+          type: string
+          enum:
+            - verification_saml
         status:
           type: string
           enum:
@@ -8065,8 +8120,10 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/SAML'
-            - $ref: '#/components/schemas/Ticket'
+            - $ref: '#/components/schemas/verification_saml'
+            - $ref: '#/components/schemas/verification_ticket'
+          discriminator:
+            propertyName: object
         saml_connection:
           type: object
           nullable: true
@@ -8144,7 +8201,7 @@ components:
         passkeys:
           type: array
           items:
-            $ref: '#/components/schemas/schemas-Passkey'
+            $ref: '#/components/schemas/Passkey'
         password_enabled:
           type: boolean
         two_factor_enabled:
