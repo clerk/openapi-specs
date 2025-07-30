@@ -6633,6 +6633,395 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+  /management/organizations/{organizationID}:
+    x-internal: true
+    delete:
+      operationId: ManagementDeleteOrganization
+      x-speakeasy-group: management
+      x-speakeasy-name-override: deleteOrganization
+      tags:
+        - Management
+      summary: Delete an organization
+      description: |
+        Delete an organization.
+        This endpoint is internal and requires a specific management token for authorization.
+      security:
+        - managementToken: []
+      parameters:
+        - name: organizationID
+          in: path
+          description: Organization ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Organization deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementDeletedObjectResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /management/applications/{applicationID}:
+    x-internal: true
+    get:
+      operationId: ManagementGetApplication
+      x-speakeasy-group: management
+      x-speakeasy-name-override: getApplication
+      tags:
+        - Management
+      summary: Get an application
+      description: |
+        Get application details.
+        This endpoint is internal and requires a specific management token for authorization.
+      security:
+        - managementToken: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: owner_id
+          in: query
+          description: Owner ID of the application (organization ID).
+          required: true
+          schema:
+            type: string
+        - name: include_secret_keys
+          in: query
+          description: Whether to include secret keys in the response. If 'true', the response will include the secret keys for each instance.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Application retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementApplicationResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    patch:
+      operationId: ManagementUpdateApplication
+      x-speakeasy-group: management
+      x-speakeasy-name-override: updateApplication
+      tags:
+        - Management
+      summary: Update an application
+      description: |
+        Update an application.
+        This endpoint is internal and requires a specific management token for authorization.
+      security:
+        - managementToken: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: owner_id
+          in: query
+          description: Owner ID of the application (organization ID).
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Application data to update.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManagementUpdateApplicationRequest'
+      responses:
+        '200':
+          description: Application updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementApplicationResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      operationId: ManagementDeleteApplication
+      x-speakeasy-group: management
+      x-speakeasy-name-override: deleteApplication
+      tags:
+        - Management
+      summary: Delete an application
+      description: |
+        Delete an application.
+        This endpoint is internal and requires a specific management token for authorization.
+      security:
+        - managementToken: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: owner_id
+          in: query
+          description: Owner ID of the application (organization ID).
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Application deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementDeletedObjectResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /management/applications/{applicationID}/usage:
+    x-internal: true
+    get:
+      operationId: ManagementGetApplicationUsage
+      x-speakeasy-group: management
+      x-speakeasy-name-override: getApplicationUsage
+      tags:
+        - Management
+      summary: Get application usage
+      description: |
+        Get usage report for an application.
+        This endpoint is internal and requires a specific management token for authorization.
+      security:
+        - managementToken: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: owner_id
+          in: query
+          description: Owner ID of the application (organization ID).
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Application usage retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementUsageReportResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /management/applications/{applicationID}/domain:
+    x-internal: true
+    patch:
+      operationId: ManagementUpdateApplicationDomain
+      x-speakeasy-group: management
+      x-speakeasy-name-override: updateApplicationDomain
+      tags:
+        - Management
+      summary: Update application domain
+      description: |
+        Update the domain for an application.
+        This endpoint is internal and requires a specific management token for authorization.
+      security:
+        - managementToken: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: owner_id
+          in: query
+          description: Owner ID of the application (organization ID).
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Domain data to update.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManagementUpdateApplicationDomainRequest'
+      responses:
+        '200':
+          description: Application domain updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementDomainResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /management/applications/{applicationID}/domains/{domainName}:
+    x-internal: true
+    get:
+      operationId: ManagementGetApplicationDomain
+      x-speakeasy-group: management
+      x-speakeasy-name-override: getApplicationDomain
+      tags:
+        - Management
+      summary: Get application domain
+      description: |
+        Get domain information for an application.
+        This endpoint is internal and requires a specific management token for authorization.
+      security:
+        - managementToken: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: domainName
+          in: path
+          description: Domain name.
+          required: true
+          schema:
+            type: string
+        - name: owner_id
+          in: query
+          description: Owner ID of the application (organization ID).
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Application domain retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementDomainResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /management/applications/{applicationID}/domains/{domainName}/status:
+    x-internal: true
+    get:
+      operationId: ManagementGetApplicationDomainStatus
+      x-speakeasy-group: management
+      x-speakeasy-name-override: getApplicationDomainStatus
+      tags:
+        - Management
+      summary: Get application domain status
+      description: |
+        Get the status of a domain for an application.
+        This endpoint is internal and requires a specific management token for authorization.
+      security:
+        - managementToken: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: domainName
+          in: path
+          description: Domain name.
+          required: true
+          schema:
+            type: string
+        - name: owner_id
+          in: query
+          description: Owner ID of the application (organization ID).
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Application domain status retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementDomainStatusResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /commerce/plans:
+    get:
+      operationId: GetCommercePlanList
+      x-speakeasy-group: commerce
+      x-speakeasy-name-override: listPlans
+      tags:
+        - Commerce
+      summary: List all commerce plans
+      description: |-
+        Returns a list of all commerce plans for the instance. The plans are returned sorted by creation date,
+        with the newest plans appearing first. This includes both free and paid plans. Pagination is supported.
+      parameters:
+        - $ref: '#/components/parameters/Paginated'
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+      responses:
+        '200':
+          $ref: '#/components/responses/CommercePlan.List'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /oauth_applications/access_tokens/verify:
     post:
       x-speakeasy-group: oauthAccessTokens
@@ -7675,6 +8064,8 @@ components:
         delivered_by_clerk:
           type: boolean
         enabled:
+          type: boolean
+        flagged_as_suspicious:
           type: boolean
         updated_at:
           type: integer
@@ -9311,6 +9702,12 @@ components:
           type: integer
           format: int32
           description: Total number of pending suggestions associated with this domain
+        public_organization_data:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/OrganizationInvitationPublicOrganizationData'
+          description: Public organization data associated with this domain
         created_at:
           type: integer
           format: int64
@@ -9958,7 +10355,6 @@ components:
           format: date-time
           description: The creation timestamp in RFC3339 format.
       required:
-        - name
         - slug
     ManagementCreateApplicationRequest:
       type: object
@@ -9978,6 +10374,9 @@ components:
           items:
             type: string
           description: List of add-on IDs (e.g., ["enhanced_auth_2023_11", "enhanced_orgs_2023_11"]).
+        domain:
+          type: string
+          description: The domain for the application (optional).
         paid_externally:
           type: boolean
           description: Whether the application is paid externally.
@@ -9990,6 +10389,27 @@ components:
         max_allowed_organizations:
           type: integer
           description: Maximum allowed organizations for the application.
+        user_settings:
+          type: object
+          description: User settings for the application.
+        organization_settings:
+          type: object
+          description: Organization settings for the application.
+        session_settings:
+          type: object
+          description: Session settings for the application.
+        native_settings:
+          type: object
+          description: Native settings for the application.
+        experimental_settings:
+          type: object
+          description: Experimental settings for the application.
+        fraud_settings:
+          type: object
+          description: Fraud settings for the application.
+        billing_settings:
+          type: object
+          description: Billing settings for the application.
         subscription_metadata:
           type: object
           additionalProperties:
@@ -10038,7 +10458,6 @@ components:
       required:
         - instance_id
         - environment_type
-        - secret_key
         - publishable_key
     ManagementApplicationResponse:
       type: object
@@ -10057,6 +10476,443 @@ components:
       required:
         - application_id
         - instances
+    ManagementDeletedObjectResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        deleted:
+          type: boolean
+          description: Whether the object was deleted.
+        object:
+          type: string
+          example: deleted
+        id:
+          type: string
+          description: The ID of the deleted resource.
+      required:
+        - deleted
+        - object
+        - id
+    ManagementUpdateApplicationRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: The name of the application.
+        plan_id:
+          type: string
+          description: The plan ID for the application.
+        addon_ids:
+          type: array
+          items:
+            type: string
+          description: List of add-on IDs for the application.
+    ManagementUsageReportResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - usage_report
+        billing_cycle:
+          type: object
+          properties:
+            end:
+              type: string
+              format: date-time
+            start:
+              type: string
+              format: date-time
+        day_usage:
+          type: object
+          additionalProperties: true
+        cycle_usage:
+          type: object
+          additionalProperties: true
+      required:
+        - object
+    ManagementUpdateApplicationDomainRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: The domain name.
+      required:
+        - name
+    ManagementDomainResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - domain
+        id:
+          type: string
+          description: The ID of the domain.
+        name:
+          type: string
+          description: The domain name.
+        is_satellite:
+          type: boolean
+          description: Whether this is a satellite domain.
+        frontend_api_url:
+          type: string
+          description: The frontend API URL.
+        development_origin:
+          type: string
+          description: The development origin.
+        accounts_portal_url:
+          type: string
+          description: The accounts portal URL.
+        cname_targets:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              required:
+                type: boolean
+          description: CNAME targets for the domain.
+      required:
+        - object
+        - id
+        - name
+        - frontend_api_url
+        - development_origin
+        - accounts_portal_url
+        - cname_targets
+    FailureHint:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    CNAMEStatus:
+      type: object
+      additionalProperties: false
+      properties:
+        clerk_subdomain:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        verified:
+          type: boolean
+        required:
+          type: boolean
+        failure_hints:
+          type: array
+          items:
+            $ref: '#/components/schemas/FailureHint'
+      required:
+        - clerk_subdomain
+        - from
+        - to
+        - verified
+        - required
+        - failure_hints
+    DNSStatus:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - not_started
+            - in_progress
+            - complete
+        cnames:
+          type: object
+          properties:
+            accounts:
+              $ref: '#/components/schemas/CNAMEStatus'
+            clerk:
+              $ref: '#/components/schemas/CNAMEStatus'
+            clk._domainkey:
+              $ref: '#/components/schemas/CNAMEStatus'
+            clk2._domainkey:
+              $ref: '#/components/schemas/CNAMEStatus'
+            clkmail:
+              $ref: '#/components/schemas/CNAMEStatus'
+      required:
+        - status
+        - cnames
+    SSLStatus:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+        required:
+          type: boolean
+        failure_hints:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/FailureHint'
+      required:
+        - status
+        - required
+        - failure_hints
+    ManagementDomainStatusResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        dns:
+          type: object
+          $ref: '#/components/schemas/DNSStatus'
+        ssl:
+          type: object
+          properties:
+            status:
+              type: string
+              enum:
+                - complete
+                - in_process
+                - not_started
+                - failed
+                - incomplete
+            required:
+              type: boolean
+            failure_hints:
+              type: array
+              nullable: true
+              items:
+                $ref: '#/components/schemas/FailureHint'
+        ssl_hosts:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/SSLStatus'
+        mail:
+          type: object
+          properties:
+            status:
+              type: string
+            required:
+              type: boolean
+          required:
+            - status
+            - required
+        proxy:
+          type: object
+          properties:
+            status:
+              type: string
+            required:
+              type: boolean
+          required:
+            - status
+            - required
+        status:
+          type: string
+          enum:
+            - complete
+            - incomplete
+      required:
+        - dns
+        - ssl
+        - status
+    CommerceMoneyResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          type: integer
+          format: int64
+          description: The amount in cents.
+        amount_formatted:
+          type: string
+          description: The formatted amount as a string (e.g., "$49.99").
+        currency:
+          type: string
+          description: The currency code (e.g., "USD").
+        currency_symbol:
+          type: string
+          description: The currency symbol (e.g., "$").
+      required:
+        - amount
+        - amount_formatted
+        - currency
+        - currency_symbol
+    FeatureResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - object
+        - id
+        - name
+        - description
+        - slug
+        - avatar_url
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - feature
+        id:
+          type: string
+          description: Unique identifier for the feature.
+        name:
+          type: string
+          description: The name of the feature.
+        description:
+          type: string
+          description: The description of the feature.
+        slug:
+          type: string
+          description: The URL-friendly slug for the feature.
+        avatar_url:
+          type: string
+          description: The URL of the feature's avatar image.
+    CommercePlan:
+      type: object
+      additionalProperties: false
+      required:
+        - object
+        - id
+        - name
+        - fee
+        - annual_monthly_fee
+        - annual_fee
+        - amount
+        - amount_formatted
+        - annual_monthly_amount
+        - annual_monthly_amount_formatted
+        - annual_amount
+        - annual_amount_formatted
+        - currency_symbol
+        - currency
+        - description
+        - product_id
+        - is_default
+        - is_recurring
+        - publicly_visible
+        - has_base_fee
+        - payer_type
+        - for_payer_type
+        - slug
+        - avatar_url
+        - period
+        - interval
+        - features
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - commerce_plan
+        id:
+          type: string
+          description: Unique identifier for the commerce plan.
+        name:
+          type: string
+          description: The name of the commerce plan.
+        fee:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        annual_monthly_fee:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        annual_fee:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        amount:
+          type: integer
+          format: int64
+          description: The amount in cents for the plan.
+        amount_formatted:
+          type: string
+          description: The formatted amount as a string (e.g., "$49.99").
+        annual_monthly_amount:
+          type: integer
+          format: int64
+          description: The monthly amount in cents when billed annually.
+        annual_monthly_amount_formatted:
+          type: string
+          description: The formatted annual monthly amount as a string.
+        annual_amount:
+          type: integer
+          format: int64
+          description: The total annual amount in cents.
+        annual_amount_formatted:
+          type: string
+          description: The formatted annual amount as a string.
+        currency_symbol:
+          type: string
+          description: The currency symbol (e.g., "$").
+        currency:
+          type: string
+          description: The currency code (e.g., "USD").
+        description:
+          type: string
+          description: The description of the commerce plan.
+        product_id:
+          type: string
+          description: The ID of the product this plan belongs to.
+        is_default:
+          type: boolean
+          description: Whether this is the default plan.
+        is_recurring:
+          type: boolean
+          description: Whether this is a recurring plan.
+        publicly_visible:
+          type: boolean
+          description: Whether this plan is publicly visible.
+        has_base_fee:
+          type: boolean
+          description: Whether this plan has a base fee.
+        payer_type:
+          type: array
+          items:
+            type: string
+          description: The types of payers that can use this plan.
+        for_payer_type:
+          type: string
+          description: The payer type this plan is designed for.
+        slug:
+          type: string
+          description: The URL-friendly slug for the plan.
+        avatar_url:
+          type: string
+          description: The URL of the plan's avatar image.
+        period:
+          type: string
+          description: The billing period for the plan.
+        interval:
+          type: integer
+          format: int64
+          description: The billing interval.
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureResponse'
+          description: The features included in this plan.
+    PaginatedCommercePlanResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - total_count
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercePlan'
+          description: Array of commerce plans.
+        total_count:
+          type: integer
+          format: int64
+          description: Total number of commerce plans.
   responses:
     WellKnown.JWKS:
       description: Get the JSON Web Key Set
@@ -10633,6 +11489,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AccountlessApplication'
+    CommercePlan.List:
+      description: A list of commerce plans.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaginatedCommercePlanResponse'
   parameters:
     Paginated:
       name: paginated
