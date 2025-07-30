@@ -6581,6 +6581,32 @@ paths:
           $ref: '#/components/responses/AccountlessApplication'
         '500':
           $ref: '#/components/responses/ClerkErrors'
+  /commerce/plans:
+    get:
+      operationId: GetCommercePlanList
+      x-speakeasy-group: commerce
+      x-speakeasy-name-override: listPlans
+      tags:
+        - Commerce
+      summary: List all commerce plans
+      description: |-
+        Returns a list of all commerce plans for the instance. The plans are returned sorted by creation date,
+        with the newest plans appearing first. This includes both free and paid plans. Pagination is supported.
+      parameters:
+        - $ref: '#/components/parameters/Paginated'
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+      responses:
+        '200':
+          $ref: '#/components/responses/CommercePlan.List'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /oauth_applications/access_tokens/verify:
     post:
       x-speakeasy-group: oauthAccessTokens
@@ -7606,6 +7632,8 @@ components:
         delivered_by_clerk:
           type: boolean
         enabled:
+          type: boolean
+        flagged_as_suspicious:
           type: boolean
         updated_at:
           type: integer
@@ -9242,6 +9270,12 @@ components:
           type: integer
           format: int32
           description: Total number of pending suggestions associated with this domain
+        public_organization_data:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/OrganizationInvitationPublicOrganizationData'
+          description: Public organization data associated with this domain
         created_at:
           type: integer
           format: int64
@@ -9845,6 +9879,195 @@ components:
       required:
         - object
         - publishable_key
+    CommerceMoneyResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          type: integer
+          format: int64
+          description: The amount in cents.
+        amount_formatted:
+          type: string
+          description: The formatted amount as a string (e.g., "$49.99").
+        currency:
+          type: string
+          description: The currency code (e.g., "USD").
+        currency_symbol:
+          type: string
+          description: The currency symbol (e.g., "$").
+      required:
+        - amount
+        - amount_formatted
+        - currency
+        - currency_symbol
+    FeatureResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - object
+        - id
+        - name
+        - description
+        - slug
+        - avatar_url
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - feature
+        id:
+          type: string
+          description: Unique identifier for the feature.
+        name:
+          type: string
+          description: The name of the feature.
+        description:
+          type: string
+          description: The description of the feature.
+        slug:
+          type: string
+          description: The URL-friendly slug for the feature.
+        avatar_url:
+          type: string
+          description: The URL of the feature's avatar image.
+    CommercePlan:
+      type: object
+      additionalProperties: false
+      required:
+        - object
+        - id
+        - name
+        - fee
+        - annual_monthly_fee
+        - annual_fee
+        - amount
+        - amount_formatted
+        - annual_monthly_amount
+        - annual_monthly_amount_formatted
+        - annual_amount
+        - annual_amount_formatted
+        - currency_symbol
+        - currency
+        - description
+        - product_id
+        - is_default
+        - is_recurring
+        - publicly_visible
+        - has_base_fee
+        - payer_type
+        - for_payer_type
+        - slug
+        - avatar_url
+        - period
+        - interval
+        - features
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - commerce_plan
+        id:
+          type: string
+          description: Unique identifier for the commerce plan.
+        name:
+          type: string
+          description: The name of the commerce plan.
+        fee:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        annual_monthly_fee:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        annual_fee:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        amount:
+          type: integer
+          format: int64
+          description: The amount in cents for the plan.
+        amount_formatted:
+          type: string
+          description: The formatted amount as a string (e.g., "$49.99").
+        annual_monthly_amount:
+          type: integer
+          format: int64
+          description: The monthly amount in cents when billed annually.
+        annual_monthly_amount_formatted:
+          type: string
+          description: The formatted annual monthly amount as a string.
+        annual_amount:
+          type: integer
+          format: int64
+          description: The total annual amount in cents.
+        annual_amount_formatted:
+          type: string
+          description: The formatted annual amount as a string.
+        currency_symbol:
+          type: string
+          description: The currency symbol (e.g., "$").
+        currency:
+          type: string
+          description: The currency code (e.g., "USD").
+        description:
+          type: string
+          description: The description of the commerce plan.
+        product_id:
+          type: string
+          description: The ID of the product this plan belongs to.
+        is_default:
+          type: boolean
+          description: Whether this is the default plan.
+        is_recurring:
+          type: boolean
+          description: Whether this is a recurring plan.
+        publicly_visible:
+          type: boolean
+          description: Whether this plan is publicly visible.
+        has_base_fee:
+          type: boolean
+          description: Whether this plan has a base fee.
+        payer_type:
+          type: array
+          items:
+            type: string
+          description: The types of payers that can use this plan.
+        for_payer_type:
+          type: string
+          description: The payer type this plan is designed for.
+        slug:
+          type: string
+          description: The URL-friendly slug for the plan.
+        avatar_url:
+          type: string
+          description: The URL of the plan's avatar image.
+        period:
+          type: string
+          description: The billing period for the plan.
+        interval:
+          type: integer
+          format: int64
+          description: The billing interval.
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureResponse'
+          description: The features included in this plan.
+    PaginatedCommercePlanResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - total_count
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercePlan'
+          description: Array of commerce plans.
+        total_count:
+          type: integer
+          format: int64
+          description: Total number of commerce plans.
   responses:
     WellKnown.JWKS:
       description: Get the JSON Web Key Set
@@ -10421,6 +10644,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AccountlessApplication'
+    CommercePlan.List:
+      description: A list of commerce plans.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaginatedCommercePlanResponse'
   parameters:
     Paginated:
       name: paginated

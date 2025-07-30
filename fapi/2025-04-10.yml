@@ -4549,6 +4549,38 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/redirect:
+    get:
+      summary: Redirect to a validated URL
+      description: Validates and redirects to a safe URL. If no URL is provided, redirects to a default URL.
+      tags:
+        - Redirect
+      operationId: redirectToUrl
+      parameters:
+        - name: redirect_url
+          in: query
+          description: The URL to redirect to (optional). If empty or not provided, redirects to the default URL.
+          required: false
+          allowEmptyValue: true
+          schema:
+            type: string
+      responses:
+        '307':
+          description: Temporary redirect to the validated URL or default URL
+          headers:
+            Location:
+              description: The URL to redirect to
+              schema:
+                type: string
+                format: uri
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
   /v1/tickets/accept:
     get:
       summary: Accept ticket
@@ -8874,6 +8906,11 @@ components:
           type: integer
         total_pending_suggestions:
           type: integer
+        public_organization_data:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.PublicOrganizationData'
         created_at:
           type: integer
           format: int64
