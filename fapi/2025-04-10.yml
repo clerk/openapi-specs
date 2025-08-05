@@ -6252,6 +6252,8 @@ components:
           $ref: '#/components/schemas/Client.CommerceSettings'
         api_keys_settings:
           $ref: '#/components/schemas/Client.ApiKeysSettings'
+        client_debug_mode:
+          type: boolean
         maintenance_mode:
           type: boolean
     Token:
