@@ -215,89 +215,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/WellKnown.JWKS'
-  /aws_credentials:
-    x-internal: true
-    get:
-      operationId: GetAWSCredentialList
-      x-speakeasy-group: awsCredentials
-      x-speakeasy-name-override: list
-      tags:
-        - AWS Credentials
-      summary: List all AWS Credentials
-      description: Returns a list of all AWS Credentials.
-      responses:
-        '200':
-          $ref: '#/components/responses/AWSCredential.List'
-    post:
-      operationId: CreateAWSCredential
-      x-speakeasy-group: awsCredentials
-      x-speakeasy-name-override: create
-      tags:
-        - AWS Credentials
-      summary: Create an AWS Credential
-      description: Create a new AWS Credential
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                access_key_id:
-                  type: string
-                  description: The Access Key ID from AWS
-                secret_access_key:
-                  type: string
-                  description: The Secret Access Key from AWS.
-                user_pool_ids:
-                  type: array
-                  items:
-                    type: string
-                  description: The User Pool IDs from AWS.
-              required:
-                - access_key_id
-                - secret_access_key
-                - user_pool_ids
-      responses:
-        '200':
-          $ref: '#/components/responses/AWSCredential'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/AuthenticationInvalid'
-        '403':
-          $ref: '#/components/responses/AuthorizationInvalid'
-        '404':
-          $ref: '#/components/responses/ResourceNotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
+  /aws_credentials: {}
   /aws_credentials/{id}:
-    x-internal: true
-    get:
-      operationId: GetAWSCredential
-      x-speakeasy-group: awsCredentials
-      x-speakeasy-name-override: get
-      tags:
-        - AWS Credentials
-      summary: Retrieve an AWS Credential
-      description: Returns the details of an AWS Credential.
-      parameters:
-        - name: id
-          in: path
-          description: The ID of the AWS Credential to retrieve
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          $ref: '#/components/responses/AWSCredential'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/AuthenticationInvalid'
-        '403':
-          $ref: '#/components/responses/AuthorizationInvalid'
-        '404':
-          $ref: '#/components/responses/ResourceNotFound'
     delete:
       operationId: DeleteAWSCredential
       x-speakeasy-group: awsCredentials
@@ -3984,54 +3903,7 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
-  /machine_tokens:
-    x-internal: true
-    post:
-      operationId: CreateMachineToken
-      x-speakeasy-group: machineTokens
-      x-speakeasy-name-override: create
-      summary: Create a machine token
-      description: Create a new machine token
-      tags:
-        - Machine Tokens
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                machine_id:
-                  type: string
-                  maxLength: 96
-                  description: ID of the machine creating the token. Must be be prefixed with `mch_`. Must only contain lowercase letters, numbers, and underscores.
-                claims:
-                  type: object
-                  description: Claims to include in the JWT
-                  nullable: true
-                expires_in_seconds:
-                  type: integer
-                  minimum: 30
-                  maximum: 315360000
-                  description: Token lifetime in seconds. Defaults to 30 seconds if not specified.
-                  nullable: true
-                allowed_clock_skew:
-                  type: integer
-                  minimum: 0
-                  maximum: 300
-                  default: 5
-                  description: Allowed clock skew in seconds. Defaults to 5 seconds if not specified.
-                  nullable: true
-              required:
-                - machine_id
-      responses:
-        '200':
-          $ref: '#/components/responses/MachineToken'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/AuthenticationInvalid'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
+  /machine_tokens: {}
   /machines:
     get:
       operationId: ListMachines
@@ -7039,6 +6911,51 @@ components:
               - $ref: '#/components/schemas/JWKS.ecdsa.PrivateKey'
               - $ref: '#/components/schemas/JWKS.rsa.PrivateKey'
               - $ref: '#/components/schemas/JWKS.symmetric.Key'
+    DeletedObject:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+        id:
+          type: string
+        slug:
+          type: string
+        deleted:
+          type: boolean
+      required:
+        - object
+        - deleted
+    ClerkError:
+      type: object
+      properties:
+        message:
+          type: string
+        long_message:
+          type: string
+        code:
+          type: string
+        meta:
+          type: object
+        clerk_trace_id:
+          type: string
+      required:
+        - message
+        - long_message
+        - code
+    ClerkErrors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClerkError'
+        meta:
+          type: object
+        clerk_trace_id:
+          type: string
+      required:
+        - errors
     AWSCredential:
       type: object
       additionalProperties: false
@@ -7074,51 +6991,6 @@ components:
         - user_pool_ids
         - created_at
         - updated_at
-    ClerkError:
-      type: object
-      properties:
-        message:
-          type: string
-        long_message:
-          type: string
-        code:
-          type: string
-        meta:
-          type: object
-        clerk_trace_id:
-          type: string
-      required:
-        - message
-        - long_message
-        - code
-    ClerkErrors:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/ClerkError'
-        meta:
-          type: object
-        clerk_trace_id:
-          type: string
-      required:
-        - errors
-    DeletedObject:
-      type: object
-      additionalProperties: false
-      properties:
-        object:
-          type: string
-        id:
-          type: string
-        slug:
-          type: string
-        deleted:
-          type: boolean
-      required:
-        - object
-        - deleted
     SessionActivityResponse:
       type: object
       nullable: true
@@ -9011,19 +8883,6 @@ components:
         - signing_algorithm
         - created_at
         - updated_at
-    MachineToken:
-      type: object
-      additionalProperties: false
-      properties:
-        object:
-          type: string
-          enum:
-            - token
-        jwt:
-          type: string
-      required:
-        - object
-        - jwt
     MachineWithoutScopedMachines:
       type: object
       required:
@@ -10075,20 +9934,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/JWKS'
-    AWSCredential.List:
-      description: Success
+    DeletedObject:
+      description: Deleted Object
       content:
         application/json:
           schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/AWSCredential'
-    AWSCredential:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AWSCredential'
+            $ref: '#/components/schemas/DeletedObject'
     ClerkErrors:
       description: Request was not successful
       content:
@@ -10113,18 +9964,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ClerkErrors'
-    UnprocessableEntity:
-      description: Invalid request parameters
+    AWSCredential:
+      description: Success
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ClerkErrors'
-    DeletedObject:
-      description: Deleted Object
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DeletedObject'
+            $ref: '#/components/schemas/AWSCredential'
     Client.List:
       description: Success
       content:
@@ -10135,6 +9980,12 @@ components:
               $ref: '#/components/schemas/Client'
     DeprecatedEndpoint:
       description: The endpoint is considered deprecated and is pending removal.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    UnprocessableEntity:
+      description: Invalid request parameters
       content:
         application/json:
           schema:
@@ -10372,12 +10223,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/JWTTemplate'
-    MachineToken:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/MachineToken'
     Machine.List:
       description: Success
       content:
