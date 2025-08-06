@@ -3535,6 +3535,9 @@ paths:
                 blocklist:
                   type: boolean
                   nullable: true
+                allowlist_blocklist_disabled_on_sign_in:
+                  type: boolean
+                  nullable: true
                 block_email_subaddresses:
                   type: boolean
                   nullable: true
@@ -8753,6 +8756,8 @@ components:
           type: boolean
         blocklist:
           type: boolean
+        allowlist_blocklist_disabled_on_sign_in:
+          type: boolean
         block_email_subaddresses:
           type: boolean
         block_disposable_email_domains:
@@ -8761,6 +8766,7 @@ components:
         - object
         - allowlist
         - blocklist
+        - allowlist_blocklist_disabled_on_sign_in
         - block_email_subaddresses
         - block_disposable_email_domains
     OrganizationSettings:
