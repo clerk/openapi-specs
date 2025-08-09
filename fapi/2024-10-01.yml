@@ -5933,6 +5933,8 @@ components:
           $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
         blocklist:
           $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
+        allowlist_blocklist_disabled_on_sign_in:
+          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
         block_email_subaddresses:
           $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
         block_disposable_email_domains:
@@ -5940,6 +5942,7 @@ components:
       required:
         - allowlist
         - blocklist
+        - allowlist_blocklist_disabled_on_sign_in
         - block_email_subaddresses
         - block_disposable_email_domains
     UserSettings.PasswordSettings:
