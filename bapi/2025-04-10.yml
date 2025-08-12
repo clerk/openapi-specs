@@ -3535,6 +3535,9 @@ paths:
                 blocklist:
                   type: boolean
                   nullable: true
+                allowlist_blocklist_disabled_on_sign_in:
+                  type: boolean
+                  nullable: true
                 block_email_subaddresses:
                   type: boolean
                   nullable: true
@@ -6429,6 +6432,15 @@ paths:
         - $ref: '#/components/parameters/Paginated'
         - $ref: '#/components/parameters/LimitParameter'
         - $ref: '#/components/parameters/OffsetParameter'
+        - in: query
+          name: payer_type
+          description: Filter plans by payer type
+          required: false
+          schema:
+            type: string
+            enum:
+              - user
+              - org
       responses:
         '200':
           $ref: '#/components/responses/CommercePlan.List'
@@ -8753,6 +8765,8 @@ components:
           type: boolean
         blocklist:
           type: boolean
+        allowlist_blocklist_disabled_on_sign_in:
+          type: boolean
         block_email_subaddresses:
           type: boolean
         block_disposable_email_domains:
@@ -8761,6 +8775,7 @@ components:
         - object
         - allowlist
         - blocklist
+        - allowlist_blocklist_disabled_on_sign_in
         - block_email_subaddresses
         - block_disposable_email_domains
     OrganizationSettings:
@@ -8779,6 +8794,8 @@ components:
         max_allowed_roles:
           type: integer
         max_allowed_permissions:
+          deprecated: true
+          description: max_allowed_permissions is now a no-op, as permissions are now unlimited
           type: integer
         creator_role:
           type: string
@@ -8804,7 +8821,6 @@ components:
         - enabled
         - max_allowed_memberships
         - max_allowed_roles
-        - max_allowed_permissions
         - creator_role
         - admin_delete_enabled
         - domains_enabled
@@ -9797,8 +9813,6 @@ components:
         - for_payer_type
         - slug
         - avatar_url
-        - period
-        - interval
         - features
       properties:
         object:
