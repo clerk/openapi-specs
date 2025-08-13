@@ -105,6 +105,8 @@ tags:
       url: https://clerk.com/docs/references/javascript/session
   - name: Machines
     description: A Machine represents a machine/server/service which can be used in machine-to-machine authentication.
+  - name: M2M Tokens
+    description: Machine to Machine Tokens are used to manage authentication between Machines.
   - name: Sign-in Tokens
     description: |-
       Sign-in tokens are JWTs that can be used to sign in to an application without specifying any credentials.
@@ -3535,6 +3537,9 @@ paths:
                 blocklist:
                   type: boolean
                   nullable: true
+                allowlist_blocklist_disabled_on_sign_in:
+                  type: boolean
+                  nullable: true
                 block_email_subaddresses:
                   type: boolean
                   nullable: true
@@ -6429,6 +6434,15 @@ paths:
         - $ref: '#/components/parameters/Paginated'
         - $ref: '#/components/parameters/LimitParameter'
         - $ref: '#/components/parameters/OffsetParameter'
+        - in: query
+          name: payer_type
+          description: Filter plans by payer type
+          required: false
+          schema:
+            type: string
+            enum:
+              - user
+              - org
       responses:
         '200':
           $ref: '#/components/responses/CommercePlan.List'
@@ -6440,6 +6454,675 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
         '500':
           $ref: '#/components/responses/ClerkErrors'
+  /m2m_tokens:
+    post:
+      x-speakeasy-group: m2mTokens
+      x-speakeasy-name-override: create
+      operationId: createM2MToken
+      summary: Create a M2M Token
+      description: Creates a new M2M Token. Must be authenticated via a Machine Secret Key.
+      tags:
+        - M2M Tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                seconds_until_expiration:
+                  type: number
+                  nullable: true
+                  minimum: 0
+                  exclusiveMinimum: true
+                claims:
+                  nullable: true
+              additionalProperties: false
+      responses:
+        '201':
+          description: 201 Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum:
+                      - machine_to_machine_token
+                  id:
+                    type: string
+                    pattern: ^mt_[0-9A-Fa-f]{32}$
+                    example: mt_f7f0ba8c3b4843ce7d85fcdd5e71853e
+                  subject:
+                    type: string
+                    pattern: ^mch_\w{27}$
+                    example: mch_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                  claims:
+                    nullable: true
+                    example:
+                      important_metadata: Some useful data
+                  scopes:
+                    type: array
+                    items:
+                      type: string
+                      pattern: ^mch_\w{27}$
+                    default: []
+                    example:
+                      - mch_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                      - mch_2yGkLpQ7Y3rXSwtU24CzTk9I7Em
+                  token:
+                    type: string
+                    example: mt_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+                  revoked:
+                    type: boolean
+                    example: false
+                  revocation_reason:
+                    type: string
+                    nullable: true
+                    example: Revoked by user
+                  expired:
+                    type: boolean
+                    example: false
+                  expiration:
+                    type: number
+                    nullable: true
+                    example: 1716883200
+                  last_used_at:
+                    type: number
+                    nullable: true
+                    example: 1716883200
+                  created_at:
+                    type: number
+                    example: 1716883200
+                  updated_at:
+                    type: number
+                    example: 1716883200
+                required:
+                  - object
+                  - id
+                  - subject
+                  - token
+                  - revoked
+                  - revocation_reason
+                  - expired
+                  - expiration
+                  - last_used_at
+                  - created_at
+                  - updated_at
+                additionalProperties: false
+        '400':
+          description: 400 Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: Bad Request
+                        long_message:
+                          type: string
+                          example: 'Invalid ''url_parameter.example'': Failed regex check'
+                        code:
+                          type: string
+                          example: bad_request
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '409':
+          description: 409 Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+    get:
+      x-speakeasy-group: m2mTokens
+      x-speakeasy-name-override: list
+      operationId: getM2MTokens
+      summary: Get M2M Tokens
+      description: |-
+        Fetches M2M tokens for a specific machine.
+
+        This endpoint can be authenticated by either a Machine Secret Key or by a Clerk Secret Key.
+
+        - When fetching M2M tokens with a Machine Secret Key, only tokens associated with the authenticated machine can be retrieved.
+        - When fetching M2M tokens with a Clerk Secret Key, tokens for any machine in the instance can be retrieved.
+      tags:
+        - M2M Tokens
+      parameters:
+        - schema:
+            type: string
+            pattern: ^mch_\w{27}$
+          required: true
+          name: subject
+          in: query
+        - schema:
+            type: boolean
+            nullable: true
+            default: false
+          required: false
+          name: revoked
+          in: query
+        - schema:
+            type: boolean
+            nullable: true
+            default: false
+          required: false
+          name: expired
+          in: query
+        - schema:
+            type: number
+            minimum: 1
+            maximum: 100
+            default: 10
+          required: false
+          name: limit
+          in: query
+        - schema:
+            type: number
+            nullable: true
+            minimum: 0
+            default: 0
+          required: false
+          name: offset
+          in: query
+      responses:
+        '200':
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  m2m_tokens:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        object:
+                          type: string
+                          enum:
+                            - machine_to_machine_token
+                        id:
+                          type: string
+                          pattern: ^mt_[0-9A-Fa-f]{32}$
+                          example: mt_f7f0ba8c3b4843ce7d85fcdd5e71853e
+                        subject:
+                          type: string
+                          pattern: ^mch_\w{27}$
+                          example: mch_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                        claims:
+                          nullable: true
+                          example:
+                            important_metadata: Some useful data
+                        scopes:
+                          type: array
+                          items:
+                            type: string
+                            pattern: ^mch_\w{27}$
+                          default: []
+                          example:
+                            - mch_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                            - mch_2yGkLpQ7Y3rXSwtU24CzTk9I7Em
+                        revoked:
+                          type: boolean
+                          example: false
+                        revocation_reason:
+                          type: string
+                          nullable: true
+                          example: Revoked by user
+                        expired:
+                          type: boolean
+                          example: false
+                        expiration:
+                          type: number
+                          nullable: true
+                          example: 1716883200
+                        last_used_at:
+                          type: number
+                          nullable: true
+                          example: 1716883200
+                        created_at:
+                          type: number
+                          example: 1716883200
+                        updated_at:
+                          type: number
+                          example: 1716883200
+                      required:
+                        - object
+                        - id
+                        - subject
+                        - revoked
+                        - revocation_reason
+                        - expired
+                        - expiration
+                        - last_used_at
+                        - created_at
+                        - updated_at
+                      additionalProperties: false
+                  total_count:
+                    type: number
+                required:
+                  - m2m_tokens
+                  - total_count
+                additionalProperties: false
+        '400':
+          description: 400 Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: Bad Request
+                        long_message:
+                          type: string
+                          example: 'Invalid ''url_parameter.example'': Failed regex check'
+                        code:
+                          type: string
+                          example: bad_request
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '403':
+          description: 403 Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '404':
+          description: 404 Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+  /m2m_tokens/{m2m_token_id}/revoke:
+    post:
+      x-speakeasy-group: m2mTokens
+      x-speakeasy-name-override: revoke
+      operationId: revokeM2MToken
+      summary: Revoke a M2M Token
+      description: |-
+        Revokes a M2M Token.
+
+        This endpoint can be authenticated by either a Machine Secret Key or by a Clerk Secret Key.
+
+        - When revoking a M2M Token with a Machine Secret Key, the token must managed by the Machine associated with the Machine Secret Key.
+        - When revoking a M2M Token with a Clerk Secret Key, any token on the Instance can be revoked.
+      tags:
+        - M2M Tokens
+      parameters:
+        - schema:
+            type: string
+            pattern: ^mt_[0-9A-Fa-f]{32}$
+          required: true
+          name: m2m_token_id
+          in: path
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                revocation_reason:
+                  type: string
+                  nullable: true
+              additionalProperties: false
+      responses:
+        '200':
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum:
+                      - machine_to_machine_token
+                  id:
+                    type: string
+                    pattern: ^mt_[0-9A-Fa-f]{32}$
+                    example: mt_f7f0ba8c3b4843ce7d85fcdd5e71853e
+                  subject:
+                    type: string
+                    pattern: ^mch_\w{27}$
+                    example: mch_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                  claims:
+                    nullable: true
+                    example:
+                      important_metadata: Some useful data
+                  scopes:
+                    type: array
+                    items:
+                      type: string
+                      pattern: ^mch_\w{27}$
+                    default: []
+                    example:
+                      - mch_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                      - mch_2yGkLpQ7Y3rXSwtU24CzTk9I7Em
+                  revoked:
+                    type: boolean
+                    example: false
+                  revocation_reason:
+                    type: string
+                    nullable: true
+                    example: Revoked by user
+                  expired:
+                    type: boolean
+                    example: false
+                  expiration:
+                    type: number
+                    nullable: true
+                    example: 1716883200
+                  last_used_at:
+                    type: number
+                    nullable: true
+                    example: 1716883200
+                  created_at:
+                    type: number
+                    example: 1716883200
+                  updated_at:
+                    type: number
+                    example: 1716883200
+                required:
+                  - object
+                  - id
+                  - subject
+                  - revoked
+                  - revocation_reason
+                  - expired
+                  - expiration
+                  - last_used_at
+                  - created_at
+                  - updated_at
+                additionalProperties: false
+        '400':
+          description: 400 Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: Bad Request
+                        long_message:
+                          type: string
+                          example: 'Invalid ''url_parameter.example'': Failed regex check'
+                        code:
+                          type: string
+                          example: bad_request
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '404':
+          description: 404 Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+  /m2m_tokens/verify:
+    post:
+      x-speakeasy-group: m2mTokens
+      x-speakeasy-name-override: verify
+      operationId: verifyM2MToken
+      summary: Verify a M2M Token
+      description: |-
+        Verifies a M2M Token.
+
+        This endpoint can be authenticated by either a Machine Secret Key or by a Clerk Secret Key.
+
+        - When verifying a M2M Token with a Machine Secret Key, the token must be granted access to the Machine associated with the Machine Secret Key.
+        - When verifying a M2M Token with a Clerk Secret Key, any token on the Instance can be verified.
+      tags:
+        - M2M Tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+              required:
+                - token
+              additionalProperties: false
+      responses:
+        '200':
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum:
+                      - machine_to_machine_token
+                  id:
+                    type: string
+                    pattern: ^mt_[0-9A-Fa-f]{32}$
+                    example: mt_f7f0ba8c3b4843ce7d85fcdd5e71853e
+                  subject:
+                    type: string
+                    pattern: ^mch_\w{27}$
+                    example: mch_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                  claims:
+                    nullable: true
+                    example:
+                      important_metadata: Some useful data
+                  scopes:
+                    type: array
+                    items:
+                      type: string
+                      pattern: ^mch_\w{27}$
+                    default: []
+                    example:
+                      - mch_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                      - mch_2yGkLpQ7Y3rXSwtU24CzTk9I7Em
+                  revoked:
+                    type: boolean
+                    example: false
+                  revocation_reason:
+                    type: string
+                    nullable: true
+                    example: Revoked by user
+                  expired:
+                    type: boolean
+                    example: false
+                  expiration:
+                    type: number
+                    nullable: true
+                    example: 1716883200
+                  last_used_at:
+                    type: number
+                    nullable: true
+                    example: 1716883200
+                  created_at:
+                    type: number
+                    example: 1716883200
+                  updated_at:
+                    type: number
+                    example: 1716883200
+                required:
+                  - object
+                  - id
+                  - subject
+                  - revoked
+                  - revocation_reason
+                  - expired
+                  - expiration
+                  - last_used_at
+                  - created_at
+                  - updated_at
+                additionalProperties: false
+        '400':
+          description: 400 Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: Bad Request
+                        long_message:
+                          type: string
+                          example: 'Invalid ''url_parameter.example'': Failed regex check'
+                        code:
+                          type: string
+                          example: bad_request
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '404':
+          description: 404 Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
   /oauth_applications/access_tokens/verify:
     post:
       x-speakeasy-group: oauthAccessTokens
@@ -8753,6 +9436,8 @@ components:
           type: boolean
         blocklist:
           type: boolean
+        allowlist_blocklist_disabled_on_sign_in:
+          type: boolean
         block_email_subaddresses:
           type: boolean
         block_disposable_email_domains:
@@ -8761,6 +9446,7 @@ components:
         - object
         - allowlist
         - blocklist
+        - allowlist_blocklist_disabled_on_sign_in
         - block_email_subaddresses
         - block_disposable_email_domains
     OrganizationSettings:
@@ -8779,6 +9465,8 @@ components:
         max_allowed_roles:
           type: integer
         max_allowed_permissions:
+          deprecated: true
+          description: max_allowed_permissions is now a no-op, as permissions are now unlimited
           type: integer
         creator_role:
           type: string
@@ -8804,7 +9492,6 @@ components:
         - enabled
         - max_allowed_memberships
         - max_allowed_roles
-        - max_allowed_permissions
         - creator_role
         - admin_delete_enabled
         - domains_enabled
@@ -9797,8 +10484,6 @@ components:
         - for_payer_type
         - slug
         - avatar_url
-        - period
-        - interval
         - features
       properties:
         object:
