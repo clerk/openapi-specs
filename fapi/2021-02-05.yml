@@ -1509,7 +1509,7 @@ paths:
           allowEmptyValue: true
           description: |
             The organization ID or slug to attempt to set as active for the session. If this param is present but has no value,
-            the personal workspace will be set as active. If the organization cannot be set as active (because it does not
+            the personal account will be set as active. If the organization cannot be set as active (because it does not
             exist, or the user is not a member), the active organization for the session will not change.
         - in: query
           name: satellite_fapi
@@ -1820,7 +1820,7 @@ paths:
         Create a session jwt for the authenticated requested user.
 
         When force organization selection is enabled and `organization_id` is sent as null or empty string,
-        the token will be created with the previous active organization and will not attempt to switch to a personal workspace.
+        the token will be created with the previous active organization and will not attempt to switch to a personal account.
       operationId: createSessionToken
       tags:
         - Sessions
@@ -1841,11 +1841,11 @@ paths:
                   type: string
                   description: |-
                     The organization id to associate with the token. The user must be a member of the organization.
-                    If present but empty, the personal workspace will be set as active.
+                    If present but empty, the personal account will be set as active.
                     If absent, the previous active organization for the session will be used.
 
                     When force organization selection is enabled and this value is sent as null or empty string,
-                    the token will be created with the previous active organization and will not attempt to switch to a personal workspace.
+                    the token will be created with the previous active organization and will not attempt to switch to a personal account.
                   nullable: true
       responses:
         '200':
@@ -5358,6 +5358,14 @@ components:
       properties:
         oauth_application_name:
           type: string
+        oauth_application_logo_url:
+          type: string
+          nullable: true
+          description: URL to the OAuth application's logo image
+        oauth_application_url:
+          type: string
+          nullable: true
+          description: URL to the OAuth application's website or homepage
         client_id:
           type: string
         scopes:
@@ -5973,6 +5981,8 @@ components:
           $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
         blocklist:
           $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
+        allowlist_blocklist_disabled_on_sign_in:
+          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
         block_email_subaddresses:
           $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
         block_disposable_email_domains:
@@ -5980,6 +5990,7 @@ components:
       required:
         - allowlist
         - blocklist
+        - allowlist_blocklist_disabled_on_sign_in
         - block_email_subaddresses
         - block_disposable_email_domains
     UserSettings.PasswordSettings:
