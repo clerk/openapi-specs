@@ -4246,7 +4246,7 @@ paths:
         Organizations support private and public metadata.
         Private metadata can only be accessed from the Backend API.
         Public metadata can be accessed from the Backend API, and are read-only from the Frontend API.
-        The `created_by` user will see this as their [active organization] (https://clerk.com/docs/organizations/overview#active-organization)
+        The `created_by` user will see this as their [active organization](https://clerk.com/docs/organizations/overview#active-organization)
         the next time they create a session, presuming they don't explicitly set a different organization as active before then.
       tags:
         - Organizations
@@ -4902,7 +4902,7 @@ paths:
         Adds a user as a member to the given organization.
         Only users in the same instance as the organization can be added as members.
 
-        This organization will be the user's [active organization] (https://clerk.com/docs/organizations/overview#active-organization)
+        This organization will be the user's [active organization](https://clerk.com/docs/organizations/overview#active-organization)
         the next time they create a session, presuming they don't explicitly set a
         different organization as active before then.
       tags:
@@ -7974,6 +7974,7 @@ components:
             - $ref: '#/components/schemas/verification_admin'
             - $ref: '#/components/schemas/verification_from_oauth'
             - $ref: '#/components/schemas/verification_ticket'
+            - $ref: '#/components/schemas/verification_saml'
           discriminator:
             propertyName: object
         linked_to:
