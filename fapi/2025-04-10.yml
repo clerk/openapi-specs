@@ -5059,6 +5059,8 @@ components:
           type: string
         token_endpoint:
           type: string
+        revocation_endpoint:
+          type: string
         userinfo_endpoint:
           type: string
         jwks_uri:
@@ -5107,6 +5109,7 @@ components:
         - issuer
         - authorization_endpoint
         - token_endpoint
+        - revocation_endpoint
         - userinfo_endpoint
         - jwks_uri
         - scopes_supported
@@ -5129,6 +5132,8 @@ components:
         authorization_endpoint:
           type: string
         token_endpoint:
+          type: string
+        revocation_endpoint:
           type: string
         jwks_uri:
           type: string
@@ -5178,6 +5183,7 @@ components:
         - issuer
         - authorization_endpoint
         - token_endpoint
+        - revocation_endpoint
         - jwks_uri
         - response_types_supported
         - grant_types_supported

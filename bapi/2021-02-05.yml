@@ -878,7 +878,7 @@ paths:
       description: |-
         Returns the session if it is authenticated; otherwise, returns an error.
         WARNING: This endpoint is deprecated and will be removed in future versions. We strongly recommend switching to networkless verification using short-lived session tokens,
-                 which is implemented transparently in all recent SDK versions (e.g. [NodeJS SDK](https://clerk.com/docs/backend-requests/handling/nodejs#clerk-express-require-auth)).
+                 which is implemented transparently in all recent SDK versions (e.g. [NodeJS SDK](https://clerk.com/docs/backend-requests/handling/nodejs#require-auth)).
                  For more details on how networkless verification works, refer to our [Session Tokens documentation](https://clerk.com/docs/backend-requests/resources/session-tokens).
       parameters:
         - name: session_id
@@ -3237,7 +3237,7 @@ paths:
       description: |-
         Change the domain of a production instance.
 
-        Changing the domain requires updating the [DNS records](https://clerk.com/docs/deployments/overview#dns-records) accordingly, deploying new [SSL certificates](https://clerk.com/docs/deployments/overview#deploy), updating your Social Connection's redirect URLs and setting the new keys in your code.
+        Changing the domain requires updating the [DNS records](https://clerk.com/docs/deployments/overview#dns-records) accordingly, deploying new [SSL certificates](https://clerk.com/docs/deployments/overview#deploy-certificates), updating your Social Connection's redirect URLs and setting the new keys in your code.
 
         WARNING: Changing your domain will invalidate all current user sessions (i.e. users will be logged out). Also, while your application is being deployed, a small downtime is expected to occur.
       tags:
@@ -3606,7 +3606,7 @@ paths:
       description: |-
         Change the domain of a production instance.
 
-        Changing the domain requires updating the [DNS records](https://clerk.com/docs/deployments/overview#dns-records) accordingly, deploying new [SSL certificates](https://clerk.com/docs/deployments/overview#deploy), updating your Social Connection's redirect URLs and setting the new keys in your code.
+        Changing the domain requires updating the [DNS records](https://clerk.com/docs/deployments/overview#dns-records) accordingly, deploying new [SSL certificates](https://clerk.com/docs/deployments/overview#deploy-certificates), updating your Social Connection's redirect URLs and setting the new keys in your code.
 
         WARNING: Changing your domain will invalidate all current user sessions (i.e. users will be logged out). Also, while your application is being deployed, a small downtime is expected to occur.
       tags:
@@ -4946,7 +4946,7 @@ paths:
         Adds a user as a member to the given organization.
         Only users in the same instance as the organization can be added as members.
 
-        This organization will be the user's [active organization](https://clerk.com/docs/organizations/overview#active-organization)
+        This organization will be the user's [active organization] (https://clerk.com/docs/organizations/overview#active-organization)
         the next time they create a session, presuming they don't explicitly set a
         different organization as active before then.
       tags:
@@ -6493,6 +6493,72 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
         '500':
           $ref: '#/components/responses/ClerkErrors'
+  /commerce/subscription_items:
+    get:
+      operationId: GetCommerceSubscriptionItemList
+      x-speakeasy-group: commerce
+      x-speakeasy-name-override: listSubscriptionItems
+      tags:
+        - Commerce
+      summary: List all subscription items
+      description: |-
+        Returns a list of all subscription items for the instance. The subscription items are returned sorted by creation date,
+        with the newest appearing first. This includes subscriptions for both users and organizations. Pagination is supported.
+      parameters:
+        - $ref: '#/components/parameters/Paginated'
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - in: query
+          name: status
+          description: Filter subscription items by status
+          required: false
+          schema:
+            type: string
+            enum:
+              - active
+              - ended
+              - past_due
+              - upcoming
+              - free_trial
+        - in: query
+          name: payer_type
+          description: Filter subscription items by payer type
+          required: false
+          schema:
+            type: string
+            enum:
+              - user
+              - org
+        - in: query
+          name: plan_id
+          description: Filter subscription items by plan ID
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: include_free
+          description: Whether to include free plan subscription items
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - in: query
+          name: query
+          description: Search query to filter subscription items
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/CommerceSubscriptionItem.List'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /m2m_tokens:
     post:
       x-speakeasy-group: m2m
@@ -7959,6 +8025,83 @@ components:
         - strategy
         - attempts
         - expire_at
+    verification_saml:
+      x-speakeasy-name-override: SAML
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_saml
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+            - transferable
+        strategy:
+          type: string
+          enum:
+            - saml
+        external_verification_redirect_url:
+          nullable: true
+          type: string
+        error:
+          nullable: true
+          type: object
+          oneOf:
+            - $ref: '#/components/schemas/ClerkError'
+        expire_at:
+          type: integer
+        attempts:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - external_verification_redirect_url
+        - attempts
+        - expire_at
+    verification_email_link:
+      x-speakeasy-name-override: EmailLink
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_email_link
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+        strategy:
+          type: string
+          enum:
+            - email_link
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
     IdentificationLink:
       type: object
       additionalProperties: false
@@ -7997,6 +8140,7 @@ components:
             - $ref: '#/components/schemas/verification_from_oauth'
             - $ref: '#/components/schemas/verification_ticket'
             - $ref: '#/components/schemas/verification_saml'
+            - $ref: '#/components/schemas/verification_email_link'
           discriminator:
             propertyName: object
         linked_to:
@@ -8508,49 +8652,6 @@ components:
         - created_at
         - updated_at
         - verification
-    verification_saml:
-      x-speakeasy-name-override: SAML
-      type: object
-      additionalProperties: false
-      properties:
-        object:
-          type: string
-          enum:
-            - verification_saml
-        status:
-          type: string
-          enum:
-            - unverified
-            - verified
-            - failed
-            - expired
-            - transferable
-        strategy:
-          type: string
-          enum:
-            - saml
-        external_verification_redirect_url:
-          nullable: true
-          type: string
-        error:
-          nullable: true
-          type: object
-          oneOf:
-            - $ref: '#/components/schemas/ClerkError'
-        expire_at:
-          type: integer
-        attempts:
-          type: integer
-          nullable: true
-        verified_at_client:
-          type: string
-          nullable: true
-      required:
-        - status
-        - strategy
-        - external_verification_redirect_url
-        - attempts
-        - expire_at
     SAMLConnection:
       type: object
       additionalProperties: false
@@ -10597,6 +10698,14 @@ components:
           items:
             $ref: '#/components/schemas/FeatureResponse'
           description: The features included in this plan.
+        free_trial_enabled:
+          type: boolean
+          description: Whether free trial is enabled for this plan.
+        free_trial_days:
+          type: integer
+          format: int64
+          nullable: true
+          description: Number of free trial days for this plan.
     PaginatedCommercePlanResponse:
       type: object
       additionalProperties: false
@@ -10613,6 +10722,318 @@ components:
           type: integer
           format: int64
           description: Total number of commerce plans.
+    CommerceSubscriptionCreditResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/CommerceMoneyResponse'
+          nullable: true
+          description: Credit amount.
+        cycle_remaining_percent:
+          type: number
+          format: float
+          description: Percentage of the billing cycle remaining.
+    CommercePaymentSourceResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - object
+        - id
+        - payer_id
+        - payment_method
+        - gateway
+        - gateway_external_id
+        - last4
+        - status
+        - wallet_type
+        - card_type
+        - created_at
+        - updated_at
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - commerce_source
+        id:
+          type: string
+          description: Unique identifier for the payment source.
+        payer_id:
+          type: string
+          description: Unique identifier for the payer.
+        payment_method:
+          type: string
+          description: The payment method type.
+          enum:
+            - card
+            - apple_pay
+            - google_pay
+        is_default:
+          type: boolean
+          nullable: true
+          description: Whether this is the default payment source for the payer.
+        gateway:
+          type: string
+          description: The payment gateway.
+        gateway_external_id:
+          type: string
+          description: External ID in the payment gateway.
+        gateway_external_account_id:
+          type: string
+          nullable: true
+          description: External account ID in the payment gateway.
+        last4:
+          type: string
+          description: Last 4 digits of the card (for card payment sources).
+        status:
+          type: string
+          description: Status of the payment source.
+          enum:
+            - active
+            - disconnected
+        wallet_type:
+          type: string
+          description: Type of wallet (if applicable).
+        card_type:
+          type: string
+          description: Type of card (if applicable).
+        expiry_year:
+          type: integer
+          description: Card expiration year (for card payment sources).
+        expiry_month:
+          type: integer
+          description: Card expiration month (for card payment sources).
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the payment source was created.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the payment source was last updated.
+        is_removable:
+          type: boolean
+          nullable: true
+          description: Whether this payment source can be removed.
+    CommerceSubscriptionItemNextPaymentResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/CommerceMoneyResponse'
+          nullable: true
+          description: Amount for the next payment.
+        date:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) for the next payment date.
+    CommercePayerResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - object
+        - id
+        - instance_id
+        - first_name
+        - last_name
+        - email
+        - image_url
+        - created_at
+        - updated_at
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - commerce_payer
+        id:
+          type: string
+          description: Unique identifier for the payer.
+        instance_id:
+          type: string
+          description: Unique identifier for the Clerk instance.
+        user_id:
+          type: string
+          description: User ID for user-type payers.
+        first_name:
+          type: string
+          description: First name of the payer.
+        last_name:
+          type: string
+          description: Last name of the payer.
+        email:
+          type: string
+          description: Email address of the payer.
+        organization_id:
+          type: string
+          description: Organization ID for org-type payers.
+        organization_name:
+          type: string
+          description: Organization name for org-type payers.
+        image_url:
+          type: string
+          description: URL of the payer's image/avatar.
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the payer was created.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the payer was last updated.
+    CommerceSubscriptionItem:
+      type: object
+      additionalProperties: false
+      required:
+        - object
+        - id
+        - instance_id
+        - status
+        - plan_id
+        - plan
+        - plan_period
+        - payment_source_id
+        - payer_id
+        - is_free_trial
+        - proration_date
+        - created_at
+        - updated_at
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - commerce_subscription_item
+        id:
+          type: string
+          description: Unique identifier for the subscription item.
+        instance_id:
+          type: string
+          description: Unique identifier for the Clerk instance.
+        status:
+          type: string
+          description: Current status of the subscription item.
+          enum:
+            - active
+            - ended
+            - past_due
+            - upcoming
+            - incomplete
+            - abandoned
+        credit:
+          allOf:
+            - $ref: '#/components/schemas/CommerceSubscriptionCreditResponse'
+          nullable: true
+          description: Credit information (only available in PaymentAttempt events).
+        plan_id:
+          type: string
+          description: Unique identifier for the associated plan.
+        plan:
+          allOf:
+            - $ref: '#/components/schemas/CommercePlan'
+          nullable: true
+          description: The associated commerce plan.
+        plan_period:
+          type: string
+          description: The billing period for this subscription.
+          enum:
+            - month
+            - annual
+        payment_source_id:
+          type: string
+          description: Unique identifier for the payment source.
+        payment_source:
+          allOf:
+            - $ref: '#/components/schemas/CommercePaymentSourceResponse'
+          nullable: true
+          description: The payment source associated with this subscription.
+        lifetime_paid:
+          allOf:
+            - $ref: '#/components/schemas/CommerceMoneyResponse'
+          nullable: true
+          description: Total amount paid over the lifetime of this subscription.
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/CommerceMoneyResponse'
+          nullable: true
+          description: Current amount for this subscription.
+        next_invoice:
+          allOf:
+            - $ref: '#/components/schemas/CommerceSubscriptionItemNextPaymentResponse'
+          nullable: true
+          description: Information about the next invoice.
+        next_payment:
+          allOf:
+            - $ref: '#/components/schemas/CommerceSubscriptionItemNextPaymentResponse'
+          nullable: true
+          description: Information about the next payment.
+        payer_id:
+          type: string
+          description: Unique identifier for the payer.
+        payer:
+          allOf:
+            - $ref: '#/components/schemas/CommercePayerResponse'
+          nullable: true
+          description: The payer associated with this subscription.
+        is_free_trial:
+          type: boolean
+          description: Whether this subscription is currently on a free trial.
+        period_start:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) when the current period started.
+        period_end:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) when the current period ends.
+        proration_date:
+          type: string
+          description: Date used for proration calculations.
+        canceled_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) when the subscription was canceled.
+        past_due_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) when the subscription became past due.
+        ended_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) when the subscription ended.
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the subscription was created.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the subscription was last updated.
+    PaginatedCommerceSubscriptionItemResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - total_count
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommerceSubscriptionItem'
+          description: Array of commerce subscription items.
+        total_count:
+          type: integer
+          format: int64
+          description: Total number of commerce subscription items.
   responses:
     WellKnown.JWKS:
       description: Get the JSON Web Key Set
@@ -11181,6 +11602,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PaginatedCommercePlanResponse'
+    CommerceSubscriptionItem.List:
+      description: A list of commerce subscription items.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaginatedCommerceSubscriptionItemResponse'
   parameters:
     Paginated:
       name: paginated
