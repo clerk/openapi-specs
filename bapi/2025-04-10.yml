@@ -3887,6 +3887,19 @@ paths:
             type: string
           allowEmptyValue: true
           required: false
+        - in: query
+          name: order_by
+          description: |-
+            Allows to return machines in a particular order.
+            You can order the returned machines by their `name` or `created_at`.
+            To specify the direction, use the `+` or `-` symbols prepended to the property to order by.
+            For example, to return machines in descending order by `created_at`, use `-created_at`.
+            If you don't use `+` or `-`, then `+` is implied.
+            Defaults to `-created_at`.
+          schema:
+            type: string
+            default: '-created_at'
+          required: false
       responses:
         '200':
           $ref: '#/components/responses/Machine.List'
