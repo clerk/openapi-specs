@@ -566,7 +566,6 @@ paths:
                       - status
                       - message
         '400':
-          description: Bad request
           $ref: '#/components/responses/ClerkErrors'
         '503':
           description: Configuration is invalid or service is unavailable
