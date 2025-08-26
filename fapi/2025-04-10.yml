@@ -845,7 +845,7 @@ paths:
                     The strategy to be prepared for first factor authentication.
 
                     Can be one of the following `email_code`, `email_link`,
-                    `phone_code`, `web3_metamask_signature`, `web3_coinbase_wallet_signature`,
+                    `phone_code`, `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature`,
                     `web3_okx_wallet_signature`, `reset_password_phone_code`, `reset_password_email_code`,
                     `oauth_[provider]`, `saml`, `passkey`
                 email_address_id:
@@ -858,7 +858,7 @@ paths:
                   nullable: true
                 web3_wallet_id:
                   type: string
-                  description: Used with the `web3_metamask_signature`, `web3_coinbase_wallet_signature` and `web3_okx_wallet_signature` strategies.
+                  description: Used with the `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature` and `web3_okx_wallet_signature` strategies.
                   nullable: true
                 passkey_id:
                   type: string
@@ -932,7 +932,7 @@ paths:
                     The strategy to be used for first factor authentication.
 
                     Can be one of the following `email_code`, `email_link`, `password`, `phone_code`,
-                    `web3_metamask_signature`, `web3_coinbase_wallet_signature`, `web3_okx_wallet_signature`,
+                    `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature`, `web3_okx_wallet_signature`,
                     `reset_password_phone_code`, `reset_password_email_code`, `passkey`, `google_one_tap`
                 code:
                   type: string
@@ -944,7 +944,7 @@ paths:
                   nullable: true
                 signature:
                   type: string
-                  description: Used with the `web3_metamask_signature`, `web3_coinbase_wallet_signature` and `web3_okx_wallet_signature` strategies.
+                  description: Used with the `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature` and `web3_okx_wallet_signature` strategies.
                   nullable: true
                 token:
                   type: string
@@ -1331,6 +1331,7 @@ paths:
                     - email_link
                     - phone_code
                     - web3_metamask_signature
+                    - web3_base_signature
                     - web3_coinbase_wallet_signature
                     - web3_okx_wallet_signature
                     - saml
@@ -1394,6 +1395,7 @@ paths:
                     - email_link
                     - phone_code
                     - web3_metamask_signature
+                    - web3_base_signature
                     - web3_coinbase_wallet_signature
                     - web3_okx_wallet_signature
                     - google_one_tap
@@ -6695,6 +6697,7 @@ components:
           type: string
           enum:
             - web3_metamask_signature
+            - web3_base_signature
             - web3_coinbase_wallet_signature
             - web3_okx_wallet_signature
         attempts:
@@ -7461,6 +7464,7 @@ components:
             - email_link
             - phone_code
             - web3_metamask_signature
+            - web3_base_signature
             - web3_coinbase_wallet_signature
             - web3_okx_wallet_signature
             - totp
