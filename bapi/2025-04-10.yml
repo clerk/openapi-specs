@@ -27,7 +27,6 @@ servers:
   - url: https://api.clerk.com/v1
 security:
   - bearerAuth: []
-  - machineSecretKey: []
 tags:
   - name: Actor Tokens
     description: Allow your users to sign in on behalf of other users.
@@ -7429,11 +7428,6 @@ components:
       type: http
       scheme: bearer
       description: Internal management token.
-    machineSecretKey:
-      type: http
-      scheme: bearer
-      description: Machine secret key, obtained under "M2M authentication" in the Clerk Dashboard.
-      bearerFormat: ak_<secret value>
   schemas:
     JWKS.ed25519.PublicKey:
       type: object
