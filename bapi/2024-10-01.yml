@@ -6474,6 +6474,71 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+  /waitlist_entries/{waitlist_entry_id}/invite:
+    post:
+      operationId: InviteWaitlistEntry
+      x-speakeasy-group: waitlistEntries
+      x-speakeasy-name-override: invite
+      summary: Invite a waitlist entry
+      description: Send an invite to the email address in a waitlist entry.
+      tags:
+        - Waitlist Entries
+      parameters:
+        - name: waitlist_entry_id
+          in: path
+          description: The ID of the waitlist entry to invite
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ignore_existing:
+                  type: boolean
+                  description: Whether an invitation should be created if there is already an existing invitation for this email address, or it's claimed by another user.
+                  nullable: true
+                  default: false
+      responses:
+        '200':
+          $ref: '#/components/responses/WaitlistEntry'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /waitlist_entries/{waitlist_entry_id}/reject:
+    post:
+      operationId: RejectWaitlistEntry
+      x-speakeasy-group: waitlistEntries
+      x-speakeasy-name-override: reject
+      summary: Reject a waitlist entry
+      description: Reject a waitlist entry.
+      tags:
+        - Waitlist Entries
+      parameters:
+        - name: waitlist_entry_id
+          in: path
+          description: The ID of the waitlist entry to reject
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/WaitlistEntry'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /accountless_applications:
     post:
       operationId: CreateAccountlessApplication
@@ -6588,7 +6653,9 @@ paths:
             default: false
         - in: query
           name: query
-          description: Search query to filter subscription items
+          description: |-
+            Search query to filter subscription items by email, user first name, user last name, or organization name.
+            Supports partial matching.
           required: false
           schema:
             type: string
@@ -8138,6 +8205,7 @@ components:
             - $ref: '#/components/schemas/ClerkError'
         expire_at:
           type: integer
+          nullable: true
         attempts:
           type: integer
           nullable: true
@@ -8147,9 +8215,7 @@ components:
       required:
         - status
         - strategy
-        - external_verification_redirect_url
         - attempts
-        - expire_at
     verification_email_link:
       x-speakeasy-name-override: EmailLink
       type: object
