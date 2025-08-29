@@ -8126,6 +8126,7 @@ components:
             - $ref: '#/components/schemas/ClerkError'
         expire_at:
           type: integer
+          nullable: true
         attempts:
           type: integer
           nullable: true
