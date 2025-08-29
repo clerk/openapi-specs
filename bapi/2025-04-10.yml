@@ -8135,9 +8135,7 @@ components:
       required:
         - status
         - strategy
-        - external_verification_redirect_url
         - attempts
-        - expire_at
     verification_email_link:
       x-speakeasy-name-override: EmailLink
       type: object
