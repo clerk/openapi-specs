@@ -6465,6 +6465,33 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+  /waitlist_entries/{waitlist_entry_id}:
+    delete:
+      operationId: DeleteWaitlistEntry
+      x-speakeasy-group: waitlistEntries
+      x-speakeasy-name-override: delete
+      summary: Delete a pending waitlist entry
+      description: Delete a pending waitlist entry.
+      tags:
+        - Waitlist Entries
+      parameters:
+        - name: waitlist_entry_id
+          in: path
+          description: The ID of the waitlist entry to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /waitlist_entries/{waitlist_entry_id}/invite:
     post:
       operationId: InviteWaitlistEntry
@@ -6659,6 +6686,18 @@ paths:
           required: false
           schema:
             type: string
+        - in: query
+          name: user_id
+          description: Filter subscription items by user ID
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: organization_id
+          description: Filter subscription items by organization ID
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/CommerceSubscriptionItem.List'
@@ -6693,6 +6732,48 @@ paths:
           schema:
             type: boolean
             default: false
+      responses:
+        '200':
+          $ref: '#/components/responses/CommerceSubscriptionItem'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
+  /billing/subscription_items/{subscription_item_id}/extend_free_trial:
+    post:
+      operationId: ExtendCommerceSubscriptionItemFreeTrial
+      x-speakeasy-group: commerce
+      x-speakeasy-name-override: extendSubscriptionItemFreeTrial
+      tags:
+        - Commerce
+      summary: Extend free trial for a subscription item
+      description: |-
+        Extends the free trial period for a specific subscription item to the specified timestamp.
+        The subscription item must be currently in a free trial period, and the plan must support free trials.
+        The timestamp must be in the future and not more than 365 days from the end of the current trial period
+        This operation is idempotent - repeated requests with the same timestamp will not change the trial period.
+      parameters:
+        - name: subscription_item_id
+          in: path
+          description: The ID of the subscription item to extend the free trial for
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Parameters for extending the free trial
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtendFreeTrialRequest'
       responses:
         '200':
           $ref: '#/components/responses/CommerceSubscriptionItem'
@@ -11287,6 +11368,19 @@ components:
           type: integer
           format: int64
           description: Total number of commerce subscription items.
+    ExtendFreeTrialRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - extend_to
+      properties:
+        extend_to:
+          type: string
+          format: date-time
+          description: |-
+            RFC3339 timestamp to extend the free trial to.
+            Must be in the future and not more than 365 days from now.
+          example: '2026-01-08T00:00:00Z'
   responses:
     WellKnown.JWKS:
       description: Get the JSON Web Key Set
