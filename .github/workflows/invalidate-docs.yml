@@ -1,0 +1,21 @@
+name: Invalidate Docs on Push to Main
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  invalidate-docs:
+    permissions: none
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Invalidate Documentation
+        run: |
+          curl --request POST \
+            --url https://clerk.com/docs/reference/spec/invalidate \
+            --header 'Content-Type: application/json' \
+            --header 'authorization: Bearer ${{ secrets.DOCS_REVALIDATE_SECRET }}' \
+            --data '{}'
+        env:
+          DOCS_REVALIDATE_SECRET: ${{ secrets.DOCS_REVALIDATE_SECRET }}
