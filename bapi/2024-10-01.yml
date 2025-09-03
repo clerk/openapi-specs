@@ -4129,6 +4129,55 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /machines/{machine_id}/secret_key/rotate:
+    post:
+      operationId: RotateMachineSecretKey
+      x-speakeasy-group: machines
+      x-speakeasy-name-override: rotateSecretKey
+      summary: Rotate a machine's secret key
+      description: |-
+        Rotates the machine's secret key.
+        When the secret key is rotated, make sure to update it in your machine/application.
+        The previous secret key will remain valid for the duration specified by the previous_token_ttl parameter.
+      tags:
+        - Machines
+      parameters:
+        - name: machine_id
+          in: path
+          description: The ID of the machine to rotate the secret key for
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - previous_token_ttl
+              properties:
+                previous_token_ttl:
+                  type: integer
+                  minimum: 0
+                  maximum: 28800
+                  description: |-
+                    The time in seconds that the previous secret key will remain valid after rotation.
+                    This ensures a graceful transition period for updating applications with the new secret key.
+                    Set to 0 to immediately expire the previous key. Maximum value is 8 hours (28800 seconds).
+      responses:
+        '200':
+          $ref: '#/components/responses/Machine.SecretKey'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /machines/{machine_id}/scopes:
     post:
       operationId: CreateMachineScope

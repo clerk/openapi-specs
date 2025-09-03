@@ -1,0 +1,4752 @@
+openapi: 3.0.3
+info:
+  title: Clerk Webhook Events
+  x-logo:
+    url: https://clerk.com/_next/image?url=%2Fimages%2Fclerk-logo.svg&w=96&q=75
+    altText: Clerk docs
+    href: https://clerk.com/docs
+  contact:
+    email: support@clerk.com
+    name: Clerk Platform Team
+    url: https://clerk.com/support
+  description: |-
+    Clerk's webhooks allow you to receive real-time notifications about events that happen in your Clerk account. You can use webhooks to trigger actions in your application based on these events.
+
+    For example, you can use webhooks to update your database when a user signs up or to send a notification when a user updates their profile.
+
+    Webhooks are sent as HTTP POST requests to a URL that you specify. The request body contains a JSON payload with information about the event.
+
+    To learn more about webhooks, see [Webhooks](https://clerk.dev/docs/webhooks).
+  version: v1
+  termsOfService: https://clerk.com/terms
+  license:
+    name: MIT
+    url: https://github.com/clerkinc/clerk-sdk-go/blob/main/LICENSE
+servers:
+  - url: https://api.clerk.dev/v1
+externalDocs:
+  url: https://clerk.dev/docs
+x-webhooks:
+  email.created:
+    post:
+      description: Email created
+      operationId: email.created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/EmailEventPayload'
+              required:
+                - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 0.0.0.0
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: email.created
+              instance_id: ins_123
+              timestamp: 1716883200
+              data:
+                body: |-
+                  <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+                  <html xmlns="http://www.w3.org/1999/xhtml">
+
+                      <head>
+                          <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+                          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                          <title>123456 is your Acme verification code</title>
+                          <style type="text/css">
+                              #outlook a {
+                                  padding: 0
+                              }
+
+                              .ExternalClass {
+                                  width: 100%
+                              }
+
+                              .ExternalClass,
+                              .ExternalClass p,
+                              .ExternalClass span,
+                              .ExternalClass font,
+                              .ExternalClass td,
+                              .ExternalClass div {
+                                  line-height: 100%
+                              }
+
+                              body,
+                              table,
+                              td,
+                              a {
+                                  -webkit-text-size-adjust: 100%;
+                                  -ms-text-size-adjust: 100%
+                              }
+
+                              table,
+                              td {
+                                  mso-table-lspace: 0;
+                                  mso-table-rspace: 0
+                              }
+
+                              img {
+                                  -ms-interpolation-mode: bicubic
+                              }
+
+                              img {
+                                  border: 0;
+                                  outline: none;
+                                  text-decoration: none
+                              }
+
+                              a img {
+                                  border: none
+                              }
+
+                              td img {
+                                  vertical-align: top
+                              }
+
+                              table,
+                              table td {
+                                  border-collapse: collapse
+                              }
+
+                              body {
+                                  margin: 0;
+                                  padding: 0;
+                                  width: 100% !important
+                              }
+
+                              .mobile-spacer {
+                                  width: 0;
+                                  display: none
+                              }
+
+                              @media all and (max-width:639px) {
+                                  .container {
+                                      width: 100% !important;
+                                      max-width: 600px !important
+                                  }
+
+                                  .mobile {
+                                      width: auto !important;
+                                      max-width: 100% !important;
+                                      display: block !important
+                                  }
+
+                                  .mobile-center {
+                                      text-align: center !important
+                                  }
+
+                                  .mobile-right {
+                                      text-align: right !important
+                                  }
+
+                                  .mobile-left {
+                                      text-align: left !important;
+                                  }
+
+                                  .mobile-hidden {
+                                      max-height: 0;
+                                      display: none !important;
+                                      mso-hide: all;
+                                      overflow: hidden
+                                  }
+
+                                  .mobile-spacer {
+                                      width: auto !important;
+                                      display: table !important
+                                  }
+
+                                  .mobile-image,
+                                  .mobile-image img {
+                                      height: auto !important;
+                                      max-width: 600px !important;
+                                      width: 100% !important
+                                  }
+                              }
+                          </style>
+                          <!--[if mso]><style type="text/css">body, table, td, a { font-family: Arial, Helvetica, sans-serif !important; }</style><![endif]-->
+                      </head>
+
+                      <body style="font-family: Helvetica, Arial, sans-serif; margin: 0px; padding: 0px; background-color: #ffffff;">
+                          <span style="color: transparent; display: none; height: 0px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; visibility: hidden; width: 0px;">Your Acme verification code</span>
+                          <table cellpadding="0" cellspacing="0" border="0" width="100%" class="body" style="width: 100%;">
+                              <tbody>
+                                  <tr>
+                                      <td align="center" valign="top" style="vertical-align: top; line-height: 1; padding: 48px 32px;">
+                                          <table cellpadding="0" cellspacing="0" border="0" width="600" class="header container" style="width: 600px;">
+                                              <tbody>
+                                                  <tr>
+                                                      <td align="left" valign="top" style="vertical-align: top; line-height: 1; padding: 16px 32px;">
+                                                          <p style="padding: 0px; margin: 0px; font-family: Helvetica, Arial, sans-serif; color: #000000; font-size: 24px; line-height: 36px;">
+                                                              Acme
+                                                          </p>
+                                                      </td>
+                                                  </tr>
+                                              </tbody>
+                                          </table>
+                                          <table cellpadding="0" cellspacing="0" border="0" width="600" class="main container" style="width: 600px; border-collapse: separate;">
+                                              <tbody>
+                                                  <tr>
+                                                      <td align="left" valign="top" bgcolor="#fff" style="vertical-align: top; line-height: 1; background-color: #ffffff; border-radius: 0px;">
+                                                          <table cellpadding="0" cellspacing="0" border="0" width="100%" class="block" style="width: 100%; border-collapse: separate;">
+                                                              <tbody>
+                                                                  <tr>
+                                                                      <td align="left" valign="top" bgcolor="#ffffff" style="vertical-align: top; line-height: 1; padding: 32px 32px 48px; background-color: #ffffff; border-radius: 0px;">
+                                                                          <h1 class="h1" align="left" style="padding: 0px; margin: 0px; font-style: normal; font-family: Helvetica, Arial, sans-serif; font-size: 32px; line-height: 39px; color: #000000; font-weight: bold;"> Verification code </h1>
+                                                                          <p align="left" style="padding: 0px; margin: 32px 0px 0px; font-family: Helvetica, Arial, sans-serif; color: #000000; font-size: 14px; line-height: 21px;"> Enter the following verification code when prompted: </p>
+                                                                          <p style="padding: 0px; margin: 16px 0px 0px; font-family: Helvetica, Arial, sans-serif; color: #000000; font-size: 40px; line-height: 60px;">
+                                                                              <b>123456</b>
+                                                                          </p>
+                                                                          <p style="padding: 0px; margin: 16px 0px 0px; font-family: Helvetica, Arial, sans-serif; color: #000000; font-size: 14px; line-height: 21px;"> To protect your account, do not share this code. </p>
+                                                                          <p style="padding: 0px; margin: 64px 0px 0px; font-family: Helvetica, Arial, sans-serif; color: #000000; font-size: 14px; line-height: 21px;">
+                                                                              <b>Didn't request this?</b>
+                                                                          </p>
+                                                                          <p style="padding: 0px; margin: 4px 0px 0px; font-family: Helvetica, Arial, sans-serif; color: #000000; font-size: 14px; line-height: 21px;"> This code was requested using <b>Chrome, OS X</b> at <b>30 August 2022, 12:14 UTC</b>. If you didn't make this request, you can safely ignore this email. </p>
+                                                                      </td>
+                                                                  </tr>
+                                                              </tbody>
+                                                          </table>
+                                                      </td>
+                                                  </tr>
+                                              </tbody>
+                                          </table>
+                                      </td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                      </body>
+
+                  </html>
+                body_plain: |
+                  123456 is your OTP code for Acme.
+
+                  Do not share this with anyone.
+
+                  It was requested at 30 August 2022, 12:14 UTC. If you did not request this, please ignore this email.
+                data:
+                  app:
+                    domain_name: uncommon.dolphin-15.lcl.dev
+                    logo_image_url: https://img.clerk.com/xxxxxx
+                    logo_url: null
+                    name: Acme
+                    url: https://accounts.uncommon.dolphin-15.lcl.dev
+                  otp_code: '123456'
+                  requested_at: 30 August 2022, 12:14 UTC
+                  requested_by: Chrome, OS X
+                  theme:
+                    button_text_color: '#ffffff'
+                    primary_color: '#335bf1'
+                    show_clerk_branding: true
+                  user:
+                    public_metadata: {}
+                    public_metadata_fallback: ''
+                delivered_by_clerk: true
+                email_address_id: idn_abcd
+                from_email_name: notifications
+                id: ema_abcd
+                object: email
+                slug: verification_code
+                status: queued
+                subject: 123456 is your verification code
+                to_email_address: johndoe@acme.com
+                user_id: user_abcd
+  organization.created:
+    post:
+      description: New organization was created
+      operationId: organization.created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Organization'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: organization.created
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: organization
+                id: org_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                name: Acme Corp
+                slug: acme-corp
+                image_url: https://img.clerk.com/xxxxxx
+                has_image: true
+                members_count: 1
+                missing_member_with_elevated_permissions: false
+                pending_invitations_count: 0
+                max_allowed_memberships: 5
+                admin_delete_enabled: true
+                public_metadata: {}
+                private_metadata: {}
+                created_by: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                created_at: 1716883200000
+                updated_at: 1716883200000
+  organization.updated:
+    post:
+      description: Organization updated
+      operationId: organization.updated
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Organization'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: organization.updated
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: organization
+                id: org_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                name: Acme Corp Updated
+                slug: acme-corp-updated
+                image_url: https://img.clerk.com/yyyyyy
+                has_image: true
+                members_count: 3
+                missing_member_with_elevated_permissions: false
+                pending_invitations_count: 1
+                max_allowed_memberships: 10
+                admin_delete_enabled: true
+                public_metadata:
+                  department: engineering
+                private_metadata:
+                  internal_id: ORG-123
+                created_by: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                created_at: 1716883200000
+                updated_at: 1716883500000
+  organization.deleted:
+    post:
+      description: Organization deleted
+      operationId: organization.deleted
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/DeletedObject'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: organization.deleted
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: organization
+                id: org_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                slug: acme-corp
+                deleted: true
+  organizationDomain.created:
+    post:
+      description: Organization domain created
+      operationId: organizationDomain.created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/OrganizationDomain'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: organizationDomain.created
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: organization_domain
+                id: orgdmn_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                organization_id: org_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                name: acme.com
+                enrollment_mode: automatic_invitation
+                affiliation_email_address: admin@acme.com
+                verification: null
+                total_pending_invitations: 0
+                total_pending_suggestions: 2
+                public_organization_data:
+                  id: org_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  name: Acme Corp
+                  slug: acme-corp
+                  image_url: https://img.clerk.com/proxy/example-url
+                  has_image: false
+                created_at: 1716883200000
+                updated_at: 1716883200000
+  organizationDomain.updated:
+    post:
+      description: Organization domain updated
+      operationId: organizationDomain.updated
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/OrganizationDomain'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: organizationDomain.updated
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: organization_domain
+                id: orgdm_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                organization_id: org_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                name: acme.com
+                enrollment_mode: automatic_suggestion
+                affiliation_email_address: admin@acme.com
+                verification:
+                  status: verified
+                  strategy: email_code
+                  attempts: 1
+                  expire_at: null
+                total_pending_invitations: 2
+                total_pending_suggestions: 5
+                created_at: 1716883200000
+                updated_at: 1716883500000
+  organizationDomain.deleted:
+    post:
+      description: Organization domain deleted
+      operationId: organizationDomain.deleted
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/DeletedObject'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: organizationDomain.deleted
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: organization_domain
+                id: orgdm_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                deleted: true
+  organizationInvitation.created:
+    post:
+      description: Organization invitation created
+      operationId: organizationInvitation.created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      allOf:
+                        - $ref: '#/components/schemas/OrganizationInvitation'
+                        - properties:
+                            data:
+                              type: object
+                              properties:
+                                public_organization_data:
+                                  nullable: true
+                                  $ref: '#/components/schemas/OrganizationInvitationPublicOrganizationData'
+              required:
+                - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: organizationInvitation.created
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: organization_invitation
+                id: orginv_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                email_address: jane.doe@acme.com
+                role: org:member
+                role_name: Member
+                organization_id: org_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                status: pending
+                public_metadata: {}
+                private_metadata: {}
+                url: https://accounts.acme.com/accept-invitation?token=abc123
+                expires_at: 1717487999000
+                created_at: 1716883200000
+                updated_at: 1716883200000
+  organizationInvitation.accepted:
+    post:
+      description: Organization invitation accepted
+      operationId: organizationInvitation.accepted
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      allOf:
+                        - $ref: '#/components/schemas/OrganizationInvitation'
+                        - properties:
+                            data:
+                              type: object
+                              properties:
+                                public_organization_data:
+                                  nullable: true
+                                  $ref: '#/components/schemas/OrganizationInvitationPublicOrganizationData'
+              required:
+                - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: organizationInvitation.accepted
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: organization_invitation
+                id: orginv_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                email_address: jane.doe@acme.com
+                role: org:member
+                role_name: Member
+                organization_id: org_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                status: accepted
+                public_metadata: {}
+                private_metadata: {}
+                url: https://accounts.acme.com/accept-invitation?token=abc123
+                expires_at: 1717487999000
+                created_at: 1716883200000
+                updated_at: 1716883500000
+  organizationInvitation.revoked:
+    post:
+      description: Organization invitation revoked
+      operationId: organizationInvitation.revoked
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      allOf:
+                        - $ref: '#/components/schemas/OrganizationInvitation'
+                        - properties:
+                            data:
+                              type: object
+                              properties:
+                                public_organization_data:
+                                  nullable: true
+                                  $ref: '#/components/schemas/OrganizationInvitationPublicOrganizationData'
+              required:
+                - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: organizationInvitation.revoked
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: organization_invitation
+                id: orginv_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                email_address: jane.doe@acme.com
+                role: org:member
+                role_name: Member
+                organization_id: org_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                status: revoked
+                public_metadata: {}
+                private_metadata: {}
+                url: https://accounts.acme.com/accept-invitation?token=abc123
+                expires_at: 1717487999000
+                created_at: 1716883200000
+                updated_at: 1716883500000
+  organizationMembership.created:
+    post:
+      description: Organization membership created
+      operationId: organizationMembership.created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/OrganizationMembership'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: organizationMembership.created
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: organization_membership
+                id: orgmem_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                role: org:member
+                role_name: Member
+                permissions:
+                  - org:posts:read
+                  - org:posts:write
+                public_metadata: {}
+                private_metadata: {}
+                organization:
+                  object: organization
+                  id: org_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  name: Acme Corp
+                  slug: acme-corp
+                  image_url: https://img.clerk.com/xxxxxx
+                  has_image: true
+                  members_count: 2
+                  missing_member_with_elevated_permissions: false
+                  pending_invitations_count: 0
+                  max_allowed_memberships: 5
+                  admin_delete_enabled: true
+                  public_metadata: {}
+                  private_metadata: {}
+                  created_by: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  created_at: 1716883200000
+                  updated_at: 1716883200000
+                public_user_data:
+                  user_id: user_2h8op3Isl1QR7tKu5FGNfaLKEoU
+                  first_name: Jane
+                  last_name: Doe
+                  profile_image_url: https://img.clerk.com/yyyyy
+                  image_url: https://img.clerk.com/yyyyy
+                  has_image: true
+                  identifier: jane.doe@acme.com
+                created_at: 1716883200000
+                updated_at: 1716883200000
+  organizationMembership.updated:
+    post:
+      description: Organization membership updated
+      operationId: organizationMembership.updated
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/OrganizationMembership'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: organizationMembership.updated
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: organization_membership
+                id: orgmem_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                role: org:admin
+                role_name: Admin
+                permissions:
+                  - org:posts:read
+                  - org:posts:write
+                  - org:posts:delete
+                  - org:members:manage
+                public_metadata: {}
+                private_metadata: {}
+                organization:
+                  object: organization
+                  id: org_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  name: Acme Corp
+                  slug: acme-corp
+                  image_url: https://img.clerk.com/xxxxxx
+                  has_image: true
+                  members_count: 2
+                  missing_member_with_elevated_permissions: false
+                  pending_invitations_count: 0
+                  max_allowed_memberships: 5
+                  admin_delete_enabled: true
+                  public_metadata: {}
+                  private_metadata: {}
+                  created_by: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  created_at: 1716883200000
+                  updated_at: 1716883500000
+                public_user_data:
+                  user_id: user_2h8op3Isl1QR7tKu5FGNfaLKEoU
+                  first_name: Jane
+                  last_name: Doe
+                  profile_image_url: https://img.clerk.com/yyyyy
+                  image_url: https://img.clerk.com/yyyyy
+                  has_image: true
+                  identifier: jane.doe@acme.com
+                created_at: 1716883200000
+                updated_at: 1716883500000
+  organizationMembership.deleted:
+    post:
+      description: Organization membership deleted
+      operationId: organizationMembership.deleted
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/OrganizationMembership'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: organizationMembership.deleted
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: organization_membership
+                id: orgmem_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                role: org:member
+                role_name: Member
+                permissions:
+                  - org:posts:read
+                  - org:posts:write
+                public_metadata: {}
+                private_metadata: {}
+                organization:
+                  object: organization
+                  id: org_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  name: Acme Corp
+                  slug: acme-corp
+                  image_url: https://img.clerk.com/xxxxxx
+                  has_image: true
+                  members_count: 1
+                  missing_member_with_elevated_permissions: false
+                  pending_invitations_count: 0
+                  max_allowed_memberships: 5
+                  admin_delete_enabled: true
+                  public_metadata: {}
+                  private_metadata: {}
+                  created_by: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  created_at: 1716883200000
+                  updated_at: 1716883200000
+                public_user_data:
+                  user_id: user_2h8op3Isl1QR7tKu5FGNfaLKEoU
+                  first_name: Jane
+                  last_name: Doe
+                  profile_image_url: https://img.clerk.com/yyyyy
+                  image_url: https://img.clerk.com/yyyyy
+                  has_image: true
+                  identifier: jane.doe@acme.com
+                created_at: 1716883200000
+                updated_at: 1716883200000
+  paymentAttempt.created:
+    post:
+      description: Payment Attempt Created
+      operationId: paymentAttempt.createdy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/PaymentAttemptEventPayload'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: paymentAttempt.created
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                id: pa_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                payment_id: cpa_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                statement_id: stmt_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                gateway_external_id: pi_1A2B3C4D5E6F7G8H9I0J1K2L
+                status: pending
+                created_at: 1716883200000
+                updated_at: 1716883200000
+                paid_at: null
+                failed_at: null
+                failed_reason: null
+                billing_date: 1716883200000
+                charge_type: recurring
+                payee:
+                  id: cpayee_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  gateway_type: stripe
+                  gateway_external_id: acct_1A2B3C4D5E6F7G8H
+                  gateway_status: active
+                payer:
+                  id: cpayer_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  image_url: https://img.clerk.com/xxxxxx
+                  user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  first_name: John
+                  last_name: Doe
+                  email: john.doe@acme.com
+                totals:
+                  subtotal:
+                    amount: 2000
+                    amount_formatted: $20.00
+                    currency: USD
+                    currency_symbol: $
+                  tax_total:
+                    amount: 200
+                    amount_formatted: $2.00
+                    currency: USD
+                    currency_symbol: $
+                  grand_total:
+                    amount: 2200
+                    amount_formatted: $22.00
+                    currency: USD
+                    currency_symbol: $
+                payment_source:
+                  id: cps_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  gateway: stripe
+                  gateway_external_id: pm_1A2B3C4D5E6F7G8H9I0J1K2L
+                  gateway_external_account_id: acct_1A2B3C4D5E6F7G8H
+                  payment_method: card
+                  status: active
+                  card_type: visa
+                  last4: '4242'
+                subscription_items:
+                  - id: csub_item_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                    status: active
+                    credit:
+                      amount:
+                        amount: 500
+                        amount_formatted: $5.00
+                        currency: USD
+                        currency_symbol: $
+                      cycle_days_remaining: 15
+                      cycle_days_total: 30
+                      cycle_remaining_percent: 0.5
+                    proration_date: '2024-05-01'
+                    plan_period: month
+                    period_start: 1716883200000
+                    period_end: 1719561600000
+                    canceled_at: null
+                    past_due_at: null
+                    lifetime_paid: 10000
+                    next_payment_amount: 2000
+                    next_payment_date: 1719561600000
+                    amount:
+                      amount: 2000
+                      amount_formatted: $20.00
+                      currency: USD
+                      currency_symbol: $
+                    plan:
+                      id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                      instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                      product_id: cprd_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                      name: Pro Plan
+                      slug: pro-plan
+                      description: Professional plan with advanced features
+                      is_default: false
+                      is_recurring: true
+                      is_prorated: true
+                      amount: 2000
+                      period: month
+                      interval: 1
+                      has_base_fee: true
+                      currency: USD
+                      annual_monthly_amount: 1800
+                      publicly_visible: true
+                    plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+  paymentAttempt.updated:
+    post:
+      description: Payment Attempt Updated
+      operationId: paymentAttempt.updated
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/PaymentAttemptEventPayload'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: paymentAttempt.updated
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                id: pa_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                payment_id: cpa_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                statement_id: stmt_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                gateway_external_id: pi_1A2B3C4D5E6F7G8H9I0J1K2L
+                status: paid
+                created_at: 1716883200000
+                updated_at: 1716883500000
+                paid_at: 1716883500000
+                failed_at: null
+                failed_reason: null
+                billing_date: 1716883200000
+                charge_type: recurring
+                payee:
+                  id: cpayee_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  gateway_type: stripe
+                  gateway_external_id: acct_1A2B3C4D5E6F7G8H
+                  gateway_status: active
+                payer:
+                  id: cpayer_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  image_url: https://img.clerk.com/xxxxxx
+                  user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  first_name: John
+                  last_name: Doe
+                  email: john.doe@acme.com
+                totals:
+                  subtotal:
+                    amount: 2000
+                    amount_formatted: $20.00
+                    currency: USD
+                    currency_symbol: $
+                  tax_total:
+                    amount: 200
+                    amount_formatted: $2.00
+                    currency: USD
+                    currency_symbol: $
+                  grand_total:
+                    amount: 2200
+                    amount_formatted: $22.00
+                    currency: USD
+                    currency_symbol: $
+                payment_source:
+                  id: cps_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  gateway: stripe
+                  gateway_external_id: pm_1A2B3C4D5E6F7G8H9I0J1K2L
+                  gateway_external_account_id: acct_1A2B3C4D5E6F7G8H
+                  payment_method: card
+                  status: active
+                  card_type: visa
+                  last4: '4242'
+                subscription_items:
+                  - id: csub_item_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                    status: active
+                    credit:
+                      amount:
+                        amount: 500
+                        amount_formatted: $5.00
+                        currency: USD
+                        currency_symbol: $
+                      cycle_days_remaining: 15
+                      cycle_days_total: 30
+                      cycle_remaining_percent: 0.5
+                    proration_date: '2024-05-01'
+                    plan_period: month
+                    period_start: 1716883200000
+                    period_end: 1719561600000
+                    canceled_at: null
+                    past_due_at: null
+                    lifetime_paid: 10000
+                    next_payment_amount: 2000
+                    next_payment_date: 1719561600000
+                    amount:
+                      amount: 2000
+                      amount_formatted: $20.00
+                      currency: USD
+                      currency_symbol: $
+                    plan:
+                      id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                      instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                      product_id: cprd_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                      name: Pro Plan
+                      slug: pro-plan
+                      description: Professional plan with advanced features
+                      is_default: false
+                      is_recurring: true
+                      is_prorated: true
+                      amount: 2000
+                      period: month
+                      interval: 1
+                      has_base_fee: true
+                      currency: USD
+                      annual_monthly_amount: 1800
+                      publicly_visible: true
+                    plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+  permission.created:
+    post:
+      description: Permission created
+      operationId: permission.created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Permission'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: permission.created
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: permission
+                id: perm_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                name: Create Posts
+                key: org:posts:create
+                description: Ability to create new posts in the organization
+                type: custom
+                created_at: 1716883200000
+                updated_at: 1716883200000
+  permission.updated:
+    post:
+      description: Permission updated
+      operationId: permission.updated
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Permission'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: permission.updated
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: permission
+                id: perm_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                name: Create and Edit Posts
+                key: org:posts:create
+                description: Ability to create and edit posts in the organization
+                type: custom
+                created_at: 1716883200000
+                updated_at: 1716883500000
+  permission.deleted:
+    post:
+      description: Permission deleted
+      operationId: permission.deleted
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/DeletedObject'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: permission.deleted
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: permission
+                id: perm_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                deleted: true
+  role.created:
+    post:
+      description: Role created
+      operationId: role.created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Role'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: role.created
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: role
+                id: role_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                name: Content Manager
+                key: org:content_manager
+                description: Can manage all content in the organization
+                is_creator_eligible: false
+                permissions:
+                  - object: permission
+                    id: perm_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                    name: Create Posts
+                    key: org:posts:create
+                    description: Ability to create new posts in the organization
+                    type: custom
+                    created_at: 1716883200000
+                    updated_at: 1716883200000
+                created_at: 1716883200000
+                updated_at: 1716883200000
+  role.updated:
+    post:
+      description: Role updated
+      operationId: role.updated
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Role'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: role.updated
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: role
+                id: role_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                name: Editor
+                key: editor
+                description: Can edit and publish content
+                permissions:
+                  - object: permission
+                    id: perm_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                    name: Edit Posts
+                    key: org:posts:edit
+                    description: Ability to edit posts in the organization
+                    type: custom
+                    created_at: 1716883200000
+                    updated_at: 1716883200000
+                  - object: permission
+                    id: perm_2g7np7Hrk0SN6kj5EDMLDaKNL0T
+                    name: Publish Posts
+                    key: org:posts:publish
+                    description: Ability to publish posts in the organization
+                    type: custom
+                    created_at: 1716883200000
+                    updated_at: 1716883200000
+                created_at: 1716883200000
+                updated_at: 1716883500000
+  role.deleted:
+    post:
+      description: Role deleted
+      operationId: role.deleted
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/DeletedObject'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: role.deleted
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: role
+                id: role_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                slug: null
+                deleted: true
+  session.created:
+    post:
+      description: Session created
+      operationId: session.created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Session'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: session.created
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: session
+                id: sess_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                client_id: client_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                actor: null
+                status: active
+                last_active_organization_id: org_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                last_active_at: 1716883200000
+                latest_activity:
+                  object: session_activity
+                  id: activity_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  device_type: desktop
+                  is_mobile: false
+                  browser_name: Chrome
+                  browser_version: 128.0.0.0
+                  ip_address: 192.168.1.100
+                  city: San Francisco
+                  country: US
+                expire_at: 1716969600000
+                abandon_at: 1719475200000
+                updated_at: 1716883200000
+                created_at: 1716883200000
+  session.pending:
+    post:
+      description: Session pending
+      operationId: session.pending
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Session'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: session.pending
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: session
+                id: sess_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                client_id: client_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                actor: null
+                status: pending
+                last_active_organization_id: null
+                last_active_at: 1716883200000
+                latest_activity: null
+                expire_at: 1716969600000
+                abandon_at: 1716969600000
+                updated_at: 1716883200000
+                created_at: 1716883200000
+  session.ended:
+    post:
+      description: Session ended
+      operationId: session.ended
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Session'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: session.ended
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: session
+                id: sess_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                client_id: client_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                actor: null
+                status: ended
+                last_active_organization_id: null
+                last_active_at: 1716883200000
+                latest_activity: null
+                expire_at: 1716969600000
+                abandon_at: 1716969600000
+                updated_at: 1716883200000
+                created_at: 1716883200000
+  session.removed:
+    post:
+      description: Session removed
+      operationId: session.removed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Session'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: session.removed
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: session
+                id: sess_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                client_id: client_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                actor: null
+                status: removed
+                last_active_organization_id: null
+                last_active_at: 1716883200000
+                latest_activity: null
+                expire_at: 1716969600000
+                abandon_at: 1716969600000
+                updated_at: 1716883200000
+                created_at: 1716883200000
+  session.revoked:
+    post:
+      description: Session revoked
+      operationId: session.revoked
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Session'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: session.revoked
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: session
+                id: sess_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                client_id: client_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                actor: null
+                status: revoked
+                last_active_organization_id: null
+                last_active_at: 1716883200000
+                latest_activity: null
+                expire_at: 1716969600000
+                abandon_at: 1716969600000
+                updated_at: 1716883200000
+                created_at: 1716883200000
+  sms.created:
+    post:
+      description: SMS created
+      operationId: sms.created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/SmsEventPayload'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: sms.created
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: sms_message
+                id: sms_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                slug: verification_code
+                from_phone_number: '+12345678901'
+                to_phone_number: '+19876543210'
+                phone_number_id: idn_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                message: Your verification code is 123456
+                status: queued
+                data: {}
+                delivered_by_clerk: true
+                created_at: 1716883200000
+  subscription.created:
+    post:
+      description: Subscription Created
+      operationId: subscription.created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/SubscriptionEventPayload'
+                  required:
+                    - data
+            examples:
+              default:
+                $ref: '#/components/examples/SubscriptionEventExample'
+  subscription.updated:
+    post:
+      description: Subscription Updated
+      operationId: subscription.updated
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/SubscriptionEventPayload'
+                  required:
+                    - data
+            examples:
+              default:
+                $ref: '#/components/examples/SubscriptionUpdatedEventExample'
+  subscription.active:
+    post:
+      description: Subscription Active
+      operationId: subscription.active
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/SubscriptionEventPayload'
+                  required:
+                    - data
+            examples:
+              default:
+                $ref: '#/components/examples/SubscriptionActiveEventExample'
+  subscription.pastDue:
+    post:
+      description: Subscription Past Due
+      operationId: subscription.pastDue
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/SubscriptionEventPayload'
+                  required:
+                    - data
+            examples:
+              default:
+                $ref: '#/components/examples/SubscriptionPastDueEventExample'
+  subscriptionItem.abandoned:
+    post:
+      description: Subscription Item Abandoned
+      operationId: subscriptionItem.abandoned
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                  required:
+                    - data
+            examples:
+              default:
+                $ref: '#/components/examples/SubscriptionItemAbandonedExample'
+  subscriptionItem.active:
+    post:
+      description: Subscription Item Active
+      operationId: subscriptionItem.active
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                  required:
+                    - data
+            examples:
+              default:
+                $ref: '#/components/examples/SubscriptionItemActiveExample'
+  subscriptionItem.created:
+    post:
+      description: Subscription Item Created
+      operationId: subscriptionItem.created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                  required:
+                    - data
+            examples:
+              default:
+                $ref: '#/components/examples/SubscriptionItemCreatedExample'
+  subscriptionItem.canceled:
+    post:
+      description: Subscription Item Canceled
+      operationId: subscriptionItem.canceled
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                  required:
+                    - data
+            examples:
+              default:
+                $ref: '#/components/examples/SubscriptionItemCanceledExample'
+  subscriptionItem.ended:
+    post:
+      description: Subscription Item Ended
+      operationId: subscriptionItem.ended
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                  required:
+                    - data
+            examples:
+              default:
+                $ref: '#/components/examples/SubscriptionItemEndedExample'
+  subscriptionItem.freeTrialEnding:
+    post:
+      description: Subscription Item Free Trial Ending
+      operationId: subscriptionItem.freeTrialEnding
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                  required:
+                    - data
+            examples:
+              default:
+                $ref: '#/components/examples/SubscriptionItemFreeTrialEndingExample'
+  subscriptionItem.incomplete:
+    post:
+      description: Subscription Item Incomplete
+      operationId: subscriptionItem.incomplete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                  required:
+                    - data
+            examples:
+              default:
+                $ref: '#/components/examples/SubscriptionItemIncompleteExample'
+  subscriptionItem.pastDue:
+    post:
+      description: Subscription Item Past Due
+      operationId: subscriptionItem.pastDue
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                  required:
+                    - data
+            examples:
+              default:
+                $ref: '#/components/examples/SubscriptionItemPastDueExample'
+  subscriptionItem.upcoming:
+    post:
+      description: Subscription Item Upcoming
+      operationId: subscriptionItem.upcoming
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                  required:
+                    - data
+            examples:
+              default:
+                $ref: '#/components/examples/SubscriptionItemUpcomingExample'
+  subscriptionItem.updated:
+    post:
+      description: Subscription Item Updated
+      operationId: subscriptionItem.updated
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                  required:
+                    - data
+            examples:
+              default:
+                $ref: '#/components/examples/SubscriptionItemUpdatedExample'
+  user.created:
+    post:
+      description: User created
+      operationId: user.created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/User'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: user.created
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: user
+                id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                external_id: null
+                primary_email_address_id: idn_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                primary_phone_number_id: null
+                primary_web3_wallet_id: null
+                username: null
+                first_name: John
+                last_name: Doe
+                profile_image_url: https://img.clerk.com/xxxxxx
+                image_url: https://img.clerk.com/xxxxxx
+                has_image: true
+                public_metadata: {}
+                private_metadata: null
+                unsafe_metadata: {}
+                email_addresses: []
+                phone_numbers: []
+                web3_wallets: []
+                passkeys: []
+                password_enabled: true
+                two_factor_enabled: false
+                totp_enabled: false
+                backup_code_enabled: false
+                mfa_enabled_at: null
+                mfa_disabled_at: null
+                external_accounts: []
+                saml_accounts: []
+                enterprise_accounts: []
+                last_sign_in_at: 1716883200000
+                banned: false
+                locked: false
+                lockout_expires_in_seconds: null
+                verification_attempts_remaining: null
+                updated_at: 1716883200000
+                created_at: 1716883200000
+                delete_self_enabled: true
+                create_organization_enabled: true
+                create_organizations_limit: null
+                last_active_at: 1716883200000
+                legal_accepted_at: 1716883200000
+  user.updated:
+    post:
+      description: User updated
+      operationId: user.updated
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/User'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: user.updated
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: user
+                id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                external_id: null
+                primary_email_address_id: idn_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                primary_phone_number_id: null
+                primary_web3_wallet_id: null
+                username: johndoe
+                first_name: John
+                last_name: Doe Updated
+                profile_image_url: https://img.clerk.com/yyyyy
+                image_url: https://img.clerk.com/yyyyy
+                has_image: true
+                public_metadata:
+                  department: engineering
+                private_metadata: null
+                unsafe_metadata: {}
+                email_addresses: []
+                phone_numbers: []
+                web3_wallets: []
+                passkeys: []
+                password_enabled: true
+                two_factor_enabled: true
+                totp_enabled: true
+                backup_code_enabled: false
+                mfa_enabled_at: 1716883200000
+                mfa_disabled_at: null
+                external_accounts: []
+                saml_accounts: []
+                enterprise_accounts: []
+                last_sign_in_at: 1716883400000
+                banned: false
+                locked: false
+                lockout_expires_in_seconds: null
+                verification_attempts_remaining: null
+                updated_at: 1716883500000
+                created_at: 1716883200000
+                delete_self_enabled: true
+                create_organization_enabled: true
+                create_organizations_limit: null
+                last_active_at: 1716883500000
+                legal_accepted_at: 1716883200000
+  user.deleted:
+    post:
+      description: User deleted
+      operationId: user.deleted
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/DeletedObject'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: user.deleted
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: user
+                id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                deleted: true
+  waitlistEntry.created:
+    post:
+      description: Waitlist entry created
+      operationId: waitlistEntry.created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/WaitlistEntry'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: waitlistEntry.created
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: waitlistEntry
+                id: wle_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                email_address: john.doe@example.com
+                status: pending
+                is_locked: false
+                created_at: 1716883200000
+                updated_at: 1716883200000
+                invitation: null
+  waitlistEntry.updated:
+    post:
+      description: Waitlist entry updated
+      operationId: waitlistEntry.updated
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/WaitlistEntry'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+              object: event
+              type: waitlistEntry.updated
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: waitlistEntry
+                id: wle_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                email_address: john.doe@example.com
+                status: invited
+                is_locked: false
+                created_at: 1716883200000
+                updated_at: 1716883500000
+                invitation:
+                  object: invitation
+                  id: inv_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  email_address: john.doe@example.com
+                  status: pending
+                  created_at: 1716883500000
+                  updated_at: 1716883500000
+components:
+  schemas:
+    WebhookEventPayload:
+      properties:
+        object:
+          type: string
+          description: The object type (event)
+        type:
+          type: string
+          description: The event type
+        event_attributes:
+          type: object
+          description: The event attributes
+          properties:
+            http_request:
+              type: object
+              description: The HTTP request
+              properties:
+                client_ip:
+                  type: string
+                  description: The client IP address
+                user_agent:
+                  type: string
+                  description: The user agent
+        timestamp:
+          type: integer
+          description: Unix timestamp of creation.
+        instance_id:
+          type: string
+          description: The instance ID
+      required:
+        - object
+        - type
+        - timestamp
+        - instance_id
+    EmailEventPayload:
+      properties:
+        id:
+          type: string
+          description: The email ID
+        object:
+          type: string
+          description: The object type
+        slug:
+          type: string
+          nullable: true
+          description: The email slug
+        from_email_name:
+          type: string
+          description: The email name
+        reply_to_email_name:
+          type: string
+          nullable: true
+          description: The email reply to name
+        to_email_address:
+          type: string
+          description: The email to address
+        email_address_id:
+          type: string
+          nullable: true
+        user_id:
+          type: string
+          nullable: true
+        subject:
+          type: string
+          description: The email subject
+        body:
+          type: string
+          description: The email body in HTML format
+        body_plain:
+          type: string
+          nullable: true
+          description: The email body in plain text format
+        status:
+          type: string
+          description: The email status
+        data:
+          type: object
+          description: The email data
+        delivered_by_clerk:
+          type: boolean
+          description: Whether the email was delivered by Clerk
+      required:
+        - id
+        - object
+        - slug
+        - from_email_name
+        - data
+        - delivered_by_clerk
+    Organization:
+      type: object
+      properties:
+        object:
+          type: string
+          enum:
+            - organization
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+        members_count:
+          type: integer
+        missing_member_with_elevated_permissions:
+          type: boolean
+        pending_invitations_count:
+          type: integer
+        max_allowed_memberships:
+          type: integer
+        admin_delete_enabled:
+          type: boolean
+        public_metadata:
+          type: object
+          additionalProperties: true
+        private_metadata:
+          type: object
+          additionalProperties: true
+        created_by:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - name
+        - slug
+        - has_image
+        - max_allowed_memberships
+        - admin_delete_enabled
+        - public_metadata
+        - created_at
+        - updated_at
+    DeletedObject:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+        id:
+          type: string
+        slug:
+          type: string
+        deleted:
+          type: boolean
+      required:
+        - object
+        - deleted
+    OrganizationDomainVerification:
+      description: The verification object from an organization domain
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status of the verification. It can be `unverified` or `verified`
+          enum:
+            - unverified
+            - verified
+        strategy:
+          type: string
+          description: Name of the strategy used to verify the domain
+        attempts:
+          type: integer
+          description: How many attempts have been made to verify the domain
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+          format: int64
+          description: Unix timestamp of when the verification will expire
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    OrganizationInvitationPublicOrganizationData:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+      required:
+        - id
+        - name
+        - slug
+        - has_image
+    OrganizationDomain:
+      description: An organization domain
+      type: object
+      properties:
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value. Always `organization_domain`
+          enum:
+            - organization_domain
+        id:
+          type: string
+          description: Unique identifier for the organization domain
+        organization_id:
+          type: string
+          description: Unique identifier for the organization
+        name:
+          type: string
+          description: Name of the organization domain
+        enrollment_mode:
+          type: string
+          description: Mode of enrollment for the domain
+          enum:
+            - manual_invitation
+            - automatic_invitation
+            - automatic_suggestion
+        affiliation_email_address:
+          type: string
+          nullable: true
+          description: Affiliation email address for the domain, if available.
+        verification:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/OrganizationDomainVerification'
+          description: Verification details for the domain
+        total_pending_invitations:
+          type: integer
+          format: int32
+          description: Total number of pending invitations associated with this domain
+        total_pending_suggestions:
+          type: integer
+          format: int32
+          description: Total number of pending suggestions associated with this domain
+        public_organization_data:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/OrganizationInvitationPublicOrganizationData'
+          description: Public organization data associated with this domain
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp when the domain was created
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of the last update to the domain
+      required:
+        - object
+        - id
+        - organization_id
+        - name
+        - enrollment_mode
+        - affiliation_email_address
+        - verification
+        - total_pending_invitations
+        - total_pending_suggestions
+        - created_at
+        - updated_at
+    OrganizationInvitation:
+      description: An organization invitation
+      type: object
+      properties:
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - organization_invitation
+        id:
+          type: string
+        email_address:
+          type: string
+        role:
+          type: string
+        role_name:
+          type: string
+        organization_id:
+          type: string
+        status:
+          type: string
+        public_metadata:
+          type: object
+          additionalProperties: true
+        private_metadata:
+          type: object
+          additionalProperties: true
+        url:
+          type: string
+          nullable: true
+        expires_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp of expiration.
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - email_address
+        - role
+        - role_name
+        - public_metadata
+        - url
+        - expires_at
+        - created_at
+        - updated_at
+    OrganizationMembershipPublicUserData:
+      description: An organization membership with public user data populated
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          type: string
+          nullable: false
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        profile_image_url:
+          type: string
+          nullable: true
+          deprecated: true
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+        identifier:
+          type: string
+          nullable: true
+      required:
+        - user_id
+        - first_name
+        - last_name
+        - profile_image_url
+        - image_url
+        - has_image
+    OrganizationMembership:
+      description: Hello world
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - organization_membership
+        role:
+          type: string
+        role_name:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        public_metadata:
+          type: object
+          description: Metadata saved on the organization membership, accessible from both Frontend and Backend APIs
+          additionalProperties: true
+        private_metadata:
+          type: object
+          description: Metadata saved on the organization membership, accessible only from the Backend API
+          additionalProperties: true
+        organization:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Organization'
+        public_user_data:
+          $ref: '#/components/schemas/OrganizationMembershipPublicUserData'
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - role
+        - permissions
+        - public_metadata
+        - created_at
+        - updated_at
+        - organization
+    CommercePaymentFailedReason:
+      type: object
+      properties:
+        code:
+          type: string
+          description: High-level error code categorizing the failure reason (e.g., "card_declined", "insufficient_funds")
+        decline_code:
+          type: string
+          description: Specific decline code from the payment processor providing detailed failure information
+      required:
+        - code
+        - decline_code
+    CommercePayee:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the payee
+        gateway_type:
+          type: string
+          description: Payment gateway used by the payee
+        gateway_external_id:
+          type: string
+          description: External identifier from the payment gateway for the payee
+        gateway_status:
+          type: string
+          description: Current status of the payee in the payment gateway
+      required:
+        - id
+        - gateway_type
+        - gateway_external_id
+        - gateway_status
+    CommercePayerEventPayload:
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object type identifier for webhook events, always "commerce_payer"
+        id:
+          type: string
+          description: Unique identifier for the payer
+        instance_id:
+          type: string
+          description: Unique identifier for the instance
+        user_id:
+          type: string
+          description: Unique identifier for the user (only populated for user payers)
+        first_name:
+          type: string
+          description: First name of the user (only populated for user payers)
+        last_name:
+          type: string
+          description: Last name of the user (only populated for user payers)
+        email:
+          type: string
+          description: Email address of the payer
+        organization_id:
+          type: string
+          description: Unique identifier for the organization (only populated for organization payers)
+        organization_name:
+          type: string
+          description: Name of the organization (only populated for organization payers)
+        image_url:
+          type: string
+          description: URL of the profile image for the payer (user avatar or organization logo)
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the payer was created
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the payer was last modified
+      required:
+        - id
+        - image_url
+    CommerceAmount:
+      type: object
+      properties:
+        amount:
+          type: integer
+          format: int64
+          description: Amount in the smallest currency unit (e.g., cents for USD)
+        amount_formatted:
+          type: string
+          description: Human-readable formatted amount string (e.g., "$10.99")
+        currency:
+          type: string
+          description: Three-letter ISO 4217 currency code (e.g., "USD")
+        currency_symbol:
+          type: string
+          description: Currency symbol for display (e.g., "$")
+      required:
+        - amount
+        - amount_formatted
+        - currency
+        - currency_symbol
+    CommerceTotals:
+      type: object
+      properties:
+        subtotal:
+          $ref: '#/components/schemas/CommerceAmount'
+          description: Total amount before taxes and fees
+        tax_total:
+          $ref: '#/components/schemas/CommerceAmount'
+          description: Total amount of taxes applied
+        grand_total:
+          $ref: '#/components/schemas/CommerceAmount'
+          description: Final total amount including taxes and fees
+      required:
+        - subtotal
+        - tax_total
+        - grand_total
+    CommercePaymentSource:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the payment source
+        gateway:
+          type: string
+          description: Payment gateway used for processing (e.g., "stripe")
+        gateway_external_id:
+          type: string
+          description: Payment gateway's unique identifier for this payment source
+        gateway_external_account_id:
+          type: string
+          nullable: true
+          description: External account identifier from the payment gateway. May be null for some payment methods.
+        payment_method:
+          type: string
+          description: Type of payment method (e.g., "card")
+        status:
+          type: string
+          description: Current status of the payment source (e.g., "active", "inactive", "expired")
+        card_type:
+          type: string
+          nullable: true
+          description: Type of card when payment method is "card" (e.g., "visa", "mastercard"). Null for non-card payment methods.
+        last4:
+          type: string
+          nullable: true
+          description: Last 4 digits of the card number when payment method is "card". Null for non-card payment methods.
+      required:
+        - id
+        - gateway
+        - gateway_external_id
+        - payment_method
+        - status
+    CommerceSubscriptionCredit:
+      type: object
+      properties:
+        amount:
+          $ref: '#/components/schemas/CommerceAmount'
+          description: Available credit amount that can be applied to future charges
+        cycle_days_remaining:
+          type: integer
+          format: int64
+          description: Number of days remaining in the current billing cycle
+        cycle_days_total:
+          type: integer
+          format: int64
+          description: Total number of days in the billing cycle
+        cycle_remaining_percent:
+          type: number
+          format: double
+          description: Percentage of the billing cycle remaining (0.0 to 1.0)
+      required:
+        - amount
+        - cycle_days_remaining
+        - cycle_days_total
+        - cycle_remaining_percent
+    CommercePlan:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the plan
+        instance_id:
+          type: string
+          description: Instance ID that owns this plan
+        product_id:
+          type: string
+          description: Unique identifier for the product this plan belongs to
+        name:
+          type: string
+          description: Display name of the plan
+        slug:
+          type: string
+          description: URL-friendly identifier for the plan
+        description:
+          type: string
+          nullable: true
+          description: Optional detailed description of the plan features and benefits
+        is_default:
+          type: boolean
+          description: Whether this is the default plan for payees
+        is_recurring:
+          type: boolean
+          description: Whether this plan charges on a recurring basis
+        is_prorated:
+          type: boolean
+          description: Whether charges for this plan are prorated when changes occur mid-cycle
+        amount:
+          type: integer
+          format: int64
+          description: Monthly billing amount in the smallest currency unit (actual charge may differ for annual plans)
+        period:
+          type: string
+          description: Billing period for this plan (e.g., "month", "annual")
+        interval:
+          type: integer
+          description: Number of period units between each billing cycle (e.g., 1 for monthly, 12 for yearly)
+        has_base_fee:
+          type: boolean
+          description: Whether this plan includes a base fee in addition to usage-based charges
+        currency:
+          type: string
+          description: Three-letter ISO 4217 currency code for this plan's pricing
+        annual_monthly_amount:
+          type: integer
+          format: int64
+          description: Effective monthly amount when billed annually, accounting for any annual discount
+        publicly_visible:
+          type: boolean
+          description: Whether this plan is visible to customers in public pricing pages
+      required:
+        - id
+        - instance_id
+        - product_id
+        - name
+        - slug
+        - is_default
+        - is_recurring
+        - is_prorated
+        - amount
+        - period
+        - interval
+        - has_base_fee
+        - currency
+        - annual_monthly_amount
+        - publicly_visible
+    CommerceSubscriptionItem:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the subscription item
+        status:
+          type: string
+          description: Current status of the subscription item (e.g., "active", "canceled", "past_due", "incomplete")
+        credit:
+          $ref: '#/components/schemas/CommerceSubscriptionCredit'
+          description: Available credit information for the subscription item
+        proration_date:
+          type: string
+          description: Date used for proration calculations when subscription changes occur
+        plan_period:
+          type: string
+          description: Billing period for the subscription item (e.g., "month", "annual")
+        period_start:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp in milliseconds when the subscription item period started. Null for non-recurring items.
+        period_end:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp in milliseconds when the subscription item period ends. Null for non-recurring items.
+        canceled_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp in milliseconds when the subscription item was canceled. Null if not canceled.
+        past_due_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp in milliseconds when the subscription item became past due. Null if not past due.
+        lifetime_paid:
+          type: integer
+          format: int64
+          description: Total amount paid over the lifetime of this subscription item in the smallest currency unit
+        next_payment_amount:
+          type: integer
+          format: int64
+          description: Amount of the next scheduled payment for this item in the smallest currency unit
+        next_payment_date:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the next payment is scheduled for this item
+        amount:
+          $ref: '#/components/schemas/CommerceAmount'
+          description: Current billing amount for this subscription item
+        plan:
+          $ref: '#/components/schemas/CommercePlan'
+          description: Details of the plan associated with this subscription item
+        plan_id:
+          type: string
+          description: Unique identifier for the plan associated with this subscription item
+      required:
+        - id
+        - status
+        - credit
+        - proration_date
+        - plan_period
+        - lifetime_paid
+        - next_payment_amount
+        - next_payment_date
+        - amount
+        - plan
+        - plan_id
+    PaymentAttemptEventPayload:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the payment attempt
+        instance_id:
+          type: string
+          description: Unique identifier for the instance where this payment attempt occurred
+        payment_id:
+          type: string
+          description: Unique identifier for the associated payment record
+        statement_id:
+          type: string
+          description: Unique identifier for the statement associated with this payment
+        gateway_external_id:
+          type: string
+          description: External identifier from the payment gateway for this payment attempt
+        status:
+          type: string
+          description: Current status of the payment attempt (e.g., "pending", "paid", "failed")
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the payment attempt was created
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the payment attempt was last modified
+        paid_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp in milliseconds when the payment was successfully completed. Null if payment has not been completed.
+        failed_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp in milliseconds when the payment failed. Null if payment has not failed.
+        failed_reason:
+          $ref: '#/components/schemas/CommercePaymentFailedReason'
+          nullable: true
+        billing_date:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds representing the date this payment is being billed for
+        charge_type:
+          type: string
+          description: The type of charge being processed (e.g., "checkout", "recurring")
+        payee:
+          $ref: '#/components/schemas/CommercePayee'
+        payer:
+          $ref: '#/components/schemas/CommercePayerEventPayload'
+        totals:
+          $ref: '#/components/schemas/CommerceTotals'
+        payment_source:
+          $ref: '#/components/schemas/CommercePaymentSource'
+        subscription_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommerceSubscriptionItem'
+          description: Array of subscription items associated with this payment attempt
+      required:
+        - id
+        - instance_id
+        - payment_id
+        - statement_id
+        - gateway_external_id
+        - status
+        - created_at
+        - updated_at
+        - billing_date
+        - charge_type
+        - payee
+        - payer
+        - totals
+        - payment_source
+        - subscription_items
+    Permission:
+      type: object
+      properties:
+        object:
+          type: string
+          enum:
+            - permission
+        id:
+          type: string
+        name:
+          type: string
+        key:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - name
+        - key
+        - description
+        - type
+        - created_at
+        - updated_at
+    Role:
+      type: object
+      properties:
+        object:
+          type: string
+          enum:
+            - role
+        id:
+          type: string
+        name:
+          type: string
+        key:
+          type: string
+        description:
+          type: string
+        is_creator_eligible:
+          type: boolean
+          description: Whether this role is eligible to be an organization creator role
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Permission'
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - name
+        - key
+        - description
+        - is_creator_eligible
+        - permissions
+        - created_at
+        - updated_at
+    SessionActivityResponse:
+      type: object
+      nullable: true
+      properties:
+        object:
+          type: string
+        id:
+          type: string
+        device_type:
+          type: string
+        is_mobile:
+          type: boolean
+        browser_name:
+          type: string
+        browser_version:
+          type: string
+        ip_address:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+      required:
+        - id
+        - object
+        - is_mobile
+    Session:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - session
+        id:
+          type: string
+        user_id:
+          type: string
+        client_id:
+          type: string
+        actor:
+          type: object
+          nullable: true
+        status:
+          type: string
+          enum:
+            - active
+            - revoked
+            - ended
+            - expired
+            - removed
+            - abandoned
+            - replaced
+        last_active_organization_id:
+          type: string
+          nullable: true
+        last_active_at:
+          type: integer
+        latest_activity:
+          $ref: '#/components/schemas/SessionActivityResponse'
+        expire_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of expiration.
+        abandon_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of abandonment.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+      required:
+        - object
+        - id
+        - user_id
+        - client_id
+        - status
+        - last_active_at
+        - expire_at
+        - abandon_at
+        - updated_at
+        - created_at
+    SmsEventPayload:
+      type: object
+      properties:
+        object:
+          type: string
+          description: The object type
+        id:
+          type: string
+          description: The SMS message ID
+        slug:
+          type: string
+          nullable: true
+          description: The SMS message slug
+        from_phone_number:
+          type: string
+          description: The SMS message from phone number
+        to_phone_number:
+          type: string
+          description: The SMS message to phone number
+        phone_number_id:
+          type: string
+          nullable: true
+          description: The phone number ID
+        user_id:
+          type: string
+          nullable: true
+          description: The user ID
+        message:
+          type: string
+          description: The SMS message
+        status:
+          type: string
+          description: The SMS message status
+        data:
+          type: object
+          description: The SMS message data
+        delivered_by_clerk:
+          type: boolean
+          description: Whether the SMS message was delivered by Clerk
+        created_at_ms:
+          type: integer
+          format: int64
+          description: Unix timestamp of creation.
+      required:
+        - object
+        - id
+        - from_phone_number
+        - to_phone_number
+        - message
+        - status
+        - data
+        - delivered_by_clerk
+        - created_at_ms
+    CommerceSubscriptionItemEventPlan:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the plan
+        slug:
+          type: string
+          description: URL-friendly identifier for the plan
+        name:
+          type: string
+          description: Display name of the plan
+        is_recurring:
+          type: boolean
+          description: Whether this plan charges on a recurring basis
+        is_default:
+          type: boolean
+          description: Whether this is the default plan for new subscriptions
+        amount:
+          type: integer
+          format: int64
+          description: Plan amount in the smallest currency unit (e.g., cents for USD)
+        currency:
+          type: string
+          description: Three-letter ISO 4217 currency code for this plan's pricing (e.g., "USD")
+        free_trial_enabled:
+          type: boolean
+          description: Whether free trial is enabled for this plan
+        free_trial_days:
+          type: integer
+          format: int64
+          nullable: true
+          minimum: 1
+          description: Number of free trial days for this plan. Null if free trial is not enabled.
+      required:
+        - id
+        - slug
+        - name
+        - is_recurring
+        - is_default
+        - amount
+        - currency
+        - free_trial_enabled
+    CommerceSubscriptionItemEventPayload:
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object type identifier for webhook events, always "subscription_item"
+        id:
+          type: string
+          description: Unique identifier for the subscription item
+        status:
+          type: string
+          description: 'Current status of the subscription item. Possible values: abandoned, active, canceled, ended, incomplete, past_due, upcoming'
+        is_free_trial:
+          type: boolean
+          description: Whether this subscription item is currently in a free-trial period
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the subscription item was created
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the subscription item was last modified
+        period_start:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the subscription item period starts and becomes active
+        period_end:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the subscription item period ends
+        interval:
+          type: string
+          description: Billing interval for this subscription item (e.g., "month", "annual")
+        plan_id:
+          type: string
+          description: Unique identifier for the plan associated with this subscription item
+        plan:
+          $ref: '#/components/schemas/CommerceSubscriptionItemEventPlan'
+          description: Detailed information about the plan associated with this subscription item
+        payer:
+          $ref: '#/components/schemas/CommercePayerEventPayload'
+          nullable: true
+          description: Detailed information about the payer responsible for this subscription item. Only populated when this item is sent as a standalone event, null when included within a subscription event.
+        subscription_id:
+          type: string
+          nullable: true
+          description: Unique identifier for the parent subscription. Only populated when this item is sent as a standalone event, null when included within a subscription event.
+      required:
+        - object
+        - id
+        - status
+        - is_free_trial
+        - created_at
+        - updated_at
+        - period_start
+        - period_end
+        - interval
+        - plan_id
+        - plan
+        - subscription_id
+      oneOf:
+        - properties:
+            is_free_trial:
+              const: true
+            plan:
+              properties:
+                free_trial_enabled:
+                  const: true
+                free_trial_days:
+                  type: integer
+                  nullable: false
+              required:
+                - free_trial_enabled
+                - free_trial_days
+        - properties:
+            is_free_trial:
+              const: false
+            plan:
+              properties:
+                free_trial_enabled:
+                  type: boolean
+    SubscriptionEventPayload:
+      type: object
+      properties:
+        object:
+          type: string
+        id:
+          type: string
+          description: Unique identifier for the subscription
+        status:
+          type: string
+          description: Current status of the subscription. (e.g., abandoned, active, canceled, ended, incomplete, past_due)
+        active_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp in milliseconds when the subscription became active. Null if subscription has never been active.
+        canceled_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp in milliseconds when the subscription was canceled. Null if not canceled.
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the subscription was created
+        ended_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp in milliseconds when the subscription ended. Null if subscription has not ended.
+        past_due_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp in milliseconds when the subscription became past due. Null if subscription is not past due.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the subscription was last modified
+        latest_payment_id:
+          type: string
+          description: Unique identifier for the most recent payment attempt associated with this subscription
+        payer_id:
+          type: string
+          description: Unique identifier for the payer (user or organization) responsible for this subscription
+        payer:
+          $ref: '#/components/schemas/CommercePayerEventPayload'
+          description: Detailed information about the payer responsible for this subscription
+        payment_source_id:
+          type: string
+          description: Unique identifier for the payment method used to process charges for this subscription
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+          description: Array of subscription items that make up this subscription, each representing a specific plan or product
+      required:
+        - object
+        - id
+        - status
+        - created_at
+        - updated_at
+        - latest_payment_id
+        - payer_id
+        - payer
+        - payment_source_id
+        - items
+    verification_otp:
+      x-speakeasy-name-override: OTP
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_otp
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+        strategy:
+          x-speakeasy-unknown-values: allow
+          type: string
+          enum:
+            - phone_code
+            - email_code
+            - reset_password_email_code
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    verification_admin:
+      x-speakeasy-name-override: Admin
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_admin
+        status:
+          type: string
+          enum:
+            - verified
+        strategy:
+          x-speakeasy-unknown-values: allow
+          type: string
+          enum:
+            - admin
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    ClerkError:
+      type: object
+      properties:
+        message:
+          type: string
+        long_message:
+          type: string
+        code:
+          type: string
+        meta:
+          type: object
+        clerk_trace_id:
+          type: string
+      required:
+        - message
+        - long_message
+        - code
+    verification_from_oauth:
+      x-speakeasy-name-override: FromOAuth
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_from_oauth
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+        strategy:
+          type: string
+          pattern: ^from_oauth_(?:(?:token_)|(?:custom_))?[a-z]+$
+        error:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/ClerkError'
+        expire_at:
+          type: integer
+          nullable: true
+        attempts:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    verification_ticket:
+      x-speakeasy-name-override: Ticket
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_ticket
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - expired
+        strategy:
+          x-speakeasy-unknown-values: allow
+          type: string
+          enum:
+            - ticket
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    verification_saml:
+      x-speakeasy-name-override: SAML
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_saml
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+            - transferable
+        strategy:
+          type: string
+          enum:
+            - saml
+        external_verification_redirect_url:
+          nullable: true
+          type: string
+        error:
+          nullable: true
+          type: object
+          oneOf:
+            - $ref: '#/components/schemas/ClerkError'
+        expire_at:
+          type: integer
+          nullable: true
+        attempts:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+    verification_email_link:
+      x-speakeasy-name-override: EmailLink
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_email_link
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+        strategy:
+          type: string
+          enum:
+            - email_link
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    IdentificationLink:
+      type: object
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+          pattern: ^oauth_[a-z]+$
+        id:
+          type: string
+      required:
+        - type
+        - id
+    EmailAddress:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          x-speakeasy-unknown-values: allow
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - email_address
+        email_address:
+          type: string
+        reserved:
+          type: boolean
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/verification_otp'
+            - $ref: '#/components/schemas/verification_admin'
+            - $ref: '#/components/schemas/verification_from_oauth'
+            - $ref: '#/components/schemas/verification_ticket'
+            - $ref: '#/components/schemas/verification_saml'
+            - $ref: '#/components/schemas/verification_email_link'
+          discriminator:
+            propertyName: object
+        linked_to:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentificationLink'
+        matches_sso_connection:
+          description: |
+            Indicates whether this email address domain matches an active enterprise connection.
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+      required:
+        - object
+        - email_address
+        - verification
+        - linked_to
+        - reserved
+        - created_at
+        - updated_at
+    PhoneNumber:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - phone_number
+        phone_number:
+          type: string
+        reserved_for_second_factor:
+          type: boolean
+        default_second_factor:
+          type: boolean
+        reserved:
+          type: boolean
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/verification_otp'
+            - $ref: '#/components/schemas/verification_admin'
+          discriminator:
+            propertyName: object
+        linked_to:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentificationLink'
+        backup_codes:
+          type: array
+          items:
+            type: string
+          nullable: true
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+      required:
+        - object
+        - phone_number
+        - verification
+        - linked_to
+        - reserved
+        - created_at
+        - updated_at
+    verification_web3:
+      x-speakeasy-name-override: Web3Signature
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_web3
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+        strategy:
+          type: string
+          enum:
+            - web3_metamask_signature
+            - web3_base_signature
+            - web3_coinbase_wallet_signature
+            - web3_okx_wallet_signature
+        nonce:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    Web3Wallet:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - web3_wallet
+        web3_wallet:
+          type: string
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/verification_web3'
+            - $ref: '#/components/schemas/verification_admin'
+          discriminator:
+            propertyName: object
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+      required:
+        - object
+        - web3_wallet
+        - verification
+        - created_at
+        - updated_at
+    verification_passkey:
+      x-speakeasy-name-override: Passkey
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_passkey
+        status:
+          type: string
+          enum:
+            - verified
+        strategy:
+          type: string
+          enum:
+            - passkey
+        nonce:
+          type: string
+          enum:
+            - nonce
+        message:
+          type: string
+          nullable: true
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    Passkey:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - passkey
+        name:
+          type: string
+        last_used_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of when the passkey was last used.
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/verification_passkey'
+          discriminator:
+            propertyName: object
+      required:
+        - object
+        - name
+        - last_used_at
+        - verification
+    verification_oauth:
+      x-speakeasy-name-override: Oauth
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_oauth
+        status:
+          type: string
+          x-speakeasy-unknown-values: allow
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+            - transferable
+        strategy:
+          type: string
+          x-speakeasy-unknown-values: allow
+          pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z]+$
+        external_verification_redirect_url:
+          type: string
+        error:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/ClerkError'
+        expire_at:
+          type: integer
+        attempts:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    verification_google_one_tap:
+      x-speakeasy-name-override: GoogleOneTap
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_google_one_tap
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+        strategy:
+          type: string
+          enum:
+            - google_one_tap
+        expire_at:
+          type: integer
+          nullable: true
+        attempts:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+        error:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/ClerkError'
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    ExternalAccountWithVerification:
+      type: object
+      additionalProperties: true
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - external_account
+            - facebook_account
+            - google_account
+        id:
+          type: string
+        provider:
+          type: string
+        identification_id:
+          type: string
+        provider_user_id:
+          description: The unique ID of the user in the external provider's system
+          type: string
+        approved_scopes:
+          type: string
+        email_address:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        avatar_url:
+          type: string
+          deprecated: true
+          description: Please use `image_url` instead
+        image_url:
+          type: string
+          nullable: true
+        username:
+          type: string
+          nullable: true
+        phone_number:
+          type: string
+          nullable: true
+        public_metadata:
+          type: object
+          additionalProperties: true
+        label:
+          type: string
+          nullable: true
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/verification_oauth'
+            - $ref: '#/components/schemas/verification_google_one_tap'
+          discriminator:
+            propertyName: object
+      required:
+        - object
+        - id
+        - provider
+        - identification_id
+        - provider_user_id
+        - approved_scopes
+        - email_address
+        - first_name
+        - last_name
+        - public_metadata
+        - created_at
+        - updated_at
+        - verification
+    SAMLConnection:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        domain:
+          type: string
+          deprecated: true
+        domains:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+        provider:
+          type: string
+        sync_user_attributes:
+          type: boolean
+        allow_subdomains:
+          type: boolean
+        allow_idp_initiated:
+          type: boolean
+        disable_additional_identifications:
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - id
+        - name
+        - active
+        - provider
+        - sync_user_attributes
+        - created_at
+        - updated_at
+      anyOf:
+        - required:
+            - domain
+        - required:
+            - domains
+    SAMLAccount:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - saml_account
+        provider:
+          type: string
+        active:
+          type: boolean
+        email_address:
+          type: string
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        provider_user_id:
+          type: string
+          nullable: true
+        public_metadata:
+          type: object
+          additionalProperties: true
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/verification_saml'
+            - $ref: '#/components/schemas/verification_ticket'
+          discriminator:
+            propertyName: object
+        saml_connection:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/SAMLConnection'
+      required:
+        - id
+        - object
+        - provider
+        - active
+        - email_address
+        - verification
+    User:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - user
+        external_id:
+          nullable: true
+          type: string
+        primary_email_address_id:
+          nullable: true
+          type: string
+        primary_phone_number_id:
+          nullable: true
+          type: string
+        primary_web3_wallet_id:
+          nullable: true
+          type: string
+        username:
+          nullable: true
+          type: string
+        first_name:
+          nullable: true
+          type: string
+        last_name:
+          nullable: true
+          type: string
+        profile_image_url:
+          type: string
+          deprecated: true
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+        public_metadata:
+          type: object
+          additionalProperties: true
+        private_metadata:
+          nullable: true
+          type: object
+          additionalProperties: true
+        unsafe_metadata:
+          type: object
+          additionalProperties: true
+        email_addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmailAddress'
+        phone_numbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhoneNumber'
+        web3_wallets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Web3Wallet'
+        passkeys:
+          type: array
+          items:
+            $ref: '#/components/schemas/Passkey'
+        password_enabled:
+          type: boolean
+        two_factor_enabled:
+          type: boolean
+        totp_enabled:
+          type: boolean
+        backup_code_enabled:
+          type: boolean
+        mfa_enabled_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of when MFA was last enabled for this user. It should be noted that this field is not nullified if MFA is disabled.
+          nullable: true
+        mfa_disabled_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of when MFA was last disabled for this user. It should be noted that this field is not nullified if MFA is enabled again.
+          nullable: true
+        external_accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalAccountWithVerification'
+        saml_accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SAMLAccount'
+        last_sign_in_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp of last sign-in.
+        banned:
+          type: boolean
+          description: |
+            Flag to denote whether user is banned or not.
+        locked:
+          type: boolean
+          description: |
+            Flag to denote whether user is currently locked, i.e. restricted from signing in or not.
+        lockout_expires_in_seconds:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            The number of seconds remaining until the lockout period expires for a locked user. A null value for a locked user indicates that lockout never expires.
+        verification_attempts_remaining:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            The number of verification attempts remaining until the user is locked. Null if account lockout is not enabled. Note: if a user is locked explicitly via the Backend API, they may still have verification attempts remaining.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        delete_self_enabled:
+          type: boolean
+          description: |
+            If enabled, user can delete themselves via FAPI.
+        create_organization_enabled:
+          type: boolean
+          description: |
+            If enabled, user can create organizations via FAPI.
+        create_organizations_limit:
+          type: integer
+          description: |
+            The maximum number of organizations the user can create. 0 means unlimited.
+          nullable: true
+        last_active_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp of the latest session activity, with day precision.
+          example: 1700690400000
+        legal_accepted_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp of when the user accepted the legal requirements.
+          example: 1700690400000
+      required:
+        - id
+        - object
+        - username
+        - first_name
+        - last_name
+        - has_image
+        - primary_email_address_id
+        - primary_phone_number_id
+        - primary_web3_wallet_id
+        - password_enabled
+        - two_factor_enabled
+        - totp_enabled
+        - backup_code_enabled
+        - email_addresses
+        - phone_numbers
+        - web3_wallets
+        - passkeys
+        - external_accounts
+        - saml_accounts
+        - enterprise_accounts
+        - public_metadata
+        - external_id
+        - last_sign_in_at
+        - banned
+        - locked
+        - lockout_expires_in_seconds
+        - verification_attempts_remaining
+        - created_at
+        - updated_at
+        - delete_self_enabled
+        - create_organization_enabled
+        - last_active_at
+        - mfa_enabled_at
+        - mfa_disabled_at
+        - legal_accepted_at
+    Invitation:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - invitation
+        id:
+          type: string
+        email_address:
+          type: string
+          format: email
+        public_metadata:
+          type: object
+          additionalProperties: true
+        revoked:
+          type: boolean
+          example: false
+        status:
+          type: string
+          enum:
+            - pending
+            - accepted
+            - revoked
+            - expired
+          example: pending
+        url:
+          type: string
+        expires_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp of expiration.
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - email_address
+        - public_metadata
+        - status
+        - created_at
+        - updated_at
+    WaitlistEntry:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - waitlist_entry
+        id:
+          type: string
+        email_address:
+          type: string
+          format: email
+        status:
+          type: string
+          enum:
+            - pending
+            - invited
+            - rejected
+            - completed
+          example: pending
+        is_locked:
+          type: boolean
+          description: |
+            Indicates if the waitlist entry is locked. Locked entries are being processed in a batch action and are unavailable for other actions.
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+        invitation:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Invitation'
+      required:
+        - object
+        - id
+        - email_address
+        - status
+        - created_at
+        - updated_at
+  examples:
+    SubscriptionEventExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: subscription.created
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: subscription
+          id: csub_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          status: active
+          active_at: 1716883200000
+          canceled_at: null
+          created_at: 1716883200000
+          ended_at: null
+          past_due_at: null
+          updated_at: 1716883200000
+          latest_payment_id: cpa_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          payer_id: cpayer_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          payment_source_id: cps_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          items:
+            - object: subscription_item
+              id: csub_item_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              status: active
+              created_at: 1716883200000
+              updated_at: 1716883200000
+              period_start: 1716883200000
+              period_end: 1719561600000
+              interval: month
+              plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              plan:
+                id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                slug: pro-plan
+                name: Pro Plan
+                is_recurring: true
+                is_default: false
+                amount: 2000
+                currency: USD
+              subscription_id: null
+    SubscriptionUpdatedEventExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: subscription.updated
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: subscription
+          id: csub_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          status: active
+          active_at: 1716883200000
+          canceled_at: null
+          created_at: 1716883200000
+          ended_at: null
+          past_due_at: null
+          updated_at: 1716883500000
+          latest_payment_id: cpa_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          payer_id: cpayer_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          payment_source_id: cps_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          items:
+            - object: subscription_item
+              id: csub_item_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              status: active
+              created_at: 1716883200000
+              updated_at: 1716883500000
+              period_start: 1716883200000
+              period_end: 1719561600000
+              interval: month
+              plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              plan:
+                id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                slug: pro-plan
+                name: Pro Plan
+                is_recurring: true
+                is_default: false
+                amount: 2000
+                currency: USD
+              subscription_id: null
+    SubscriptionActiveEventExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: subscription.active
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: subscription
+          id: csub_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          status: active
+          active_at: 1716883200000
+          canceled_at: null
+          created_at: 1716883200000
+          ended_at: null
+          past_due_at: null
+          updated_at: 1716883200000
+          latest_payment_id: cpa_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          payer_id: cpayer_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          payment_source_id: cps_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          items:
+            - object: subscription_item
+              id: csub_item_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              status: active
+              created_at: 1716883200000
+              updated_at: 1716883200000
+              period_start: 1716883200000
+              period_end: 1719561600000
+              interval: month
+              plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              plan:
+                id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                slug: pro-plan
+                name: Pro Plan
+                is_recurring: true
+                is_default: false
+                amount: 2000
+                currency: USD
+              subscription_id: null
+    SubscriptionPastDueEventExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: subscription.pastDue
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: subscription
+          id: csub_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          status: past_due
+          active_at: 1716883200000
+          canceled_at: null
+          created_at: 1716883200000
+          ended_at: null
+          past_due_at: 1716969600000
+          updated_at: 1716969600000
+          latest_payment_id: cpa_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          payer_id: cpayer_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          payment_source_id: cps_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          items:
+            - object: subscription_item
+              id: csub_item_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              status: past_due
+              created_at: 1716883200000
+              updated_at: 1716969600000
+              period_start: 1716883200000
+              period_end: 1719561600000
+              interval: month
+              plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              plan:
+                id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                slug: pro-plan
+                name: Pro Plan
+                is_recurring: true
+                is_default: false
+                amount: 2000
+                currency: USD
+              subscription_id: null
+    SubscriptionItemAbandonedExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: subscriptionItem.abandoned
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: subscription_item
+          id: csub_item_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          status: abandoned
+          is_free_trial: false
+          created_at: 1716883200000
+          updated_at: 1716969600000
+          period_start: 1716883200000
+          period_end: 1719561600000
+          interval: month
+          plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          plan:
+            id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            slug: pro-plan
+            name: Pro Plan
+            is_recurring: true
+            is_default: false
+            amount: 2000
+            currency: USD
+            free_trial_enabled: false
+            free_trial_days: null
+          subscription_id: csub_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+    SubscriptionItemActiveExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: subscriptionItem.active
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: subscription_item
+          id: csub_item_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          status: active
+          is_free_trial: false
+          created_at: 1716883200000
+          updated_at: 1716883200000
+          period_start: 1716883200000
+          period_end: 1719561600000
+          interval: month
+          plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          plan:
+            id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            slug: pro-plan
+            name: Pro Plan
+            is_recurring: true
+            is_default: false
+            amount: 2000
+            currency: USD
+            free_trial_enabled: true
+            free_trial_days: 14
+          subscription_id: csub_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+    SubscriptionItemCreatedExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: subscriptionItem.created
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: subscription_item
+          id: csub_item_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          status: upcoming
+          is_free_trial: false
+          created_at: 1716883200000
+          updated_at: 1716883200000
+          period_start: 1716883200000
+          period_end: 1719561600000
+          interval: month
+          plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          plan:
+            id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            slug: pro-plan
+            name: Pro Plan
+            is_recurring: true
+            is_default: false
+            amount: 2000
+            currency: USD
+            free_trial_enabled: false
+            free_trial_days: null
+          subscription_id: csub_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+    SubscriptionItemCanceledExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: subscriptionItem.canceled
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: subscription_item
+          id: csub_item_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          status: canceled
+          is_free_trial: false
+          created_at: 1716883200000
+          updated_at: 1716969600000
+          period_start: 1716883200000
+          period_end: 1719561600000
+          interval: month
+          plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          plan:
+            id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            slug: pro-plan
+            name: Pro Plan
+            is_recurring: true
+            is_default: false
+            amount: 2000
+            currency: USD
+            free_trial_enabled: false
+            free_trial_days: null
+          subscription_id: csub_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+    SubscriptionItemEndedExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: subscriptionItem.ended
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: subscription_item
+          id: csub_item_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          status: ended
+          is_free_trial: false
+          created_at: 1716883200000
+          updated_at: 1719561600000
+          period_start: 1716883200000
+          period_end: 1719561600000
+          interval: month
+          plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          plan:
+            id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            slug: pro-plan
+            name: Pro Plan
+            is_recurring: true
+            is_default: false
+            amount: 2000
+            currency: USD
+            free_trial_enabled: false
+            free_trial_days: null
+          subscription_id: csub_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+    SubscriptionItemFreeTrialEndingExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: subscriptionItem.freeTrialEnding
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: subscription_item
+          id: csub_item_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          status: active
+          is_free_trial: true
+          created_at: 1716883200000
+          updated_at: 1716883200000
+          period_start: 1716883200000
+          period_end: 1719561600000
+          interval: month
+          plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          plan:
+            id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            slug: premium-trial
+            name: Premium Plan with Trial
+            is_recurring: true
+            is_default: false
+            amount: 2999
+            currency: USD
+            free_trial_enabled: true
+            free_trial_days: 14
+          payer:
+            object: commerce_payer
+            id: cpayer_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            first_name: John
+            last_name: Doe
+            email: user@example.com
+            image_url: https://img.clerk.com/xxxxxx
+            created_at: 1716883200000
+            updated_at: 1716883200000
+          subscription_id: csub_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+    SubscriptionItemIncompleteExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: subscriptionItem.incomplete
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: subscription_item
+          id: csub_item_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          status: incomplete
+          is_free_trial: false
+          created_at: 1716883200000
+          updated_at: 1716883200000
+          period_start: 1716883200000
+          period_end: 1719561600000
+          interval: month
+          plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          plan:
+            id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            slug: pro-plan
+            name: Pro Plan
+            is_recurring: true
+            is_default: false
+            amount: 2000
+            currency: USD
+            free_trial_enabled: false
+            free_trial_days: null
+          subscription_id: csub_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+    SubscriptionItemPastDueExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: subscriptionItem.pastDue
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: subscription_item
+          id: csub_item_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          status: past_due
+          is_free_trial: false
+          created_at: 1716883200000
+          updated_at: 1716969600000
+          period_start: 1716883200000
+          period_end: 1719561600000
+          interval: month
+          plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          plan:
+            id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            slug: pro-plan
+            name: Pro Plan
+            is_recurring: true
+            is_default: false
+            amount: 2000
+            currency: USD
+            free_trial_enabled: false
+            free_trial_days: null
+          subscription_id: csub_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+    SubscriptionItemUpcomingExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: subscriptionItem.upcoming
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: subscription_item
+          id: csub_item_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          status: upcoming
+          is_free_trial: false
+          created_at: 1716883200000
+          updated_at: 1716883200000
+          period_start: 1719561600000
+          period_end: 1722240000000
+          interval: month
+          plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          plan:
+            id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            slug: pro-plan
+            name: Pro Plan
+            is_recurring: true
+            is_default: false
+            amount: 2000
+            currency: USD
+            free_trial_enabled: false
+            free_trial_days: null
+          subscription_id: csub_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+    SubscriptionItemUpdatedExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: subscriptionItem.updated
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: subscription_item
+          id: csub_item_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          status: active
+          is_free_trial: false
+          created_at: 1716883200000
+          updated_at: 1716883500000
+          period_start: 1716883200000
+          period_end: 1719561600000
+          interval: month
+          plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          plan:
+            id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            slug: pro-plan
+            name: Pro Plan
+            is_recurring: true
+            is_default: false
+            amount: 2000
+            currency: USD
+            free_trial_enabled: false
+            free_trial_days: null
+          subscription_id: csub_2g7np7Hrk0SN6kj5EDMLDaKNL0S
