@@ -1109,7 +1109,7 @@ paths:
                   type: string
                   description: |-
                     Strategy used to sign up.
-                    Can be one of `phone_code`, `email_code`, `ticket`, `web3_[provider]_signature` `reset_password_code`, `reset_password_phone_code`, `email_link`, `oauth_[provider]`, `oauth_token_[provider]`, `saml`, `password`, `passkey`, `google_one_tap`
+                    Can be one of `email_code`, `email_link`, `enterprise_sso`, `google_one_tap`, `oauth_[provider]`, `oauth_token_[provider]`, `phone_code`, `saml`, `ticket`, `web3_[provider]_signature`
                   nullable: true
                 action_complete_redirect_url:
                   type: string
@@ -1242,7 +1242,7 @@ paths:
                   type: string
                   description: |-
                     Strategy used to sign up.
-                    Can be one of `phone_code`, `email_code`, `ticket`, `web3_[provider]_signature` `reset_password_code`, `reset_password_phone_code`, `email_link`, `oauth_[provider]`, `oauth_token_[provider]`, `saml`, `password`, `passkey`, `google_one_tap`
+                    Can be one of `email_code`, `email_link`, `enterprise_sso`, `google_one_tap`, `oauth_[provider]`, `oauth_token_[provider]`, `phone_code`, `saml`, `ticket`, `web3_[provider]_signature`
                   nullable: true
                 redirect_url:
                   type: string
