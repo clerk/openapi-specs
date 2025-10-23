@@ -537,17 +537,9 @@ x-webhooks:
                 - $ref: '#/components/schemas/WebhookEventPayload'
                 - properties:
                     data:
-                      allOf:
-                        - $ref: '#/components/schemas/OrganizationInvitation'
-                        - properties:
-                            data:
-                              type: object
-                              properties:
-                                public_organization_data:
-                                  nullable: true
-                                  $ref: '#/components/schemas/OrganizationInvitationPublicOrganizationData'
-              required:
-                - data
+                      $ref: '#/components/schemas/OrganizationInvitationAcceptedPayload'
+                  required:
+                    - data
             example:
               event_attributes:
                 http_request:
@@ -568,6 +560,7 @@ x-webhooks:
                 public_metadata: {}
                 private_metadata: {}
                 url: https://accounts.acme.com/accept-invitation?token=abc123
+                user_id: user_2h8op3Isl1QR7tKu5FGNfaLKEoU
                 expires_at: 1717487999000
                 created_at: 1716883200000
                 updated_at: 1716883500000
@@ -805,7 +798,7 @@ x-webhooks:
   paymentAttempt.created:
     post:
       description: Payment Attempt Created
-      operationId: paymentAttempt.createdy
+      operationId: paymentAttempt.created
       requestBody:
         content:
           application/json:
@@ -1574,7 +1567,7 @@ x-webhooks:
                 - $ref: '#/components/schemas/WebhookEventPayload'
                 - properties:
                     data:
-                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                      $ref: '#/components/schemas/BillingSubscriptionItemEventPayload'
                   required:
                     - data
             examples:
@@ -1592,7 +1585,7 @@ x-webhooks:
                 - $ref: '#/components/schemas/WebhookEventPayload'
                 - properties:
                     data:
-                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                      $ref: '#/components/schemas/BillingSubscriptionItemEventPayload'
                   required:
                     - data
             examples:
@@ -1610,7 +1603,7 @@ x-webhooks:
                 - $ref: '#/components/schemas/WebhookEventPayload'
                 - properties:
                     data:
-                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                      $ref: '#/components/schemas/BillingSubscriptionItemEventPayload'
                   required:
                     - data
             examples:
@@ -1628,7 +1621,7 @@ x-webhooks:
                 - $ref: '#/components/schemas/WebhookEventPayload'
                 - properties:
                     data:
-                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                      $ref: '#/components/schemas/BillingSubscriptionItemEventPayload'
                   required:
                     - data
             examples:
@@ -1646,7 +1639,7 @@ x-webhooks:
                 - $ref: '#/components/schemas/WebhookEventPayload'
                 - properties:
                     data:
-                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                      $ref: '#/components/schemas/BillingSubscriptionItemEventPayload'
                   required:
                     - data
             examples:
@@ -1664,7 +1657,7 @@ x-webhooks:
                 - $ref: '#/components/schemas/WebhookEventPayload'
                 - properties:
                     data:
-                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                      $ref: '#/components/schemas/BillingSubscriptionItemEventPayload'
                   required:
                     - data
             examples:
@@ -1682,7 +1675,7 @@ x-webhooks:
                 - $ref: '#/components/schemas/WebhookEventPayload'
                 - properties:
                     data:
-                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                      $ref: '#/components/schemas/BillingSubscriptionItemEventPayload'
                   required:
                     - data
             examples:
@@ -1700,7 +1693,7 @@ x-webhooks:
                 - $ref: '#/components/schemas/WebhookEventPayload'
                 - properties:
                     data:
-                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                      $ref: '#/components/schemas/BillingSubscriptionItemEventPayload'
                   required:
                     - data
             examples:
@@ -1718,7 +1711,7 @@ x-webhooks:
                 - $ref: '#/components/schemas/WebhookEventPayload'
                 - properties:
                     data:
-                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                      $ref: '#/components/schemas/BillingSubscriptionItemEventPayload'
                   required:
                     - data
             examples:
@@ -1736,7 +1729,7 @@ x-webhooks:
                 - $ref: '#/components/schemas/WebhookEventPayload'
                 - properties:
                     data:
-                      $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+                      $ref: '#/components/schemas/BillingSubscriptionItemEventPayload'
                   required:
                     - data
             examples:
@@ -1901,6 +1894,7 @@ x-webhooks:
                 object: user
                 id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
                 deleted: true
+                external_id: ex_123456789
   waitlistEntry.created:
     post:
       description: Waitlist entry created
@@ -2130,6 +2124,8 @@ components:
           type: string
         deleted:
           type: boolean
+        external_id:
+          type: string
       required:
         - object
         - deleted
@@ -2304,6 +2300,23 @@ components:
         - expires_at
         - created_at
         - updated_at
+    OrganizationInvitationAcceptedPayload:
+      allOf:
+        - $ref: '#/components/schemas/OrganizationInvitation'
+        - properties:
+            user_id:
+              type: string
+              nullable: false
+              description: The ID of the user that accepted the invitation.
+            data:
+              type: object
+              properties:
+                public_organization_data:
+                  nullable: true
+                  $ref: '#/components/schemas/OrganizationInvitationPublicOrganizationData'
+          required:
+            - user_id
+            - data
     OrganizationMembershipPublicUserData:
       description: An organization membership with public user data populated
       type: object
@@ -2327,6 +2340,9 @@ components:
         has_image:
           type: boolean
         identifier:
+          type: string
+          nullable: true
+        username:
           type: string
           nullable: true
       required:
@@ -2388,7 +2404,7 @@ components:
         - created_at
         - updated_at
         - organization
-    CommercePaymentFailedReason:
+    BillingPaymentFailedReason:
       type: object
       properties:
         code:
@@ -2400,7 +2416,7 @@ components:
       required:
         - code
         - decline_code
-    CommercePayee:
+    BillingPayee:
       type: object
       properties:
         id:
@@ -2420,7 +2436,7 @@ components:
         - gateway_type
         - gateway_external_id
         - gateway_status
-    CommercePayerEventPayload:
+    BillingPayerEventPayload:
       type: object
       properties:
         object:
@@ -2464,7 +2480,7 @@ components:
       required:
         - id
         - image_url
-    CommerceAmount:
+    BillingAmount:
       type: object
       properties:
         amount:
@@ -2485,23 +2501,23 @@ components:
         - amount_formatted
         - currency
         - currency_symbol
-    CommerceTotals:
+    BillingTotals:
       type: object
       properties:
         subtotal:
-          $ref: '#/components/schemas/CommerceAmount'
+          $ref: '#/components/schemas/BillingAmount'
           description: Total amount before taxes and fees
         tax_total:
-          $ref: '#/components/schemas/CommerceAmount'
+          $ref: '#/components/schemas/BillingAmount'
           description: Total amount of taxes applied
         grand_total:
-          $ref: '#/components/schemas/CommerceAmount'
+          $ref: '#/components/schemas/BillingAmount'
           description: Final total amount including taxes and fees
       required:
         - subtotal
         - tax_total
         - grand_total
-    CommercePaymentSource:
+    BillingPaymentSource:
       type: object
       properties:
         id:
@@ -2537,11 +2553,11 @@ components:
         - gateway_external_id
         - payment_method
         - status
-    CommerceSubscriptionCredit:
+    BillingSubscriptionCredit:
       type: object
       properties:
         amount:
-          $ref: '#/components/schemas/CommerceAmount'
+          $ref: '#/components/schemas/BillingAmount'
           description: Available credit amount that can be applied to future charges
         cycle_days_remaining:
           type: integer
@@ -2560,7 +2576,7 @@ components:
         - cycle_days_remaining
         - cycle_days_total
         - cycle_remaining_percent
-    CommercePlan:
+    BillingPlan:
       type: object
       properties:
         id:
@@ -2630,7 +2646,7 @@ components:
         - currency
         - annual_monthly_amount
         - publicly_visible
-    CommerceSubscriptionItem:
+    BillingSubscriptionItem:
       type: object
       properties:
         id:
@@ -2640,7 +2656,7 @@ components:
           type: string
           description: Current status of the subscription item (e.g., "active", "canceled", "past_due", "incomplete")
         credit:
-          $ref: '#/components/schemas/CommerceSubscriptionCredit'
+          $ref: '#/components/schemas/BillingSubscriptionCredit'
           description: Available credit information for the subscription item
         proration_date:
           type: string
@@ -2681,10 +2697,10 @@ components:
           format: int64
           description: Unix timestamp in milliseconds when the next payment is scheduled for this item
         amount:
-          $ref: '#/components/schemas/CommerceAmount'
+          $ref: '#/components/schemas/BillingAmount'
           description: Current billing amount for this subscription item
         plan:
-          $ref: '#/components/schemas/CommercePlan'
+          $ref: '#/components/schemas/BillingPlan'
           description: Details of the plan associated with this subscription item
         plan_id:
           type: string
@@ -2741,7 +2757,7 @@ components:
           nullable: true
           description: Unix timestamp in milliseconds when the payment failed. Null if payment has not failed.
         failed_reason:
-          $ref: '#/components/schemas/CommercePaymentFailedReason'
+          $ref: '#/components/schemas/BillingPaymentFailedReason'
           nullable: true
         billing_date:
           type: integer
@@ -2751,17 +2767,17 @@ components:
           type: string
           description: The type of charge being processed (e.g., "checkout", "recurring")
         payee:
-          $ref: '#/components/schemas/CommercePayee'
+          $ref: '#/components/schemas/BillingPayee'
         payer:
-          $ref: '#/components/schemas/CommercePayerEventPayload'
+          $ref: '#/components/schemas/BillingPayerEventPayload'
         totals:
-          $ref: '#/components/schemas/CommerceTotals'
+          $ref: '#/components/schemas/BillingTotals'
         payment_source:
-          $ref: '#/components/schemas/CommercePaymentSource'
+          $ref: '#/components/schemas/BillingPaymentSource'
         subscription_items:
           type: array
           items:
-            $ref: '#/components/schemas/CommerceSubscriptionItem'
+            $ref: '#/components/schemas/BillingSubscriptionItem'
           description: Array of subscription items associated with this payment attempt
       required:
         - id
@@ -3003,7 +3019,7 @@ components:
         - data
         - delivered_by_clerk
         - created_at_ms
-    CommerceSubscriptionItemEventPlan:
+    BillingSubscriptionItemEventPlan:
       type: object
       properties:
         id:
@@ -3046,7 +3062,7 @@ components:
         - amount
         - currency
         - free_trial_enabled
-    CommerceSubscriptionItemEventPayload:
+    BillingSubscriptionItemEventPayload:
       type: object
       properties:
         object:
@@ -3084,10 +3100,10 @@ components:
           type: string
           description: Unique identifier for the plan associated with this subscription item
         plan:
-          $ref: '#/components/schemas/CommerceSubscriptionItemEventPlan'
+          $ref: '#/components/schemas/BillingSubscriptionItemEventPlan'
           description: Detailed information about the plan associated with this subscription item
         payer:
-          $ref: '#/components/schemas/CommercePayerEventPayload'
+          $ref: '#/components/schemas/BillingPayerEventPayload'
           nullable: true
           description: Detailed information about the payer responsible for this subscription item. Only populated when this item is sent as a standalone event, null when included within a subscription event.
         subscription_id:
@@ -3174,7 +3190,7 @@ components:
           type: string
           description: Unique identifier for the payer (user or organization) responsible for this subscription
         payer:
-          $ref: '#/components/schemas/CommercePayerEventPayload'
+          $ref: '#/components/schemas/BillingPayerEventPayload'
           description: Detailed information about the payer responsible for this subscription
         payment_source_id:
           type: string
@@ -3182,7 +3198,7 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/CommerceSubscriptionItemEventPayload'
+            $ref: '#/components/schemas/BillingSubscriptionItemEventPayload'
           description: Array of subscription items that make up this subscription, each representing a specific plan or product
       required:
         - object
@@ -3275,8 +3291,6 @@ components:
           type: string
         meta:
           type: object
-        clerk_trace_id:
-          type: string
       required:
         - message
         - long_message
@@ -3468,6 +3482,13 @@ components:
             - $ref: '#/components/schemas/verification_email_link'
           discriminator:
             propertyName: object
+            mapping:
+              verification_otp: '#/components/schemas/verification_otp'
+              verification_admin: '#/components/schemas/verification_admin'
+              verification_from_oauth: '#/components/schemas/verification_from_oauth'
+              verification_ticket: '#/components/schemas/verification_ticket'
+              verification_saml: '#/components/schemas/verification_saml'
+              verification_email_link: '#/components/schemas/verification_email_link'
         linked_to:
           type: array
           items:
@@ -3522,6 +3543,9 @@ components:
             - $ref: '#/components/schemas/verification_admin'
           discriminator:
             propertyName: object
+            mapping:
+              verification_otp: '#/components/schemas/verification_otp'
+              verification_admin: '#/components/schemas/verification_admin'
         linked_to:
           type: array
           items:
@@ -3934,6 +3958,12 @@ components:
         provider_user_id:
           type: string
           nullable: true
+        last_authenticated_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp of last authentication.
         public_metadata:
           type: object
           additionalProperties: true
@@ -3988,6 +4018,9 @@ components:
           nullable: true
           type: string
         last_name:
+          nullable: true
+          type: string
+        locale:
           nullable: true
           type: string
         profile_image_url:
