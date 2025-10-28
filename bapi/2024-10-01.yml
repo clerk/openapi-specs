@@ -218,75 +218,7 @@ paths:
         '200':
           $ref: '#/components/responses/WellKnown.JWKS'
   /aws_credentials: {}
-  /aws_credentials/{id}:
-    delete:
-      operationId: DeleteAWSCredential
-      x-speakeasy-group: awsCredentials
-      x-speakeasy-name-override: delete
-      tags:
-        - AWS Credentials
-      summary: Delete an AWS Credential
-      description: Delete the AWS Credential with the given ID
-      parameters:
-        - name: id
-          in: path
-          description: The ID of the AWS Credential to delete
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          $ref: '#/components/responses/DeletedObject'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/AuthenticationInvalid'
-        '403':
-          $ref: '#/components/responses/AuthorizationInvalid'
-        '404':
-          $ref: '#/components/responses/ResourceNotFound'
-    patch:
-      operationId: UpdateAWSCredential
-      x-speakeasy-group: awsCredentials
-      x-speakeasy-name-override: update
-      tags:
-        - AWS Credentials
-      summary: Update an AWS Credential
-      description: Updates an AWS credential.
-      parameters:
-        - name: id
-          in: path
-          description: The ID of the AWS Credential to update
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                access_key_id:
-                  type: string
-                  nullable: true
-                user_pool_ids:
-                  type: array
-                  items:
-                    type: string
-                secret_access_key:
-                  type: string
-                  nullable: true
-      responses:
-        '200':
-          $ref: '#/components/responses/AWSCredential'
-        '400':
-          $ref: '#/components/responses/ClerkErrors'
-        '401':
-          $ref: '#/components/responses/AuthenticationInvalid'
-        '403':
-          $ref: '#/components/responses/AuthorizationInvalid'
-        '404':
-          $ref: '#/components/responses/ResourceNotFound'
+  /aws_credentials/{id}: {}
   /clients:
     get:
       deprecated: true
@@ -807,7 +739,7 @@ paths:
                     Note: this JWT must be associated with the supplied session ID.
                 refresh_token:
                   type: string
-                  description: The JWT that is sent via the `__session` cookie from your frontend.
+                  description: The refresh token from the `__refresh` cookie set via FAPI's handshake flow.
                 request_origin:
                   type: string
                   description: The origin of the request.
@@ -964,8 +896,8 @@ paths:
       x-speakeasy-name-override: createTokenFromTemplate
       tags:
         - Sessions
-      summary: Create a session token from a jwt template
-      description: Creates a JSON Web Token(JWT) based on a session and a JWT Template name defined for your instance
+      summary: Create a session token from a JWT template
+      description: Creates a JSON Web Token (JWT) based on a session and a JWT Template name defined for your instance
       parameters:
         - name: session_id
           in: path
@@ -975,7 +907,7 @@ paths:
             type: string
         - name: template_name
           in: path
-          description: The name of the JWT Template defined in your instance (e.g. `custom_hasura`).
+          description: The name of the JWT template defined in your instance (e.g. `custom_hasura`).
           required: true
           schema:
             type: string
@@ -989,7 +921,7 @@ paths:
                   type: integer
                   minimum: 30
                   maximum: 315360000
-                  description: Use this parameter to override the JWT token lifetime.
+                  description: Use this parameter to override the JWT lifetime.
                   nullable: true
       responses:
         '200':
@@ -1350,13 +1282,13 @@ paths:
             items:
               type: string
           description: |-
-            Returns users with the specified external ids.
-            For each external id, the `+` and `-` can be
-            prepended to the id, which denote whether the
-            respective external id should be included or
+            Returns users with the specified external IDs.
+            For each external ID, the `+` and `-` can be
+            prepended to the ID, which denote whether the
+            respective external ID should be included or
             excluded from the result set.
-            Accepts up to 100 external ids.
-            Any external ids not found are ignored.
+            Accepts up to 100 external IDs.
+            Any external IDs not found are ignored.
           required: false
         - name: username
           in: query
@@ -1378,7 +1310,7 @@ paths:
           description: |-
             Returns users with the specified web3 wallet addresses.
             Accepts up to 100 web3 wallet addresses.
-            Any web3 wallet addressed not found are ignored.
+            Any web3 wallet addresses not found are ignored.
           required: false
         - name: user_id
           in: query
@@ -1387,13 +1319,13 @@ paths:
             items:
               type: string
           description: |-
-            Returns users with the user ids specified.
-            For each user id, the `+` and `-` can be
-            prepended to the id, which denote whether the
-            respective user id should be included or
+            Returns users with the user IDs specified.
+            For each user ID, the `+` and `-` can be
+            prepended to the ID, which denote whether the
+            respective user ID should be included or
             excluded from the result set.
-            Accepts up to 100 user ids.
-            Any user ids not found are ignored.
+            Accepts up to 100 user IDs.
+            Any user IDs not found are ignored.
           required: false
         - name: organization_id
           in: query
@@ -1404,17 +1336,17 @@ paths:
           description: |-
             Returns users that have memberships to the
             given organizations.
-            For each organization id, the `+` and `-` can be
-            prepended to the id, which denote whether the
+            For each organization ID, the `+` and `-` can be
+            prepended to the ID, which denote whether the
             respective organization should be included or
             excluded from the result set.
-            Accepts up to 100 organization ids.
+            Accepts up to 100 organization IDs.
           required: false
         - name: query
           in: query
           description: |-
             Returns users that match the given query.
-            For possible matches, we check the email addresses, phone numbers, usernames, web3 wallets, user ids, first and last names.
+            For possible matches, we check the email addresses, phone numbers, usernames, web3 wallets, user IDs, first and last names.
             The query value doesn't need to match the exact value you are looking for, it is capable of partial matches as well.
           schema:
             type: string
@@ -1555,6 +1487,10 @@ paths:
                 last_name:
                   type: string
                   description: The last name to assign to the user
+                  nullable: true
+                locale:
+                  type: string
+                  description: The locale to assign to the user (e.g., "en-US", "fr-FR")
                   nullable: true
                 email_address:
                   type: array
@@ -1724,9 +1660,9 @@ paths:
             items:
               type: string
           description: |-
-            Counts users with the specified external ids.
-            Accepts up to 100 external ids.
-            Any external ids not found are ignored.
+            Counts users with the specified external IDs.
+            Accepts up to 100 external IDs.
+            Any external IDs not found are ignored.
           required: false
         - name: username
           in: query
@@ -1748,7 +1684,7 @@ paths:
           description: |-
             Counts users with the specified web3 wallet addresses.
             Accepts up to 100 web3 wallet addresses.
-            Any web3 wallet addressed not found are ignored.
+            Any web3 wallet addresses not found are ignored.
           required: false
         - name: user_id
           in: query
@@ -1757,9 +1693,9 @@ paths:
             items:
               type: string
           description: |-
-            Counts users with the user ids specified.
-            Accepts up to 100 user ids.
-            Any user ids not found are ignored.
+            Counts users with the user IDs specified.
+            Accepts up to 100 user IDs.
+            Any user IDs not found are ignored.
           required: false
         - name: organization_id
           in: query
@@ -1768,15 +1704,15 @@ paths:
             items:
               type: string
           description: |-
-            Returns users that have memberships to the given organizations. For each organization id, the `+` and `-`
-            can be prepended to the id, which denote whether the respective organization should be included or
-            excluded from the result set. Accepts up to 100 organization ids.
+            Returns users that have memberships to the given organizations. For each organization ID, the `+` and `-`
+            can be prepended to the ID, which denote whether the respective organization should be included or
+            excluded from the result set. Accepts up to 100 organization IDs.
           required: false
         - name: query
           in: query
           description: |-
             Counts users that match the given query.
-            For possible matches, we check the email addresses, phone numbers, usernames, web3 wallets, user ids, first and last names.
+            For possible matches, we check the email addresses, phone numbers, usernames, web3 wallets, user IDs, first and last names.
             The query value doesn't need to match the exact value you are looking for, it is capable of partial matches as well.
           schema:
             type: string
@@ -1939,6 +1875,10 @@ paths:
                   type: string
                   description: The last name to assign to the user
                   nullable: true
+                locale:
+                  type: string
+                  description: The locale to assign to the user (e.g., "en-US", "fr-FR")
+                  nullable: true
                 primary_email_address_id:
                   type: string
                   description: |-
@@ -2039,7 +1979,7 @@ paths:
                   nullable: true
                 legal_accepted_at:
                   type: string
-                  description: A custom timestamps denoting _when_ the user accepted legal requirements, specified in RFC3339 format (e.g. `2012-10-20T07:15:20.902Z`).
+                  description: A custom timestamp denoting _when_ the user accepted legal requirements, specified in RFC3339 format (e.g. `2012-10-20T07:15:20.902Z`).
                   nullable: true
                 skip_legal_checks:
                   type: boolean
@@ -3662,6 +3602,9 @@ paths:
                 domains_enabled:
                   type: boolean
                   nullable: true
+                slug_disabled:
+                  type: boolean
+                  nullable: true
                 domains_enrollment_modes:
                   type: array
                   items:
@@ -3721,7 +3664,7 @@ paths:
       x-speakeasy-group: webhooks
       x-speakeasy-name-override: generateSvixAuthURL
       summary: Create a Svix Dashboard URL
-      description: Generate a new url for accessing the Svix's management dashboard for that particular instance
+      description: Generate a new URL for accessing the Svix's management dashboard for that particular instance
       tags:
         - Webhooks
       responses:
@@ -3770,13 +3713,13 @@ paths:
                   type: integer
                   minimum: 30
                   maximum: 315360000
-                  description: JWT token lifetime
+                  description: JWT lifetime
                   nullable: true
                 allowed_clock_skew:
                   type: integer
                   minimum: 0
                   maximum: 300
-                  description: JWT token allowed clock skew
+                  description: JWT allowed clock skew
                   nullable: true
                 custom_signing_key:
                   type: boolean
@@ -3855,13 +3798,13 @@ paths:
                   type: integer
                   minimum: 30
                   maximum: 315360000
-                  description: JWT token lifetime
+                  description: JWT lifetime
                   nullable: true
                 allowed_clock_skew:
                   type: integer
                   minimum: 0
                   maximum: 300
-                  description: JWT token allowed clock skew
+                  description: JWT allowed clock skew
                   nullable: true
                 custom_signing_key:
                   type: boolean
@@ -4294,8 +4237,8 @@ paths:
         - in: query
           name: user_id
           description: |-
-            Returns organizations with the user ids specified. Any user ids not found are ignored.
-            For each user id, the `+` and `-` can be prepended to the id, which denote whether the
+            Returns organizations that include any of the specified user IDs as members. Any user IDs not found are ignored.
+            For each user ID, the `+` and `-` can be prepended to the ID, which denote whether the
             respective organization should be included or excluded from the result set.
           schema:
             type: array
@@ -4305,9 +4248,9 @@ paths:
         - in: query
           name: organization_id
           description: |-
-            Returns organizations with the organization ids specified. Any organization ids not found are ignored.
-            For each organization id, the `+` and `-` can be prepended to the id, which denote whether the
-            respective organization should be included or excluded from the result set. Accepts up to 100 organization ids.
+            Returns organizations with the organization IDs specified. Any organization IDs not found are ignored.
+            For each organization ID, the `+` and `-` can be prepended to the ID, which denote whether the
+            respective organization should be included or excluded from the result set. Accepts up to 100 organization IDs.
             Example: ?organization_id=+org_1&organization_id=-org_2
           schema:
             type: array
@@ -4388,6 +4331,7 @@ paths:
                     A slug for the new organization.
                     Can contain only lowercase alphanumeric characters and the dash "-".
                     Must be unique for the instance.
+                    This field should only be included when slugs are enabled in the organization settings, refer to our [documentation](https://clerk.com/docs/guides/organizations/overview#organization-slugs).
                   nullable: true
                 max_allowed_memberships:
                   type: integer
@@ -4506,6 +4450,8 @@ paths:
           $ref: '#/components/responses/Organization'
         '402':
           $ref: '#/components/responses/ResourceNotFound'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
         '422':
@@ -5114,9 +5060,9 @@ paths:
             items:
               type: string
           description: |-
-            Returns users with the user ids specified. For each user id, the `+` and `-` can be
-            prepended to the id, which denote whether the respective user id should be included or
-            excluded from the result set. Accepts up to 100 user ids. Any user ids not found are ignored.
+            Returns users with the user IDs specified. For each user ID, the `+` and `-` can be
+            prepended to the ID, which denote whether the respective user ID should be included or
+            excluded from the result set. Accepts up to 100 user IDs. Any user IDs not found are ignored.
           required: false
         - name: email_address
           in: query
@@ -5154,7 +5100,7 @@ paths:
           description: |-
             Returns users with the specified web3 wallet addresses.
             Accepts up to 100 web3 wallet addresses.
-            Any web3 wallet addressed not found are ignored.
+            Any web3 wallet addresses not found are ignored.
           required: false
         - name: role
           in: query
@@ -5168,7 +5114,7 @@ paths:
           in: query
           description: |-
             Returns users that match the given query.
-            For possible matches, we check the email addresses, phone numbers, usernames, web3 wallets, user ids, first and last names.
+            For possible matches, we check the email addresses, phone numbers, usernames, web3 wallets, user IDs, first and last names.
             The query value doesn't need to match the exact value you are looking for, it is capable of partial matches as well.
           schema:
             type: string
@@ -5257,13 +5203,13 @@ paths:
           name: organization_id
           schema:
             type: string
-          description: The ID of the organization to which the membership belongs
+          description: The ID of the organization to which this membership belongs
         - in: path
           required: true
           name: user_id
           schema:
             type: string
-          description: The ID of the user that this membership belongs to
+          description: The ID of the user to which this membership belongs
       requestBody:
         required: true
         content:
@@ -5297,13 +5243,13 @@ paths:
           name: organization_id
           schema:
             type: string
-          description: The ID of the organization to which the membership belongs
+          description: The ID of the organization to which this membership belongs
         - in: path
           required: true
           name: user_id
           schema:
             type: string
-          description: The ID of the user that this membership belongs to
+          description: The ID of the user to which this membership belongs
       responses:
         '200':
           $ref: '#/components/responses/OrganizationMembership'
@@ -5331,13 +5277,13 @@ paths:
           name: organization_id
           schema:
             type: string
-          description: The ID of the organization to which the membership belongs
+          description: The ID of the organization to which this membership belongs
         - in: path
           required: true
           name: user_id
           schema:
             type: string
-          description: The ID of the user that this membership belongs to
+          description: The ID of the user to which this membership belongs
       requestBody:
         content:
           application/json:
@@ -5464,7 +5410,7 @@ paths:
           name: organization_id
           schema:
             type: string
-          description: The ID of the organization the domain belongs to
+          description: The ID of the organization to which the domain belongs
         - in: path
           required: true
           name: domain_id
@@ -5509,7 +5455,7 @@ paths:
           name: organization_id
           schema:
             type: string
-          description: The ID of the organization the domain belongs to
+          description: The ID of the organization to which the domain belongs
         - in: path
           required: true
           name: domain_id
@@ -5673,7 +5619,7 @@ paths:
               properties:
                 url:
                   type: string
-                  description: The full url value prefixed with `https://` or a custom scheme e.g. `"https://my-app.com/oauth-callback"` or `"my-app://oauth-callback"`
+                  description: The full URL value prefixed with `https://` or a custom scheme e.g. `"https://my-app.com/oauth-callback"` or `"my-app://oauth-callback"`
               required:
                 - url
       responses:
@@ -5893,7 +5839,7 @@ paths:
       summary: Create an OAuth application
       description: |-
         Creates a new OAuth application with the given name and callback URL for an instance.
-        The callback URL must be a valid url.
+        The callback URL must be a valid URL.
         All URL schemes are allowed such as `http://`, `https://`, `myapp://`, etc...
       tags:
         - OAuth Applications
@@ -6134,11 +6080,11 @@ paths:
           description: |-
             Returns SAML connections that have an associated organization ID to the
             given organizations.
-            For each organization id, the `+` and `-` can be
-            prepended to the id, which denote whether the
+            For each organization ID, the `+` and `-` can be
+            prepended to the ID, which denote whether the
             respective organization should be included or
             excluded from the result set.
-            Accepts up to 100 organization ids.
+            Accepts up to 100 organization IDs.
       responses:
         '200':
           $ref: '#/components/responses/SAMLConnections'
@@ -6221,6 +6167,9 @@ paths:
                       type: string
                     last_name:
                       type: string
+                force_authn:
+                  type: boolean
+                  description: Enable or deactivate ForceAuthn
               required:
                 - name
                 - provider
@@ -6305,11 +6254,11 @@ paths:
                   description: A list of the domains on use for the SAML connection
                 idp_entity_id:
                   type: string
-                  description: The entity id as provided by the IdP
+                  description: The Entity ID as provided by the IdP
                   nullable: true
                 idp_sso_url:
                   type: string
-                  description: The SSO url as provided by the IdP
+                  description: The SSO URL as provided by the IdP
                   nullable: true
                 idp_certificate:
                   type: string
@@ -6329,7 +6278,7 @@ paths:
                   nullable: true
                 attribute_mapping:
                   type: object
-                  description: Define the atrtibute name mapping between Identity Provider and Clerk's user properties
+                  description: Define the attribute name mapping between Identity Provider and Clerk's user properties
                   nullable: true
                   additionalProperties: false
                   properties:
@@ -6361,6 +6310,9 @@ paths:
                   type: boolean
                   description: Enable or deactivate additional identifications
                   nullable: true
+                force_authn:
+                  type: boolean
+                  description: Enable or deactivate ForceAuthn
       responses:
         '200':
           $ref: '#/components/responses/SAMLConnection'
@@ -6615,34 +6567,8 @@ paths:
           $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
-  /accountless_applications:
-    post:
-      operationId: CreateAccountlessApplication
-      x-speakeasy-group: experimentalAccountlessApplications
-      x-speakeasy-name-override: create
-      summary: Create an accountless application [EXPERIMENTAL]
-      description: Creates a new accountless application. [EXPERIMENTAL]
-      tags:
-        - Accountless Applications
-      responses:
-        '200':
-          $ref: '#/components/responses/AccountlessApplication'
-        '500':
-          $ref: '#/components/responses/ClerkErrors'
-  /accountless_applications/complete:
-    post:
-      operationId: CompleteAccountlessApplication
-      x-speakeasy-group: experimentalAccountlessApplications
-      x-speakeasy-name-override: complete
-      summary: Complete an accountless application [EXPERIMENTAL]
-      description: Completes an accountless application. [EXPERIMENTAL]
-      tags:
-        - Accountless Applications
-      responses:
-        '200':
-          $ref: '#/components/responses/AccountlessApplication'
-        '500':
-          $ref: '#/components/responses/ClerkErrors'
+  /accountless_applications: {}
+  /accountless_applications/complete: {}
   /commerce/plans:
     get:
       operationId: GetCommercePlanList
@@ -6798,11 +6724,11 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
   /billing/subscription_items/{subscription_item_id}/extend_free_trial:
     post:
-      operationId: ExtendCommerceSubscriptionItemFreeTrial
-      x-speakeasy-group: commerce
+      operationId: ExtendBillingSubscriptionItemFreeTrial
+      x-speakeasy-group: billing
       x-speakeasy-name-override: extendSubscriptionItemFreeTrial
       tags:
-        - Commerce
+        - Billing
       summary: Extend free trial for a subscription item
       description: |-
         Extends the free trial period for a specific subscription item to the specified timestamp.
@@ -7939,86 +7865,6 @@ components:
               - $ref: '#/components/schemas/JWKS.ecdsa.PrivateKey'
               - $ref: '#/components/schemas/JWKS.rsa.PrivateKey'
               - $ref: '#/components/schemas/JWKS.symmetric.Key'
-    DeletedObject:
-      type: object
-      additionalProperties: false
-      properties:
-        object:
-          type: string
-        id:
-          type: string
-        slug:
-          type: string
-        deleted:
-          type: boolean
-      required:
-        - object
-        - deleted
-    ClerkError:
-      type: object
-      properties:
-        message:
-          type: string
-        long_message:
-          type: string
-        code:
-          type: string
-        meta:
-          type: object
-        clerk_trace_id:
-          type: string
-      required:
-        - message
-        - long_message
-        - code
-    ClerkErrors:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/ClerkError'
-        meta:
-          type: object
-        clerk_trace_id:
-          type: string
-      required:
-        - errors
-    AWSCredential:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          type: string
-        object:
-          type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - aws_credential
-        access_key_id:
-          type: string
-        user_pool_ids:
-          type: array
-          items:
-            type: string
-        created_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of creation
-        updated_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of creation
-      required:
-        - id
-        - object
-        - access_key_id
-        - user_pool_ids
-        - created_at
-        - updated_at
     SessionActivityResponse:
       type: object
       nullable: true
@@ -8145,6 +7991,11 @@ components:
           type: string
           description: |
             Last active session_id.
+        last_authentication_strategy:
+          nullable: true
+          type: string
+          description: |
+            The authentication strategy that was last used to authenticate the user on this client.
         updated_at:
           type: integer
           format: int64
@@ -8163,8 +8014,37 @@ components:
         - sign_in_id
         - sign_up_id
         - last_active_session_id
+        - last_authentication_strategy
         - updated_at
         - created_at
+    ClerkError:
+      type: object
+      properties:
+        message:
+          type: string
+        long_message:
+          type: string
+        code:
+          type: string
+        meta:
+          type: object
+      required:
+        - message
+        - long_message
+        - code
+    ClerkErrors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClerkError'
+        meta:
+          type: object
+        clerk_trace_id:
+          type: string
+      required:
+        - errors
     verification_otp:
       x-speakeasy-name-override: OTP
       type: object
@@ -8421,6 +8301,13 @@ components:
             - $ref: '#/components/schemas/verification_email_link'
           discriminator:
             propertyName: object
+            mapping:
+              verification_otp: '#/components/schemas/verification_otp'
+              verification_admin: '#/components/schemas/verification_admin'
+              verification_from_oauth: '#/components/schemas/verification_from_oauth'
+              verification_ticket: '#/components/schemas/verification_ticket'
+              verification_saml: '#/components/schemas/verification_saml'
+              verification_email_link: '#/components/schemas/verification_email_link'
         linked_to:
           type: array
           items:
@@ -8447,6 +8334,23 @@ components:
         - reserved
         - created_at
         - updated_at
+    DeletedObject:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+        id:
+          type: string
+        slug:
+          type: string
+        deleted:
+          type: boolean
+        external_id:
+          type: string
+      required:
+        - object
+        - deleted
     PhoneNumber:
       type: object
       additionalProperties: false
@@ -8475,6 +8379,9 @@ components:
             - $ref: '#/components/schemas/verification_admin'
           discriminator:
             propertyName: object
+            mapping:
+              verification_otp: '#/components/schemas/verification_otp'
+              verification_admin: '#/components/schemas/verification_admin'
         linked_to:
           type: array
           items:
@@ -8515,7 +8422,7 @@ components:
         jwt:
           type: string
           description: |
-            String representing the encoded jwt value.
+            String representing the encoded JSON Web Token (JWT) value.
       required:
         - object
         - jwt
@@ -8555,7 +8462,7 @@ components:
         instance_id:
           nullable: true
           type: string
-          description: The id of the instance to which this template belongs
+          description: The ID of the instance to which the template belongs
         resource_type:
           type: string
           description: whether this is a system (default) or user overridden) template
@@ -9008,6 +8915,12 @@ components:
         provider_user_id:
           type: string
           nullable: true
+        last_authenticated_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp of last authentication.
         public_metadata:
           type: object
           additionalProperties: true
@@ -9062,6 +8975,9 @@ components:
           nullable: true
           type: string
         last_name:
+          nullable: true
+          type: string
+        locale:
           nullable: true
           type: string
         profile_image_url:
@@ -9380,6 +9296,9 @@ components:
         has_image:
           type: boolean
         identifier:
+          type: string
+          nullable: true
+        username:
           type: string
           nullable: true
       required:
@@ -9879,6 +9798,8 @@ components:
           description: The default for whether an admin can delete an organization with the Frontend API.
         domains_enabled:
           type: boolean
+        slug_disabled:
+          type: boolean
         domains_enrollment_modes:
           type: array
           items:
@@ -9890,6 +9811,10 @@ components:
         domains_default_role:
           type: string
           description: The role key that it will be used in order to create an organization invitation or suggestion.
+        initial_role_set_key:
+          type: string
+          nullable: true
+          description: The role set key that it will be used to create new organizations.
       required:
         - object
         - enabled
@@ -11027,6 +10952,11 @@ components:
           description: |
             Unix timestamp at which the user accepted the legal requirements.
           example: 1700690400000
+        locale:
+          type: string
+          nullable: true
+          description: The user locale preference for the sign-up specified as a BCP-47 language tag.
+          example: en-US
         external_account:
           type: object
           deprecated: true
@@ -11234,6 +11164,9 @@ components:
           type: boolean
         disable_additional_identifications:
           type: boolean
+        force_authn:
+          type: boolean
+          description: Enable or deactivate ForceAuthn
         created_at:
           type: integer
           format: int64
@@ -11258,6 +11191,10 @@ components:
         - provider
         - user_count
         - sync_user_attributes
+        - allow_subdomains
+        - allow_idp_initiated
+        - disable_additional_identifications
+        - force_authn
         - created_at
         - updated_at
       anyOf:
@@ -11349,25 +11286,6 @@ components:
         - status
         - created_at
         - updated_at
-    AccountlessApplication:
-      type: object
-      additionalProperties: false
-      properties:
-        object:
-          type: string
-          enum:
-            - accountless_application
-        publishable_key:
-          type: string
-        secret_key:
-          type: string
-        claim_url:
-          type: string
-        api_keys_url:
-          type: string
-      required:
-        - object
-        - publishable_key
     PaginatedCommercePlanResponse:
       type: object
       additionalProperties: false
@@ -11420,12 +11338,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/JWKS'
-    DeletedObject:
-      description: Deleted Object
+    Client.List:
+      description: Success
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/DeletedObject'
+            type: array
+            items:
+              $ref: '#/components/schemas/Client'
     ClerkErrors:
       description: Request was not successful
       content:
@@ -11438,32 +11358,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ClerkErrors'
-    AuthorizationInvalid:
-      description: Authorization invalid
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClerkErrors'
-    ResourceNotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClerkErrors'
-    AWSCredential:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AWSCredential'
-    Client.List:
-      description: Success
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/Client'
     DeprecatedEndpoint:
       description: The endpoint is considered deprecated and is pending removal.
       content:
@@ -11482,12 +11376,30 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client'
+    ResourceNotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
     EmailAddress:
       description: Success
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/EmailAddress'
+    AuthorizationInvalid:
+      description: Authorization invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    DeletedObject:
+      description: Deleted Object
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeletedObject'
     PhoneNumber:
       description: Success
       content:
@@ -11975,12 +11887,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/WaitlistEntry'
-    AccountlessApplication:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AccountlessApplication'
     CommercePlan.List:
       description: A list of commerce plans.
       content:
