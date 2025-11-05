@@ -963,9 +963,14 @@ paths:
                   nullable: true
                   enum:
                     - phone_code
+                    - email_code
                 phone_number_id:
                   type: string
                   description: Used with the `phone_code` strategy.
+                  nullable: true
+                email_address_id:
+                  type: string
+                  description: Used with the `email_code` strategy.
                   nullable: true
       responses:
         '200':
@@ -1002,6 +1007,7 @@ paths:
                   type: string
                   description: The strategy to be attempted for second factor authentication.
                   enum:
+                    - email_code
                     - phone_code
                     - totp
                     - backup_code
@@ -7770,6 +7776,15 @@ components:
           format: int64
           description: Unix timestamp at which the sign in will be abandoned.
           example: 1700690400000
+        client_trust_state:
+          type: string
+          nullable: true
+          description: |
+            The trust state of the client for this sign-in attempt. - `pending`: The identifier has not been set yet. - `new`: The user has not had a session on this client before. - `known`: The user has had a session on this client before.
+          enum:
+            - pending
+            - new
+            - known
       required:
         - object
         - id
