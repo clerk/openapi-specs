@@ -201,9 +201,17 @@ paths:
   /oauth/token:
     post:
       summary: Get OAuth2 token
-      description: Get OAuth2 token in exchange for a valid authorization grant.
+      description: |-
+        Get OAuth2 token in exchange for a valid authorization grant.
+
+        #### Authentication
+
+        - **Confidential clients** (using `authorization_code` or `refresh_token` grant types): Must authenticate using HTTP Basic Authentication with Client ID as username and Client Secret as password in the Authorization header.
+        - **Public clients** (using PKCE with `authorization_code` grant type): No client authentication required.
       operationId: getOAuthToken
-      security: []
+      security:
+        - ClientCredentials: []
+        - {}
       tags:
         - OAuth2 Identity Provider
       responses:
@@ -963,9 +971,14 @@ paths:
                   nullable: true
                   enum:
                     - phone_code
+                    - email_code
                 phone_number_id:
                   type: string
                   description: Used with the `phone_code` strategy.
+                  nullable: true
+                email_address_id:
+                  type: string
+                  description: Used with the `email_code` strategy.
                   nullable: true
       responses:
         '200':
@@ -1002,6 +1015,7 @@ paths:
                   type: string
                   description: The strategy to be attempted for second factor authentication.
                   enum:
+                    - email_code
                     - phone_code
                     - totp
                     - backup_code
@@ -4713,6 +4727,10 @@ components:
         If sent and the value is true, it instructs the server to parse the API token from the `Authorization` header.
 
         It should always be set to true when using the `Authorization` header authentication strategy.
+    ClientCredentials:
+      type: http
+      scheme: basic
+      description: HTTP Basic Authentication using Client ID as username and Client Secret as password.
   schemas:
     WellKnown.Assetlinks:
       type: array
@@ -7770,6 +7788,15 @@ components:
           format: int64
           description: Unix timestamp at which the sign in will be abandoned.
           example: 1700690400000
+        client_trust_state:
+          type: string
+          nullable: true
+          description: |
+            The trust state of the client for this sign-in attempt. - `pending`: The identifier has not been set yet. - `new`: The user has not had a session on this client before. - `known`: The user has had a session on this client before.
+          enum:
+            - pending
+            - new
+            - known
       required:
         - object
         - id
