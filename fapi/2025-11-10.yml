@@ -3442,6 +3442,1037 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/me/billing/subscription:
+    get:
+      operationId: GetUserMainBillingSubscription
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getUserMainSubscription
+      tags:
+        - Billing
+      summary: Get user's main billing subscription
+      description: Returns the main billing subscription for the current user.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingSubscription'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/me/billing/subscription_items:
+    get:
+      operationId: GetUserBillingSubscriptionItems
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: listUserSubscriptionItems
+      tags:
+        - Billing
+      summary: List user's subscription items
+      description: Returns a list of subscription items for the current user.
+      parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/Paginated'
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingSubscriptionItemList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+  /v1/me/billing/subscription_items/{subscriptionItemID}:
+    delete:
+      operationId: DeleteUserBillingSubscriptionItem
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: cancelUserSubscriptionItem
+      tags:
+        - Billing
+      summary: Cancel user's subscription item
+      description: Cancels a subscription item for the current user.
+      parameters:
+        - name: subscriptionItemID
+          in: path
+          description: The ID of the subscription item to cancel
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingSubscriptionItem'
+        '204':
+          description: Subscription item canceled successfully
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
+  /v1/me/billing/payment_methods:
+    get:
+      operationId: GetUserPaymentMethods
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: listUserPaymentMethods
+      tags:
+        - Billing
+      summary: List user payment methods
+      description: Returns a list of all payment methods for the current user.
+      parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/Paginated'
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentMethodList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    post:
+      operationId: CreateUserPaymentMethod
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: createUserPaymentMethod
+      tags:
+        - Billing
+      summary: Create user payment method
+      description: Creates a new payment method for the current user.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                gateway:
+                  type: string
+                  description: Payment gateway to use
+                payment_token:
+                  type: string
+                  nullable: true
+                  description: Payment token for the method
+                org_id:
+                  type: string
+                  nullable: true
+                  description: Organization ID (optional)
+              required:
+                - gateway
+                - payment_token
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentMethod'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/me/billing/payment_methods/initialize:
+    post:
+      operationId: InitializeUserPaymentMethod
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: initializeUserPaymentMethod
+      tags:
+        - Billing
+      summary: Initialize user payment method
+      description: Initializes a payment method setup process for the current user.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentMethodInitialize'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/me/billing/payment_methods/{paymentMethodID}:
+    delete:
+      operationId: DeleteUserPaymentMethod
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: deleteUserPaymentMethod
+      tags:
+        - Billing
+      summary: Delete user payment method
+      description: Deletes a specific payment method for the current user.
+      parameters:
+        - name: paymentMethodID
+          in: path
+          description: The ID of the payment method to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentMethod'
+        '204':
+          description: Payment method deleted successfully
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
+  /v1/me/billing/checkouts:
+    post:
+      operationId: CreateUserBillingCheckout
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: createUserCheckout
+      tags:
+        - Billing
+      summary: Create billing checkout
+      description: Creates a new billing checkout for the current user.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                plan_id:
+                  type: string
+                  description: The ID of the plan to checkout
+                plan_period:
+                  type: string
+                  enum:
+                    - month
+                    - annual
+                  description: The billing period for the plan
+                  default: month
+                org_id:
+                  type: string
+                  nullable: true
+                  description: Organization ID (if creating org checkout)
+                payment_method_id:
+                  type: string
+                  nullable: true
+                  description: Payment method ID to use
+              required:
+                - plan_id
+                - plan_period
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingCheckout'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/me/billing/checkouts/{checkoutID}:
+    get:
+      operationId: GetUserBillingCheckout
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getUserCheckout
+      tags:
+        - Billing
+      summary: Get billing checkout
+      description: Returns a billing checkout for the current user.
+      parameters:
+        - name: checkoutID
+          in: path
+          description: The ID of the checkout
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingCheckout'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/me/billing/checkouts/{checkoutID}/confirm:
+    patch:
+      operationId: ConfirmUserBillingCheckout
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: confirmUserCheckout
+      tags:
+        - Billing
+      summary: Confirm billing checkout
+      description: Confirms a billing checkout for the current user.
+      parameters:
+        - name: checkoutID
+          in: path
+          description: The ID of the checkout to confirm
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                payment_method_id:
+                  type: string
+                  nullable: true
+                  description: The ID of the payment method to use for this checkout
+                gateway:
+                  type: string
+                  nullable: true
+                  description: The payment gateway to use (e.g., stripe)
+                payment_token:
+                  type: string
+                  nullable: true
+                  description: A payment token for processing the payment
+                use_test_card:
+                  type: boolean
+                  nullable: true
+                  description: Whether to use a test card for payment processing
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingCheckout'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/me/billing/payment_attempts:
+    get:
+      operationId: GetUserPaymentAttempts
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: listUserPaymentAttempts
+      tags:
+        - Billing
+      summary: List user payment attempts
+      description: Returns a list of payment attempts for the current user.
+      parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/Paginated'
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentAttemptList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+  /v1/me/billing/payment_attempts/{paymentAttemptID}:
+    get:
+      operationId: GetUserPaymentAttempt
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getUserPaymentAttempt
+      tags:
+        - Billing
+      summary: Get user payment attempt
+      description: Returns details of a specific payment attempt for the current user.
+      parameters:
+        - name: paymentAttemptID
+          in: path
+          description: The ID of the payment attempt to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentAttempt'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/me/billing/payers/default_payment_method:
+    put:
+      operationId: SetUserDefaultPaymentMethod
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: setUserDefaultPaymentMethod
+      tags:
+        - Billing
+      summary: Set user default payment method
+      description: Sets the default payment method for the current user.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentMethod'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/me/billing/invoices:
+    get:
+      operationId: GetUserInvoices
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: listUserInvoices
+      tags:
+        - Billing
+      summary: List user invoices
+      description: Returns a list of invoices for the current user.
+      parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/Paginated'
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingInvoiceList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+  /v1/me/billing/statements:
+    get:
+      operationId: GetUserStatements
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: listUserStatements
+      tags:
+        - Billing
+      summary: List user statements
+      description: Returns a list of billing statements for the current user.
+      parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/Paginated'
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingStatementList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+  /v1/me/billing/statements/{statementID}:
+    get:
+      operationId: GetUserStatement
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getUserStatement
+      tags:
+        - Billing
+      summary: Get user statement
+      description: Returns details of a specific billing statement for the current user.
+      parameters:
+        - name: statementID
+          in: path
+          description: The ID of the statement to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingStatement'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/organizations/{organizationID}/billing/checkouts:
+    post:
+      operationId: CreateOrganizationBillingCheckout
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: createOrganizationCheckout
+      tags:
+        - Billing
+      summary: Create organization billing checkout
+      description: Creates a new billing checkout for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                plan_id:
+                  type: string
+                  description: The ID of the plan to checkout
+                plan_period:
+                  type: string
+                  enum:
+                    - month
+                    - annual
+                  description: The billing period for the plan
+                  default: month
+                payment_method_id:
+                  type: string
+                  nullable: true
+                  description: Payment method ID to use
+              required:
+                - plan_id
+                - plan_period
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingCheckout'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/organizations/{organizationID}/billing/checkouts/{checkoutID}:
+    get:
+      operationId: GetOrganizationBillingCheckout
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getOrganizationCheckout
+      tags:
+        - Billing
+      summary: Get organization billing checkout
+      description: Returns a billing checkout for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+        - name: checkoutID
+          in: path
+          description: The ID of the checkout
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingCheckout'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/organizations/{organizationID}/billing/checkouts/{checkoutID}/confirm:
+    patch:
+      operationId: ConfirmOrganizationBillingCheckout
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: confirmOrganizationCheckout
+      tags:
+        - Billing
+      summary: Confirm organization billing checkout
+      description: Confirms a billing checkout for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+        - name: checkoutID
+          in: path
+          description: The ID of the checkout to confirm
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                payment_method_id:
+                  type: string
+                  nullable: true
+                  description: The ID of the payment method to use for this checkout
+                gateway:
+                  type: string
+                  nullable: true
+                  description: The payment gateway to use (e.g., stripe)
+                payment_token:
+                  type: string
+                  nullable: true
+                  description: A payment token for processing the payment
+                use_test_card:
+                  type: boolean
+                  nullable: true
+                  description: Whether to use a test card for payment processing
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingCheckout'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/organizations/{organizationID}/billing/payment_methods:
+    get:
+      operationId: GetOrganizationPaymentMethods
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getOrganizationPaymentMethods
+      tags:
+        - Billing
+      summary: List organization payment methods
+      description: Lists all payment methods for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentMethodList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    post:
+      operationId: CreateOrganizationPaymentMethod
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: createOrganizationPaymentMethod
+      tags:
+        - Billing
+      summary: Create organization payment method
+      description: Creates a new payment method for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                payment_token:
+                  type: string
+                  description: The payment token for the payment method
+                gateway:
+                  type: string
+                  description: The payment gateway to use
+                  enum:
+                    - stripe
+              required:
+                - payment_token
+                - gateway
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                payment_token:
+                  type: string
+                  description: The payment token for the payment method
+                gateway:
+                  type: string
+                  description: The payment gateway to use
+                  enum:
+                    - stripe
+              required:
+                - payment_token
+                - gateway
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingGenericObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/organizations/{organizationID}/billing/payment_methods/initialize:
+    post:
+      operationId: InitializeOrganizationPaymentMethod
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: initializeOrganizationPaymentMethod
+      tags:
+        - Billing
+      summary: Initialize organization payment method
+      description: Initializes a payment method for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentMethodInitialize'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/organizations/{organizationID}/billing/payment_methods/{paymentMethodID}:
+    delete:
+      operationId: DeleteOrganizationPaymentMethod
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: deleteOrganizationPaymentMethod
+      tags:
+        - Billing
+      summary: Delete organization payment method
+      description: Deletes a payment method for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+        - name: paymentMethodID
+          in: path
+          description: The ID of the payment method to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingGenericObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/organizations/{organizationID}/billing/statements:
+    get:
+      operationId: GetOrganizationStatements
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getOrganizationStatements
+      tags:
+        - Billing
+      summary: List organization statements
+      description: Lists all statements for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingGenericArray'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/organizations/{organizationID}/billing/statements/{statementID}:
+    get:
+      operationId: GetOrganizationStatement
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getOrganizationStatement
+      tags:
+        - Billing
+      summary: Get organization statement
+      description: Gets a specific statement for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+        - name: statementID
+          in: path
+          description: The ID of the statement to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingGenericObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/organizations/{organizationID}/billing/payers/default_payment_method:
+    put:
+      operationId: SetOrganizationDefaultPaymentMethod
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: setOrganizationDefaultPaymentMethod
+      tags:
+        - Billing
+      summary: Set organization default payment method
+      description: Sets the default payment method for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                payment_method_id:
+                  type: string
+                  description: The ID of the payment method to set as default
+              required:
+                - payment_method_id
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                payment_method_id:
+                  type: string
+                  description: The ID of the payment method to set as default
+              required:
+                - payment_method_id
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingGenericObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/organizations/{organizationID}/billing/subscription:
+    get:
+      operationId: GetOrganizationBillingSubscription
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getOrganizationSubscription
+      tags:
+        - Billing
+      summary: Get organization's billing subscription
+      description: Returns the billing subscription for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingSubscription'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/organizations/{organizationID}/billing/subscription_items:
+    get:
+      operationId: GetOrganizationBillingSubscriptionItems
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: listOrganizationSubscriptionItems
+      tags:
+        - Billing
+      summary: List organization's subscription items
+      description: Returns a list of subscription items for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingSubscriptionItemList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/organizations/{organizationID}/billing/subscription_items/{subscriptionItemID}:
+    delete:
+      operationId: DeleteOrganizationBillingSubscriptionItem
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: cancelOrganizationSubscriptionItem
+      tags:
+        - Billing
+      summary: Cancel organization's subscription item
+      description: Cancels a subscription item for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+        - name: subscriptionItemID
+          in: path
+          description: The ID of the subscription item to cancel
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingSubscriptionItem'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/billing/products:
+    get:
+      operationId: GetBillingProductList
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: listProducts
+      tags:
+        - Billing
+      summary: List billing products
+      description: Returns a list of all publicly visible billing products with their associated plans.
+      parameters:
+        - in: query
+          name: payer_type
+          description: Filter products by payer type
+          required: false
+          schema:
+            type: string
+            enum:
+              - user
+              - org
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingProductList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/billing/plans:
+    get:
+      operationId: GetBillingPlanList
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: listPlans
+      tags:
+        - Billing
+      summary: List billing plans
+      description: Returns a list of all publicly visible billing plans.
+      parameters:
+        - in: query
+          name: payer_type
+          description: Filter plans by payer type
+          required: false
+          schema:
+            type: string
+            enum:
+              - user
+              - org
+      responses:
+        '200':
+          $ref: '#/components/responses/BillingPlanList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/billing/plans/{planIdOrSlug}:
+    get:
+      operationId: GetBillingPlan
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getPlan
+      tags:
+        - Billing
+      summary: Get a billing plan
+      description: Returns a billing plan by ID or slug.
+      parameters:
+        - name: planIdOrSlug
+          in: path
+          description: The ID or slug of the plan
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/BillingPlan'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /v1/me/organization_memberships:
     get:
       summary: Get Organization Memberships
@@ -8835,6 +9866,1151 @@ components:
       required:
         - response
         - client
+    BillingMoneyResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          type: integer
+          format: int64
+          description: Amount in cents
+        amount_formatted:
+          type: string
+          description: Formatted amount as a string (e.g., "$10.00")
+        currency:
+          type: string
+          description: Currency code (e.g., "USD")
+        currency_symbol:
+          type: string
+          description: Currency symbol (e.g., "$")
+      required:
+        - amount
+        - amount_formatted
+        - currency
+        - currency_symbol
+    BillingSubscriptionCreditResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Credit amount with formatting
+        cycle_days_remaining:
+          type: integer
+          format: int64
+          description: Number of days remaining in the billing cycle
+        cycle_days_total:
+          type: integer
+          format: int64
+          description: Total number of days in the billing cycle
+        cycle_remaining_percent:
+          type: number
+          format: double
+          description: Percentage of the billing cycle remaining
+      required:
+        - amount
+        - cycle_days_remaining
+        - cycle_days_total
+        - cycle_remaining_percent
+    BillingFee:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          type: integer
+          format: int64
+          description: Amount in the smallest currency unit (e.g., cents)
+          minimum: 0
+        amount_formatted:
+          type: string
+          description: The formatted amount as a string (e.g., "$49.99")
+        currency:
+          type: string
+          description: The currency code (e.g., "USD")
+        currency_symbol:
+          type: string
+          description: The currency symbol (e.g., "$")
+      required:
+        - amount
+        - amount_formatted
+        - currency
+        - currency_symbol
+    BillingPlan:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_plan
+        id:
+          type: string
+          description: Unique identifier for the plan
+        name:
+          type: string
+          description: The name of the plan
+        fee:
+          $ref: '#/components/schemas/BillingFee'
+          description: The monthly fee for this plan
+        annual_monthly_fee:
+          allOf:
+            - $ref: '#/components/schemas/BillingFee'
+          nullable: true
+          description: The monthly equivalent when billed annually
+        annual_fee:
+          allOf:
+            - $ref: '#/components/schemas/BillingFee'
+          nullable: true
+          description: The annual fee for this plan
+        description:
+          type: string
+          description: The description of the plan
+          nullable: true
+        product_id:
+          type: string
+          description: The ID of the product this plan belongs to
+        is_default:
+          type: boolean
+          description: Whether this is the default plan
+        is_recurring:
+          type: boolean
+          description: Whether this is a recurring plan
+        publicly_visible:
+          type: boolean
+          description: Whether this plan is publicly visible
+        has_base_fee:
+          type: boolean
+          description: Whether this plan has a base fee
+        for_payer_type:
+          type: string
+          description: The payer type this plan is designed for
+        slug:
+          type: string
+          description: The URL-friendly slug for the plan
+        avatar_url:
+          type: string
+          description: The URL of the plan's avatar image
+          nullable: true
+        free_trial_enabled:
+          type: boolean
+          description: Whether free trial is enabled for this plan
+        free_trial_days:
+          type: integer
+          nullable: true
+          description: Number of free trial days for this plan
+        features:
+          type: array
+          description: The features included in this plan
+          items:
+            type: object
+            properties:
+              object:
+                type: string
+                enum:
+                  - feature
+                description: String representing the object's type
+              id:
+                type: string
+                description: Unique identifier for the feature
+              name:
+                type: string
+                description: Name of the feature
+              description:
+                type: string
+                nullable: true
+                description: Description of the feature
+              slug:
+                type: string
+                description: URL-friendly representation of the feature's name
+              avatar_url:
+                type: string
+                nullable: true
+                description: URL for an image to represent the feature
+            required:
+              - object
+              - id
+              - name
+              - description
+              - slug
+              - avatar_url
+      required:
+        - object
+        - id
+        - name
+        - fee
+        - annual_monthly_fee
+        - annual_fee
+        - description
+        - product_id
+        - is_default
+        - is_recurring
+        - publicly_visible
+        - has_base_fee
+        - for_payer_type
+        - slug
+        - avatar_url
+        - free_trial_enabled
+        - free_trial_days
+    BillingPaymentMethod:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_payment_method
+        id:
+          type: string
+          description: Unique identifier for the payment method
+        payer_id:
+          type: string
+          description: Unique identifier for the payer
+        payment_type:
+          type: string
+          description: The payment method type
+          enum:
+            - card
+            - link
+        is_default:
+          type: boolean
+          description: Whether this is the default payment method for the payer
+        gateway:
+          type: string
+          description: The payment gateway
+        gateway_external_id:
+          type: string
+          description: External ID in the payment gateway
+        gateway_external_account_id:
+          type: string
+          nullable: true
+          description: External account ID in the payment gateway
+        last4:
+          type: string
+          description: Last 4 digits of the card (for card payment methods)
+          nullable: true
+        status:
+          type: string
+          description: Status of the payment method
+          enum:
+            - active
+            - disconnected
+        wallet_type:
+          type: string
+          description: Type of wallet (if applicable)
+          nullable: true
+        card_type:
+          type: string
+          description: Type of card (if applicable)
+          nullable: true
+        expiry_year:
+          type: integer
+          description: Card expiration year (for card payment methods)
+          nullable: true
+        expiry_month:
+          type: integer
+          description: Card expiration month (for card payment methods)
+          nullable: true
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the payment method was created
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the payment method was last updated
+        is_removable:
+          type: boolean
+          description: Whether this payment method can be removed
+      required:
+        - object
+        - id
+        - payer_id
+        - payment_type
+        - gateway
+        - gateway_external_id
+        - gateway_external_account_id
+        - last4
+        - status
+        - card_type
+    BillingSubscriptionItemNextPayment:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          $ref: '#/components/schemas/BillingFee'
+          description: Amount for the next payment
+        date:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) for the next payment date
+    BillingPayer:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_payer
+        id:
+          type: string
+          description: Unique identifier for the payer
+        instance_id:
+          type: string
+          description: Unique identifier for the Clerk instance
+        user_id:
+          type: string
+          description: User ID for user-type payers
+          nullable: true
+        first_name:
+          type: string
+          description: First name of the payer (only set when user_id isn't null)
+          nullable: true
+        last_name:
+          type: string
+          description: Last name of the payer (only set when user_id isn't null)
+          nullable: true
+        email:
+          type: string
+          format: email
+          description: Email address of the payer (only set when user_id isn't null)
+          nullable: true
+        organization_id:
+          type: string
+          description: Organization ID for org-type payers
+          nullable: true
+        organization_name:
+          type: string
+          description: Organization name for org-type payers (only set when organization_id isn't null)
+          nullable: true
+        image_url:
+          type: string
+          format: uri
+          description: URL of the payer's image/avatar
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the payer was created
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the payer was last updated
+      required:
+        - object
+        - id
+        - instance_id
+        - user_id
+        - organization_id
+    BillingSubscriptionItem:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_subscription_item
+        id:
+          type: string
+          description: Unique identifier for the subscription item
+        instance_id:
+          type: string
+          description: Unique identifier for the Clerk instance
+        status:
+          type: string
+          description: Current status of the subscription item
+          enum:
+            - active
+            - canceled
+            - ended
+            - past_due
+            - upcoming
+            - incomplete
+            - abandoned
+        credit:
+          $ref: '#/components/schemas/BillingSubscriptionCreditResponse'
+          description: Credit information for this subscription (available in payment attempt events)
+        plan_id:
+          type: string
+          nullable: true
+          description: Unique identifier for the associated plan
+        plan:
+          allOf:
+            - $ref: '#/components/schemas/BillingPlan'
+          nullable: true
+          description: The associated plan
+        plan_period:
+          type: string
+          description: The billing period for this subscription
+          enum:
+            - month
+            - annual
+        payment_method_id:
+          type: string
+          description: Unique identifier for the payment method
+        payment_method:
+          $ref: '#/components/schemas/BillingPaymentMethod'
+          description: The payment method associated with this subscription
+        lifetime_paid:
+          $ref: '#/components/schemas/BillingFee'
+          description: Total amount paid over the lifetime of this subscription
+        amount:
+          $ref: '#/components/schemas/BillingFee'
+          description: Current amount due every period for this subscription
+        next_payment:
+          $ref: '#/components/schemas/BillingSubscriptionItemNextPayment'
+          nullable: true
+          description: Information about the next payment
+        payer_id:
+          type: string
+          description: Unique identifier for the payer
+        payer:
+          $ref: '#/components/schemas/BillingPayer'
+          description: The payer associated with this subscription
+        is_free_trial:
+          type: boolean
+          description: Whether this subscription is currently on a free trial
+        period_start:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the current period started
+        period_end:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) when the current period ends
+        proration_date:
+          type: string
+          description: Date used for proration calculations
+        canceled_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) when the subscription was canceled
+        past_due_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) when the subscription became past due
+        ended_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) when the subscription ended
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the subscription was created
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the subscription was last updated
+      required:
+        - object
+        - id
+        - instance_id
+        - status
+        - plan_id
+        - plan_period
+        - payer_id
+        - is_free_trial
+        - period_start
+        - period_end
+        - canceled_at
+        - past_due_at
+        - ended_at
+    BillingSubscriptionNextPayment:
+      type: object
+      additionalProperties: false
+      properties:
+        date:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) of the next payment date
+        amount:
+          $ref: '#/components/schemas/BillingFee'
+          description: The amount of the next payment
+      required:
+        - date
+        - amount
+    BillingSubscription:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_subscription
+        id:
+          type: string
+          description: Unique identifier for the commerce subscription
+        instance_id:
+          type: string
+          description: The ID of the instance this subscription belongs to
+        status:
+          type: string
+          description: The current status of the subscription
+          enum:
+            - active
+            - past_due
+            - canceled
+            - ended
+            - abandoned
+            - incomplete
+        payer_id:
+          type: string
+          description: The ID of the payer for this subscription
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) of creation
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) of last update
+        active_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (milliseconds) when the subscription became active
+        past_due_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (milliseconds) when the subscription became past due
+        subscription_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingSubscriptionItem'
+          description: Array of subscription items in this subscription
+        next_payment:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionNextPayment'
+          nullable: true
+          description: Information about the next scheduled payment
+        eligible_for_free_trial:
+          type: boolean
+          description: Whether the payer is eligible for a free trial
+      required:
+        - object
+        - id
+        - instance_id
+        - status
+        - payer_id
+        - created_at
+        - updated_at
+        - active_at
+        - past_due_at
+        - subscription_items
+    Client.BillingSubscription:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          $ref: '#/components/schemas/BillingSubscription'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingSubscriptionItemList:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          additionalProperties: false
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/BillingSubscriptionItem'
+            total_count:
+              type: integer
+              format: int64
+              description: Total number of subscription items
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingSubscriptionItem:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          $ref: '#/components/schemas/BillingSubscriptionItem'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingPaymentMethodList:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          additionalProperties: false
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/BillingPaymentMethod'
+            total_count:
+              type: integer
+              format: int64
+              description: Total number of payment methods
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingPaymentMethod:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/BillingPaymentMethod'
+          nullable: true
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
+    BillingPaymentMethodInitialize:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_payment_method_initialize
+        external_client_secret:
+          type: string
+          description: Client secret from the payment gateway for setting up payment method
+        external_gateway_id:
+          type: string
+          description: External gateway identifier
+        payment_method_order:
+          type: array
+          items:
+            type: string
+          description: Ordered list of supported payment methods
+      required:
+        - object
+        - payment_method_order
+    Client.BillingPaymentMethodInitialize:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          $ref: '#/components/schemas/BillingPaymentMethodInitialize'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingCheckout:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
+    BillingPayee:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_payee
+        id:
+          type: string
+          description: Unique identifier for the payee
+        gateway_type:
+          type: string
+          description: Type of payment gateway
+        gateway_external_id:
+          type: string
+          description: External ID in the payment gateway
+        gateway_status:
+          type: string
+          description: Status of the gateway connection
+      required:
+        - object
+        - id
+        - gateway_type
+        - gateway_external_id
+        - gateway_status
+    BillingPaymentAttempt:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_payment
+        id:
+          type: string
+          description: Unique identifier for the payment attempt
+        payment_id:
+          type: string
+          description: Unique identifier for the payment
+        instance_id:
+          type: string
+          description: Unique identifier for the instance
+        charge_type:
+          type: string
+          description: Type of charge
+        payee_id:
+          type: string
+          description: Unique identifier for the payee
+        payee:
+          $ref: '#/components/schemas/BillingPayee'
+          description: The payee associated with this payment
+        payer_id:
+          type: string
+          description: Unique identifier for the payer
+        payer:
+          $ref: '#/components/schemas/BillingPayer'
+          description: The payer associated with this payment
+        subscription_item_id:
+          type: string
+          description: Unique identifier for the subscription item (only present for recurring payments)
+        subscription_item:
+          $ref: '#/components/schemas/BillingSubscriptionItem'
+          description: The subscription item associated with this payment
+        amount:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Payment amount with formatting
+        payment_method_id:
+          type: string
+          description: Unique identifier for the payment method used
+        payment_method:
+          $ref: '#/components/schemas/BillingPaymentMethod'
+          nullable: true
+          description: The payment method used for this payment
+        statement_id:
+          type: string
+          description: Unique identifier for the statement
+        gateway_external_id:
+          type: string
+          nullable: true
+          description: External ID from the payment gateway
+        gateway_external_url:
+          type: string
+          nullable: true
+          description: URL to view this payment in the gateway dashboard
+        status:
+          type: string
+          description: Status of the payment attempt
+        paid_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) when the payment was completed
+        failed_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) when the payment failed
+        failed_reason:
+          type: object
+          description: Reason for payment failure
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the payment attempt was created
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the payment attempt was last updated
+      required:
+        - object
+        - id
+        - payment_id
+        - instance_id
+        - charge_type
+        - payee_id
+        - payee
+        - payer_id
+        - payer
+        - subscription_item_id
+        - subscription_item
+        - amount
+        - payment_method_id
+        - payment_method
+        - statement_id
+        - gateway_external_id
+        - gateway_external_url
+        - status
+        - paid_at
+        - failed_at
+        - created_at
+        - updated_at
+    Client.BillingPaymentAttemptList:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          additionalProperties: false
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/BillingPaymentAttempt'
+            total_count:
+              type: integer
+              format: int64
+              description: Total number of payment attempts
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingPaymentAttempt:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          $ref: '#/components/schemas/BillingPaymentAttempt'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
+    BillingTotalsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        subtotal:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Subtotal before adjustments
+        tax_total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Total tax amount
+        grand_total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Grand total amount
+        total_due_after_free_trial:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: Total amount due after free trial ends
+        credit:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: Credit amount
+        past_due:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: Past due amount
+        total_due_now:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: Total amount due now
+        proration:
+          type: object
+          nullable: true
+          additionalProperties: false
+          properties:
+            credit:
+              $ref: '#/components/schemas/BillingMoneyResponse'
+              description: Proration credit amount
+      required:
+        - subtotal
+        - tax_total
+        - grand_total
+    BillingInvoice:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_invoice
+        id:
+          type: string
+          description: Unique identifier for the invoice
+        totals:
+          $ref: '#/components/schemas/BillingTotalsResponse'
+          description: Totals breakdown for the invoice
+        payment_due_on:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when payment is due
+        paid_on:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the invoice was paid
+        status:
+          type: string
+          description: Status of the invoice
+      required:
+        - object
+        - id
+        - totals
+        - payment_due_on
+        - paid_on
+        - status
+    Client.BillingInvoiceList:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          additionalProperties: false
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/BillingInvoice'
+            total_count:
+              type: integer
+              format: int64
+              description: Total number of invoices
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
+    BillingStatementTotalsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        subtotal:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Subtotal amount
+        tax_total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Total tax amount
+        grand_total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Grand total amount
+      required:
+        - subtotal
+        - tax_total
+        - grand_total
+    BillingStatementResponseGroup:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+        timestamp:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) for the group
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPaymentAttempt'
+          description: Payment items in this group
+      required:
+        - object
+        - timestamp
+        - items
+    BillingStatement:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_statement
+        instance_id:
+          type: string
+          description: Unique identifier for the instance
+        id:
+          type: string
+          description: Unique identifier for the statement
+        timestamp:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) for the statement
+        payer:
+          $ref: '#/components/schemas/BillingPayer'
+          description: The payer associated with this statement
+        status:
+          type: string
+          description: Status of the statement
+        totals:
+          $ref: '#/components/schemas/BillingStatementTotalsResponse'
+          description: Totals breakdown for the statement
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingStatementResponseGroup'
+          description: Groups of payment items in the statement
+      required:
+        - object
+        - instance_id
+        - id
+        - timestamp
+        - payer
+        - status
+        - totals
+        - groups
+    Client.BillingStatementList:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          additionalProperties: false
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/BillingStatement'
+            total_count:
+              type: integer
+              format: int64
+              description: Total number of statements
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingStatement:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          $ref: '#/components/schemas/BillingStatement'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingGenericObject:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          nullable: true
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingGenericArray:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          properties:
+            data:
+              type: array
+              items:
+                type: object
+            total_count:
+              type: integer
+              format: int64
+          required:
+            - data
+            - total_count
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingProductList:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              object:
+                type: string
+                enum:
+                  - commerce_product
+              name:
+                type: string
+              slug:
+                type: string
+              currency:
+                type: string
+              is_default:
+                type: boolean
+              plans:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BillingPlan'
+        total_count:
+          type: integer
+      required:
+        - data
+        - total_count
     Client.ClientWrappedOrganizationMemberships:
       type: object
       additionalProperties: false
@@ -9692,6 +11868,144 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/schemas-Client.ClientWrappedUser'
+    Client.BillingSubscription:
+      description: Returns a commerce subscription.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingSubscription'
+    AuthenticationInvalid:
+      description: Authentication invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    ResourceNotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    Client.BillingSubscriptionItemList:
+      description: Returns a list of commerce subscription items.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingSubscriptionItemList'
+    Client.BillingSubscriptionItem:
+      description: Returns a commerce subscription item.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingSubscriptionItem'
+    AuthorizationInvalid:
+      description: Authorization invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    UnprocessableEntity:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    Client.BillingPaymentMethodList:
+      description: Returns a list of commerce payment methods.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingPaymentMethodList'
+    Client.BillingPaymentMethod:
+      description: Returns a commerce payment method.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingPaymentMethod'
+    Client.BillingPaymentMethodInitialize:
+      description: Returns payment method initialization data.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingPaymentMethodInitialize'
+    Client.BillingCheckout:
+      description: Returns a commerce checkout.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingCheckout'
+    Client.BillingPaymentAttemptList:
+      description: Returns a list of commerce payment attempts.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingPaymentAttemptList'
+    Client.BillingPaymentAttempt:
+      description: Returns a commerce payment attempt.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingPaymentAttempt'
+    Client.BillingInvoiceList:
+      description: Returns a list of commerce invoices.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingInvoiceList'
+    Client.BillingStatementList:
+      description: Returns a list of commerce statements.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingStatementList'
+    Client.BillingStatement:
+      description: Returns a commerce statement.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingStatement'
+    Client.BillingGenericObject:
+      description: Returns a generic commerce object.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingGenericObject'
+    Client.BillingGenericArray:
+      description: Returns a generic commerce array.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingGenericArray'
+    Client.BillingProductList:
+      description: Returns a list of commerce products.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingProductList'
+    BillingPlanList:
+      description: Returns a list of commerce plans.
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required:
+              - data
+              - total_count
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BillingPlan'
+              total_count:
+                type: integer
+                format: int64
+    BillingPlan:
+      description: Returns a commerce plan.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BillingPlan'
     Client.ClientWrappedOrganizationMemberships:
       description: Returns the response for Client wrapped array of OrganizationMembership objects.
       content:
