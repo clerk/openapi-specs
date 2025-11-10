@@ -2809,6 +2809,8 @@ paths:
         invitations as emails by setting the `notify` parameter to `true`. There cannot be an existing invitation for any
         of the email addresses you provide unless you set `ignore_existing` to `true` for specific email addresses. Please
         note that there must be no existing user for any of the email addresses you provide, and this rule cannot be bypassed.
+
+        This endpoint is limited to a maximum of 10 invitations per API call. If you need to send more invitations, please make multiple requests.
       tags:
         - Invitations
       requestBody:
@@ -2817,6 +2819,8 @@ paths:
           application/json:
             schema:
               type: array
+              minItems: 1
+              maxItems: 10
               items:
                 type: object
                 additionalProperties: false
@@ -3139,12 +3143,6 @@ paths:
                   type: boolean
                   description: Enable the Progressive Sign Up algorithm. Refer to the [docs](https://clerk.com/docs/upgrade-guides/progressive-sign-up) for more info.
                   nullable: true
-                enhanced_email_deliverability:
-                  type: boolean
-                  description: |-
-                    The "enhanced_email_deliverability" feature will send emails from "verifications@clerk.dev" instead of your domain.
-                    This can be helpful if you do not have a high domain reputation.
-                  nullable: true
                 test_mode:
                   type: boolean
                   description: |-
@@ -3453,12 +3451,6 @@ paths:
                 hibp:
                   type: boolean
                   description: Whether the instance should be using the HIBP service to check passwords for breaches
-                  nullable: true
-                enhanced_email_deliverability:
-                  type: boolean
-                  description: |-
-                    The "enhanced_email_deliverability" feature will send emails from "verifications@clerk.dev" instead of your domain.
-                    This can be helpful if you do not have a high domain reputation.
                   nullable: true
                 support_email:
                   type: string
@@ -4778,6 +4770,9 @@ paths:
       summary: Bulk create and send organization invitations
       description: |-
         Creates new organization invitations in bulk and sends out emails to the provided email addresses with a link to accept the invitation and join the organization.
+
+        This endpoint is limited to a maximum of 10 invitations per API call. If you need to send more invitations, please make multiple requests.
+
         You can specify a different `role` for each invited organization member.
         New organization invitations get a "pending" status until they are revoked by an organization administrator or accepted by the invitee.
         The request body supports passing an optional `redirect_url` parameter for each invitation.
@@ -4805,6 +4800,8 @@ paths:
           application/json:
             schema:
               type: array
+              minItems: 1
+              maxItems: 10
               items:
                 type: object
                 properties:
@@ -8962,6 +8959,277 @@ components:
         - active
         - email_address
         - verification
+    EnterpriseConnection:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        protocol:
+          type: string
+        provider:
+          type: string
+        name:
+          type: string
+        logo_public_url:
+          type: string
+          nullable: true
+        domain:
+          type: string
+          deprecated: true
+        domains:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+        sync_user_attributes:
+          type: boolean
+        allow_subdomains:
+          type: boolean
+        allow_idp_initiated:
+          type: boolean
+        disable_additional_identifications:
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - id
+        - protocol
+        - name
+        - logo_public_url
+        - active
+        - provider
+        - sync_user_attributes
+        - disable_additional_identifications
+        - allow_subdomains
+        - allow_idp_initiated
+        - created_at
+        - updated_at
+      anyOf:
+        - required:
+            - domain
+        - required:
+            - domains
+    EnterpriseAccount:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - enterprise_account
+        protocol:
+          type: string
+          description: |
+            The authentication protocol used to sign in.
+          enum:
+            - oauth
+            - saml
+        provider:
+          type: string
+        active:
+          type: boolean
+        email_address:
+          type: string
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        provider_user_id:
+          description: The unique ID of the user in the external provider's system
+          type: string
+          nullable: true
+        enterprise_connection_id:
+          type: string
+          nullable: true
+        public_metadata:
+          type: object
+          additionalProperties: true
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/verification_ticket'
+            - $ref: '#/components/schemas/verification_saml'
+            - $ref: '#/components/schemas/verification_oauth'
+          discriminator:
+            propertyName: object
+        enterprise_connection:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/EnterpriseConnection'
+        last_authenticated_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp of last authentication.
+      required:
+        - id
+        - object
+        - provider
+        - active
+        - email_address
+        - verification
+    Organization:
+      type: object
+      properties:
+        object:
+          type: string
+          enum:
+            - organization
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+        members_count:
+          type: integer
+        missing_member_with_elevated_permissions:
+          type: boolean
+        pending_invitations_count:
+          type: integer
+        max_allowed_memberships:
+          type: integer
+        admin_delete_enabled:
+          type: boolean
+        public_metadata:
+          type: object
+          additionalProperties: true
+        private_metadata:
+          type: object
+          additionalProperties: true
+        created_by:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - name
+        - slug
+        - has_image
+        - max_allowed_memberships
+        - admin_delete_enabled
+        - public_metadata
+        - created_at
+        - updated_at
+    OrganizationMembershipPublicUserData:
+      description: An organization membership with public user data populated
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          type: string
+          nullable: false
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        profile_image_url:
+          type: string
+          nullable: true
+          deprecated: true
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+        identifier:
+          type: string
+          nullable: true
+        username:
+          type: string
+          nullable: true
+      required:
+        - user_id
+        - first_name
+        - last_name
+        - profile_image_url
+        - image_url
+        - has_image
+    OrganizationMembership:
+      description: Hello world
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - organization_membership
+        role:
+          type: string
+        role_name:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        public_metadata:
+          type: object
+          description: Metadata saved on the organization membership, accessible from both Frontend and Backend APIs
+          additionalProperties: true
+        private_metadata:
+          type: object
+          description: Metadata saved on the organization membership, accessible only from the Backend API
+          additionalProperties: true
+        organization:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Organization'
+        public_user_data:
+          $ref: '#/components/schemas/OrganizationMembershipPublicUserData'
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - role
+        - permissions
+        - public_metadata
+        - created_at
+        - updated_at
+        - organization
     User:
       type: object
       additionalProperties: false
@@ -9059,6 +9327,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SAMLAccount'
+        enterprise_accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnterpriseAccount'
+        organization_memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizationMembership'
         last_sign_in_at:
           type: integer
           format: int64
@@ -9797,149 +10073,6 @@ components:
           - provider
           - public_metadata
           - label
-    Organization:
-      type: object
-      properties:
-        object:
-          type: string
-          enum:
-            - organization
-        id:
-          type: string
-        name:
-          type: string
-        slug:
-          type: string
-        image_url:
-          type: string
-        has_image:
-          type: boolean
-        members_count:
-          type: integer
-        missing_member_with_elevated_permissions:
-          type: boolean
-        pending_invitations_count:
-          type: integer
-        max_allowed_memberships:
-          type: integer
-        admin_delete_enabled:
-          type: boolean
-        public_metadata:
-          type: object
-          additionalProperties: true
-        private_metadata:
-          type: object
-          additionalProperties: true
-        created_by:
-          type: string
-        created_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of creation.
-        updated_at:
-          type: integer
-          format: int64
-          description: |
-            Unix timestamp of last update.
-      required:
-        - object
-        - id
-        - name
-        - slug
-        - has_image
-        - max_allowed_memberships
-        - admin_delete_enabled
-        - public_metadata
-        - created_at
-        - updated_at
-    OrganizationMembershipPublicUserData:
-      description: An organization membership with public user data populated
-      type: object
-      additionalProperties: false
-      properties:
-        user_id:
-          type: string
-          nullable: false
-        first_name:
-          type: string
-          nullable: true
-        last_name:
-          type: string
-          nullable: true
-        profile_image_url:
-          type: string
-          nullable: true
-          deprecated: true
-        image_url:
-          type: string
-        has_image:
-          type: boolean
-        identifier:
-          type: string
-          nullable: true
-        username:
-          type: string
-          nullable: true
-      required:
-        - user_id
-        - first_name
-        - last_name
-        - profile_image_url
-        - image_url
-        - has_image
-    OrganizationMembership:
-      description: Hello world
-      type: object
-      properties:
-        id:
-          type: string
-        object:
-          type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - organization_membership
-        role:
-          type: string
-        role_name:
-          type: string
-        permissions:
-          type: array
-          items:
-            type: string
-        public_metadata:
-          type: object
-          description: Metadata saved on the organization membership, accessible from both Frontend and Backend APIs
-          additionalProperties: true
-        private_metadata:
-          type: object
-          description: Metadata saved on the organization membership, accessible only from the Backend API
-          additionalProperties: true
-        organization:
-          type: object
-          nullable: false
-          allOf:
-            - $ref: '#/components/schemas/Organization'
-        public_user_data:
-          $ref: '#/components/schemas/OrganizationMembershipPublicUserData'
-        created_at:
-          type: integer
-          format: int64
-          description: Unix timestamp of creation.
-        updated_at:
-          type: integer
-          format: int64
-          description: Unix timestamp of last update.
-      required:
-        - object
-        - id
-        - role
-        - permissions
-        - public_metadata
-        - created_at
-        - updated_at
-        - organization
     OrganizationMemberships:
       type: object
       additionalProperties: false
@@ -9996,6 +10129,9 @@ components:
               type: string
             organization_id:
               type: string
+            inviter_id:
+              type: string
+              nullable: true
             status:
               type: string
             public_metadata:
@@ -10034,6 +10170,7 @@ components:
         - expires_at
         - created_at
         - updated_at
+        - inviter_id
     OrganizationInvitationsWithPublicOrganizationData:
       type: object
       additionalProperties: false
@@ -10563,6 +10700,7 @@ components:
     OrganizationInvitation:
       description: An organization invitation
       type: object
+      additionalProperties: false
       properties:
         object:
           type: string
@@ -10580,6 +10718,9 @@ components:
           type: string
         organization_id:
           type: string
+        inviter_id:
+          type: string
+          nullable: true
         status:
           type: string
         public_metadata:
@@ -10615,6 +10756,7 @@ components:
         - expires_at
         - created_at
         - updated_at
+        - inviter_id
     OrganizationInvitations:
       type: object
       additionalProperties: false

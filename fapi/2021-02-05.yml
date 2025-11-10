@@ -198,6 +198,90 @@ paths:
           description: Unauthorized error, for example the provided client is invalid.
         '403':
           description: Forbidden error, for example you are trying to use a satellite domain
+  /oauth/register:
+    post:
+      summary: Register OAuth 2.0 Client
+      description: |-
+        Registers a new OAuth 2.0 client with the authorization server according to RFC 7591
+        (OAuth 2.0 Dynamic Client Registration Protocol).
+
+        This endpoint allows clients to dynamically register by submitting client metadata.
+        Upon successful registration, the authorization server assigns a unique client identifier
+        and optionally a client secret (for confidential clients).
+
+        **Authentication:** This endpoint does not require authentication as it is used for
+        initial client registration. However, the endpoint is disabled by default and must
+        be enabled in the Instance settings.
+
+        **Client Types:**
+        - **Confidential clients** receive both a `client_id` and `client_secret`
+        - **Public clients** (using `token_endpoint_auth_method: none`) receive only a `client_id`
+
+        **Key Points:**
+        - All dynamically registered clients must use the consent screen (cannot be disabled)
+        - PKCE is not required for dynamically registered clients
+        - The `redirect_uris` field is required and must contain at least one valid redirect URI
+        - If `client_name` is not provided, the `client_id` will be used as the display name
+        - If `scope` is not provided, default scopes will be assigned
+        - The `token_endpoint_auth_method` values `client_secret_basic` and `client_secret_post` are
+          treated equivalently in the current implementation; both methods can be used at the
+          token endpoint
+
+        See [RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591) for complete specification details.
+      operationId: registerOAuthClient
+      security: []
+      tags:
+        - OAuth2 Identity Provider
+      requestBody:
+        description: |-
+          Client metadata as defined in RFC 7591 Section 2. The client metadata includes
+          information about the client such as its name, redirect URIs, and authentication method.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OAuth.DynamicClientRegistrationRequest'
+            examples:
+              confidentialClient:
+                summary: Confidential Client Registration
+                description: Register a confidential client that will authenticate with client_secret_basic
+                value:
+                  client_name: My Confidential App
+                  client_uri: https://example.com
+                  logo_uri: https://example.com/logo.png
+                  redirect_uris:
+                    - https://example.com/oauth/callback
+                  token_endpoint_auth_method: client_secret_basic
+                  scope: openid email profile
+              publicClient:
+                summary: Public Client Registration
+                description: Register a public client (no client secret)
+                value:
+                  client_name: My Mobile App
+                  client_uri: https://example.com
+                  redirect_uris:
+                    - myapp://oauth/callback
+                  token_endpoint_auth_method: none
+                  scope: openid email profile
+              minimalClient:
+                summary: Minimal Client Registration
+                description: Register a client with only required fields
+                value:
+                  redirect_uris:
+                    - https://example.com/callback
+      responses:
+        '201':
+          $ref: '#/components/responses/OAuth.DynamicClientRegistration'
+        '400':
+          $ref: '#/components/responses/OAuth.DynamicClientRegistrationError'
+        '422':
+          description: |-
+            Unprocessable entity error. The dynamic client registration feature may not be enabled
+            for this instance.
+        '500':
+          description: |-
+            Internal server error. The authorization server encountered an unexpected condition
+            that prevented it from fulfilling the registration request.
   /oauth/token:
     post:
       summary: Get OAuth2 token
@@ -5274,6 +5358,186 @@ components:
         - id_token_signing_alg_values_supported
         - claims_supported
         - code_challenge_methods_supported
+    OAuth.DynamicClientRegistrationRequest:
+      type: object
+      additionalProperties: false
+      description: |-
+        Client metadata used to register a new OAuth 2.0 client according to RFC 7591.
+        The authorization server assigns this client a unique client identifier.
+      properties:
+        redirect_uris:
+          type: array
+          items:
+            type: string
+            format: uri
+          description: |-
+            Array of redirection URI strings for use in redirect-based flows such as
+            the authorization code flow. As required by Section 2 of RFC 6749, clients
+            using flows with redirection must register their redirection URI values.
+          minItems: 1
+        token_endpoint_auth_method:
+          type: string
+          enum:
+            - client_secret_basic
+            - client_secret_post
+            - none
+          default: client_secret_basic
+          description: |-
+            Indicator of the requested authentication method for the token endpoint.
+            - `client_secret_basic`: HTTP Basic authentication scheme
+            - `client_secret_post`: Client credentials in the request body
+            - `none`: Public client (no authentication)
+
+            **Note:** In the current implementation, `client_secret_basic` and `client_secret_post`
+            are treated equivalently. Both methods can be used interchangeably at the token endpoint
+            regardless of which one was specified during registration.
+        client_name:
+          type: string
+          nullable: true
+          maxLength: 256
+          description: |-
+            Human-readable string name of the client to be presented to the end-user
+            during authorization.
+        client_uri:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 1024
+          description: URL string of a web page providing information about the client.
+        logo_uri:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 1024
+          description: |-
+            URL string that references a logo for the client. If present, the
+            Clerk will display this image to the end-user during approval.
+        scope:
+          type: string
+          nullable: true
+          maxLength: 1024
+          description: |-
+            Space-separated list of scope values that the client can use when requesting
+            access tokens. If omitted, the client will be registered with the default set of scopes.
+      required:
+        - redirect_uris
+    OAuth.DynamicClientRegistrationResponse:
+      type: object
+      additionalProperties: false
+      description: |-
+        Client information response after successful registration according to RFC 7591.
+        Contains the client identifier, client secret (for confidential clients), and
+        other client metadata.
+      properties:
+        client_id:
+          type: string
+          description: |-
+            Unique client identifier string assigned by the authorization server.
+            The client identifier is not a secret; it is exposed to the resource owner
+            and must not be used alone for client authentication.
+        client_secret:
+          type: string
+          description: |-
+            Client secret string. This value is used by confidential clients to
+            authenticate to the token endpoint. The client secret is omitted for
+            public clients (when token_endpoint_auth_method is "none").
+        client_id_issued_at:
+          type: integer
+          format: int64
+          description: |-
+            Time at which the client identifier was issued. The time is represented
+            as the number of seconds from 1970-01-01T00:00:00Z as measured in UTC.
+        client_secret_expires_at:
+          type: integer
+          format: int64
+          description: |-
+            Time at which the client secret will expire or 0 if it will not expire.
+            The time is represented as the number of seconds from 1970-01-01T00:00:00Z
+            as measured in UTC.
+        client_name:
+          type: string
+          description: |-
+            Human-readable string name of the client to be presented to the end-user
+            during authorization.
+        client_uri:
+          type: string
+          format: uri
+          description: URL string of a web page providing information about the client.
+        logo_uri:
+          type: string
+          format: uri
+          description: URL string that references a logo for the client.
+        redirect_uris:
+          type: array
+          items:
+            type: string
+            format: uri
+          description: Array of redirection URI strings for use in redirect-based flows.
+        grant_types:
+          type: array
+          items:
+            type: string
+          description: |-
+            Array of OAuth 2.0 grant type strings that the client can use at the
+            token endpoint.
+        response_types:
+          type: array
+          items:
+            type: string
+          description: |-
+            Array of the OAuth 2.0 response type strings that the client can use
+            at the authorization endpoint.
+        scope:
+          type: string
+          description: |-
+            Space-separated list of scope values that the client can use when
+            requesting access tokens.
+        token_endpoint_auth_method:
+          type: string
+          enum:
+            - client_secret_basic
+            - client_secret_post
+            - none
+          description: |-
+            Indicator of the requested authentication method for the token endpoint.
+            This value reflects what was specified during registration.
+      required:
+        - client_id
+        - client_id_issued_at
+        - client_secret_expires_at
+        - client_name
+        - redirect_uris
+        - grant_types
+        - response_types
+        - scope
+        - token_endpoint_auth_method
+    OAuth.DynamicClientRegistrationError:
+      type: object
+      additionalProperties: false
+      description: |-
+        Error response for OAuth 2.0 Dynamic Client Registration according to RFC 7591.
+        The error response uses OAuth 2.0 error response format.
+      properties:
+        error:
+          type: string
+          enum:
+            - invalid_redirect_uri
+            - invalid_client_metadata
+            - invalid_software_statement
+            - unapproved_software_statement
+          description: |-
+            Single ASCII error code string indicating the error type.
+            - `invalid_redirect_uri`: The value of one or more redirect_uris is invalid
+            - `invalid_client_metadata`: One or more client metadata fields is invalid
+            - `invalid_software_statement`: The software statement presented is invalid
+            - `unapproved_software_statement`: The software statement is not approved
+        error_description:
+          type: string
+          description: |-
+            Human-readable ASCII text description of the error used for debugging.
+            This is not meant to be displayed to the end-user.
+      required:
+        - error
     OAuth.Token:
       type: object
       additionalProperties: false
@@ -9160,6 +9424,23 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/WellKnown.OAuth2AuthorizationServerMetadata'
+    OAuth.DynamicClientRegistration:
+      description: |-
+        Client information response after successful OAuth 2.0 dynamic client registration.
+        Returns the client identifier, client secret (for confidential clients), and client metadata
+        according to RFC 7591.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OAuth.DynamicClientRegistrationResponse'
+    OAuth.DynamicClientRegistrationError:
+      description: |-
+        OAuth 2.0 dynamic client registration error response according to RFC 7591.
+        Indicates that the client registration request was invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OAuth.DynamicClientRegistrationError'
     OAuth.Token:
       description: Fetch token for OAuth2 flow
       content:

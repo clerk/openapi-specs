@@ -1259,41 +1259,12 @@ x-webhooks:
                 - $ref: '#/components/schemas/WebhookEventPayload'
                 - properties:
                     data:
-                      $ref: '#/components/schemas/Session'
+                      $ref: '#/components/schemas/SessionEventPayload'
                   required:
                     - data
-            example:
-              event_attributes:
-                http_request:
-                  client_ip: 192.168.1.100
-                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              object: event
-              type: session.created
-              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-              timestamp: 1716883200
-              data:
-                object: session
-                id: sess_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-                user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-                client_id: client_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-                actor: null
-                status: active
-                last_active_organization_id: org_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-                last_active_at: 1716883200000
-                latest_activity:
-                  object: session_activity
-                  id: activity_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-                  device_type: desktop
-                  is_mobile: false
-                  browser_name: Chrome
-                  browser_version: 128.0.0.0
-                  ip_address: 192.168.1.100
-                  city: San Francisco
-                  country: US
-                expire_at: 1716969600000
-                abandon_at: 1719475200000
-                updated_at: 1716883200000
-                created_at: 1716883200000
+            examples:
+              default:
+                $ref: '#/components/examples/SessionEventPayloadExample'
   session.pending:
     post:
       description: Session pending
@@ -1306,32 +1277,12 @@ x-webhooks:
                 - $ref: '#/components/schemas/WebhookEventPayload'
                 - properties:
                     data:
-                      $ref: '#/components/schemas/Session'
+                      $ref: '#/components/schemas/SessionEventPayload'
                   required:
                     - data
-            example:
-              event_attributes:
-                http_request:
-                  client_ip: 192.168.1.100
-                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              object: event
-              type: session.pending
-              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-              timestamp: 1716883200
-              data:
-                object: session
-                id: sess_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-                user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-                client_id: client_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-                actor: null
-                status: pending
-                last_active_organization_id: null
-                last_active_at: 1716883200000
-                latest_activity: null
-                expire_at: 1716969600000
-                abandon_at: 1716969600000
-                updated_at: 1716883200000
-                created_at: 1716883200000
+            examples:
+              default:
+                $ref: '#/components/examples/SessionEventPayloadExample'
   session.ended:
     post:
       description: Session ended
@@ -1344,32 +1295,12 @@ x-webhooks:
                 - $ref: '#/components/schemas/WebhookEventPayload'
                 - properties:
                     data:
-                      $ref: '#/components/schemas/Session'
+                      $ref: '#/components/schemas/SessionEventPayload'
                   required:
                     - data
-            example:
-              event_attributes:
-                http_request:
-                  client_ip: 192.168.1.100
-                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              object: event
-              type: session.ended
-              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-              timestamp: 1716883200
-              data:
-                object: session
-                id: sess_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-                user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-                client_id: client_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-                actor: null
-                status: ended
-                last_active_organization_id: null
-                last_active_at: 1716883200000
-                latest_activity: null
-                expire_at: 1716969600000
-                abandon_at: 1716969600000
-                updated_at: 1716883200000
-                created_at: 1716883200000
+            examples:
+              default:
+                $ref: '#/components/examples/SessionEventPayloadExample'
   session.removed:
     post:
       description: Session removed
@@ -1382,32 +1313,12 @@ x-webhooks:
                 - $ref: '#/components/schemas/WebhookEventPayload'
                 - properties:
                     data:
-                      $ref: '#/components/schemas/Session'
+                      $ref: '#/components/schemas/SessionEventPayload'
                   required:
                     - data
-            example:
-              event_attributes:
-                http_request:
-                  client_ip: 192.168.1.100
-                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              object: event
-              type: session.removed
-              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-              timestamp: 1716883200
-              data:
-                object: session
-                id: sess_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-                user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-                client_id: client_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-                actor: null
-                status: removed
-                last_active_organization_id: null
-                last_active_at: 1716883200000
-                latest_activity: null
-                expire_at: 1716969600000
-                abandon_at: 1716969600000
-                updated_at: 1716883200000
-                created_at: 1716883200000
+            examples:
+              default:
+                $ref: '#/components/examples/SessionEventPayloadExample'
   session.revoked:
     post:
       description: Session revoked
@@ -1420,32 +1331,12 @@ x-webhooks:
                 - $ref: '#/components/schemas/WebhookEventPayload'
                 - properties:
                     data:
-                      $ref: '#/components/schemas/Session'
+                      $ref: '#/components/schemas/SessionEventPayload'
                   required:
                     - data
-            example:
-              event_attributes:
-                http_request:
-                  client_ip: 192.168.1.100
-                  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              object: event
-              type: session.revoked
-              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-              timestamp: 1716883200
-              data:
-                object: session
-                id: sess_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-                user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-                client_id: client_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-                actor: null
-                status: revoked
-                last_active_organization_id: null
-                last_active_at: 1716883200000
-                latest_activity: null
-                expire_at: 1716969600000
-                abandon_at: 1716969600000
-                updated_at: 1716883200000
-                created_at: 1716883200000
+            examples:
+              default:
+                $ref: '#/components/examples/SessionEventPayloadExample'
   sms.created:
     post:
       description: SMS created
@@ -2248,6 +2139,7 @@ components:
     OrganizationInvitation:
       description: An organization invitation
       type: object
+      additionalProperties: false
       properties:
         object:
           type: string
@@ -2265,6 +2157,9 @@ components:
           type: string
         organization_id:
           type: string
+        inviter_id:
+          type: string
+          nullable: true
         status:
           type: string
         public_metadata:
@@ -2300,6 +2195,7 @@ components:
         - expires_at
         - created_at
         - updated_at
+        - inviter_id
     OrganizationInvitationAcceptedPayload:
       allOf:
         - $ref: '#/components/schemas/OrganizationInvitation'
@@ -2937,253 +2833,6 @@ components:
         - abandon_at
         - updated_at
         - created_at
-    SmsEventPayload:
-      type: object
-      properties:
-        object:
-          type: string
-          description: The object type
-        id:
-          type: string
-          description: The SMS message ID
-        slug:
-          type: string
-          nullable: true
-          description: The SMS message slug
-        from_phone_number:
-          type: string
-          description: The SMS message from phone number
-        to_phone_number:
-          type: string
-          description: The SMS message to phone number
-        phone_number_id:
-          type: string
-          nullable: true
-          description: The phone number ID
-        user_id:
-          type: string
-          nullable: true
-          description: The user ID
-        message:
-          type: string
-          description: The SMS message
-        status:
-          type: string
-          description: The SMS message status
-        data:
-          type: object
-          description: The SMS message data
-        delivered_by_clerk:
-          type: boolean
-          description: Whether the SMS message was delivered by Clerk
-        created_at_ms:
-          type: integer
-          format: int64
-          description: Unix timestamp of creation.
-      required:
-        - object
-        - id
-        - from_phone_number
-        - to_phone_number
-        - message
-        - status
-        - data
-        - delivered_by_clerk
-        - created_at_ms
-    BillingSubscriptionItemEventPlan:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique identifier for the plan
-        slug:
-          type: string
-          description: URL-friendly identifier for the plan
-        name:
-          type: string
-          description: Display name of the plan
-        is_recurring:
-          type: boolean
-          description: Whether this plan charges on a recurring basis
-        amount:
-          type: integer
-          format: int64
-          description: Plan amount in the smallest currency unit (e.g., cents for USD)
-        currency:
-          type: string
-          description: Three-letter ISO 4217 currency code for this plan's pricing (e.g., "USD")
-      required:
-        - id
-        - slug
-        - name
-        - is_recurring
-        - amount
-        - currency
-    BillingSubscriptionItemEventPayload:
-      type: object
-      properties:
-        object:
-          type: string
-          description: Object type identifier for webhook events
-          enum:
-            - commerce_subscription_item
-        id:
-          type: string
-          description: Unique identifier for the subscription item
-        status:
-          type: string
-          description: |-
-            Current status of the subscription item.
-
-            * **abandoned**: a subscription item that was scheduled and superseded before it started.
-            * **active**: the subscription item describing the current state of the subscription.
-            * **canceled**: a subscription item that will end at the end of the current billing period.
-            * **ended**: a subscription item that was active and is no longer active.
-            * **incomplete**: a subscription item that requires more user action before it can be active.
-            * **past_due**: a subscription item that a payment is overdue on.
-            * **upcoming**: a subscription item that is scheduled to start but has not started yet.
-          enum:
-            - abandoned
-            - active
-            - canceled
-            - ended
-            - incomplete
-            - past_due
-            - upcoming
-        is_free_trial:
-          type: boolean
-          description: Whether this subscription item is currently in a free-trial period
-        created_at:
-          type: integer
-          format: int64
-          description: Unix timestamp in milliseconds when the subscription item was created
-        updated_at:
-          type: integer
-          format: int64
-          description: Unix timestamp in milliseconds when the subscription item was last modified
-        period_start:
-          type: integer
-          format: int64
-          description: Unix timestamp in milliseconds when the subscription item period starts and becomes active
-        period_end:
-          type: integer
-          format: int64
-          description: Unix timestamp in milliseconds when the subscription item period ends
-        interval:
-          type: string
-          description: Billing interval for this subscription item (e.g., "month", "annual")
-        plan_id:
-          type: string
-          description: Unique identifier for the plan associated with this subscription item
-          nullable: true
-        plan:
-          allOf:
-            - $ref: '#/components/schemas/BillingSubscriptionItemEventPlan'
-          description: Detailed information about the plan associated with this subscription item
-          nullable: true
-        payer:
-          $ref: '#/components/schemas/BillingPayerEventPayload'
-          description: Detailed information about the payer responsible for this subscription item. Only populated when this item is sent as a standalone event, null when included within a subscription event.
-        subscription_id:
-          type: string
-          nullable: true
-          description: Unique identifier for the parent subscription. Only populated when this item is sent as a standalone event, null when included within a subscription event.
-      required:
-        - object
-        - id
-        - status
-        - is_free_trial
-        - created_at
-        - updated_at
-        - period_start
-        - period_end
-        - interval
-        - plan_id
-        - plan
-        - subscription_id
-    SubscriptionEventPayload:
-      type: object
-      properties:
-        object:
-          type: string
-          description: String representing the object's type
-          enum:
-            - commerce_subscription
-        id:
-          type: string
-          description: Unique identifier for the subscription
-        status:
-          type: string
-          description: Current status of the subscription
-          enum:
-            - ended
-            - canceled
-            - abandoned
-            - past_due
-            - active
-            - incomplete
-        active_at:
-          type: integer
-          format: int64
-          nullable: true
-          description: Unix timestamp in milliseconds when the subscription became active. Null if subscription has never been active.
-        canceled_at:
-          type: integer
-          format: int64
-          nullable: true
-          description: Unix timestamp in milliseconds when the subscription was canceled. Null if not canceled.
-        created_at:
-          type: integer
-          format: int64
-          description: Unix timestamp in milliseconds when the subscription was created
-        ended_at:
-          type: integer
-          format: int64
-          nullable: true
-          description: Unix timestamp in milliseconds when the subscription ended. Null if subscription has not ended.
-        past_due_at:
-          type: integer
-          format: int64
-          nullable: true
-          description: Unix timestamp in milliseconds when the subscription became past due. Null if subscription is not past due.
-        updated_at:
-          type: integer
-          format: int64
-          description: Unix timestamp in milliseconds when the subscription was last modified
-        latest_payment_id:
-          type: string
-          description: Unique identifier for the most recent payment attempt associated with this subscription
-          nullable: true
-        payer_id:
-          type: string
-          description: Unique identifier for the payer responsible for this subscription
-        payer:
-          $ref: '#/components/schemas/BillingPayerEventPayload'
-          description: Detailed information about the payer responsible for this subscription
-        payment_source_id:
-          type: string
-          description: Unique identifier for the payment method used to process charges for this subscription
-          nullable: true
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/BillingSubscriptionItemEventPayload'
-          description: Array of subscription items that make up this subscription, each representing the period of time a subscription was in a given state
-      required:
-        - object
-        - id
-        - status
-        - active_at
-        - canceled_at
-        - created_at
-        - ended_at
-        - past_due_at
-        - updated_at
-        - latest_payment_id
-        - payer_id
-        - payer
-        - payment_source_id
-        - items
     verification_otp:
       x-speakeasy-name-override: OTP
       type: object
@@ -3960,6 +3609,134 @@ components:
         - active
         - email_address
         - verification
+    EnterpriseConnection:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        protocol:
+          type: string
+        provider:
+          type: string
+        name:
+          type: string
+        logo_public_url:
+          type: string
+          nullable: true
+        domain:
+          type: string
+          deprecated: true
+        domains:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+        sync_user_attributes:
+          type: boolean
+        allow_subdomains:
+          type: boolean
+        allow_idp_initiated:
+          type: boolean
+        disable_additional_identifications:
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - id
+        - protocol
+        - name
+        - logo_public_url
+        - active
+        - provider
+        - sync_user_attributes
+        - disable_additional_identifications
+        - allow_subdomains
+        - allow_idp_initiated
+        - created_at
+        - updated_at
+      anyOf:
+        - required:
+            - domain
+        - required:
+            - domains
+    EnterpriseAccount:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - enterprise_account
+        protocol:
+          type: string
+          description: |
+            The authentication protocol used to sign in.
+          enum:
+            - oauth
+            - saml
+        provider:
+          type: string
+        active:
+          type: boolean
+        email_address:
+          type: string
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        provider_user_id:
+          description: The unique ID of the user in the external provider's system
+          type: string
+          nullable: true
+        enterprise_connection_id:
+          type: string
+          nullable: true
+        public_metadata:
+          type: object
+          additionalProperties: true
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/verification_ticket'
+            - $ref: '#/components/schemas/verification_saml'
+            - $ref: '#/components/schemas/verification_oauth'
+          discriminator:
+            propertyName: object
+        enterprise_connection:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/EnterpriseConnection'
+        last_authenticated_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp of last authentication.
+      required:
+        - id
+        - object
+        - provider
+        - active
+        - email_address
+        - verification
     User:
       type: object
       additionalProperties: false
@@ -4057,6 +3834,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SAMLAccount'
+        enterprise_accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnterpriseAccount'
+        organization_memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizationMembership'
         last_sign_in_at:
           type: integer
           format: int64
@@ -4156,6 +3941,261 @@ components:
         - mfa_enabled_at
         - mfa_disabled_at
         - legal_accepted_at
+    SessionEventPayload:
+      allOf:
+        - $ref: '#/components/schemas/Session'
+        - properties:
+            user:
+              $ref: '#/components/schemas/User'
+          required:
+            - user
+    SmsEventPayload:
+      type: object
+      properties:
+        object:
+          type: string
+          description: The object type
+        id:
+          type: string
+          description: The SMS message ID
+        slug:
+          type: string
+          nullable: true
+          description: The SMS message slug
+        from_phone_number:
+          type: string
+          description: The SMS message from phone number
+        to_phone_number:
+          type: string
+          description: The SMS message to phone number
+        phone_number_id:
+          type: string
+          nullable: true
+          description: The phone number ID
+        user_id:
+          type: string
+          nullable: true
+          description: The user ID
+        message:
+          type: string
+          description: The SMS message
+        status:
+          type: string
+          description: The SMS message status
+        data:
+          type: object
+          description: The SMS message data
+        delivered_by_clerk:
+          type: boolean
+          description: Whether the SMS message was delivered by Clerk
+        created_at_ms:
+          type: integer
+          format: int64
+          description: Unix timestamp of creation.
+      required:
+        - object
+        - id
+        - from_phone_number
+        - to_phone_number
+        - message
+        - status
+        - data
+        - delivered_by_clerk
+        - created_at_ms
+    BillingSubscriptionItemEventPlan:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the plan
+        slug:
+          type: string
+          description: URL-friendly identifier for the plan
+        name:
+          type: string
+          description: Display name of the plan
+        is_recurring:
+          type: boolean
+          description: Whether this plan charges on a recurring basis
+        amount:
+          type: integer
+          format: int64
+          description: Plan amount in the smallest currency unit (e.g., cents for USD)
+        currency:
+          type: string
+          description: Three-letter ISO 4217 currency code for this plan's pricing (e.g., "USD")
+      required:
+        - id
+        - slug
+        - name
+        - is_recurring
+        - amount
+        - currency
+    BillingSubscriptionItemEventPayload:
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object type identifier for webhook events
+          enum:
+            - commerce_subscription_item
+        id:
+          type: string
+          description: Unique identifier for the subscription item
+        status:
+          type: string
+          description: |-
+            Current status of the subscription item.
+
+            * **abandoned**: a subscription item that was scheduled and superseded before it started.
+            * **active**: the subscription item describing the current state of the subscription.
+            * **canceled**: a subscription item that will end at the end of the current billing period.
+            * **ended**: a subscription item that was active and is no longer active.
+            * **incomplete**: a subscription item that requires more user action before it can be active.
+            * **past_due**: a subscription item that a payment is overdue on.
+            * **upcoming**: a subscription item that is scheduled to start but has not started yet.
+          enum:
+            - abandoned
+            - active
+            - canceled
+            - ended
+            - incomplete
+            - past_due
+            - upcoming
+        is_free_trial:
+          type: boolean
+          description: Whether this subscription item is currently in a free-trial period
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the subscription item was created
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the subscription item was last modified
+        period_start:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the subscription item period starts and becomes active
+        period_end:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the subscription item period ends
+        interval:
+          type: string
+          description: Billing interval for this subscription item (e.g., "month", "annual")
+        plan_id:
+          type: string
+          description: Unique identifier for the plan associated with this subscription item
+          nullable: true
+        plan:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionItemEventPlan'
+          description: Detailed information about the plan associated with this subscription item
+          nullable: true
+        payer:
+          $ref: '#/components/schemas/BillingPayerEventPayload'
+          description: Detailed information about the payer responsible for this subscription item. Only populated when this item is sent as a standalone event, null when included within a subscription event.
+        subscription_id:
+          type: string
+          nullable: true
+          description: Unique identifier for the parent subscription. Only populated when this item is sent as a standalone event, null when included within a subscription event.
+      required:
+        - object
+        - id
+        - status
+        - is_free_trial
+        - created_at
+        - updated_at
+        - period_start
+        - period_end
+        - interval
+        - plan_id
+        - plan
+        - subscription_id
+    SubscriptionEventPayload:
+      type: object
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_subscription
+        id:
+          type: string
+          description: Unique identifier for the subscription
+        status:
+          type: string
+          description: Current status of the subscription
+          enum:
+            - ended
+            - canceled
+            - abandoned
+            - past_due
+            - active
+            - incomplete
+        active_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp in milliseconds when the subscription became active. Null if subscription has never been active.
+        canceled_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp in milliseconds when the subscription was canceled. Null if not canceled.
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the subscription was created
+        ended_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp in milliseconds when the subscription ended. Null if subscription has not ended.
+        past_due_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp in milliseconds when the subscription became past due. Null if subscription is not past due.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the subscription was last modified
+        latest_payment_id:
+          type: string
+          description: Unique identifier for the most recent payment attempt associated with this subscription
+          nullable: true
+        payer_id:
+          type: string
+          description: Unique identifier for the payer responsible for this subscription
+        payer:
+          $ref: '#/components/schemas/BillingPayerEventPayload'
+          description: Detailed information about the payer responsible for this subscription
+        payment_source_id:
+          type: string
+          description: Unique identifier for the payment method used to process charges for this subscription
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingSubscriptionItemEventPayload'
+          description: Array of subscription items that make up this subscription, each representing the period of time a subscription was in a given state
+      required:
+        - object
+        - id
+        - status
+        - active_at
+        - canceled_at
+        - created_at
+        - ended_at
+        - past_due_at
+        - updated_at
+        - latest_payment_id
+        - payer_id
+        - payer
+        - payment_source_id
+        - items
     Invitation:
       type: object
       additionalProperties: false
@@ -4257,6 +4297,80 @@ components:
         - created_at
         - updated_at
   examples:
+    SessionEventPayloadExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: session.created
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: session
+          id: sess_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          user:
+            object: user
+            id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            external_id: null
+            primary_email_address_id: idn_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            primary_phone_number_id: null
+            primary_web3_wallet_id: null
+            username: null
+            first_name: John
+            last_name: Doe
+            profile_image_url: https://img.clerk.com/xxxxxx
+            image_url: https://img.clerk.com/xxxxxx
+            has_image: true
+            public_metadata: {}
+            private_metadata: {}
+            unsafe_metadata: {}
+            email_addresses: []
+            phone_numbers: []
+            web3_wallets: []
+            passkeys: []
+            password_enabled: true
+            two_factor_enabled: false
+            totp_enabled: false
+            backup_code_enabled: false
+            mfa_enabled_at: null
+            mfa_disabled_at: null
+            external_accounts: []
+            saml_accounts: []
+            enterprise_accounts: []
+            last_sign_in_at: 1716883200000
+            banned: false
+            locked: false
+            lockout_expires_in_seconds: null
+            verification_attempts_remaining: null
+            updated_at: 1716883200000
+            created_at: 1716883200000
+            delete_self_enabled: true
+            create_organization_enabled: true
+            create_organizations_limit: null
+            last_active_at: 1716883200000
+            legal_accepted_at: 1716883200000
+          client_id: client_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          actor: null
+          status: active
+          last_active_organization_id: org_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          last_active_at: 1716883200000
+          latest_activity:
+            object: session_activity
+            id: activity_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            device_type: desktop
+            is_mobile: false
+            browser_name: Chrome
+            browser_version: 128.0.0.0
+            ip_address: 192.168.1.100
+            city: San Francisco
+            country: US
+          expire_at: 1716969600000
+          abandon_at: 1719475200000
+          updated_at: 1716883200000
+          created_at: 1716883200000
     SubscriptionEventExample:
       value:
         event_attributes:
