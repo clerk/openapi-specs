@@ -2248,6 +2248,7 @@ components:
     OrganizationInvitation:
       description: An organization invitation
       type: object
+      additionalProperties: false
       properties:
         object:
           type: string
@@ -2265,6 +2266,9 @@ components:
           type: string
         organization_id:
           type: string
+        inviter_id:
+          type: string
+          nullable: true
         status:
           type: string
         public_metadata:
@@ -2300,6 +2304,7 @@ components:
         - expires_at
         - created_at
         - updated_at
+        - inviter_id
     OrganizationInvitationAcceptedPayload:
       allOf:
         - $ref: '#/components/schemas/OrganizationInvitation'
@@ -3960,6 +3965,134 @@ components:
         - active
         - email_address
         - verification
+    EnterpriseConnection:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        protocol:
+          type: string
+        provider:
+          type: string
+        name:
+          type: string
+        logo_public_url:
+          type: string
+          nullable: true
+        domain:
+          type: string
+          deprecated: true
+        domains:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+        sync_user_attributes:
+          type: boolean
+        allow_subdomains:
+          type: boolean
+        allow_idp_initiated:
+          type: boolean
+        disable_additional_identifications:
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - id
+        - protocol
+        - name
+        - logo_public_url
+        - active
+        - provider
+        - sync_user_attributes
+        - disable_additional_identifications
+        - allow_subdomains
+        - allow_idp_initiated
+        - created_at
+        - updated_at
+      anyOf:
+        - required:
+            - domain
+        - required:
+            - domains
+    EnterpriseAccount:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - enterprise_account
+        protocol:
+          type: string
+          description: |
+            The authentication protocol used to sign in.
+          enum:
+            - oauth
+            - saml
+        provider:
+          type: string
+        active:
+          type: boolean
+        email_address:
+          type: string
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        provider_user_id:
+          description: The unique ID of the user in the external provider's system
+          type: string
+          nullable: true
+        enterprise_connection_id:
+          type: string
+          nullable: true
+        public_metadata:
+          type: object
+          additionalProperties: true
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/verification_ticket'
+            - $ref: '#/components/schemas/verification_saml'
+            - $ref: '#/components/schemas/verification_oauth'
+          discriminator:
+            propertyName: object
+        enterprise_connection:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/EnterpriseConnection'
+        last_authenticated_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp of last authentication.
+      required:
+        - id
+        - object
+        - provider
+        - active
+        - email_address
+        - verification
     User:
       type: object
       additionalProperties: false
@@ -4057,6 +4190,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SAMLAccount'
+        enterprise_accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnterpriseAccount'
         last_sign_in_at:
           type: integer
           format: int64
