@@ -2248,6 +2248,7 @@ components:
     OrganizationInvitation:
       description: An organization invitation
       type: object
+      additionalProperties: false
       properties:
         object:
           type: string
@@ -2265,6 +2266,9 @@ components:
           type: string
         organization_id:
           type: string
+        inviter_id:
+          type: string
+          nullable: true
         status:
           type: string
         public_metadata:
@@ -2300,6 +2304,7 @@ components:
         - expires_at
         - created_at
         - updated_at
+        - inviter_id
     OrganizationInvitationAcceptedPayload:
       allOf:
         - $ref: '#/components/schemas/OrganizationInvitation'
