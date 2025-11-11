@@ -668,6 +668,9 @@ paths:
                 user_id:
                   type: string
                   description: The ID representing the user
+                active_organization_id:
+                  type: string
+                  description: The ID of the organization to set as active for this session
               required:
                 - user_id
       responses:
@@ -9300,6 +9303,12 @@ components:
           format: int64
           description: |
             Unix timestamp of when MFA was last disabled for this user. It should be noted that this field is not nullified if MFA is enabled again.
+          nullable: true
+        password_last_updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of when the user's password was last updated.
           nullable: true
         external_accounts:
           type: array
