@@ -3552,7 +3552,11 @@ paths:
   /v1/me/organization_memberships/{organization_id}:
     delete:
       summary: Delete Organization Membership
-      description: Delete the membership of the given organization.
+      description: |-
+        Delete the membership of the given organization.
+
+        After the membership is deleted, the removed member's active sessions will be updated
+        to their latest enrolled organization.
       operationId: deleteOrganizationMemberships
       tags:
         - Organizations Memberships
@@ -3770,6 +3774,9 @@ paths:
         Delete the given organization.
 
         The current user must be an admin in the organization.
+
+        After the organization is deleted, any active sessions belonging to the requesting user
+        that are associated with this organization will be updated with the user's latest enrolled organization.
       operationId: deleteOrganization
       tags:
         - Organization
