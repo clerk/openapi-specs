@@ -45,6 +45,8 @@ security:
 tags:
   - name: DevBrowser
     description: Used to handle dev browsers.
+  - name: DevTools
+    description: Used to configure development instance settings.
   - name: Well Known
     description: Well-known endpoints like JWKS, deep linking, and openid-configuration.
   - name: Health
@@ -1103,13 +1105,18 @@ paths:
                   enum:
                     - phone_code
                     - email_code
+                    - email_link
                 phone_number_id:
                   type: string
                   description: Used with the `phone_code` strategy.
                   nullable: true
                 email_address_id:
                   type: string
-                  description: Used with the `email_code` strategy.
+                  description: Used with the `email_code` and `email_link` strategies.
+                  nullable: true
+                redirect_url:
+                  type: string
+                  description: Used with the `email_link` strategy. The redirect URL after email link verification.
                   nullable: true
       responses:
         '200':
@@ -1678,6 +1685,7 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '500':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/dev_tools/enable_environment_setting: {}
   /v1/oauth_callback:
     get:
       operationId: getOauthCallback
@@ -6558,21 +6566,13 @@ components:
         user_api_keys_enabled:
           type: boolean
           description: Indicates whether User API Keys are enabled.
-        show_in_user_profile:
-          type: boolean
-          description: Indicates whether API Keys should be shown in the user profile.
         orgs_api_keys_enabled:
           type: boolean
           description: Indicates whether Organization API Keys are enabled.
-        show_in_org_profile:
-          type: boolean
-          description: Indicates whether API Keys should be shown in the organization profile.
       required:
         - enabled
         - user_api_keys_enabled
-        - show_in_user_profile
         - orgs_api_keys_enabled
-        - show_in_org_profile
     Client.Environment:
       type: object
       additionalProperties: false
@@ -8041,6 +8041,7 @@ components:
           nullable: true
           oneOf:
             - $ref: '#/components/schemas/Stubs.Verification.OTP'
+            - $ref: '#/components/schemas/Stubs.Verification.Link'
             - $ref: '#/components/schemas/Stubs.Verification.TOTP'
             - $ref: '#/components/schemas/Stubs.Verification.Ticket'
             - $ref: '#/components/schemas/Stubs.Verification.BackupCode'
@@ -10144,6 +10145,7 @@ x-tagGroups:
     tags:
       - Well Known
       - DevBrowser
+      - DevTools
       - Health
       - OAuth2 Identity Provider
       - OAuth2 Callbacks
