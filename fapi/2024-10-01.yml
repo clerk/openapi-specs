@@ -45,6 +45,8 @@ security:
 tags:
   - name: DevBrowser
     description: Used to handle dev browsers.
+  - name: DevTools
+    description: Used to configure development instance settings.
   - name: Well Known
     description: Well-known endpoints like JWKS, deep linking, and openid-configuration.
   - name: Health
@@ -1632,6 +1634,7 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '500':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/dev_tools/enable_environment_setting: {}
   /v1/oauth_callback:
     get:
       operationId: getOauthCallback
@@ -3552,7 +3555,11 @@ paths:
   /v1/me/organization_memberships/{organization_id}:
     delete:
       summary: Delete Organization Membership
-      description: Delete the membership of the given organization.
+      description: |-
+        Delete the membership of the given organization.
+
+        After the membership is deleted, the removed member's active sessions will be updated
+        to their latest enrolled organization.
       operationId: deleteOrganizationMemberships
       tags:
         - Organizations Memberships
@@ -3770,6 +3777,9 @@ paths:
         Delete the given organization.
 
         The current user must be an admin in the organization.
+
+        After the organization is deleted, any active sessions belonging to the requesting user
+        that are associated with this organization will be updated with the user's latest enrolled organization.
       operationId: deleteOrganization
       tags:
         - Organization
@@ -6563,21 +6573,13 @@ components:
         user_api_keys_enabled:
           type: boolean
           description: Indicates whether User API Keys are enabled.
-        show_in_user_profile:
-          type: boolean
-          description: Indicates whether API Keys should be shown in the user profile.
         orgs_api_keys_enabled:
           type: boolean
           description: Indicates whether Organization API Keys are enabled.
-        show_in_org_profile:
-          type: boolean
-          description: Indicates whether API Keys should be shown in the organization profile.
       required:
         - enabled
         - user_api_keys_enabled
-        - show_in_user_profile
         - orgs_api_keys_enabled
-        - show_in_org_profile
     Client.Environment:
       type: object
       additionalProperties: false
@@ -9752,6 +9754,7 @@ x-tagGroups:
     tags:
       - Well Known
       - DevBrowser
+      - DevTools
       - Health
       - OAuth2 Identity Provider
       - OAuth2 Callbacks
