@@ -4460,6 +4460,9 @@ paths:
         Deletes the given organization.
         Please note that deleting an organization will also delete all memberships and invitations.
         This is not reversible.
+
+        After the organization is deleted, any user's active sessions that contain the deleted
+        organization will be cleared.
       tags:
         - Organizations
       parameters:
@@ -5236,7 +5239,11 @@ paths:
       x-speakeasy-group: organizationMemberships
       x-speakeasy-name-override: delete
       summary: Remove a member from an organization
-      description: Removes the given membership from the organization
+      description: |-
+        Removes the given membership from the organization.
+
+        After the membership is deleted, the removed member's active sessions will be updated
+        to their latest enrolled organization.
       tags:
         - Organization Memberships
       parameters:
@@ -9121,6 +9128,11 @@ components:
           format: int64
           description: |
             Unix timestamp of last update.
+        last_active_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last activity.
       required:
         - object
         - id
