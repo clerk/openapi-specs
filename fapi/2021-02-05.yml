@@ -45,6 +45,8 @@ security:
 tags:
   - name: DevBrowser
     description: Used to handle dev browsers.
+  - name: DevTools
+    description: Used to configure development instance settings.
   - name: Well Known
     description: Well-known endpoints like JWKS, deep linking, and openid-configuration.
   - name: Health
@@ -165,6 +167,94 @@ paths:
       security: []
       tags:
         - OAuth2 Identity Provider
+      parameters:
+        - name: response_type
+          in: query
+          required: true
+          description: The authorization flow type. Must be `code` for authorization code flow.
+          schema:
+            type: string
+            enum:
+              - code
+        - name: client_id
+          in: query
+          required: true
+          description: The OAuth2 client ID of the OAuth application.
+          schema:
+            type: string
+        - name: redirect_uri
+          in: query
+          required: false
+          description: The URI to redirect to after authorization. Must be registered for the OAuth application.
+          schema:
+            type: string
+            format: uri
+        - name: scope
+          in: query
+          required: false
+          style: spaceDelimited
+          explode: false
+          description: Space-separated list of scopes being requested. Available scopes are `email`, `profile`, `openid`, `public_metadata`, and `private_metadata`. Defaults to `profile email` if not provided.
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - email
+                - profile
+                - openid
+                - public_metadata
+                - private_metadata
+        - name: state
+          in: query
+          required: false
+          description: An opaque value used to maintain state between the request and callback (minimum 8 characters). Required to prevent CSRF attacks unless PKCE parameters (`code_challenge` and `code_challenge_method`) are provided.
+          schema:
+            type: string
+            minLength: 8
+        - name: prompt
+          in: query
+          required: false
+          style: spaceDelimited
+          explode: false
+          description: Space-separated list of prompts. Supported values are `none` (no user interaction), `login` (force re-authentication), and `consent` (force consent screen).
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - none
+                - login
+                - consent
+        - name: code_challenge
+          in: query
+          required: false
+          description: The code challenge for PKCE (Proof Key for Code Exchange). Required for public clients.
+          schema:
+            type: string
+        - name: code_challenge_method
+          in: query
+          required: false
+          description: The method used to generate the code challenge. Must be `S256`.
+          schema:
+            type: string
+            enum:
+              - S256
+        - name: response_mode
+          in: query
+          required: false
+          description: The method used to return authorization response parameters. Supported values are `query` (parameters in URL query string) and `form_post` (parameters in POST body).
+          schema:
+            type: string
+            enum:
+              - query
+              - form_post
+        - name: nonce
+          in: query
+          required: false
+          description: String value used to associate a client session with an ID Token and to mitigate replay attacks. Used in OpenID Connect flows.
+          schema:
+            type: string
       responses:
         '200':
           description: Success for 'form_post' response mode
@@ -185,6 +275,63 @@ paths:
       security: []
       tags:
         - OAuth2 Identity Provider
+      requestBody:
+        required: false
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                response_type:
+                  type: string
+                  description: The authorization flow type. Must be `code` for authorization code flow.
+                  enum:
+                    - code
+                client_id:
+                  type: string
+                  description: The OAuth2 client ID of the OAuth application.
+                redirect_uri:
+                  type: string
+                  format: uri
+                  nullable: true
+                  description: The URI to redirect to after authorization. Must be registered for the OAuth application.
+                scope:
+                  type: string
+                  nullable: true
+                  description: Space-separated list of scopes being requested. Available scopes are `email`, `profile`, `openid`, `public_metadata`, and `private_metadata`. Defaults to `profile email` if not provided. Multiple values should be space-delimited (e.g., "email profile openid").
+                state:
+                  type: string
+                  nullable: true
+                  description: An opaque value used to maintain state between the request and callback (minimum 8 characters). Required to prevent CSRF attacks unless PKCE parameters (`code_challenge` and `code_challenge_method`) are provided.
+                  minLength: 8
+                prompt:
+                  type: string
+                  nullable: true
+                  description: Space-separated list of prompts. Supported values are `none` (no user interaction), `login` (force re-authentication), and `consent` (force consent screen). Multiple values should be space-delimited (e.g., "login consent").
+                code_challenge:
+                  type: string
+                  nullable: true
+                  description: The code challenge for PKCE (Proof Key for Code Exchange). Required for public clients.
+                code_challenge_method:
+                  type: string
+                  nullable: true
+                  description: The method used to generate the code challenge. Must be `S256`.
+                  enum:
+                    - S256
+                response_mode:
+                  type: string
+                  nullable: true
+                  description: The method used to return authorization response parameters. Supported values are `query` (parameters in URL query string) and `form_post` (parameters in POST body).
+                  enum:
+                    - query
+                    - form_post
+                nonce:
+                  type: string
+                  nullable: true
+                  description: String value used to associate a client session with an ID Token and to mitigate replay attacks. Used in OpenID Connect flows.
+              required:
+                - response_type
+                - client_id
       responses:
         '200':
           description: Success for 'form_post' response mode
@@ -1678,6 +1825,7 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '500':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/dev_tools/enable_environment_setting: {}
   /v1/oauth_callback:
     get:
       operationId: getOauthCallback
@@ -3598,7 +3746,11 @@ paths:
   /v1/me/organization_memberships/{organization_id}:
     delete:
       summary: Delete Organization Membership
-      description: Delete the membership of the given organization.
+      description: |-
+        Delete the membership of the given organization.
+
+        After the membership is deleted, the removed member's active sessions will be updated
+        to their latest enrolled organization.
       operationId: deleteOrganizationMemberships
       tags:
         - Organizations Memberships
@@ -3816,6 +3968,9 @@ paths:
         Delete the given organization.
 
         The current user must be an admin in the organization.
+
+        After the organization is deleted, any active sessions belonging to the requesting user
+        that are associated with this organization will be updated with the user's latest enrolled organization.
       operationId: deleteOrganization
       tags:
         - Organization
@@ -6609,21 +6764,42 @@ components:
         user_api_keys_enabled:
           type: boolean
           description: Indicates whether User API Keys are enabled.
-        show_in_user_profile:
-          type: boolean
-          description: Indicates whether API Keys should be shown in the user profile.
         orgs_api_keys_enabled:
           type: boolean
           description: Indicates whether Organization API Keys are enabled.
-        show_in_org_profile:
-          type: boolean
-          description: Indicates whether API Keys should be shown in the organization profile.
       required:
         - enabled
         - user_api_keys_enabled
-        - show_in_user_profile
         - orgs_api_keys_enabled
-        - show_in_org_profile
+    Client.ProtectConfig.Loader:
+      type: object
+      additionalProperties: false
+      description: Configuration for the Clerk Protect loader.
+      properties:
+        rollout:
+          type: number
+          format: float
+          description: rollout percentage (between 0.0 and 1.0)
+          minimum: 0
+          maximum: 1
+        type:
+          type: string
+        target:
+          type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+        textContent:
+          type: string
+    Client.ProtectConfig:
+      type: object
+      additionalProperties: false
+      properties:
+        loaders:
+          type: array
+          items:
+            $ref: '#/components/schemas/Client.ProtectConfig.Loader'
     Client.Environment:
       type: object
       additionalProperties: false
@@ -6642,6 +6818,8 @@ components:
           $ref: '#/components/schemas/Client.CommerceSettings'
         api_keys_settings:
           $ref: '#/components/schemas/Client.ApiKeysSettings'
+        protect_config:
+          $ref: '#/components/schemas/Client.ProtectConfig'
         client_debug_mode:
           type: boolean
         maintenance_mode:
@@ -9798,6 +9976,7 @@ x-tagGroups:
     tags:
       - Well Known
       - DevBrowser
+      - DevTools
       - Health
       - OAuth2 Identity Provider
       - OAuth2 Callbacks

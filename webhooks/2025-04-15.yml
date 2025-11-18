@@ -1992,6 +1992,11 @@ components:
           format: int64
           description: |
             Unix timestamp of last update.
+        last_active_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last activity.
       required:
         - object
         - id

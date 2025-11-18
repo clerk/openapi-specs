@@ -4455,6 +4455,9 @@ paths:
         Deletes the given organization.
         Please note that deleting an organization will also delete all memberships and invitations.
         This is not reversible.
+
+        After the organization is deleted, any user's active sessions that contain the deleted
+        organization will be cleared.
       tags:
         - Organizations
       parameters:
@@ -6574,6 +6577,16 @@ paths:
   /management/applications/{applicationID}/domain: {}
   /management/applications/{applicationID}/domains/{domainName}: {}
   /management/applications/{applicationID}/domains/{domainName}/status: {}
+  /platform/users: {}
+  /platform/organizations: {}
+  /platform/applications: {}
+  /platform/organizations/{organizationID}: {}
+  /platform/applications/{applicationID}: {}
+  /platform/applications/{applicationID}/transfer_ownership: {}
+  /platform/applications/{applicationID}/usage: {}
+  /platform/applications/{applicationID}/domain: {}
+  /platform/applications/{applicationID}/domains/{domainName}: {}
+  /platform/applications/{applicationID}/domains/{domainName}/status: {}
   /billing/plans:
     get:
       operationId: GetCommercePlanList
@@ -9214,6 +9227,11 @@ components:
           format: int64
           description: |
             Unix timestamp of last update.
+        last_active_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last activity.
       required:
         - object
         - id
