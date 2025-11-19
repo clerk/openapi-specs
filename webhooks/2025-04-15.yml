@@ -1992,6 +1992,11 @@ components:
           format: int64
           description: |
             Unix timestamp of last update.
+        last_active_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last activity.
       required:
         - object
         - id
@@ -2713,6 +2718,7 @@ components:
           type: string
         description:
           type: string
+          nullable: true
         is_creator_eligible:
           type: boolean
           description: Whether this role is eligible to be an organization creator role
@@ -2730,6 +2736,7 @@ components:
           format: int64
           description: |
             Unix timestamp of last update.
+      additionalProperties: false
       required:
         - object
         - id
