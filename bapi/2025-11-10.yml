@@ -88,6 +88,14 @@ tags:
     description: Manage member roles in an organization.
     externalDocs:
       url: https://clerk.com/docs/organizations/manage-member-roles
+  - name: Organization Permissions
+    description: Manage organization permissions that define what members can do within an organization.
+    externalDocs:
+      url: https://clerk.com/docs/organizations/manage-member-roles
+  - name: Organization Roles
+    description: Manage custom roles in an organization.
+    externalDocs:
+      url: https://clerk.com/docs/organizations/manage-member-roles
   - name: Phone Numbers
     description: A user can be associated with one or more phone numbers, which allows them to be contacted via SMS.
     externalDocs:
@@ -4455,6 +4463,9 @@ paths:
         Deletes the given organization.
         Please note that deleting an organization will also delete all memberships and invitations.
         This is not reversible.
+
+        After the organization is deleted, any user's active sessions that contain the deleted
+        organization will be cleared.
       tags:
         - Organizations
       parameters:
@@ -4974,6 +4985,222 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /organization_roles:
+    get:
+      operationId: ListOrganizationRoles
+      x-speakeasy-group: organizationRoles
+      x-speakeasy-name-override: list
+      summary: Get a list of organization roles
+      description: |-
+        This request returns the list of organization roles for the instance.
+        Results can be paginated using the optional `limit` and `offset` query parameters.
+        The organization roles are ordered by descending creation date.
+        Most recent roles will be returned first.
+      tags:
+        - Organization Roles
+      parameters:
+        - in: query
+          name: query
+          description: |-
+            Returns organization roles with ID, name, or key that match the given query.
+            Uses exact match for organization role ID and partial match for name and key.
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: order_by
+          description: |-
+            Allows to return organization roles in a particular order.
+            At the moment, you can order the returned organization roles by their `created_at`, `name`, or `key`.
+            In order to specify the direction, you can use the `+/-` symbols prepended in the property to order by.
+            For example, if you want organization roles to be returned in descending order according to their `created_at` property, you can use `-created_at`.
+            If you don't use `+` or `-`, then `+` is implied.
+            Defaults to `-created_at`.
+          required: false
+          schema:
+            type: string
+            default: '-created_at'
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+      responses:
+        '200':
+          $ref: '#/components/responses/Roles'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    post:
+      operationId: CreateOrganizationRole
+      x-speakeasy-group: organizationRoles
+      x-speakeasy-name-override: create
+      summary: Create an organization role
+      description: |-
+        Creates a new organization role with the given name and permissions for an instance.
+        The key must be unique for the instance and start with the 'org:' prefix, followed by lowercase alphanumeric characters and underscores only.
+        You can optionally provide a description for the role and specify whether it should be included in the initial role set.
+        Organization roles support permissions that can be assigned to control access within the organization.
+      tags:
+        - Organization Roles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the new organization role
+                key:
+                  type: string
+                  description: A unique key for the organization role. Must start with 'org:' and contain only lowercase alphanumeric characters and underscores.
+                description:
+                  type: string
+                  description: Optional description for the role
+                  nullable: true
+                permissions:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of permission IDs to assign to the role
+                  nullable: true
+                include_in_initial_role_set:
+                  type: boolean
+                  description: Whether this role should be included in the initial role set
+                  nullable: true
+              additionalProperties: false
+              required:
+                - name
+                - key
+      responses:
+        '200':
+          $ref: '#/components/responses/Role'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /organization_roles/{organization_role_id}:
+    get:
+      operationId: GetOrganizationRole
+      x-speakeasy-group: organizationRoles
+      x-speakeasy-name-override: get
+      summary: Retrieve an organization role
+      description: Use this request to retrieve an existing organization role by its ID.
+      tags:
+        - Organization Roles
+      parameters:
+        - in: path
+          required: true
+          name: organization_role_id
+          schema:
+            type: string
+          description: The ID of the organization role
+      responses:
+        '200':
+          $ref: '#/components/responses/Role'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    patch:
+      operationId: UpdateOrganizationRole
+      x-speakeasy-group: organizationRoles
+      x-speakeasy-name-override: update
+      summary: Update an organization role
+      description: |-
+        Updates an existing organization role.
+        You can update the name, key, description, and permissions of the role.
+        All parameters are optional - you can update only the fields you want to change.
+        If the role is used as a creator role or domain default role, updating the key will cascade the update to the organization settings.
+      tags:
+        - Organization Roles
+      parameters:
+        - in: path
+          required: true
+          name: organization_role_id
+          schema:
+            type: string
+          description: The ID of the organization role to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The new name for the organization role
+                  nullable: true
+                key:
+                  type: string
+                  description: A unique key for the organization role. Must start with 'org:' and contain only lowercase alphanumeric characters and underscores.
+                  nullable: true
+                description:
+                  type: string
+                  description: Optional description for the role
+                  nullable: true
+                permissions:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of permission IDs to assign to the role. If provided, this will replace the existing permissions.
+                  nullable: true
+      responses:
+        '200':
+          $ref: '#/components/responses/Role'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      operationId: DeleteOrganizationRole
+      x-speakeasy-group: organizationRoles
+      x-speakeasy-name-override: delete
+      summary: Delete an organization role
+      description: |-
+        Deletes the organization role.
+        The role cannot be deleted if it is currently used as the default creator role, domain default role, assigned to any members, or exists in any invitations.
+      tags:
+        - Organization Roles
+      parameters:
+        - in: path
+          required: true
+          name: organization_role_id
+          schema:
+            type: string
+          description: The ID of the organization role to delete
+      responses:
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /organizations/{organization_id}/memberships:
     post:
       operationId: CreateOrganizationMembership
@@ -6574,6 +6801,16 @@ paths:
   /management/applications/{applicationID}/domain: {}
   /management/applications/{applicationID}/domains/{domainName}: {}
   /management/applications/{applicationID}/domains/{domainName}/status: {}
+  /platform/users: {}
+  /platform/organizations: {}
+  /platform/applications: {}
+  /platform/organizations/{organizationID}: {}
+  /platform/applications/{applicationID}: {}
+  /platform/applications/{applicationID}/transfer_ownership: {}
+  /platform/applications/{applicationID}/usage: {}
+  /platform/applications/{applicationID}/domain: {}
+  /platform/applications/{applicationID}/domains/{domainName}: {}
+  /platform/applications/{applicationID}/domains/{domainName}/status: {}
   /billing/plans:
     get:
       operationId: GetCommercePlanList
@@ -6844,6 +7081,178 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
         '500':
           $ref: '#/components/responses/ClerkErrors'
+  /organization_permissions:
+    get:
+      operationId: ListOrganizationPermissions
+      x-speakeasy-group: organizationPermissions
+      x-speakeasy-name-override: list
+      summary: Get a list of all organization permissions
+      description: Retrieves all organization permissions for the given instance.
+      tags:
+        - Organization Permissions
+      parameters:
+        - name: query
+          in: query
+          description: |-
+            Returns organization permissions with ID, name, or key that match the given query.
+            Uses exact match for permission ID and partial match for name and key.
+          schema:
+            type: string
+          required: false
+        - name: order_by
+          in: query
+          description: |-
+            Allows to return organization permissions in a particular order.
+            At the moment, you can order the returned permissions by their `created_at`, `name`, or `key`.
+            In order to specify the direction, you can use the `+/-` symbols prepended in the property to order by.
+            For example, if you want permissions to be returned in descending order according to their `created_at` property, you can use `-created_at`.
+          schema:
+            type: string
+          required: false
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+      responses:
+        '200':
+          $ref: '#/components/responses/Permissions'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    post:
+      operationId: CreateOrganizationPermission
+      x-speakeasy-group: organizationPermissions
+      x-speakeasy-name-override: create
+      summary: Create a new organization permission
+      description: Creates a new organization permission for the given instance.
+      tags:
+        - Organization Permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the permission.
+                key:
+                  type: string
+                  description: The key of the permission. Must have the format "org:feature:action" where feature and action are segments consisting of lowercase letters, digits, or underscores, for example "org:billing:manage" or "org:team:read". Cannot begin with "org:sys_" as that prefix is reserved for system permissions.
+                description:
+                  type: string
+                  description: A description of the permission.
+              required:
+                - name
+                - key
+      responses:
+        '200':
+          $ref: '#/components/responses/Permission'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /organization_permissions/{permission_id}:
+    get:
+      operationId: GetOrganizationPermission
+      x-speakeasy-group: organizationPermissions
+      x-speakeasy-name-override: get
+      summary: Get an organization permission
+      description: Retrieves the details of an organization permission.
+      tags:
+        - Organization Permissions
+      parameters:
+        - in: path
+          required: true
+          name: permission_id
+          schema:
+            type: string
+          description: The ID of the permission to retrieve
+      responses:
+        '200':
+          $ref: '#/components/responses/Permission'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    patch:
+      operationId: UpdateOrganizationPermission
+      x-speakeasy-group: organizationPermissions
+      x-speakeasy-name-override: update
+      summary: Update an organization permission
+      description: |-
+        Updates the properties of an existing organization permission.
+        System permissions cannot be updated.
+      tags:
+        - Organization Permissions
+      parameters:
+        - in: path
+          required: true
+          name: permission_id
+          schema:
+            type: string
+          description: The ID of the permission to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the permission.
+                key:
+                  type: string
+                  description: The key of the permission. Must have the format "org:feature:action" where feature and action are segments consisting of lowercase letters, digits, or underscores. Cannot begin with "org:sys_" as that prefix is reserved for system permissions.
+                description:
+                  type: string
+                  description: A description of the permission.
+      responses:
+        '200':
+          $ref: '#/components/responses/Permission'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      operationId: DeleteOrganizationPermission
+      x-speakeasy-group: organizationPermissions
+      x-speakeasy-name-override: delete
+      summary: Delete an organization permission
+      description: |-
+        Deletes an organization permission.
+        System permissions cannot be deleted.
+      tags:
+        - Organization Permissions
+      parameters:
+        - in: path
+          required: true
+          name: permission_id
+          schema:
+            type: string
+          description: The ID of the permission to delete
+      responses:
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /m2m_tokens:
     post:
       x-speakeasy-group: m2m
@@ -9214,6 +9623,11 @@ components:
           format: int64
           description: |
             Unix timestamp of last update.
+        last_active_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last activity.
       required:
         - object
         - id
@@ -10798,6 +11212,102 @@ components:
       required:
         - data
         - total_count
+    Permission:
+      type: object
+      properties:
+        object:
+          type: string
+          enum:
+            - permission
+        id:
+          type: string
+        name:
+          type: string
+        key:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - name
+        - key
+        - description
+        - type
+        - created_at
+        - updated_at
+    Role:
+      type: object
+      properties:
+        object:
+          type: string
+          enum:
+            - role
+        id:
+          type: string
+        name:
+          type: string
+        key:
+          type: string
+        description:
+          type: string
+          nullable: true
+        is_creator_eligible:
+          type: boolean
+          description: Whether this role is eligible to be an organization creator role
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Permission'
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      additionalProperties: false
+      required:
+        - object
+        - id
+        - name
+        - key
+        - description
+        - is_creator_eligible
+        - permissions
+        - created_at
+        - updated_at
+    Roles:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+        total_count:
+          type: integer
+          format: int64
+          description: |
+            Total number of roles
+      required:
+        - data
+        - total_count
     OrganizationDomainVerification:
       description: The verification object from an organization domain
       type: object
@@ -12127,6 +12637,22 @@ components:
           type: integer
           format: int64
           description: Total number of billing payment attempts.
+    Permissions:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Permission'
+        total_count:
+          type: integer
+          format: int64
+          description: |
+            Total number of permissions
+      required:
+        - data
+        - total_count
   responses:
     WellKnown.JWKS:
       description: Get the JSON Web Key Set
@@ -12574,6 +13100,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/OrganizationInvitation'
+    Roles:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Roles'
+    Role:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Role'
     OrganizationMembership:
       description: Success
       content:
@@ -12725,6 +13263,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PaginatedBillingPaymentAttemptResponse'
+    Permissions:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Permissions'
+    Permission:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Permission'
   parameters:
     Paginated:
       name: paginated
