@@ -10128,6 +10128,8 @@ components:
           type: integer
         max_allowed_roles:
           type: integer
+        max_role_sets_allowed:
+          type: integer
         max_allowed_permissions:
           deprecated: true
           description: max_allowed_permissions is now a no-op, as permissions are now unlimited

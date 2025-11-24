@@ -433,25 +433,159 @@ paths:
     post:
       summary: Get OAuth2 token
       description: |-
-        Get OAuth2 token in exchange for a valid authorization grant.
+        Exchange an authorization grant for OAuth2 tokens (access token, refresh token, and optionally ID token).
+
+        This endpoint implements the OAuth 2.0 Token Endpoint (RFC 6749) and OpenID Connect token endpoint.
+        It supports two grant types: `authorization_code` and `refresh_token`.
+
+        #### Grant Types
+
+        - **`authorization_code`**: Exchange an authorization code for tokens
+        - **`refresh_token`**: Refresh an access token using a refresh token
 
         #### Authentication
 
-        - **Confidential clients** (using `authorization_code` or `refresh_token` grant types): Must authenticate using HTTP Basic Authentication with Client ID as username and Client Secret as password in the Authorization header.
-        - **Public clients** (using PKCE with `authorization_code` grant type): No client authentication required.
+        - **Confidential clients**: Must authenticate using one of the following methods:
+          - HTTP Basic Authentication: `Authorization: Basic base64(client_id:client_secret)`
+          - Client credentials in request body: Include `client_id` and `client_secret` in form fields
+          - *Note: Both methods (`client_secret_basic` and `client_secret_post`) are treated equivalently*
+        - **Public clients** (PKCE flow): No client secret required. Must provide `client_id` and `code_verifier` in request body.
+
+        #### PKCE (Proof Key for Code Exchange)
+
+        Public clients and clients that cannot securely store a client secret must use PKCE (RFC 7636).
+        When using PKCE:
+        - Include `code_challenge` and `code_challenge_method` in the authorization request
+        - Include `code_verifier` in the token request (instead of `client_secret`)
+
+        #### Scopes
+
+        Available scopes:
+        - `openid` - Enables OpenID Connect features, returns an `id_token` in the response
+        - `email` - User's email address
+        - `profile` - Basic profile information (name, username, picture, etc.)
+        - `public_metadata` - Clerk custom scope for public metadata
+        - `private_metadata` - Clerk custom scope for private metadata
+
+        Default scopes (if not specified): `email profile`
+
+        #### Token Lifespans
+
+        - **Access token**: 1 day (86400 seconds)
+        - **Refresh token**: 10 years
+        - **ID token**: 1 day (86400 seconds)
+        - **Authorization code**: 10 minutes (must be exchanged within this time)
+
+        #### OpenID Connect
+
+        When the `openid` scope is included in the authorization request, the token response will include
+        an `id_token` field containing a signed JWT with user identity information per the OpenID Connect specification.
+        The `id_token` will be refreshed along with the access token when using the `refresh_token` grant type.
       operationId: getOAuthToken
       security:
         - ClientCredentials: []
         - {}
       tags:
         - OAuth2 Identity Provider
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - grant_type
+              properties:
+                grant_type:
+                  type: string
+                  description: |-
+                    The grant type being used.
+                    - `authorization_code`: Exchange an authorization code for tokens
+                    - `refresh_token`: Refresh an access token
+                  enum:
+                    - authorization_code
+                    - refresh_token
+                code:
+                  type: string
+                  nullable: true
+                  description: |-
+                    The authorization code received from the authorization endpoint.
+                    **Required when `grant_type=authorization_code`**.
+                redirect_uri:
+                  type: string
+                  nullable: true
+                  description: |-
+                    The redirect URI used in the authorization request. Must match exactly.
+                    **Required when `grant_type=authorization_code`**.
+                code_verifier:
+                  type: string
+                  nullable: true
+                  description: |-
+                    The PKCE code verifier that corresponds to the `code_challenge` sent in the authorization request.
+                    **Required for public clients using PKCE with `grant_type=authorization_code`**.
+                    Confidential clients using `client_secret` should not include this parameter.
+                client_id:
+                  type: string
+                  nullable: true
+                  description: |-
+                    The OAuth 2.0 client identifier.
+                    **Required for public clients** (those not using HTTP Basic Authentication).
+                    For confidential clients, can be provided here or via HTTP Basic Authentication.
+                client_secret:
+                  type: string
+                  nullable: true
+                  description: |-
+                    The OAuth 2.0 client secret.
+                    **Required for confidential clients** (unless using HTTP Basic Authentication).
+                    Public clients using PKCE should not include this parameter.
+                refresh_token:
+                  type: string
+                  nullable: true
+                  description: |-
+                    The refresh token issued to the client.
+                    **Required when `grant_type=refresh_token`**.
+                scope:
+                  type: string
+                  nullable: true
+                  description: |-
+                    Space-separated list of scopes for the access token.
+                    **Optional when `grant_type=refresh_token`**.
+                    If provided, the requested scope must not exceed the scope originally granted.
+                    If omitted, the same scope as originally granted will be used.
+            examples:
+              authorizationCodeConfidential:
+                summary: Authorization Code - Confidential Client
+                description: Exchange an authorization code for tokens using a confidential client with client secret
+                value:
+                  grant_type: authorization_code
+                  code: clk_code_abc123xyz
+                  redirect_uri: https://example.com/oauth/callback
+                  client_id: client_abc123
+                  client_secret: secret_xyz789
+              authorizationCodePKCE:
+                summary: Authorization Code - Public Client with PKCE
+                description: Exchange an authorization code for tokens using PKCE (public client, no client secret)
+                value:
+                  grant_type: authorization_code
+                  code: clk_code_abc123xyz
+                  redirect_uri: https://example.com/oauth/callback
+                  client_id: client_abc123
+                  code_verifier: dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
+              refreshToken:
+                summary: Refresh Token
+                description: Refresh an access token using a refresh token
+                value:
+                  grant_type: refresh_token
+                  refresh_token: clk_refresh_abc123xyz
+                  client_id: client_abc123
+                  client_secret: secret_xyz789
       responses:
         '200':
           $ref: '#/components/responses/OAuth.Token'
         '400':
-          description: Bad request error, for example a request parameter is invalid.
+          $ref: '#/components/responses/OAuth.TokenError400'
         '401':
-          description: Unauthorized error, for example the provided client is invalid.
+          $ref: '#/components/responses/OAuth.TokenError401'
         '403':
           description: Forbidden error, for example you are trying to use a satellite domain
   /oauth/userinfo:
@@ -5696,19 +5830,42 @@ components:
     OAuth.Token:
       type: object
       additionalProperties: false
+      description: |-
+        OAuth 2.0 token response according to RFC 6749 Section 5.1.
+        When using OpenID Connect (with `openid` scope), also includes an `id_token` field.
       properties:
         access_token:
           type: string
+          description: |-
+            The access token issued by the authorization server.
+            This token can be used to access protected resources on behalf of the user.
         token_type:
           type: string
+          description: The type of token issued. Always "Bearer" for OAuth 2.0.
+          example: Bearer
         expires_in:
           type: integer
+          description: |-
+            The lifetime in seconds of the access token.
+            For example, the value "86400" denotes that the access token will expire in 1 day from when the response was generated.
+          example: 86400
         refresh_token:
           type: string
+          description: |-
+            The refresh token which can be used to obtain new access tokens using the same authorization grant.
+            Refresh tokens have a 10 year lifetime.
         scope:
           type: string
+          description: |-
+            Space-separated list of scopes that were granted for this access token.
+            May differ from requested scopes if the authorization server granted a subset.
+          example: openid email profile
         id_token:
           type: string
+          description: |-
+            JWT ID token containing user identity information (OpenID Connect).
+            Only present when the `openid` scope was granted.
+            This is a signed JWT that can be decoded and verified using the instance's public keys.
       required:
         - access_token
         - token_type
@@ -9620,11 +9777,76 @@ components:
           schema:
             $ref: '#/components/schemas/OAuth.DynamicClientRegistrationError'
     OAuth.Token:
-      description: Fetch token for OAuth2 flow
+      description: |-
+        Successfully issued OAuth2 tokens.
+
+        The response includes an `access_token` and `refresh_token`. If the `openid` scope was
+        granted, an `id_token` (JWT) will also be included in the response.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/OAuth.Token'
+          examples:
+            withoutIdToken:
+              summary: Token Response without ID Token
+              description: Response when `openid` scope is not included
+              value:
+                access_token: oat_abc123xyz...
+                token_type: Bearer
+                expires_in: 86400
+                refresh_token: clk_refresh_abc123xyz...
+                scope: email profile
+            withIdToken:
+              summary: Token Response with ID Token (OpenID Connect)
+              description: Response when `openid` scope is included, includes JWT ID token
+              value:
+                access_token: oat_abc123xyz...
+                token_type: Bearer
+                expires_in: 86400
+                refresh_token: clk_refresh_abc123xyz...
+                scope: openid email profile
+                id_token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+    OAuth.TokenError400:
+      description: |-
+        Bad request error. Common causes:
+        - Missing required parameters
+        - Invalid `grant_type` value
+        - Malformed request
+        - Expired authorization code
+        - Invalid `redirect_uri` (doesn't match authorization request)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: invalid_request
+              error_description:
+                type: string
+                example: The request is missing a required parameter
+    OAuth.TokenError401:
+      description: |-
+        Unauthorized error. Common causes:
+        - Invalid client credentials (`client_id` or `client_secret`)
+        - Invalid or expired authorization code
+        - Invalid or expired refresh token
+        - Invalid `code_verifier` for PKCE flow
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                enum:
+                  - invalid_client
+                  - invalid_grant
+                  - unsupported_grant_type
+                example: invalid_client
+              error_description:
+                type: string
+                example: Client authentication failed
     OAuth.UserInfo:
       description: Get user info after successful OAuth2 flow
       content:

@@ -5201,6 +5201,71 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+  /organization_roles/{organization_role_id}/permissions/{permission_id}:
+    post:
+      operationId: AssignPermissionToOrganizationRole
+      x-speakeasy-group: organizationRoles
+      x-speakeasy-name-override: assignPermission
+      summary: Assign a permission to an organization role
+      description: Assigns a permission to an organization role
+      tags:
+        - Organization Roles
+      parameters:
+        - in: path
+          required: true
+          name: organization_role_id
+          schema:
+            type: string
+          description: The ID of the organization role
+        - in: path
+          required: true
+          name: permission_id
+          schema:
+            type: string
+          description: The ID of the permission to assign
+      responses:
+        '200':
+          $ref: '#/components/responses/Role'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+    delete:
+      operationId: RemovePermissionFromOrganizationRole
+      x-speakeasy-group: organizationRoles
+      x-speakeasy-name-override: removePermission
+      summary: Remove a permission from an organization role
+      description: Removes a permission from an organization role
+      tags:
+        - Organization Roles
+      parameters:
+        - in: path
+          required: true
+          name: organization_role_id
+          schema:
+            type: string
+          description: The ID of the organization role
+        - in: path
+          required: true
+          name: permission_id
+          schema:
+            type: string
+          description: The ID of the permission to remove
+      responses:
+        '200':
+          $ref: '#/components/responses/Role'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /organizations/{organization_id}/memberships:
     post:
       operationId: CreateOrganizationMembership
@@ -6791,16 +6856,6 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
   /accountless_applications: {}
   /accountless_applications/complete: {}
-  /management/users: {}
-  /management/organizations: {}
-  /management/applications: {}
-  /management/organizations/{organizationID}: {}
-  /management/applications/{applicationID}: {}
-  /management/applications/{applicationID}/transfer_ownership: {}
-  /management/applications/{applicationID}/usage: {}
-  /management/applications/{applicationID}/domain: {}
-  /management/applications/{applicationID}/domains/{domainName}: {}
-  /management/applications/{applicationID}/domains/{domainName}/status: {}
   /platform/users: {}
   /platform/organizations: {}
   /platform/applications: {}
@@ -8071,10 +8126,10 @@ components:
       scheme: bearer
       description: Secret key, obtained under "API Keys" in the Clerk Dashboard.
       bearerFormat: sk_<environment>_<secret value>
-    managementToken:
+    platformToken:
       type: http
       scheme: bearer
-      description: Internal management token.
+      description: Internal auth.
   schemas:
     JWKS.ed25519.PublicKey:
       type: object
@@ -10941,6 +10996,8 @@ components:
         max_allowed_memberships:
           type: integer
         max_allowed_roles:
+          type: integer
+        max_role_sets_allowed:
           type: integer
         max_allowed_permissions:
           deprecated: true
