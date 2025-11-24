@@ -9714,6 +9714,34 @@ components:
       required:
         - data
         - total_count
+    OrganizationInvitationPublicUserData:
+      description: An organization inviter's public user data
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        user_id:
+          type: string
+          nullable: false
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+        identifier:
+          type: string
+      required:
+        - user_id
+        - first_name
+        - last_name
+        - image_url
+        - has_image
+        - identifier
     OrganizationInvitationPublicOrganizationData:
       type: object
       additionalProperties: false
@@ -9757,6 +9785,8 @@ components:
             inviter_id:
               type: string
               nullable: true
+            public_inviter_data:
+              $ref: '#/components/schemas/OrganizationInvitationPublicUserData'
             status:
               type: string
             public_metadata:
@@ -9796,6 +9826,7 @@ components:
         - created_at
         - updated_at
         - inviter_id
+        - public_inviter_data
     OrganizationInvitationsWithPublicOrganizationData:
       type: object
       additionalProperties: false
@@ -10910,6 +10941,8 @@ components:
         inviter_id:
           type: string
           nullable: true
+        public_inviter_data:
+          $ref: '#/components/schemas/OrganizationInvitationPublicUserData'
         status:
           type: string
         public_metadata:
@@ -10946,6 +10979,7 @@ components:
         - created_at
         - updated_at
         - inviter_id
+        - public_inviter_data
     OrganizationInvitations:
       type: object
       additionalProperties: false
