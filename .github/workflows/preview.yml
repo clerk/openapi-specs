@@ -8,6 +8,12 @@ jobs:
   preview-comment:
     runs-on: ubuntu-latest
     steps:
+      - name: Encode branch name
+        id: encode-branch
+        run: |
+          encoded=$(printf '%s' "${{ github.head_ref }}" | jq -sRr @uri)
+          echo "branch=$encoded" >> $GITHUB_OUTPUT
+
       - name: Find existing comment
         uses: peter-evans/find-comment@v3
         id: find-comment
@@ -25,5 +31,5 @@ jobs:
             <!-- preview-links -->
             ## Preview Links
 
-            - [Backend API](https://clerk.com/docs/reference/${{ github.head_ref }}/backend-api)
-            - [Frontend API](https://clerk.com/docs/reference/${{ github.head_ref }}/frontend-api)
+            - [Backend API](https://clerk.com/docs/reference/${{ steps.encode-branch.outputs.branch }}/backend-api)
+            - [Frontend API](https://clerk.com/docs/reference/${{ steps.encode-branch.outputs.branch }}/frontend-api)
