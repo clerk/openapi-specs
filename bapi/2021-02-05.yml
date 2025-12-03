@@ -5027,6 +5027,16 @@ paths:
                 role:
                   type: string
                   description: The role that the new member will have in the organization.
+                public_metadata:
+                  type: object
+                  description: Metadata saved on the organization membership, that is visible to both your frontend and backend.
+                  additionalProperties: true
+                  nullable: true
+                private_metadata:
+                  type: object
+                  description: Metadata saved on the organization membership that is only visible to your backend.
+                  additionalProperties: true
+                  nullable: true
               required:
                 - user_id
                 - role
@@ -7654,64 +7664,76 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  object:
-                    type: string
-                    enum:
-                      - clerk_idp_oauth_access_token
-                    example: clerk_idp_oauth_access_token
-                  id:
-                    type: string
-                    pattern: ^oat_[0-9A-Fa-f]{32}$
-                    example: oat_0ef5a7a33d87ed87ee7954c845d80450
-                  client_id:
-                    type: string
-                    example: client_2xhFjEI5X2qWRvtV13BzSj8H6Dk
-                  subject:
-                    type: string
-                    pattern: ^user_\w{27}$
-                    example: user_2xhFjEI5X2qWRvtV13BzSj8H6Dk
-                  scopes:
-                    type: array
-                    items:
-                      type: string
-                    example:
-                      - read
-                      - write
-                  revoked:
-                    type: boolean
-                    example: false
-                  revocation_reason:
-                    type: string
-                    nullable: true
-                    example: Revoked by user
-                  expired:
-                    type: boolean
-                    example: false
-                  expiration:
-                    type: number
-                    nullable: true
-                    example: 1716883200
-                  created_at:
-                    type: number
-                    example: 1716883200
-                  updated_at:
-                    type: number
-                    example: 1716883200
-                required:
-                  - object
-                  - id
-                  - client_id
-                  - subject
-                  - scopes
-                  - revoked
-                  - revocation_reason
-                  - expired
-                  - expiration
-                  - created_at
-                  - updated_at
-                additionalProperties: false
+                anyOf:
+                  - type: object
+                    properties:
+                      object:
+                        type: string
+                        enum:
+                          - clerk_idp_oauth_access_token
+                        example: clerk_idp_oauth_access_token
+                      id:
+                        type: string
+                        pattern: ^oat_[0-9A-Fa-f]{32}$
+                        example: oat_0ef5a7a33d87ed87ee7954c845d80450
+                      client_id:
+                        type: string
+                        example: client_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                      subject:
+                        type: string
+                        pattern: ^user_\w{27}$
+                        example: user_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                      scopes:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                          - read
+                          - write
+                      revoked:
+                        type: boolean
+                        example: false
+                      revocation_reason:
+                        type: string
+                        nullable: true
+                        example: Revoked by user
+                      expired:
+                        type: boolean
+                        example: false
+                      expiration:
+                        type: number
+                        nullable: true
+                        example: 1716883200
+                      created_at:
+                        type: number
+                        example: 1716883200
+                      updated_at:
+                        type: number
+                        example: 1716883200
+                    required:
+                      - object
+                      - id
+                      - client_id
+                      - subject
+                      - scopes
+                      - revoked
+                      - revocation_reason
+                      - expired
+                      - expiration
+                      - created_at
+                      - updated_at
+                    additionalProperties: false
+                  - type: object
+                    properties:
+                      active:
+                        type: boolean
+                        enum:
+                          - false
+                        description: Indicates that a JWT access token is not active (expired)
+                        example: false
+                    required:
+                      - active
+                    additionalProperties: false
         '400':
           description: 400 Bad Request
           content:
@@ -9714,6 +9736,34 @@ components:
       required:
         - data
         - total_count
+    OrganizationInvitationPublicUserData:
+      description: An organization inviter's public user data
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        user_id:
+          type: string
+          nullable: false
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+        identifier:
+          type: string
+      required:
+        - user_id
+        - first_name
+        - last_name
+        - image_url
+        - has_image
+        - identifier
     OrganizationInvitationPublicOrganizationData:
       type: object
       additionalProperties: false
@@ -9757,6 +9807,8 @@ components:
             inviter_id:
               type: string
               nullable: true
+            public_inviter_data:
+              $ref: '#/components/schemas/OrganizationInvitationPublicUserData'
             status:
               type: string
             public_metadata:
@@ -9796,6 +9848,7 @@ components:
         - created_at
         - updated_at
         - inviter_id
+        - public_inviter_data
     OrganizationInvitationsWithPublicOrganizationData:
       type: object
       additionalProperties: false
@@ -10910,6 +10963,8 @@ components:
         inviter_id:
           type: string
           nullable: true
+        public_inviter_data:
+          $ref: '#/components/schemas/OrganizationInvitationPublicUserData'
         status:
           type: string
         public_metadata:
@@ -10946,6 +11001,7 @@ components:
         - created_at
         - updated_at
         - inviter_id
+        - public_inviter_data
     OrganizationInvitations:
       type: object
       additionalProperties: false
