@@ -1264,7 +1264,7 @@ x-webhooks:
                     - data
             examples:
               default:
-                $ref: '#/components/examples/SessionEventPayloadExample'
+                $ref: '#/components/examples/SessionCreatedEventPayloadExample'
   session.pending:
     post:
       description: Session pending
@@ -1282,7 +1282,7 @@ x-webhooks:
                     - data
             examples:
               default:
-                $ref: '#/components/examples/SessionEventPayloadExample'
+                $ref: '#/components/examples/SessionPendingEventPayloadExample'
   session.ended:
     post:
       description: Session ended
@@ -1300,7 +1300,7 @@ x-webhooks:
                     - data
             examples:
               default:
-                $ref: '#/components/examples/SessionEventPayloadExample'
+                $ref: '#/components/examples/SessionEndedEventPayloadExample'
   session.removed:
     post:
       description: Session removed
@@ -1318,7 +1318,7 @@ x-webhooks:
                     - data
             examples:
               default:
-                $ref: '#/components/examples/SessionEventPayloadExample'
+                $ref: '#/components/examples/SessionRemovedEventPayloadExample'
   session.revoked:
     post:
       description: Session revoked
@@ -1336,7 +1336,7 @@ x-webhooks:
                     - data
             examples:
               default:
-                $ref: '#/components/examples/SessionEventPayloadExample'
+                $ref: '#/components/examples/SessionRevokedEventPayloadExample'
   sms.created:
     post:
       description: SMS created
@@ -2141,6 +2141,34 @@ components:
         - total_pending_suggestions
         - created_at
         - updated_at
+    OrganizationInvitationPublicUserData:
+      description: An organization inviter's public user data
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        user_id:
+          type: string
+          nullable: false
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+        identifier:
+          type: string
+      required:
+        - user_id
+        - first_name
+        - last_name
+        - image_url
+        - has_image
+        - identifier
     OrganizationInvitation:
       description: An organization invitation
       type: object
@@ -2165,6 +2193,8 @@ components:
         inviter_id:
           type: string
           nullable: true
+        public_inviter_data:
+          $ref: '#/components/schemas/OrganizationInvitationPublicUserData'
         status:
           type: string
         public_metadata:
@@ -2201,6 +2231,7 @@ components:
         - created_at
         - updated_at
         - inviter_id
+        - public_inviter_data
     OrganizationInvitationAcceptedPayload:
       allOf:
         - $ref: '#/components/schemas/OrganizationInvitation'
@@ -4310,7 +4341,7 @@ components:
         - created_at
         - updated_at
   examples:
-    SessionEventPayloadExample:
+    SessionCreatedEventPayloadExample:
       value:
         event_attributes:
           http_request:
@@ -4382,6 +4413,266 @@ components:
             country: US
           expire_at: 1716969600000
           abandon_at: 1719475200000
+          updated_at: 1716883200000
+          created_at: 1716883200000
+    SessionPendingEventPayloadExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: session.pending
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: session
+          id: sess_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          user:
+            object: user
+            id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            external_id: null
+            primary_email_address_id: idn_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            primary_phone_number_id: null
+            primary_web3_wallet_id: null
+            username: null
+            first_name: John
+            last_name: Doe
+            profile_image_url: https://img.clerk.com/xxxxxx
+            image_url: https://img.clerk.com/xxxxxx
+            has_image: true
+            public_metadata: {}
+            private_metadata: {}
+            unsafe_metadata: {}
+            email_addresses: []
+            phone_numbers: []
+            web3_wallets: []
+            passkeys: []
+            password_enabled: true
+            two_factor_enabled: false
+            totp_enabled: false
+            backup_code_enabled: false
+            mfa_enabled_at: null
+            mfa_disabled_at: null
+            external_accounts: []
+            saml_accounts: []
+            enterprise_accounts: []
+            last_sign_in_at: 1716883200000
+            banned: false
+            locked: false
+            lockout_expires_in_seconds: null
+            verification_attempts_remaining: null
+            updated_at: 1716883200000
+            created_at: 1716883200000
+            delete_self_enabled: true
+            create_organization_enabled: true
+            create_organizations_limit: null
+            last_active_at: 1716883200000
+            legal_accepted_at: 1716883200000
+          client_id: client_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          actor: null
+          status: pending
+          last_active_organization_id: null
+          last_active_at: 1716883200000
+          latest_activity: null
+          expire_at: 1716969600000
+          abandon_at: 1716969600000
+          updated_at: 1716883200000
+          created_at: 1716883200000
+    SessionEndedEventPayloadExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: session.ended
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: session
+          id: sess_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          user:
+            object: user
+            id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            external_id: null
+            primary_email_address_id: idn_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            primary_phone_number_id: null
+            primary_web3_wallet_id: null
+            username: null
+            first_name: John
+            last_name: Doe
+            profile_image_url: https://img.clerk.com/xxxxxx
+            image_url: https://img.clerk.com/xxxxxx
+            has_image: true
+            public_metadata: {}
+            private_metadata: {}
+            unsafe_metadata: {}
+            email_addresses: []
+            phone_numbers: []
+            web3_wallets: []
+            passkeys: []
+            password_enabled: true
+            two_factor_enabled: false
+            totp_enabled: false
+            backup_code_enabled: false
+            mfa_enabled_at: null
+            mfa_disabled_at: null
+            external_accounts: []
+            saml_accounts: []
+            enterprise_accounts: []
+            last_sign_in_at: 1716883200000
+            banned: false
+            locked: false
+            lockout_expires_in_seconds: null
+            verification_attempts_remaining: null
+            updated_at: 1716883200000
+            created_at: 1716883200000
+            delete_self_enabled: true
+            create_organization_enabled: true
+            create_organizations_limit: null
+            last_active_at: 1716883200000
+            legal_accepted_at: 1716883200000
+          client_id: client_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          actor: null
+          status: ended
+          last_active_organization_id: null
+          last_active_at: 1716883200000
+          latest_activity: null
+          expire_at: 1716969600000
+          abandon_at: 1716969600000
+          updated_at: 1716883200000
+          created_at: 1716883200000
+    SessionRemovedEventPayloadExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: session.removed
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: session
+          id: sess_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          user:
+            object: user
+            id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            external_id: null
+            primary_email_address_id: idn_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            primary_phone_number_id: null
+            primary_web3_wallet_id: null
+            username: null
+            first_name: John
+            last_name: Doe
+            profile_image_url: https://img.clerk.com/xxxxxx
+            image_url: https://img.clerk.com/xxxxxx
+            has_image: true
+            public_metadata: {}
+            private_metadata: {}
+            unsafe_metadata: {}
+            email_addresses: []
+            phone_numbers: []
+            web3_wallets: []
+            passkeys: []
+            password_enabled: true
+            two_factor_enabled: false
+            totp_enabled: false
+            backup_code_enabled: false
+            mfa_enabled_at: null
+            mfa_disabled_at: null
+            external_accounts: []
+            saml_accounts: []
+            enterprise_accounts: []
+            last_sign_in_at: 1716883200000
+            banned: false
+            locked: false
+            lockout_expires_in_seconds: null
+            verification_attempts_remaining: null
+            updated_at: 1716883200000
+            created_at: 1716883200000
+            delete_self_enabled: true
+            create_organization_enabled: true
+            create_organizations_limit: null
+            last_active_at: 1716883200000
+            legal_accepted_at: 1716883200000
+          client_id: client_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          actor: null
+          status: removed
+          last_active_organization_id: null
+          last_active_at: 1716883200000
+          latest_activity: null
+          expire_at: 1716969600000
+          abandon_at: 1716969600000
+          updated_at: 1716883200000
+          created_at: 1716883200000
+    SessionRevokedEventPayloadExample:
+      value:
+        event_attributes:
+          http_request:
+            client_ip: 192.168.1.100
+            user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+        object: event
+        type: session.revoked
+        instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+        timestamp: 1716883200
+        data:
+          object: session
+          id: sess_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          user_id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          user:
+            object: user
+            id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            external_id: null
+            primary_email_address_id: idn_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+            primary_phone_number_id: null
+            primary_web3_wallet_id: null
+            username: null
+            first_name: John
+            last_name: Doe
+            profile_image_url: https://img.clerk.com/xxxxxx
+            image_url: https://img.clerk.com/xxxxxx
+            has_image: true
+            public_metadata: {}
+            private_metadata: {}
+            unsafe_metadata: {}
+            email_addresses: []
+            phone_numbers: []
+            web3_wallets: []
+            passkeys: []
+            password_enabled: true
+            two_factor_enabled: false
+            totp_enabled: false
+            backup_code_enabled: false
+            mfa_enabled_at: null
+            mfa_disabled_at: null
+            external_accounts: []
+            saml_accounts: []
+            enterprise_accounts: []
+            last_sign_in_at: 1716883200000
+            banned: false
+            locked: false
+            lockout_expires_in_seconds: null
+            verification_attempts_remaining: null
+            updated_at: 1716883200000
+            created_at: 1716883200000
+            delete_self_enabled: true
+            create_organization_enabled: true
+            create_organizations_limit: null
+            last_active_at: 1716883200000
+            legal_accepted_at: 1716883200000
+          client_id: client_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+          actor: null
+          status: revoked
+          last_active_organization_id: null
+          last_active_at: 1716883200000
+          latest_activity: null
+          expire_at: 1716969600000
+          abandon_at: 1716969600000
           updated_at: 1716883200000
           created_at: 1716883200000
     SubscriptionEventExample:
