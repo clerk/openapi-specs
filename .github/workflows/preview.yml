@@ -1,0 +1,29 @@
+name: PR Preview Links
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  preview-comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find existing comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: "<!-- preview-links -->"
+
+      - name: Create preview comment
+        if: steps.find-comment.outputs.comment-id == ''
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            <!-- preview-links -->
+            ## Preview Links
+
+            - [Backend API](https://clerk.com/docs/reference/${{ github.head_ref }}/backend-api)
+            - [Frontend API](https://clerk.com/docs/reference/${{ github.head_ref }}/frontend-api)
