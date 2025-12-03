@@ -1,4 +1,7 @@
 name: PR Preview Links
+permissions:
+  contents: read
+  pull-requests: write
 
 on:
   pull_request:
