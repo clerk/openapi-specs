@@ -1621,6 +1621,10 @@ paths:
                   type: string
                   description: A custom date/time denoting _when_ the user signed up to the application, specified in RFC3339 format (e.g. `2012-10-20T07:15:20.902Z`).
                   nullable: true
+                bypass_client_trust:
+                  type: boolean
+                  description: When set to `true`, the user will bypass client trust checks during sign-in.
+                  nullable: true
       responses:
         '200':
           $ref: '#/components/responses/User'
@@ -2005,6 +2009,10 @@ paths:
                 created_at:
                   type: string
                   description: A custom date/time denoting _when_ the user signed up to the application, specified in RFC3339 format (e.g. `2012-10-20T07:15:20.902Z`).
+                  nullable: true
+                bypass_client_trust:
+                  type: boolean
+                  description: When set to `true`, the user will bypass client trust checks during sign-in.
                   nullable: true
       responses:
         '200':
@@ -9039,6 +9047,7 @@ components:
             - web3_base_signature
             - web3_coinbase_wallet_signature
             - web3_okx_wallet_signature
+            - web3_solana_signature
         nonce:
           type: string
           nullable: true
@@ -9880,6 +9889,10 @@ components:
           description: |
             Unix timestamp of when the user accepted the legal requirements.
           example: 1700690400000
+        bypass_client_trust:
+          type: boolean
+          description: When set to `true`, the user will bypass client trust checks during sign-in.
+          default: false
       required:
         - id
         - object
@@ -11941,6 +11954,9 @@ components:
         force_authn:
           type: boolean
           description: Enable or deactivate ForceAuthn
+        enterprise_connection_id:
+          type: string
+          nullable: true
         created_at:
           type: integer
           format: int64
