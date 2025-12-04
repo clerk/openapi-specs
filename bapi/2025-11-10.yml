@@ -1581,6 +1581,10 @@ paths:
                   type: string
                   description: A custom date/time denoting _when_ the user signed up to the application, specified in RFC3339 format (e.g. `2012-10-20T07:15:20.902Z`).
                   nullable: true
+                bypass_client_trust:
+                  type: boolean
+                  description: When set to `true`, the user will bypass client trust checks during sign-in.
+                  nullable: true
       responses:
         '200':
           $ref: '#/components/responses/User'
@@ -1965,6 +1969,10 @@ paths:
                 created_at:
                   type: string
                   description: A custom date/time denoting _when_ the user signed up to the application, specified in RFC3339 format (e.g. `2012-10-20T07:15:20.902Z`).
+                  nullable: true
+                bypass_client_trust:
+                  type: boolean
+                  description: When set to `true`, the user will bypass client trust checks during sign-in.
                   nullable: true
       responses:
         '200':
@@ -9978,6 +9986,10 @@ components:
           description: |
             Unix timestamp of when the user accepted the legal requirements.
           example: 1700690400000
+        bypass_client_trust:
+          type: boolean
+          description: When set to `true`, the user will bypass client trust checks during sign-in.
+          default: false
       required:
         - id
         - object
@@ -10100,12 +10112,14 @@ components:
           description: The name of the feature.
         description:
           type: string
+          nullable: true
           description: The description of the feature.
         slug:
           type: string
           description: The URL-friendly slug for the feature.
         avatar_url:
           type: string
+          nullable: true
           description: The URL of the feature's avatar image.
     CommercePlan:
       type: object
@@ -11976,6 +11990,9 @@ components:
         force_authn:
           type: boolean
           description: Enable or deactivate ForceAuthn
+        enterprise_connection_id:
+          type: string
+          nullable: true
         created_at:
           type: integer
           format: int64
@@ -12140,6 +12157,37 @@ components:
             RFC3339 timestamp to extend the free trial to.
             Must be in the future and not more than 365 days from now.
           example: '2026-01-08T00:00:00Z'
+    schemas-FeatureResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - object
+        - id
+        - name
+        - description
+        - slug
+        - avatar_url
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - feature
+        id:
+          type: string
+          description: Unique identifier for the feature.
+        name:
+          type: string
+          description: The name of the feature.
+        description:
+          type: string
+          description: The description of the feature.
+        slug:
+          type: string
+          description: The URL-friendly slug for the feature.
+        avatar_url:
+          type: string
+          description: The URL of the feature's avatar image.
     schemas-CommercePlan:
       type: object
       additionalProperties: false
@@ -12256,7 +12304,7 @@ components:
         features:
           type: array
           items:
-            $ref: '#/components/schemas/FeatureResponse'
+            $ref: '#/components/schemas/schemas-FeatureResponse'
           description: The features included in this plan.
         free_trial_enabled:
           type: boolean
