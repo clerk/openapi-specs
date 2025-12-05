@@ -1180,7 +1180,7 @@ paths:
 
                     Can be one of the following `email_code`, `email_link`,
                     `phone_code`, `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature`,
-                    `web3_okx_wallet_signature`, `reset_password_phone_code`, `reset_password_email_code`,
+                    `web3_okx_wallet_signature`, `web3_solana_signature`, `reset_password_phone_code`, `reset_password_email_code`,
                     `oauth_[provider]`, `saml`, `passkey`, `enterprise_sso`
                 email_address_id:
                   type: string
@@ -1192,7 +1192,7 @@ paths:
                   nullable: true
                 web3_wallet_id:
                   type: string
-                  description: Used with the `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature` and `web3_okx_wallet_signature` strategies.
+                  description: Used with the `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature`, `web3_okx_wallet_signature`, and `web3_solana_signature` strategies.
                   nullable: true
                 passkey_id:
                   type: string
@@ -1267,7 +1267,7 @@ paths:
 
                     Can be one of the following `email_code`, `email_link`, `password`, `phone_code`,
                     `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature`, `web3_okx_wallet_signature`,
-                    `reset_password_phone_code`, `reset_password_email_code`, `passkey`, `google_one_tap`
+                    `web3_solana_signature`, `reset_password_phone_code`, `reset_password_email_code`, `passkey`, `google_one_tap`
                 code:
                   type: string
                   description: The code that was sent to the email. Used with the `email_code`, `phone_code`, and `email_link` strategies.
@@ -1278,7 +1278,7 @@ paths:
                   nullable: true
                 signature:
                   type: string
-                  description: Used with the `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature` and `web3_okx_wallet_signature` strategies.
+                  description: Used with the `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature`, `web3_okx_wallet_signature`, and `web3_solana_signature` strategies.
                   nullable: true
                 token:
                   type: string
@@ -1674,6 +1674,7 @@ paths:
                     - web3_base_signature
                     - web3_coinbase_wallet_signature
                     - web3_okx_wallet_signature
+                    - web3_solana_signature
                     - saml
                     - oauth
                 redirect_url:
@@ -1738,6 +1739,7 @@ paths:
                     - web3_base_signature
                     - web3_coinbase_wallet_signature
                     - web3_okx_wallet_signature
+                    - web3_solana_signature
                     - google_one_tap
                 code:
                   nullable: true
@@ -3332,7 +3334,7 @@ paths:
                     Can be one of `oauth_[provider]` or `oauth_token_[provider]`.
                     The `oauth_[provider]` strategy can be used for regular OAuth flows with redirects and a `redirect_url` parameter is also required.
                     The `oauth_token_[provider]` strategy can be used for native flows, along with a `token` or `code` parameter.
-                  pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z]+$
+                  pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z0-9_]+$
                 redirect_url:
                   type: string
                   nullable: true
@@ -7348,6 +7350,7 @@ components:
             - web3_base_signature
             - web3_coinbase_wallet_signature
             - web3_okx_wallet_signature
+            - web3_solana_signature
         attempts:
           type: integer
           nullable: true
@@ -8127,6 +8130,7 @@ components:
             - web3_base_signature
             - web3_coinbase_wallet_signature
             - web3_okx_wallet_signature
+            - web3_solana_signature
             - totp
             - backup_code
             - oauth_apple
@@ -8211,7 +8215,7 @@ components:
             - transferable
         strategy:
           type: string
-          pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z]+$
+          pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z0-9_]+$
         external_verification_redirect_url:
           nullable: true
           type: string
