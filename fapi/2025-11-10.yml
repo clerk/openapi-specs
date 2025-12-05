@@ -1789,6 +1789,7 @@ paths:
                     - web3_base_signature
                     - web3_coinbase_wallet_signature
                     - web3_okx_wallet_signature
+                    - web3_solana_signature
                     - google_one_tap
                 code:
                   nullable: true
@@ -3391,7 +3392,7 @@ paths:
                     Can be one of `oauth_[provider]` or `oauth_token_[provider]`.
                     The `oauth_[provider]` strategy can be used for regular OAuth flows with redirects and a `redirect_url` parameter is also required.
                     The `oauth_token_[provider]` strategy can be used for native flows, along with a `token` or `code` parameter.
-                  pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z]+$
+                  pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z0-9_]+$
                 redirect_url:
                   type: string
                   nullable: true
@@ -8335,6 +8336,7 @@ components:
             - web3_base_signature
             - web3_coinbase_wallet_signature
             - web3_okx_wallet_signature
+            - web3_solana_signature
         attempts:
           type: integer
           nullable: true
@@ -9114,6 +9116,7 @@ components:
             - web3_base_signature
             - web3_coinbase_wallet_signature
             - web3_okx_wallet_signature
+            - web3_solana_signature
             - totp
             - backup_code
             - oauth_apple
@@ -9200,7 +9203,7 @@ components:
             - transferable
         strategy:
           type: string
-          pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z]+$
+          pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z0-9_]+$
         external_verification_redirect_url:
           nullable: true
           type: string
@@ -9706,6 +9709,7 @@ components:
             - web3_base_signature
             - web3_coinbase_wallet_signature
             - web3_okx_wallet_signature
+            - web3_solana_signature
             - totp
             - backup_code
             - oauth_apple
