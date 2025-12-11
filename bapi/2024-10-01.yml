@@ -115,6 +115,8 @@ tags:
     description: A Machine represents a machine/server/service which can be used in machine-to-machine authentication.
   - name: M2M Tokens
     description: Machine to Machine Tokens are used to manage authentication between Machines.
+  - name: API Keys
+    description: Endpoints for managing API Keys
   - name: Sign-in Tokens
     description: |-
       Sign-in tokens are JWTs that can be used to sign in to an application without specifying any credentials.
@@ -1621,6 +1623,10 @@ paths:
                   type: string
                   description: A custom date/time denoting _when_ the user signed up to the application, specified in RFC3339 format (e.g. `2012-10-20T07:15:20.902Z`).
                   nullable: true
+                bypass_client_trust:
+                  type: boolean
+                  description: When set to `true`, the user will bypass client trust checks during sign-in.
+                  nullable: true
       responses:
         '200':
           $ref: '#/components/responses/User'
@@ -2005,6 +2011,10 @@ paths:
                 created_at:
                   type: string
                   description: A custom date/time denoting _when_ the user signed up to the application, specified in RFC3339 format (e.g. `2012-10-20T07:15:20.902Z`).
+                  nullable: true
+                bypass_client_trust:
+                  type: boolean
+                  description: When set to `true`, the user will bypass client trust checks during sign-in.
                   nullable: true
       responses:
         '200':
@@ -7238,6 +7248,1237 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /api_keys:
+    post:
+      operationId: createApiKey
+      summary: Create an API Key
+      tags:
+        - API Keys
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  minLength: 3
+                  maxLength: 25
+                  default: api_key
+                name:
+                  type: string
+                  minLength: 3
+                  pattern: ^(\S(.*\S)?)?$
+                description:
+                  type: string
+                  nullable: true
+                  maxLength: 255
+                subject:
+                  type: string
+                  pattern: ^(user|org|mch)_\w{27}$
+                claims:
+                  nullable: true
+                scopes:
+                  type: array
+                  items:
+                    type: string
+                  default: []
+                created_by:
+                  type: string
+                  nullable: true
+                  pattern: ^user_\w{27}$
+                seconds_until_expiration:
+                  type: number
+                  nullable: true
+                  minimum: 0
+                  exclusiveMinimum: true
+              required:
+                - name
+                - subject
+              additionalProperties: false
+      responses:
+        '200':
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum:
+                      - api_key
+                  id:
+                    type: string
+                    pattern: ^ak_[0-9A-Fa-f]{32}$
+                    example: ak_3beecc9c60adb5f9b850e91a8ee1e992
+                  type:
+                    type: string
+                    minLength: 3
+                    example: api_key
+                  subject:
+                    type: string
+                    pattern: ^(user|org|mch)_\w{27}$
+                    example: user_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                  name:
+                    type: string
+                    example: MY_SERVICE_API_KEY
+                  description:
+                    type: string
+                    nullable: true
+                    maxLength: 255
+                    example: This is my API Key
+                  claims:
+                    nullable: true
+                    example:
+                      foo: bar
+                  scopes:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - read
+                      - write
+                  secret:
+                    type: string
+                    example: ak_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+                  revoked:
+                    type: boolean
+                    example: false
+                  revocation_reason:
+                    type: string
+                    nullable: true
+                    example: Revoked by user
+                  expired:
+                    type: boolean
+                    example: false
+                  expiration:
+                    type: number
+                    nullable: true
+                    example: 1716883200
+                  created_by:
+                    type: string
+                    nullable: true
+                    pattern: ^user_\w{27}$
+                    example: user_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                  last_used_at:
+                    type: number
+                    nullable: true
+                    example: 1716883200
+                  created_at:
+                    type: number
+                    example: 1716883200
+                  updated_at:
+                    type: number
+                    example: 1716883200
+                required:
+                  - object
+                  - id
+                  - type
+                  - subject
+                  - name
+                  - claims
+                  - scopes
+                  - secret
+                  - revoked
+                  - revocation_reason
+                  - expired
+                  - expiration
+                  - created_by
+                  - last_used_at
+                  - created_at
+                  - updated_at
+                additionalProperties: false
+        '400':
+          description: 400 Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: Bad Request
+                        long_message:
+                          type: string
+                          example: 'Invalid ''url_parameter.example'': Failed regex check'
+                        code:
+                          type: string
+                          example: bad_request
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '409':
+          description: 409 Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+    get:
+      operationId: getApiKeys
+      summary: Get API Keys
+      tags:
+        - API Keys
+      parameters:
+        - schema:
+            type: string
+            minLength: 3
+            default: api_key
+          required: false
+          name: type
+          in: query
+        - schema:
+            type: string
+            pattern: ^(user|org|mch)_\w{27}$
+          required: true
+          name: subject
+          in: query
+        - schema:
+            type: string
+            enum:
+              - 'true'
+              - 'false'
+            default: 'false'
+          required: false
+          name: include_invalid
+          in: query
+        - schema:
+            type: number
+            minimum: 1
+            maximum: 100
+            default: 10
+          required: false
+          name: limit
+          in: query
+        - schema:
+            type: number
+            nullable: true
+            minimum: 0
+            default: 0
+          required: false
+          name: offset
+          in: query
+        - schema:
+            type: string
+          required: false
+          name: query
+          in: query
+      responses:
+        '200':
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        object:
+                          type: string
+                          enum:
+                            - api_key
+                        id:
+                          type: string
+                          pattern: ^ak_[0-9A-Fa-f]{32}$
+                          example: ak_3beecc9c60adb5f9b850e91a8ee1e992
+                        type:
+                          type: string
+                          minLength: 3
+                          example: api_key
+                        subject:
+                          type: string
+                          pattern: ^(user|org|mch)_\w{27}$
+                          example: user_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                        name:
+                          type: string
+                          example: MY_SERVICE_API_KEY
+                        description:
+                          type: string
+                          nullable: true
+                          maxLength: 255
+                          example: This is my API Key
+                        claims:
+                          nullable: true
+                          example:
+                            foo: bar
+                        scopes:
+                          type: array
+                          items:
+                            type: string
+                          example:
+                            - read
+                            - write
+                        revoked:
+                          type: boolean
+                          example: false
+                        revocation_reason:
+                          type: string
+                          nullable: true
+                          example: Revoked by user
+                        expired:
+                          type: boolean
+                          example: false
+                        expiration:
+                          type: number
+                          nullable: true
+                          example: 1716883200
+                        created_by:
+                          type: string
+                          nullable: true
+                          pattern: ^user_\w{27}$
+                          example: user_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                        last_used_at:
+                          type: number
+                          nullable: true
+                          example: 1716883200
+                        created_at:
+                          type: number
+                          example: 1716883200
+                        updated_at:
+                          type: number
+                          example: 1716883200
+                      required:
+                        - object
+                        - id
+                        - type
+                        - subject
+                        - name
+                        - claims
+                        - scopes
+                        - revoked
+                        - revocation_reason
+                        - expired
+                        - expiration
+                        - created_by
+                        - last_used_at
+                        - created_at
+                        - updated_at
+                      additionalProperties: false
+                  total_count:
+                    type: number
+                required:
+                  - data
+                  - total_count
+        '400':
+          description: 400 Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: Bad Request
+                        long_message:
+                          type: string
+                          example: 'Invalid ''url_parameter.example'': Failed regex check'
+                        code:
+                          type: string
+                          example: bad_request
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '404':
+          description: 404 Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+  /api_keys/{apiKeyID}:
+    get:
+      operationId: getApiKey
+      summary: Get an API Key by ID
+      tags:
+        - API Keys
+      parameters:
+        - schema:
+            type: string
+            pattern: ^(ak|api_key)_[0-9A-Fa-f]{32}$
+          required: true
+          name: apiKeyID
+          in: path
+      responses:
+        '200':
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum:
+                      - api_key
+                  id:
+                    type: string
+                    pattern: ^ak_[0-9A-Fa-f]{32}$
+                    example: ak_3beecc9c60adb5f9b850e91a8ee1e992
+                  type:
+                    type: string
+                    minLength: 3
+                    example: api_key
+                  subject:
+                    type: string
+                    pattern: ^(user|org|mch)_\w{27}$
+                    example: user_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                  name:
+                    type: string
+                    example: MY_SERVICE_API_KEY
+                  description:
+                    type: string
+                    nullable: true
+                    maxLength: 255
+                    example: This is my API Key
+                  claims:
+                    nullable: true
+                    example:
+                      foo: bar
+                  scopes:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - read
+                      - write
+                  revoked:
+                    type: boolean
+                    example: false
+                  revocation_reason:
+                    type: string
+                    nullable: true
+                    example: Revoked by user
+                  expired:
+                    type: boolean
+                    example: false
+                  expiration:
+                    type: number
+                    nullable: true
+                    example: 1716883200
+                  created_by:
+                    type: string
+                    nullable: true
+                    pattern: ^user_\w{27}$
+                    example: user_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                  last_used_at:
+                    type: number
+                    nullable: true
+                    example: 1716883200
+                  created_at:
+                    type: number
+                    example: 1716883200
+                  updated_at:
+                    type: number
+                    example: 1716883200
+                required:
+                  - object
+                  - id
+                  - type
+                  - subject
+                  - name
+                  - claims
+                  - scopes
+                  - revoked
+                  - revocation_reason
+                  - expired
+                  - expiration
+                  - created_by
+                  - last_used_at
+                  - created_at
+                  - updated_at
+                additionalProperties: false
+        '400':
+          description: 400 Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: Bad Request
+                        long_message:
+                          type: string
+                          example: 'Invalid ''url_parameter.example'': Failed regex check'
+                        code:
+                          type: string
+                          example: bad_request
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '404':
+          description: 404 Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+    patch:
+      operationId: updateApiKey
+      summary: Update an API Key
+      tags:
+        - API Keys
+      parameters:
+        - schema:
+            type: string
+            pattern: ^(ak|api_key)_[0-9A-Fa-f]{32}$
+          required: true
+          name: apiKeyID
+          in: path
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                claims:
+                  nullable: true
+                scopes:
+                  type: array
+                  items:
+                    type: string
+                description:
+                  type: string
+                  nullable: true
+                  maxLength: 255
+                subject:
+                  type: string
+                  pattern: ^(user|org|mch)_\w{27}$
+                seconds_until_expiration:
+                  type: number
+                  nullable: true
+                  minimum: 0
+                  exclusiveMinimum: true
+              additionalProperties: false
+      responses:
+        '200':
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum:
+                      - api_key
+                  id:
+                    type: string
+                    pattern: ^ak_[0-9A-Fa-f]{32}$
+                    example: ak_3beecc9c60adb5f9b850e91a8ee1e992
+                  type:
+                    type: string
+                    minLength: 3
+                    example: api_key
+                  subject:
+                    type: string
+                    pattern: ^(user|org|mch)_\w{27}$
+                    example: user_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                  name:
+                    type: string
+                    example: MY_SERVICE_API_KEY
+                  description:
+                    type: string
+                    nullable: true
+                    maxLength: 255
+                    example: This is my API Key
+                  claims:
+                    nullable: true
+                    example:
+                      foo: bar
+                  scopes:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - read
+                      - write
+                  revoked:
+                    type: boolean
+                    example: false
+                  revocation_reason:
+                    type: string
+                    nullable: true
+                    example: Revoked by user
+                  expired:
+                    type: boolean
+                    example: false
+                  expiration:
+                    type: number
+                    nullable: true
+                    example: 1716883200
+                  created_by:
+                    type: string
+                    nullable: true
+                    pattern: ^user_\w{27}$
+                    example: user_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                  last_used_at:
+                    type: number
+                    nullable: true
+                    example: 1716883200
+                  created_at:
+                    type: number
+                    example: 1716883200
+                  updated_at:
+                    type: number
+                    example: 1716883200
+                required:
+                  - object
+                  - id
+                  - type
+                  - subject
+                  - name
+                  - claims
+                  - scopes
+                  - revoked
+                  - revocation_reason
+                  - expired
+                  - expiration
+                  - created_by
+                  - last_used_at
+                  - created_at
+                  - updated_at
+                additionalProperties: false
+        '400':
+          description: 400 Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: Bad Request
+                        long_message:
+                          type: string
+                          example: 'Invalid ''url_parameter.example'': Failed regex check'
+                        code:
+                          type: string
+                          example: bad_request
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '404':
+          description: 404 Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+    delete:
+      operationId: deleteApiKey
+      summary: Delete an API Key
+      tags:
+        - API Keys
+      parameters:
+        - schema:
+            type: string
+            pattern: ^(ak|api_key)_[0-9A-Fa-f]{32}$
+          required: true
+          name: apiKeyID
+          in: path
+      responses:
+        '200':
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: ak_3beecc9c60adb5f9b850e91a8ee1e992
+                  object:
+                    type: string
+                    enum:
+                      - api_key
+                  deleted:
+                    type: boolean
+                    enum:
+                      - true
+                required:
+                  - id
+                  - object
+                  - deleted
+        '400':
+          description: 400 Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: Bad Request
+                        long_message:
+                          type: string
+                          example: 'Invalid ''url_parameter.example'': Failed regex check'
+                        code:
+                          type: string
+                          example: bad_request
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '404':
+          description: 404 Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+  /api_keys/{apiKeyID}/secret:
+    get:
+      operationId: getApiKeySecret
+      summary: Get an API Key Secret
+      tags:
+        - API Keys
+      parameters:
+        - schema:
+            type: string
+            pattern: ^(ak|api_key)_[0-9A-Fa-f]{32}$
+          required: true
+          name: apiKeyID
+          in: path
+      responses:
+        '200':
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  secret:
+                    type: string
+                required:
+                  - secret
+        '400':
+          description: 400 Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: Bad Request
+                        long_message:
+                          type: string
+                          example: 'Invalid ''url_parameter.example'': Failed regex check'
+                        code:
+                          type: string
+                          example: bad_request
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '404':
+          description: 404 Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+  /api_keys/{apiKeyID}/revoke:
+    post:
+      operationId: revokeApiKey
+      summary: Revoke an API Key
+      tags:
+        - API Keys
+      parameters:
+        - schema:
+            type: string
+            pattern: ^(ak|api_key)_[0-9A-Fa-f]{32}$
+          required: true
+          name: apiKeyID
+          in: path
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                revocation_reason:
+                  type: string
+                  nullable: true
+              additionalProperties: false
+      responses:
+        '200':
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum:
+                      - api_key
+                  id:
+                    type: string
+                    pattern: ^ak_[0-9A-Fa-f]{32}$
+                    example: ak_3beecc9c60adb5f9b850e91a8ee1e992
+                  type:
+                    type: string
+                    minLength: 3
+                    example: api_key
+                  subject:
+                    type: string
+                    pattern: ^(user|org|mch)_\w{27}$
+                    example: user_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                  name:
+                    type: string
+                    example: MY_SERVICE_API_KEY
+                  description:
+                    type: string
+                    nullable: true
+                    maxLength: 255
+                    example: This is my API Key
+                  claims:
+                    nullable: true
+                    example:
+                      foo: bar
+                  scopes:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - read
+                      - write
+                  revoked:
+                    type: boolean
+                    example: false
+                  revocation_reason:
+                    type: string
+                    nullable: true
+                    example: Revoked by user
+                  expired:
+                    type: boolean
+                    example: false
+                  expiration:
+                    type: number
+                    nullable: true
+                    example: 1716883200
+                  created_by:
+                    type: string
+                    nullable: true
+                    pattern: ^user_\w{27}$
+                    example: user_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                  last_used_at:
+                    type: number
+                    nullable: true
+                    example: 1716883200
+                  created_at:
+                    type: number
+                    example: 1716883200
+                  updated_at:
+                    type: number
+                    example: 1716883200
+                required:
+                  - object
+                  - id
+                  - type
+                  - subject
+                  - name
+                  - claims
+                  - scopes
+                  - revoked
+                  - revocation_reason
+                  - expired
+                  - expiration
+                  - created_by
+                  - last_used_at
+                  - created_at
+                  - updated_at
+                additionalProperties: false
+        '400':
+          description: 400 Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: Bad Request
+                        long_message:
+                          type: string
+                          example: 'Invalid ''url_parameter.example'': Failed regex check'
+                        code:
+                          type: string
+                          example: bad_request
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '404':
+          description: 404 Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+  /api_keys/verify:
+    post:
+      operationId: verifyApiKey
+      summary: Verify an API Key
+      tags:
+        - API Keys
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                secret:
+                  type: string
+              required:
+                - secret
+              additionalProperties: false
+      responses:
+        '200':
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum:
+                      - api_key
+                  id:
+                    type: string
+                    pattern: ^ak_[0-9A-Fa-f]{32}$
+                    example: ak_3beecc9c60adb5f9b850e91a8ee1e992
+                  type:
+                    type: string
+                    minLength: 3
+                    example: api_key
+                  subject:
+                    type: string
+                    pattern: ^(user|org|mch)_\w{27}$
+                    example: user_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                  name:
+                    type: string
+                    example: MY_SERVICE_API_KEY
+                  description:
+                    type: string
+                    nullable: true
+                    maxLength: 255
+                    example: This is my API Key
+                  claims:
+                    nullable: true
+                    example:
+                      foo: bar
+                  scopes:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - read
+                      - write
+                  revoked:
+                    type: boolean
+                    example: false
+                  revocation_reason:
+                    type: string
+                    nullable: true
+                    example: Revoked by user
+                  expired:
+                    type: boolean
+                    example: false
+                  expiration:
+                    type: number
+                    nullable: true
+                    example: 1716883200
+                  created_by:
+                    type: string
+                    nullable: true
+                    pattern: ^user_\w{27}$
+                    example: user_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                  last_used_at:
+                    type: number
+                    nullable: true
+                    example: 1716883200
+                  created_at:
+                    type: number
+                    example: 1716883200
+                  updated_at:
+                    type: number
+                    example: 1716883200
+                required:
+                  - object
+                  - id
+                  - type
+                  - subject
+                  - name
+                  - claims
+                  - scopes
+                  - revoked
+                  - revocation_reason
+                  - expired
+                  - expiration
+                  - created_by
+                  - last_used_at
+                  - created_at
+                  - updated_at
+                additionalProperties: false
+        '400':
+          description: 400 Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: Bad Request
+                        long_message:
+                          type: string
+                          example: 'Invalid ''url_parameter.example'': Failed regex check'
+                        code:
+                          type: string
+                          example: bad_request
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '404':
+          description: 404 Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
   /m2m_tokens:
     post:
       x-speakeasy-group: m2m
@@ -9039,6 +10280,7 @@ components:
             - web3_base_signature
             - web3_coinbase_wallet_signature
             - web3_okx_wallet_signature
+            - web3_solana_signature
         nonce:
           type: string
           nullable: true
@@ -9880,6 +11122,10 @@ components:
           description: |
             Unix timestamp of when the user accepted the legal requirements.
           example: 1700690400000
+        bypass_client_trust:
+          type: boolean
+          description: When set to `true`, the user will bypass client trust checks during sign-in.
+          default: false
       required:
         - id
         - object
@@ -11941,6 +13187,9 @@ components:
         force_authn:
           type: boolean
           description: Enable or deactivate ForceAuthn
+        enterprise_connection_id:
+          type: string
+          nullable: true
         created_at:
           type: integer
           format: int64
