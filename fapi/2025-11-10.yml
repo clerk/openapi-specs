@@ -782,7 +782,7 @@ paths:
       parameters:
         - in: header
           name: Origin
-          description: The origin of the request
+          description: Origin of the request
           required: true
           schema:
             type: string
@@ -790,6 +790,8 @@ paths:
         '200':
           $ref: '#/components/responses/Client.Environment'
         '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
           $ref: '#/components/responses/ClerkErrors'
   /v1/saml/metadata/{saml_connection_id}.xml:
     get:
@@ -8535,15 +8537,9 @@ components:
           type: object
           additionalProperties: false
           properties:
-            enabled:
-              type: boolean
             stripe_publishable_key:
               type: string
               nullable: true
-            has_paid_user_plans:
-              type: boolean
-            has_paid_org_plans:
-              type: boolean
             free_trial_requires_payment_method:
               type: boolean
             user:
