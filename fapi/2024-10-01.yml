@@ -10498,6 +10498,7 @@ components:
         - Malformed request
         - Expired authorization code
         - Invalid `redirect_uri` (doesn't match authorization request)
+        - Unsupported token type for revocation (e.g., JWT access tokens)
       content:
         application/json:
           schema:
@@ -10505,6 +10506,10 @@ components:
             properties:
               error:
                 type: string
+                enum:
+                  - invalid_request
+                  - invalid_grant
+                  - unsupported_token_type
                 example: invalid_request
               error_description:
                 type: string
