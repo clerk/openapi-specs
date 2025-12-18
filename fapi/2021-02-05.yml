@@ -694,15 +694,9 @@ paths:
         '200':
           description: Success, no content.
         '400':
-          $ref: '#/components/responses/ClerkErrors'
+          $ref: '#/components/responses/OAuth.TokenError400'
         '401':
-          $ref: '#/components/responses/ClerkErrors'
-        '403':
-          $ref: '#/components/responses/ClerkErrors'
-        '404':
-          $ref: '#/components/responses/ClerkErrors'
-        '422':
-          $ref: '#/components/responses/ClerkErrors'
+          $ref: '#/components/responses/OAuth.TokenError401'
   /v1/me/oauth/consent/{client_id}:
     get:
       summary: Get consent information
@@ -10544,6 +10538,7 @@ components:
         - Malformed request
         - Expired authorization code
         - Invalid `redirect_uri` (doesn't match authorization request)
+        - Unsupported token type for revocation (e.g., JWT access tokens)
       content:
         application/json:
           schema:
@@ -10551,6 +10546,10 @@ components:
             properties:
               error:
                 type: string
+                enum:
+                  - invalid_request
+                  - invalid_grant
+                  - unsupported_token_type
                 example: invalid_request
               error_description:
                 type: string
