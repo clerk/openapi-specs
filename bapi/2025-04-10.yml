@@ -6893,6 +6893,8 @@ paths:
   /platform/applications/{applicationID}/domains/{domainIDOrName}: {}
   /platform/applications/{applicationID}/domains/{domainIDOrName}/status: {}
   /platform/applications/{applicationID}/domains/{domainIDOrName}/dns_check: {}
+  /platform/applications/{applicationID}/transfers: {}
+  /platform/applications/{applicationID}/transfers/{transferID}: {}
   /commerce/plans:
     get:
       operationId: GetCommercePlanList
