@@ -733,6 +733,7 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/me/organization_creation_defaults: {}
   /v1/account_portal:
     get:
       summary: Get account portal

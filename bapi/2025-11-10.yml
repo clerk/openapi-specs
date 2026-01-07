@@ -2718,6 +2718,74 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '500':
           $ref: '#/components/responses/ClerkErrors'
+  /users/{user_id}/password/set_compromised:
+    post:
+      operationId: SetUserPasswordCompromised
+      x-speakeasy-group: users
+      x-speakeasy-name-override: setPasswordCompromised
+      summary: Set a user's password as compromised
+      description: Sets the given user's password as compromised, which means that they will be prompted to reset their password on their next sign in.
+      tags:
+        - Users
+      parameters:
+        - name: user_id
+          in: path
+          description: The ID of the user to set the password as compromised
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                revoke_all_sessions:
+                  type: boolean
+                  nullable: true
+      responses:
+        '200':
+          $ref: '#/components/responses/User'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /users/{user_id}/password/unset_compromised:
+    post:
+      operationId: UnsetUserPasswordCompromised
+      x-speakeasy-group: users
+      x-speakeasy-name-override: unsetPasswordCompromised
+      summary: Unmark a user's password as compromised
+      description: Removes the compromised status from the given user's password. The user will no longer be prompted to reset their password on their next sign in.
+      tags:
+        - Users
+      parameters:
+        - name: user_id
+          in: path
+          description: The ID of the user to unset the compromised status for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/User'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /invitations:
     post:
       operationId: CreateInvitation
@@ -6897,6 +6965,8 @@ paths:
   /platform/applications/{applicationID}/domains/{domainIDOrName}: {}
   /platform/applications/{applicationID}/domains/{domainIDOrName}/status: {}
   /platform/applications/{applicationID}/domains/{domainIDOrName}/dns_check: {}
+  /platform/applications/{applicationID}/transfers: {}
+  /platform/applications/{applicationID}/transfers/{transferID}: {}
   /billing/plans:
     get:
       operationId: GetCommercePlanList
