@@ -101,6 +101,20 @@ tags:
     description: Used to interact with the waitlist.
   - name: API Keys
     description: Endpoints for managing API Keys
+  - name: Plans
+    description: Used to interact with plans that users and organizations can purchase.
+  - name: Subscriptions
+    description: Used to interact with subscriptions belonging to users and organizations.
+  - name: Subscription Items
+    description: Used to interact with subscription items belonging to users and organizations.
+  - name: Checkouts
+    description: Used to interact with the checkout flow.
+  - name: Payment Methods
+    description: Used to interact with payment methods belonging to users and organizations.
+  - name: Statements
+    description: Used to interact with billing statements for users and organizations.
+  - name: Payment Attempts
+    description: Used to interact with payment attempts for users and organizations.
 paths:
   /.well-known/assetlinks.json:
     get:
@@ -3819,7 +3833,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: getUserMainSubscription
       tags:
-        - Billing
+        - Subscriptions
       summary: Get user's main billing subscription
       description: Returns the main billing subscription for the current user.
       responses:
@@ -3837,7 +3851,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: listUserSubscriptionItems
       tags:
-        - Billing
+        - Subscription Items
       summary: List user's subscription items
       description: Returns a list of subscription items for the current user.
       parameters:
@@ -3857,7 +3871,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: cancelUserSubscriptionItem
       tags:
-        - Billing
+        - Subscription Items
       summary: Cancel user's subscription item
       description: Cancels a subscription item for the current user.
       parameters:
@@ -3892,7 +3906,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: listUserPaymentMethods
       tags:
-        - Billing
+        - Payment Methods
       summary: List user payment methods
       description: Returns a list of all payment methods for the current user.
       parameters:
@@ -3915,7 +3929,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: createUserPaymentMethod
       tags:
-        - Billing
+        - Payment Methods
       summary: Create user payment method
       description: Creates a new payment method for the current user.
       requestBody:
@@ -3954,7 +3968,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: initializeUserPaymentMethod
       tags:
-        - Billing
+        - Payment Methods
       summary: Initialize user payment method
       description: Initializes a payment method setup process for the current user.
       responses:
@@ -3976,7 +3990,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: deleteUserPaymentMethod
       tags:
-        - Billing
+        - Payment Methods
       summary: Delete user payment method
       description: Deletes a specific payment method for the current user.
       parameters:
@@ -4011,7 +4025,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: createUserCheckout
       tags:
-        - Billing
+        - Checkouts
       summary: Create billing checkout
       description: Creates a new billing checkout for the current user.
       requestBody:
@@ -4059,7 +4073,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: getUserCheckout
       tags:
-        - Billing
+        - Checkouts
       summary: Get billing checkout
       description: Returns a billing checkout for the current user.
       parameters:
@@ -4084,7 +4098,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: confirmUserCheckout
       tags:
-        - Billing
+        - Checkouts
       summary: Confirm billing checkout
       description: Confirms a billing checkout for the current user.
       parameters:
@@ -4135,7 +4149,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: listUserPaymentAttempts
       tags:
-        - Billing
+        - Payment Attempts
       summary: List user payment attempts
       description: Returns a list of payment attempts for the current user.
       parameters:
@@ -4157,7 +4171,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: getUserPaymentAttempt
       tags:
-        - Billing
+        - Payment Attempts
       summary: Get user payment attempt
       description: Returns details of a specific payment attempt for the current user.
       parameters:
@@ -4184,7 +4198,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: setUserDefaultPaymentMethod
       tags:
-        - Billing
+        - Payment Methods
       summary: Set user default payment method
       description: Sets the default payment method for the current user.
       responses:
@@ -4204,7 +4218,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: listUserStatements
       tags:
-        - Billing
+        - Statements
       summary: List user statements
       description: Returns a list of billing statements for the current user.
       parameters:
@@ -4226,7 +4240,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: getUserStatement
       tags:
-        - Billing
+        - Statements
       summary: Get user statement
       description: Returns details of a specific billing statement for the current user.
       parameters:
@@ -4253,7 +4267,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: createOrganizationCheckout
       tags:
-        - Billing
+        - Checkouts
       summary: Create organization billing checkout
       description: Creates a new billing checkout for the organization.
       parameters:
@@ -4304,7 +4318,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: getOrganizationCheckout
       tags:
-        - Billing
+        - Checkouts
       summary: Get organization billing checkout
       description: Returns a billing checkout for the organization.
       parameters:
@@ -4339,7 +4353,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: confirmOrganizationCheckout
       tags:
-        - Billing
+        - Checkouts
       summary: Confirm organization billing checkout
       description: Confirms a billing checkout for the organization.
       parameters:
@@ -4396,7 +4410,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: getOrganizationPaymentMethods
       tags:
-        - Billing
+        - Payment Methods
       summary: List organization payment methods
       description: Lists all payment methods for the organization.
       parameters:
@@ -4422,7 +4436,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: createOrganizationPaymentMethod
       tags:
-        - Billing
+        - Payment Methods
       summary: Create organization payment method
       description: Creates a new payment method for the organization.
       parameters:
@@ -4486,7 +4500,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: initializeOrganizationPaymentMethod
       tags:
-        - Billing
+        - Payment Methods
       summary: Initialize organization payment method
       description: Initializes a payment method for the organization.
       parameters:
@@ -4515,7 +4529,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: deleteOrganizationPaymentMethod
       tags:
-        - Billing
+        - Payment Methods
       summary: Delete organization payment method
       description: Deletes a payment method for the organization.
       parameters:
@@ -4548,7 +4562,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: getOrganizationStatements
       tags:
-        - Billing
+        - Statements
       summary: List organization statements
       description: Lists all statements for the organization.
       parameters:
@@ -4575,7 +4589,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: getOrganizationStatement
       tags:
-        - Billing
+        - Statements
       summary: Get organization statement
       description: Gets a specific statement for the organization.
       parameters:
@@ -4608,7 +4622,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: setOrganizationDefaultPaymentMethod
       tags:
-        - Billing
+        - Payment Methods
       summary: Set organization default payment method
       description: Sets the default payment method for the organization.
       parameters:
@@ -4660,7 +4674,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: getOrganizationSubscription
       tags:
-        - Billing
+        - Subscriptions
       summary: Get organization's billing subscription
       description: Returns the billing subscription for the organization.
       parameters:
@@ -4687,7 +4701,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: listOrganizationSubscriptionItems
       tags:
-        - Billing
+        - Subscription Items
       summary: List organization's subscription items
       description: Returns a list of subscription items for the organization.
       parameters:
@@ -4714,7 +4728,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: cancelOrganizationSubscriptionItem
       tags:
-        - Billing
+        - Subscription Items
       summary: Cancel organization's subscription item
       description: Cancels a subscription item for the organization.
       parameters:
@@ -4747,7 +4761,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: listPlans
       tags:
-        - Billing
+        - Plans
       summary: List billing plans
       description: Returns a list of all publicly visible billing plans.
       parameters:
@@ -4775,7 +4789,7 @@ paths:
       x-speakeasy-group: billing
       x-speakeasy-name-override: getPlan
       tags:
-        - Billing
+        - Plans
       summary: Get a billing plan
       description: Returns a billing plan by ID or slug.
       parameters:
@@ -6150,6 +6164,7 @@ paths:
                         expiration:
                           type: number
                           nullable: true
+                          description: The timestamp for when the API key will expire, in milliseconds
                           example: 1716883200
                         created_by:
                           type: string
@@ -6159,12 +6174,15 @@ paths:
                         last_used_at:
                           type: number
                           nullable: true
+                          description: The timestamp for when the API key was last used, in milliseconds
                           example: 1716883200
                         created_at:
                           type: number
+                          description: The timestamp for when the API key was created, in milliseconds
                           example: 1716883200
                         updated_at:
                           type: number
+                          description: The timestamp for when the API key was last updated, in milliseconds
                           example: 1716883200
                       required:
                         - object
@@ -6338,6 +6356,7 @@ paths:
                   expiration:
                     type: number
                     nullable: true
+                    description: The timestamp for when the API key will expire, in milliseconds
                     example: 1716883200
                   created_by:
                     type: string
@@ -6347,12 +6366,15 @@ paths:
                   last_used_at:
                     type: number
                     nullable: true
+                    description: The timestamp for when the API key was last used, in milliseconds
                     example: 1716883200
                   created_at:
                     type: number
+                    description: The timestamp for when the API key was created, in milliseconds
                     example: 1716883200
                   updated_at:
                     type: number
+                    description: The timestamp for when the API key was last updated, in milliseconds
                     example: 1716883200
                 required:
                   - object
@@ -6507,6 +6529,7 @@ paths:
                   expiration:
                     type: number
                     nullable: true
+                    description: The timestamp for when the API key will expire, in milliseconds
                     example: 1716883200
                   created_by:
                     type: string
@@ -6516,12 +6539,15 @@ paths:
                   last_used_at:
                     type: number
                     nullable: true
+                    description: The timestamp for when the API key was last used, in milliseconds
                     example: 1716883200
                   created_at:
                     type: number
+                    description: The timestamp for when the API key was created, in milliseconds
                     example: 1716883200
                   updated_at:
                     type: number
+                    description: The timestamp for when the API key was last updated, in milliseconds
                     example: 1716883200
                 required:
                   - object
@@ -6674,6 +6700,7 @@ paths:
                   expiration:
                     type: number
                     nullable: true
+                    description: The timestamp for when the API key will expire, in milliseconds
                     example: 1716883200
                   created_by:
                     type: string
@@ -6683,12 +6710,15 @@ paths:
                   last_used_at:
                     type: number
                     nullable: true
+                    description: The timestamp for when the API key was last used, in milliseconds
                     example: 1716883200
                   created_at:
                     type: number
+                    description: The timestamp for when the API key was created, in milliseconds
                     example: 1716883200
                   updated_at:
                     type: number
+                    description: The timestamp for when the API key was last updated, in milliseconds
                     example: 1716883200
                 required:
                   - object
@@ -11505,6 +11535,9 @@ components:
         plan_id:
           type: string
           description: Unique identifier for the associated plan
+        price_id:
+          type: string
+          description: Unique identifier for the associated price
         plan:
           $ref: '#/components/schemas/BillingPlan'
           description: The associated plan
@@ -12739,6 +12772,9 @@ components:
             total_count:
               type: integer
               format: int64
+            has_role_set_migration:
+              type: boolean
+              description: Indicates whether there is an active role set migration for this organization.
         client:
           type: object
           nullable: false
@@ -13382,6 +13418,15 @@ x-tagGroups:
       - Members
       - Domains
       - Roles
+  - name: Billing
+    tags:
+      - Plans
+      - Subscriptions
+      - Subscription Items
+      - Checkouts
+      - Payment Methods
+      - Statements
+      - Payment Attempts
   - name: Other
     tags:
       - Well Known
