@@ -5220,6 +5220,7 @@ paths:
                         expiration:
                           type: number
                           nullable: true
+                          description: The timestamp for when the API key will expire, in milliseconds
                           example: 1716883200
                         created_by:
                           type: string
@@ -5229,12 +5230,15 @@ paths:
                         last_used_at:
                           type: number
                           nullable: true
+                          description: The timestamp for when the API key was last used, in milliseconds
                           example: 1716883200
                         created_at:
                           type: number
+                          description: The timestamp for when the API key was created, in milliseconds
                           example: 1716883200
                         updated_at:
                           type: number
+                          description: The timestamp for when the API key was last updated, in milliseconds
                           example: 1716883200
                       required:
                         - object
@@ -5408,6 +5412,7 @@ paths:
                   expiration:
                     type: number
                     nullable: true
+                    description: The timestamp for when the API key will expire, in milliseconds
                     example: 1716883200
                   created_by:
                     type: string
@@ -5417,12 +5422,15 @@ paths:
                   last_used_at:
                     type: number
                     nullable: true
+                    description: The timestamp for when the API key was last used, in milliseconds
                     example: 1716883200
                   created_at:
                     type: number
+                    description: The timestamp for when the API key was created, in milliseconds
                     example: 1716883200
                   updated_at:
                     type: number
+                    description: The timestamp for when the API key was last updated, in milliseconds
                     example: 1716883200
                 required:
                   - object
@@ -5577,6 +5585,7 @@ paths:
                   expiration:
                     type: number
                     nullable: true
+                    description: The timestamp for when the API key will expire, in milliseconds
                     example: 1716883200
                   created_by:
                     type: string
@@ -5586,12 +5595,15 @@ paths:
                   last_used_at:
                     type: number
                     nullable: true
+                    description: The timestamp for when the API key was last used, in milliseconds
                     example: 1716883200
                   created_at:
                     type: number
+                    description: The timestamp for when the API key was created, in milliseconds
                     example: 1716883200
                   updated_at:
                     type: number
+                    description: The timestamp for when the API key was last updated, in milliseconds
                     example: 1716883200
                 required:
                   - object
@@ -5744,6 +5756,7 @@ paths:
                   expiration:
                     type: number
                     nullable: true
+                    description: The timestamp for when the API key will expire, in milliseconds
                     example: 1716883200
                   created_by:
                     type: string
@@ -5753,12 +5766,15 @@ paths:
                   last_used_at:
                     type: number
                     nullable: true
+                    description: The timestamp for when the API key was last used, in milliseconds
                     example: 1716883200
                   created_at:
                     type: number
+                    description: The timestamp for when the API key was created, in milliseconds
                     example: 1716883200
                   updated_at:
                     type: number
+                    description: The timestamp for when the API key was last updated, in milliseconds
                     example: 1716883200
                 required:
                   - object
@@ -10425,6 +10441,9 @@ components:
             total_count:
               type: integer
               format: int64
+            has_role_set_migration:
+              type: boolean
+              description: Indicates whether there is an active role set migration for this organization.
         client:
           type: object
           nullable: false
