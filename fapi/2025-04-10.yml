@@ -976,6 +976,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '401':
           $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
     put:
       summary: Create New Client
       description: Creates a new Client and sets it either in the response cookies or the response authorization header.
