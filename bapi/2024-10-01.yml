@@ -7107,6 +7107,48 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
         '500':
           $ref: '#/components/responses/ClerkErrors'
+  /billing/subscription_items/{subscription_item_id}/price_transition:
+    post:
+      operationId: CreateBillingPriceTransition
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: createPriceTransition
+      tags:
+        - Billing
+      summary: Create a price transition for a subscription item
+      description: |-
+        Creates a price transition for the specified subscription item.
+        This may create an upcoming subscription item or activate immediately depending on plan and payer rules.
+      parameters:
+        - name: subscription_item_id
+          in: path
+          description: The ID of the subscription item to transition
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Parameters for the price transition
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PriceTransitionRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/CommercePriceTransition'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /organization_permissions:
     get:
       operationId: ListOrganizationPermissions
@@ -7676,7 +7718,7 @@ paths:
                   maxLength: 255
                 subject:
                   type: string
-                  pattern: ^(user|org|mch)_\w{27}$
+                  pattern: ^(user|org|mch|scim)_\w{27}$
                 claims:
                   nullable: true
                 scopes:
@@ -7863,7 +7905,7 @@ paths:
           in: query
         - schema:
             type: string
-            pattern: ^(user|org|mch)_\w{27}$
+            pattern: ^(user|org|mch|scim)_\w{27}$
           required: true
           name: subject
           in: query
@@ -8245,7 +8287,7 @@ paths:
                   maxLength: 255
                 subject:
                   type: string
-                  pattern: ^(user|org|mch)_\w{27}$
+                  pattern: ^(user|org|mch|scim)_\w{27}$
                 seconds_until_expiration:
                   type: number
                   nullable: true
@@ -11610,7 +11652,7 @@ components:
         The algorithms we support at the moment are [`bcrypt`](https://en.wikipedia.org/wiki/Bcrypt), [`bcrypt_sha256_django`](https://docs.djangoproject.com/en/4.0/topics/auth/passwords/), [`md5`](https://en.wikipedia.org/wiki/MD5), `pbkdf2_sha1`, `pbkdf2_sha256`, [`pbkdf2_sha256_django`](https://docs.djangoproject.com/en/4.0/topics/auth/passwords/),
         [`phpass`](https://www.openwall.com/phpass/), `md5_phpass`, [`scrypt_firebase`](https://firebaseopensource.com/projects/firebase/scrypt/),
         [`scrypt_werkzeug`](https://werkzeug.palletsprojects.com/en/3.0.x/utils/#werkzeug.security.generate_password_hash), [`sha256`](https://en.wikipedia.org/wiki/SHA-2),
-        [`ldap_ssha`](https://www.openldap.org/faq/data/cache/347.html) and the [`argon2`](https://argon2.online/) variants: `argon2i` and `argon2id`.
+        [`ldap_ssha`](https://www.openldap.org/faq/data/cache/347.html), the [`argon2`](https://argon2.online/) variants: `argon2i` and `argon2id`, and `sha512_symfony`, the SHA-512 variant of the [Symfony](https://symfony.com/doc/current/security/passwords.html) legacy hasher.
 
         Each of the supported hashers expects the incoming digest to be in a particular format. See the [Clerk docs](https://clerk.com/docs/references/backend/user/create-user) for more information.
     TotalCount:
@@ -13800,6 +13842,141 @@ components:
             RFC3339 timestamp to extend the free trial to.
             Must be in the future and not more than 365 days from now.
           example: '2026-01-08T00:00:00Z'
+    PriceTransitionRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - from_price_id
+        - to_price_id
+      properties:
+        from_price_id:
+          type: string
+          description: The current price ID of the subscription item.
+        to_price_id:
+          type: string
+          description: The target price ID to transition to.
+    CommercePriceResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - object
+        - id
+        - plan_id
+        - instance_id
+        - currency
+        - currency_symbol
+        - amount
+        - annual_monthly_amount
+        - fee
+        - annual_monthly_fee
+        - created_at
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - commerce_price
+        id:
+          type: string
+          description: Unique identifier for the price.
+        plan_id:
+          type: string
+          description: Unique identifier for the associated plan.
+        instance_id:
+          type: string
+          description: Unique identifier for the instance.
+        currency:
+          type: string
+          description: The currency code (e.g., "USD").
+        currency_symbol:
+          type: string
+          description: The currency symbol (e.g., "$").
+        amount:
+          type: integer
+          format: int64
+          description: The amount in cents for the price.
+        annual_monthly_amount:
+          type: integer
+          format: int64
+          description: The monthly amount in cents when billed annually.
+        fee:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        annual_monthly_fee:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        description:
+          type: string
+          nullable: true
+          description: The description of the price.
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) of creation.
+    CommercePriceTransitionDetails:
+      type: object
+      additionalProperties: false
+      required:
+        - previous_plan
+        - previous_price
+        - effective_at
+        - effective_mode
+        - charged_immediately
+        - previous_subscription_item_status
+        - previous_subscription_item_id
+      properties:
+        previous_plan:
+          $ref: '#/components/schemas/CommercePlan'
+        previous_price:
+          $ref: '#/components/schemas/CommercePriceResponse'
+        effective_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) when the new price takes effect.
+        effective_mode:
+          type: string
+          description: When the new price takes effect.
+          enum:
+            - immediate
+            - end_of_period
+        next_billing_date:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (milliseconds) for the next billing date.
+        charged_immediately:
+          type: boolean
+          description: Whether an immediate charge was made.
+        immediate_charge:
+          allOf:
+            - $ref: '#/components/schemas/CommerceMoneyResponse'
+          nullable: true
+          description: Amount charged immediately, if any.
+        previous_subscription_item_status:
+          type: string
+          description: The status of the previous subscription item after transition.
+          enum:
+            - canceled
+            - ended
+            - abandoned
+        previous_subscription_item_id:
+          type: string
+          description: The ID of the previous subscription item.
+    CommercePriceTransitionResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - object
+        - subscription_item
+        - transition
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - commerce_price_transition
+        subscription_item:
+          $ref: '#/components/schemas/CommerceSubscriptionItem'
+        transition:
+          $ref: '#/components/schemas/CommercePriceTransitionDetails'
     Permissions:
       type: object
       additionalProperties: false
@@ -14604,6 +14781,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CommerceSubscriptionItem'
+    CommercePriceTransition:
+      description: A commerce price transition.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommercePriceTransitionResponse'
     Permissions:
       description: Success
       content:

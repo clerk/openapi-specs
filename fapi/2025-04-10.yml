@@ -205,6 +205,7 @@ paths:
                 - email
                 - profile
                 - openid
+                - offline_access
                 - public_metadata
                 - private_metadata
         - name: state
@@ -7742,7 +7743,6 @@ components:
         - last_active_at
     Stubs.Verification.OTP:
       type: object
-      additionalProperties: false
       properties:
         object:
           type: string
@@ -7798,7 +7798,6 @@ components:
         - strategy
     Stubs.Verification.Link:
       type: object
-      additionalProperties: false
       properties:
         object:
           type: string
@@ -7828,7 +7827,6 @@ components:
         - expire_at
     Stubs.Verification.Ticket:
       type: object
-      additionalProperties: false
       properties:
         object:
           type: string
@@ -7880,7 +7878,6 @@ components:
         - strategy
     Stubs.Verification.FromOauth:
       type: object
-      additionalProperties: false
       properties:
         object:
           type: string
@@ -7909,7 +7906,6 @@ components:
         - strategy
     Stubs.Verification.SAML:
       type: object
-      additionalProperties: false
       properties:
         object:
           type: string
@@ -8071,7 +8067,6 @@ components:
         - updated_at
     Stubs.Verification.Web3Signature:
       type: object
-      additionalProperties: false
       properties:
         object:
           type: string
@@ -8892,10 +8887,8 @@ components:
           type: string
         enterprise_connection_id:
           type: string
-          description: Only defined if the strategy is equal to `enterprise_sso`
         enterprise_connection_name:
           type: string
-          description: Only defined if the strategy is equal to `enterprise_sso`
         email_address_id:
           type: string
         phone_number_id:
@@ -9175,7 +9168,7 @@ components:
         - user_data
         - created_session_id
         - abandon_at
-    Stubs.SignUpVerification:
+    Stubs.SignUpVerification.AdditionalFields:
       type: object
       properties:
         next_action:
@@ -9198,17 +9191,33 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Stubs.SignUpVerification'
+            - allOf:
+                - $ref: '#/components/schemas/Stubs.Verification.OTP'
+                - $ref: '#/components/schemas/Stubs.SignUpVerification.AdditionalFields'
+            - allOf:
+                - $ref: '#/components/schemas/Stubs.Verification.Link'
+                - $ref: '#/components/schemas/Stubs.SignUpVerification.AdditionalFields'
+            - allOf:
+                - $ref: '#/components/schemas/Stubs.Verification.Ticket'
+                - $ref: '#/components/schemas/Stubs.SignUpVerification.AdditionalFields'
+            - allOf:
+                - $ref: '#/components/schemas/Stubs.Verification.FromOauth'
+                - $ref: '#/components/schemas/Stubs.SignUpVerification.AdditionalFields'
+            - allOf:
+                - $ref: '#/components/schemas/Stubs.Verification.SAML'
+                - $ref: '#/components/schemas/Stubs.SignUpVerification.AdditionalFields'
         phone_number:
           type: object
           nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/Stubs.SignUpVerification'
+          allOf:
+            - $ref: '#/components/schemas/Stubs.Verification.OTP'
+            - $ref: '#/components/schemas/Stubs.SignUpVerification.AdditionalFields'
         web3_wallet:
           type: object
           nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/Stubs.SignUpVerification'
+          allOf:
+            - $ref: '#/components/schemas/Stubs.Verification.Web3Signature'
+            - $ref: '#/components/schemas/Stubs.SignUpVerification.AdditionalFields'
         external_account:
           type: object
           nullable: true
@@ -9449,63 +9458,6 @@ components:
       required:
         - response
         - client
-    schemas-Stubs.SignInFactor:
-      type: object
-      additionalProperties: false
-      properties:
-        strategy:
-          type: string
-          enum:
-            - ticket
-            - password
-            - email_code
-            - email_link
-            - phone_code
-            - web3_metamask_signature
-            - web3_base_signature
-            - web3_coinbase_wallet_signature
-            - web3_okx_wallet_signature
-            - web3_solana_signature
-            - totp
-            - backup_code
-            - oauth_apple
-            - oauth_google
-            - oauth_facebook
-            - oauth_hubspot
-            - oauth_github
-            - oauth_mock
-            - oauth_custom_mock
-            - oauth_token_mock
-            - saml
-            - enterprise_sso
-            - reset_password_email_code
-            - reset_password_phone_code
-            - passkey
-            - google_one_tap
-        safe_identifier:
-          type: string
-        enterprise_connection_id:
-          type: string
-        enterprise_connection_name:
-          type: string
-        email_address_id:
-          type: string
-        phone_number_id:
-          type: string
-        web3_wallet_id:
-          type: string
-        passkey_id:
-          type: string
-        primary:
-          type: boolean
-          nullable: true
-        external_verification_redirect_url:
-          nullable: true
-          type: string
-        default:
-          type: boolean
-      required:
-        - strategy
     schemas-Client.SignIn:
       type: object
       additionalProperties: false
@@ -9542,12 +9494,12 @@ components:
           type: array
           nullable: true
           items:
-            $ref: '#/components/schemas/schemas-Stubs.SignInFactor'
+            $ref: '#/components/schemas/Stubs.SignInFactor'
         supported_second_factors:
           type: array
           nullable: true
           items:
-            $ref: '#/components/schemas/schemas-Stubs.SignInFactor'
+            $ref: '#/components/schemas/Stubs.SignInFactor'
         first_factor_verification:
           type: object
           nullable: true

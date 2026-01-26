@@ -205,6 +205,7 @@ paths:
                 - email
                 - profile
                 - openid
+                - offline_access
                 - public_metadata
                 - private_metadata
         - name: state
@@ -7783,7 +7784,6 @@ components:
         - last_active_at
     Stubs.Verification.OTP:
       type: object
-      additionalProperties: false
       properties:
         object:
           type: string
@@ -7839,7 +7839,6 @@ components:
         - strategy
     Stubs.Verification.Link:
       type: object
-      additionalProperties: false
       properties:
         object:
           type: string
@@ -7869,7 +7868,6 @@ components:
         - expire_at
     Stubs.Verification.Ticket:
       type: object
-      additionalProperties: false
       properties:
         object:
           type: string
@@ -7921,7 +7919,6 @@ components:
         - strategy
     Stubs.Verification.FromOauth:
       type: object
-      additionalProperties: false
       properties:
         object:
           type: string
@@ -7950,7 +7947,6 @@ components:
         - strategy
     Stubs.Verification.SAML:
       type: object
-      additionalProperties: false
       properties:
         object:
           type: string
@@ -8112,7 +8108,6 @@ components:
         - updated_at
     Stubs.Verification.Web3Signature:
       type: object
-      additionalProperties: false
       properties:
         object:
           type: string
@@ -9213,7 +9208,7 @@ components:
         - user_data
         - created_session_id
         - abandon_at
-    Stubs.SignUpVerification:
+    Stubs.SignUpVerification.AdditionalFields:
       type: object
       properties:
         next_action:
@@ -9236,17 +9231,33 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Stubs.SignUpVerification'
+            - allOf:
+                - $ref: '#/components/schemas/Stubs.Verification.OTP'
+                - $ref: '#/components/schemas/Stubs.SignUpVerification.AdditionalFields'
+            - allOf:
+                - $ref: '#/components/schemas/Stubs.Verification.Link'
+                - $ref: '#/components/schemas/Stubs.SignUpVerification.AdditionalFields'
+            - allOf:
+                - $ref: '#/components/schemas/Stubs.Verification.Ticket'
+                - $ref: '#/components/schemas/Stubs.SignUpVerification.AdditionalFields'
+            - allOf:
+                - $ref: '#/components/schemas/Stubs.Verification.FromOauth'
+                - $ref: '#/components/schemas/Stubs.SignUpVerification.AdditionalFields'
+            - allOf:
+                - $ref: '#/components/schemas/Stubs.Verification.SAML'
+                - $ref: '#/components/schemas/Stubs.SignUpVerification.AdditionalFields'
         phone_number:
           type: object
           nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/Stubs.SignUpVerification'
+          allOf:
+            - $ref: '#/components/schemas/Stubs.Verification.OTP'
+            - $ref: '#/components/schemas/Stubs.SignUpVerification.AdditionalFields'
         web3_wallet:
           type: object
           nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/Stubs.SignUpVerification'
+          allOf:
+            - $ref: '#/components/schemas/Stubs.Verification.Web3Signature'
+            - $ref: '#/components/schemas/Stubs.SignUpVerification.AdditionalFields'
         external_account:
           type: object
           nullable: true
