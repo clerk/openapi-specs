@@ -87,6 +87,8 @@ tags:
     description: Used to interact with the current user's organization memberships, invitations and suggestions.
   - name: Organization
     description: Used to interact with an organization and its properties. The current user must be an administrator to access them.
+  - name: Organization Creation Defaults
+    description: Used to get suggested defaults when creating a new organization.
   - name: Invitations
     description: Used to interact with the invitations of an organization. The current user must be an administrator to access them.
   - name: Members
@@ -752,12 +754,11 @@ paths:
     get:
       operationId: getOrganizationCreationDefaults
       tags:
-        - Me
+        - Organization Creation Defaults
       summary: Get organization creation defaults
       description: |
         Get suggested organization name and other defaults for creating a new organization.
         Returns suggestions based on the user's email domain or configured naming templates.
-        This is an internal endpoint not yet publicly available.
       responses:
         '200':
           description: Organization creation defaults
@@ -912,6 +913,7 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/enterprise_connections/{enterpriseConnectionID}/init_test_run: {}
   /v1/health:
     get:
       summary: Get Health
@@ -13533,6 +13535,7 @@ x-tagGroups:
   - name: Organizations
     tags:
       - Organization
+      - Organization Creation Defaults
       - Invitations
       - Membership Requests
       - Members

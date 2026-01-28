@@ -3628,6 +3628,38 @@ paths:
           $ref: '#/components/responses/PaymentRequired'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+  /instance/protect:
+    get:
+      operationId: GetInstanceProtect
+      summary: Get instance protect settings
+      tags:
+        - Instance Settings
+      responses:
+        '200':
+          $ref: '#/components/responses/InstanceProtect'
+    patch:
+      operationId: UpdateInstanceProtect
+      summary: Update instance protect settings
+      tags:
+        - Instance Settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                rules_enabled:
+                  type: boolean
+                  nullable: true
+                specter_enabled:
+                  type: boolean
+                  nullable: true
+      responses:
+        '200':
+          $ref: '#/components/responses/InstanceProtect'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /instance/change_domain:
     post:
       operationId: ChangeProductionInstanceDomain
@@ -6992,6 +7024,9 @@ paths:
   /platform/applications/{applicationID}/transfers: {}
   /platform/applications/{applicationID}/transfers/{transferID}: {}
   /platform/application_transfers: {}
+  /platform/applications/{applicationID}/instances/{envOrInsID}/users: {}
+  /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}/ban: {}
+  /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}/unban: {}
   /billing/plans:
     get:
       operationId: GetCommercePlanList
@@ -12846,6 +12881,21 @@ components:
         - allowlist_blocklist_disabled_on_sign_in
         - block_email_subaddresses
         - block_disposable_email_domains
+    InstanceProtect:
+      type: object
+      properties:
+        object:
+          type: string
+          enum:
+            - instance_protect
+        rules_enabled:
+          type: boolean
+        specter_enabled:
+          type: boolean
+      required:
+        - object
+        - rules_enabled
+        - specter_enabled
     OrganizationSettings:
       type: object
       additionalProperties: false
@@ -15221,6 +15271,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/InstanceRestrictions'
+    InstanceProtect:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InstanceProtect'
     OrganizationSettings:
       description: Success
       content:
