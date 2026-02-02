@@ -1447,6 +1447,22 @@ paths:
           example: 1730160000000
           schema:
             type: integer
+        - name: last_sign_in_at_before
+          in: query
+          description: |-
+            Returns users whose last sign-in was before the given date (with millisecond precision).
+            Example: use 1700690400000 to retrieve users whose last sign-in was before 2023-11-23.
+          example: 1700690400000
+          schema:
+            type: integer
+        - name: last_sign_in_at_after
+          in: query
+          description: |-
+            Returns users whose last sign-in was after the given date (with millisecond precision).
+            Example: use 1700690400000 to retrieve users whose last sign-in was after 2023-11-23.
+          example: 1700690400000
+          schema:
+            type: integer
         - $ref: '#/components/parameters/LimitParameter'
         - $ref: '#/components/parameters/OffsetParameter'
         - name: order_by
@@ -1826,6 +1842,22 @@ paths:
             Returns users who have been created after the given date (with millisecond precision).
             Example: use 1730160000000 to retrieve users who have been created after 2024-10-29.
           example: 1730160000000
+          schema:
+            type: integer
+        - name: last_sign_in_at_before
+          in: query
+          description: |-
+            Counts users whose last sign-in was before the given date (with millisecond precision).
+            Example: use 1700690400000 to count users whose last sign-in was before 2023-11-23.
+          example: 1700690400000
+          schema:
+            type: integer
+        - name: last_sign_in_at_after
+          in: query
+          description: |-
+            Counts users whose last sign-in was after the given date (with millisecond precision).
+            Example: use 1700690400000 to count users whose last sign-in was after 2023-11-23.
+          example: 1700690400000
           schema:
             type: integer
       responses:
@@ -10752,6 +10784,11 @@ components:
           type: string
         email_address:
           type: string
+        email_address_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Whether the email was verified by the OAuth provider at creation time. null = unknown (pre-migration data or custom OAuth providers), true = provider confirmed email was verified, false = provider confirmed email was NOT verified
         first_name:
           type: string
         last_name:
@@ -11138,7 +11175,7 @@ components:
         - image_url
         - has_image
     OrganizationMembership:
-      description: Hello world
+      description: A user's membership in an organization
       type: object
       properties:
         id:
@@ -13533,7 +13570,7 @@ components:
         to_price_id:
           type: string
           description: The target price ID to transition to.
-    CommercePriceResponse:
+    BillingPriceResponse:
       type: object
       additionalProperties: false
       required:
@@ -13604,7 +13641,7 @@ components:
         previous_plan:
           $ref: '#/components/schemas/CommercePlan'
         previous_price:
-          $ref: '#/components/schemas/CommercePriceResponse'
+          $ref: '#/components/schemas/BillingPriceResponse'
         effective_at:
           type: integer
           format: int64

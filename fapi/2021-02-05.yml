@@ -3540,6 +3540,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Client.DeletedTOTP'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
@@ -8492,6 +8494,11 @@ components:
           type: string
         email_address:
           type: string
+        email_address_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Whether the email was verified by the OAuth provider at creation time. null = unknown (pre-migration data or custom OAuth providers), true = provider confirmed email was verified, false = provider confirmed email was NOT verified
         first_name:
           type: string
         last_name:
