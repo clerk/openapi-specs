@@ -2285,7 +2285,7 @@ components:
         - image_url
         - has_image
     OrganizationMembership:
-      description: Hello world
+      description: A user's membership in an organization
       type: object
       properties:
         id:
@@ -3487,6 +3487,11 @@ components:
           type: string
         email_address:
           type: string
+        email_address_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Whether the email was verified by the OAuth provider at creation time. null = unknown (pre-migration data or custom OAuth providers), true = provider confirmed email was verified, false = provider confirmed email was NOT verified
         first_name:
           type: string
         last_name:
@@ -4130,6 +4135,7 @@ components:
           type: integer
           format: int64
           description: Unix timestamp in milliseconds when the subscription item period ends
+          nullable: true
         interval:
           type: string
           description: Billing interval for this subscription item (e.g., "month", "annual")
@@ -4955,15 +4961,15 @@ components:
           created_at: 1716883200000
           updated_at: 1716883200000
           period_start: 1716883200000
-          period_end: 1719561600000
+          period_end: null
           interval: month
           plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
           plan:
             id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
-            slug: pro-plan
-            name: Pro Plan
-            is_recurring: true
-            amount: 2000
+            slug: free-plan
+            name: Free Plan
+            is_recurring: false
+            amount: 0
             currency: USD
           payer:
             object: commerce_payer
@@ -5078,7 +5084,7 @@ components:
           created_at: 1716883200000
           updated_at: 1719561600000
           period_start: 1716883200000
-          period_end: 1719561600000
+          period_end: null
           interval: month
           plan_id: cplan_2g7np7Hrk0SN6kj5EDMLDaKNL0S
           plan:

@@ -1407,6 +1407,22 @@ paths:
           example: 1730160000000
           schema:
             type: integer
+        - name: last_sign_in_at_before
+          in: query
+          description: |-
+            Returns users whose last sign-in was before the given date (with millisecond precision).
+            Example: use 1700690400000 to retrieve users whose last sign-in was before 2023-11-23.
+          example: 1700690400000
+          schema:
+            type: integer
+        - name: last_sign_in_at_after
+          in: query
+          description: |-
+            Returns users whose last sign-in was after the given date (with millisecond precision).
+            Example: use 1700690400000 to retrieve users whose last sign-in was after 2023-11-23.
+          example: 1700690400000
+          schema:
+            type: integer
         - $ref: '#/components/parameters/LimitParameter'
         - $ref: '#/components/parameters/OffsetParameter'
         - name: order_by
@@ -1786,6 +1802,22 @@ paths:
             Returns users who have been created after the given date (with millisecond precision).
             Example: use 1730160000000 to retrieve users who have been created after 2024-10-29.
           example: 1730160000000
+          schema:
+            type: integer
+        - name: last_sign_in_at_before
+          in: query
+          description: |-
+            Counts users whose last sign-in was before the given date (with millisecond precision).
+            Example: use 1700690400000 to count users whose last sign-in was before 2023-11-23.
+          example: 1700690400000
+          schema:
+            type: integer
+        - name: last_sign_in_at_after
+          in: query
+          description: |-
+            Counts users whose last sign-in was after the given date (with millisecond precision).
+            Example: use 1700690400000 to count users whose last sign-in was after 2023-11-23.
+          example: 1700690400000
           schema:
             type: integer
       responses:
@@ -7027,6 +7059,8 @@ paths:
   /platform/applications/{applicationID}/instances/{envOrInsID}/users: {}
   /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}/ban: {}
   /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}/unban: {}
+  /platform/applications/{applicationID}/instances/{instanceID}/config: {}
+  /platform/applications/{applicationID}/instances/{instanceID}/config/schema: {}
   /billing/plans:
     get:
       operationId: GetCommercePlanList
@@ -7058,6 +7092,70 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '401':
           $ref: '#/components/responses/AuthenticationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
+  /billing/prices:
+    get:
+      operationId: GetBillingPriceList
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: listPrices
+      tags:
+        - Billing
+      summary: List all billing prices
+      description: |-
+        Returns a list of all prices for the instance. The prices are returned sorted by amount ascending,
+        then by creation date descending. This includes both default and custom prices. Pagination is supported.
+      parameters:
+        - $ref: '#/components/parameters/Paginated'
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - in: query
+          name: plan_id
+          description: Filter prices by plan ID
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/BillingPrice.List'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
+    post:
+      operationId: CreateBillingPrice
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: createPrice
+      tags:
+        - Billing
+      summary: Create a custom billing price
+      description: |-
+        Creates a custom price for a billing plan. Custom prices allow you to offer different pricing
+        to specific customers while maintaining the same plan structure.
+      requestBody:
+        description: Parameters for creating a custom price
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBillingPriceRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/BillingPrice'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
         '500':
@@ -11200,6 +11298,11 @@ components:
           type: string
         email_address:
           type: string
+        email_address_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Whether the email was verified by the OAuth provider at creation time. null = unknown (pre-migration data or custom OAuth providers), true = provider confirmed email was verified, false = provider confirmed email was NOT verified
         first_name:
           type: string
         last_name:
@@ -11586,7 +11689,7 @@ components:
         - image_url
         - has_image
     OrganizationMembership:
-      description: Hello world
+      description: A user's membership in an organization
       type: object
       properties:
         id:
@@ -13974,6 +14077,103 @@ components:
           type: integer
           format: int64
           description: Total number of plans.
+    BillingPriceResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - object
+        - id
+        - plan_id
+        - instance_id
+        - currency
+        - currency_symbol
+        - amount
+        - annual_monthly_amount
+        - fee
+        - annual_monthly_fee
+        - created_at
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - commerce_price
+        id:
+          type: string
+          description: Unique identifier for the price.
+        plan_id:
+          type: string
+          description: Unique identifier for the associated plan.
+        instance_id:
+          type: string
+          description: Unique identifier for the instance.
+        currency:
+          type: string
+          description: The currency code (e.g., "USD").
+        currency_symbol:
+          type: string
+          description: The currency symbol (e.g., "$").
+        amount:
+          type: integer
+          format: int64
+          description: The amount in cents for the price.
+        annual_monthly_amount:
+          type: integer
+          format: int64
+          description: The monthly amount in cents when billed annually.
+        fee:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        annual_monthly_fee:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        description:
+          type: string
+          nullable: true
+          description: The description of the price.
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) of creation.
+    PaginatedBillingPriceResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - total_count
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPriceResponse'
+          description: Array of prices.
+        total_count:
+          type: integer
+          format: int64
+          description: Total number of prices.
+    CreateBillingPriceRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - plan_id
+        - amount
+      properties:
+        plan_id:
+          type: string
+          description: The ID of the plan this price belongs to.
+        currency:
+          type: string
+          description: The currency code (e.g., "USD"). Defaults to USD.
+          default: USD
+        amount:
+          type: integer
+          format: int64
+          description: The amount in cents for the price. Must be at least $1 (100 cents).
+        annual_monthly_amount:
+          type: integer
+          format: int64
+          description: The monthly amount in cents when billed annually. Optional.
+        description:
+          type: string
+          description: An optional description for this custom price.
     PaginatedCommerceSubscriptionItemResponse:
       type: object
       additionalProperties: false
@@ -14445,62 +14645,6 @@ components:
         to_price_id:
           type: string
           description: The target price ID to transition to.
-    CommercePriceResponse:
-      type: object
-      additionalProperties: false
-      required:
-        - object
-        - id
-        - plan_id
-        - instance_id
-        - currency
-        - currency_symbol
-        - amount
-        - annual_monthly_amount
-        - fee
-        - annual_monthly_fee
-        - created_at
-      properties:
-        object:
-          type: string
-          description: String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - commerce_price
-        id:
-          type: string
-          description: Unique identifier for the price.
-        plan_id:
-          type: string
-          description: Unique identifier for the associated plan.
-        instance_id:
-          type: string
-          description: Unique identifier for the instance.
-        currency:
-          type: string
-          description: The currency code (e.g., "USD").
-        currency_symbol:
-          type: string
-          description: The currency symbol (e.g., "$").
-        amount:
-          type: integer
-          format: int64
-          description: The amount in cents for the price.
-        annual_monthly_amount:
-          type: integer
-          format: int64
-          description: The monthly amount in cents when billed annually.
-        fee:
-          $ref: '#/components/schemas/CommerceMoneyResponse'
-        annual_monthly_fee:
-          $ref: '#/components/schemas/CommerceMoneyResponse'
-        description:
-          type: string
-          nullable: true
-          description: The description of the price.
-        created_at:
-          type: integer
-          format: int64
-          description: Unix timestamp (milliseconds) of creation.
     CommercePriceTransitionDetails:
       type: object
       additionalProperties: false
@@ -14516,7 +14660,7 @@ components:
         previous_plan:
           $ref: '#/components/schemas/schemas-CommercePlan'
         previous_price:
-          $ref: '#/components/schemas/CommercePriceResponse'
+          $ref: '#/components/schemas/BillingPriceResponse'
         effective_at:
           type: integer
           format: int64
@@ -15581,6 +15725,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PaginatedCommercePlanResponse'
+    BillingPrice.List:
+      description: A list of billing prices.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaginatedBillingPriceResponse'
+    BillingPrice:
+      description: A billing price.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BillingPriceResponse'
     CommerceSubscriptionItem.List:
       description: A list of commerce subscription items.
       content:
