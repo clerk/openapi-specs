@@ -4134,7 +4134,7 @@ components:
         period_end:
           type: integer
           format: int64
-          description: Unix timestamp in milliseconds when the subscription item period ends
+          description: Unix timestamp in milliseconds when the subscription item period ends. The field is null for default plan subscription items.
           nullable: true
         interval:
           type: string
