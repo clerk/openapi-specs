@@ -103,6 +103,8 @@ tags:
     description: Used to interact with the waitlist.
   - name: API Keys
     description: Endpoints for managing API Keys
+  - name: Enterprise Connections
+    description: Endpoints for managing enterprise connections.
   - name: Plans
     description: Used to interact with plans that users and organizations can purchase.
   - name: Subscriptions
@@ -914,6 +916,7 @@ paths:
         '404':
           $ref: '#/components/responses/ClerkErrors'
   /v1/enterprise_connections/{enterpriseConnectionID}/init_test_run: {}
+  /v1/enterprise_connections/{enterpriseConnectionID}/test_runs/{testRunID}: {}
   /v1/health:
     get:
       summary: Get Health
@@ -13567,3 +13570,4 @@ x-tagGroups:
       - OAuth2 Callbacks
       - SAML
       - Waitlist
+      - Enterprise Connections

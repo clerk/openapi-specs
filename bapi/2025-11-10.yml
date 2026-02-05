@@ -1423,6 +1423,28 @@ paths:
           example: 1700690400000
           schema:
             type: integer
+        - name: provider
+          in: query
+          schema:
+            type: string
+          description: |-
+            Returns users with external accounts for the specified OAuth provider.
+            Must be used in combination with the `provider_user_id` parameter.
+            For example, use `provider=oauth_google&provider_user_id=12345` to retrieve a user with Google provider user ID 12345.
+          required: false
+        - name: provider_user_id
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: |-
+            Returns users with the specified provider user IDs for a specific provider.
+            Must be used in combination with the `provider` parameter.
+            For example, use `provider=oauth_google&provider_user_id=12345` to retrieve a user with Google provider user ID 12345.
+            Accepts up to 100 provider user IDs.
+            Any provider user IDs not found are ignored.
+          required: false
         - $ref: '#/components/parameters/LimitParameter'
         - $ref: '#/components/parameters/OffsetParameter'
         - name: order_by
@@ -1820,6 +1842,29 @@ paths:
           example: 1700690400000
           schema:
             type: integer
+        - name: provider
+          in: query
+          schema:
+            type: string
+          description: |-
+            Counts users with external accounts for the specified OAuth provider.
+            Must be used in combination with the `provider_user_id` parameter.
+            For example, use `provider=oauth_google&provider_user_id=12345` to count users with Google provider user ID 12345.
+            Accepts up to 100 providers.
+          required: false
+        - name: provider_user_id
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: |-
+            Counts users with the specified provider user IDs for a specific provider.
+            Must be used in combination with the `provider` parameter.
+            For example, use `provider=oauth_google&provider_user_id=12345` to count users with Google provider user ID 12345.
+            Accepts up to 100 provider user IDs.
+            Any provider user IDs not found are ignored.
+          required: false
       responses:
         '200':
           $ref: '#/components/responses/User.Count'
@@ -3281,7 +3326,7 @@ paths:
                   nullable: true
                 progressive_sign_up:
                   type: boolean
-                  description: Enable the Progressive Sign Up algorithm. Refer to the [docs](https://clerk.com/docs/upgrade-guides/progressive-sign-up) for more info.
+                  description: Enable the Progressive Sign Up algorithm. This feature is deprecated, please contact support if you need assistance.
                   nullable: true
                 test_mode:
                   type: boolean
