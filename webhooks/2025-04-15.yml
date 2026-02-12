@@ -1997,6 +1997,11 @@ components:
           format: int64
           description: |
             Unix timestamp of last activity.
+        role_set_key:
+          type: string
+          description: |
+            The key of the [role set](https://clerk.com/docs/guides/organizations/control-access/role-sets) assigned to this organization.
+          nullable: true
       required:
         - object
         - id
