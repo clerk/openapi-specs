@@ -11509,6 +11509,9 @@ components:
           type: string
           format: uri
           description: URL of the payer's image/avatar
+        credits_balance:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Current credits balance for the payer
         created_at:
           type: integer
           format: int64
@@ -11854,6 +11857,66 @@ components:
       required:
         - response
         - client
+    BillingProrationCreditDetail:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Credit amount with formatting
+        cycle_days_remaining:
+          type: integer
+          format: int64
+          description: Number of days remaining in the billing cycle
+        cycle_days_total:
+          type: integer
+          format: int64
+          description: Total number of days in the billing cycle
+        cycle_remaining_percent:
+          type: number
+          format: double
+          description: Percentage of the billing cycle remaining
+      required:
+        - amount
+        - cycle_days_remaining
+        - cycle_days_total
+        - cycle_remaining_percent
+    BillingPayerCreditResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        remaining_balance:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The payer's remaining credit balance after credit is applied for this checkout (in cents)
+        applied_amount:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The amount of payer credit applied to this checkout (in cents)
+      required:
+        - remaining_balance
+        - applied_amount
+    BillingCreditsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        proration:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingProrationCreditDetail'
+          description: Proration credit details from unused subscription time
+        payer:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingPayerCreditResponse'
+          description: Payer credit details from the payer's credit balance
+        total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Total credits applied
+      required:
+        - proration
+        - payer
+        - total
     BillingCheckoutTotals:
       type: object
       additionalProperties: false
@@ -11891,12 +11954,19 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingMoneyResponse'
           description: The amount of credit that will be consumed before the payment method is charged
+        credits:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditsResponse'
+          description: Unified credits breakdown
       required:
         - subtotal
         - tax_total
         - grand_total
         - total_due_after_free_trial
         - credit
+        - credits
         - total_due_now
     BillingCheckout:
       type: object
