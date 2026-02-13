@@ -1,0 +1,3112 @@
+openapi: 3.0.3
+info:
+  title: Clerk Platform API
+  x-logo:
+    url: https://clerk.com/_next/image?url=%2Fimages%2Fclerk-logo.svg&w=96&q=75
+    altText: Clerk docs
+    href: https://clerk.com/docs
+  contact:
+    email: support@clerk.com
+    name: Clerk Platform Team
+    url: https://clerk.com/support
+  description: |-
+    The Clerk REST Platform API, for programmatic management of resources of a workspace.
+
+    > [!note]
+    > This API is currently in private beta. If you'd like access for your workspace, please fill out and submit our [request form](https://clerkdev.notion.site/2df2b9ab44fe803f9031e9f3185c5e19).
+  version: BETA
+  termsOfService: https://clerk.com/terms
+  license:
+    name: MIT
+    url: https://github.com/clerk/openapi-specs/blob/main/LICENSE
+servers:
+  - url: https://api.clerk.com/v1
+security:
+  - platform_api_access_token: []
+tags:
+  - name: Applications
+    description: An object representing a Clerk application. Each `application` can have multiple `instances`, typically one for development and one for production, each with distinct user pools.
+  - name: Domains
+    description: An object representing a domain associated with a Clerk application. In development `instances`, a domain is provided by Clerk. Production `instances` require additional configuration to be set up.
+  - name: Application Transfers
+    description: An object representing a transfer request for an application between workspaces.
+  - name: Users
+    description: Operations for managing users within an application instance.
+  - name: Config
+    description: Operations for managing instance configuration. The config API provides a unified interface for reading and updating instance settings, including authentication methods, SSO connections, and other instance-level configuration options.
+externalDocs:
+  url: https://clerk.com/docs
+paths:
+  /platform/applications:
+    get:
+      operationId: PlatformListApplications
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: listApplications
+      tags:
+        - Applications
+      summary: List applications
+      description: |
+        List applications.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: include_secret_keys
+          in: query
+          description: Whether to include secret keys in the response.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Applications retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformListApplicationsResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+    post:
+      operationId: PlatformCreateApplication
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: createApplication
+      tags:
+        - Applications
+      summary: Create an application
+      description: |
+        Create a new application.
+      security:
+        - platform_api_access_token: []
+      requestBody:
+        description: Application data to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformCreateApplicationRequest'
+      responses:
+        '200':
+          description: Application created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformApplicationResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /platform/applications/{applicationID}:
+    get:
+      operationId: PlatformGetApplication
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: getApplication
+      tags:
+        - Applications
+      summary: Get an application
+      description: |
+        Get application details.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: include_secret_keys
+          in: query
+          description: Whether to include secret keys in the response. If 'true', the response will include the secret keys for each instance.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Application retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformApplicationResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    patch:
+      operationId: PlatformUpdateApplication
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: updateApplication
+      tags:
+        - Applications
+      summary: Update an application
+      description: |
+        Update an application.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Application data to update.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformUpdateApplicationRequest'
+      responses:
+        '200':
+          description: Application updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformApplicationResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      operationId: PlatformDeleteApplication
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: deleteApplication
+      tags:
+        - Applications
+      summary: Delete an application
+      description: |
+        Delete an application.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Application deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformDeletedObjectResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /platform/applications/{applicationID}/logo:
+    post:
+      operationId: PlatformUploadApplicationLogo
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: uploadApplicationLogo
+      tags:
+        - Applications
+      summary: Upload application logo
+      description: |
+        Set or replace an application's logo by uploading an image file.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+          application/octet-stream:
+            schema:
+              type: string
+            example: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=
+      responses:
+        '200':
+          description: Application logo uploaded successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformApplicationResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '413':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      operationId: PlatformDeleteApplicationLogo
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: deleteApplicationLogo
+      tags:
+        - Applications
+      summary: Delete application logo
+      description: |
+        Delete an application's logo.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Application logo deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformApplicationResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /platform/applications/{applicationID}/favicon:
+    post:
+      operationId: PlatformUploadApplicationFavicon
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: uploadApplicationFavicon
+      tags:
+        - Applications
+      summary: Upload application favicon
+      description: |
+        Set or replace an application's favicon by uploading an image file.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+          application/octet-stream:
+            schema:
+              type: string
+            example: data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAGAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      responses:
+        '200':
+          description: Application favicon uploaded successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformApplicationResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '413':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      operationId: PlatformDeleteApplicationFavicon
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: deleteApplicationFavicon
+      tags:
+        - Applications
+      summary: Delete application favicon
+      description: |
+        Delete an application's favicon.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Application favicon deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformApplicationResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /platform/applications/{applicationID}/domain:
+    patch:
+      operationId: PlatformUpdateApplicationDomain
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: updateApplicationDomain
+      tags:
+        - Domains
+      summary: Update application domain
+      description: |
+        Update the production domain for an application.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Domain data to update.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformUpdateApplicationDomainRequest'
+      responses:
+        '200':
+          description: Application domain updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformDomainResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /platform/applications/{applicationID}/domains:
+    get:
+      operationId: PlatformListApplicationDomains
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: listApplicationDomains
+      tags:
+        - Domains
+      summary: List application domains
+      description: |
+        List all domains for an application's production instance.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Application domains retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformListApplicationDomainsResponse'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    post:
+      operationId: PlatformCreateApplicationDomain
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: createApplicationDomain
+      tags:
+        - Domains
+      summary: Create application domain
+      description: |
+        Create a provider domain for an application's production instance.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Domain data to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformCreateApplicationDomainRequest'
+      responses:
+        '201':
+          description: Application domain created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformDomainResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /platform/applications/{applicationID}/domains/{domainIDOrName}:
+    get:
+      operationId: PlatformGetApplicationDomain
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: getApplicationDomain
+      tags:
+        - Domains
+      summary: Get application domain
+      description: |
+        Get domain information for an application.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: domainIDOrName
+          in: path
+          description: Domain ID or domain name.
+          example: dmn_abcdefghijklmnopqrstuvwxyz0
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Application domain retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformDomainResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    delete:
+      operationId: PlatformDeleteApplicationDomain
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: deleteApplicationDomain
+      tags:
+        - Domains
+      summary: Delete application domain
+      description: |
+        Delete a provider domain from an application's production instance.
+
+        Only provider domains can be deleted. The primary domain cannot be deleted.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: domainIDOrName
+          in: path
+          description: Domain ID or domain name.
+          example: dmn_abcdefghijklmnopqrstuvwxyz0
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Application domain deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformDeletedObjectResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /platform/applications/{applicationID}/domains/{domainIDOrName}/status:
+    get:
+      operationId: PlatformGetApplicationDomainStatus
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: getApplicationDomainStatus
+      tags:
+        - Domains
+      summary: Get application domain status
+      description: |
+        Get the status of a domain for an application.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: domainIDOrName
+          in: path
+          description: Domain ID or domain name.
+          example: dmn_abcdefghijklmnopqrstuvwxyz0
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Application domain status retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformDomainStatusResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /platform/applications/{applicationID}/domains/{domainIDOrName}/dns_check:
+    post:
+      operationId: PlatformTriggerDNSCheck
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: triggerDNSCheck
+      tags:
+        - Domains
+      summary: Trigger DNS check
+      description: |
+        Triggers a DNS check for a domain and returns the current domain status.
+
+        This endpoint ensures that at most one DNS check job is in-flight at any time.
+        If a check is already running or was recently performed, a 409 Conflict is returned.
+
+        Use this endpoint to trigger a new DNS verification check after configuring DNS records.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: domainIDOrName
+          in: path
+          description: Domain ID or domain name.
+          example: dmn_abcdefghijklmnopqrstuvwxyz0
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: DNS check triggered and domain status returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformDNSCheckResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          description: A DNS check is already in progress or a recent check was performed. Wait for the current check to complete or for the cooldown period to expire before retrying.
+          $ref: '#/components/responses/Conflict'
+  /platform/application_transfers:
+    get:
+      operationId: PlatformListApplicationTransfers
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: listApplicationTransfers
+      tags:
+        - Application Transfers
+      summary: List application transfers
+      description: |
+        List all transfer requests created by the authenticated workspace. Returns
+        transfers sorted by creation date in descending order (most recent first).
+
+        Use the `status` parameter to filter by transfer status.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: status
+          in: query
+          description: |
+            Filter by transfer status. Multiple values can be provided by repeating
+            the parameter (e.g., `?status=pending&status=canceled`).
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - pending
+                - completed
+                - canceled
+                - expired
+        - name: limit
+          in: query
+          description: Number of results to return per page (1-500, default 10).
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 10
+        - name: starting_after
+          in: query
+          description: |
+            Cursor for pagination. Provide the ID of the last transfer from the
+            previous page to get the next page of results.
+          required: false
+          schema:
+            type: string
+        - name: ending_before
+          in: query
+          description: |
+            Cursor for pagination. Provide the ID of the first transfer from the
+            previous page to get the previous page of results.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Application transfers retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformListApplicationTransfersResponse'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /platform/applications/{applicationID}/transfers:
+    post:
+      operationId: PlatformCreateApplicationTransfer
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: createApplicationTransfer
+      tags:
+        - Application Transfers
+      summary: Create an application transfer
+      description: |
+        Create a new transfer request for an application. This initiates the process of
+        transferring ownership of the application to another workspace.
+
+        Only one pending transfer can exist for an application at a time. The transfer
+        will expire after 24 hours if not completed.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Application transfer created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformApplicationTransferResponse'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /platform/applications/{applicationID}/transfers/{transferID}:
+    get:
+      operationId: PlatformGetApplicationTransfer
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: getApplicationTransfer
+      tags:
+        - Application Transfers
+      summary: Get an application transfer
+      description: |
+        Retrieve details of an application transfer by its ID.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: transferID
+          in: path
+          description: Application Transfer ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Application transfer retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformApplicationTransferResponse'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    delete:
+      operationId: PlatformCancelApplicationTransfer
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: cancelApplicationTransfer
+      tags:
+        - Application Transfers
+      summary: Cancel an application transfer
+      description: |
+        Cancel an existing application transfer. Only transfers in 'pending' status can be canceled.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: transferID
+          in: path
+          description: Application Transfer ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Application transfer canceled successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformApplicationTransferResponse'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/users:
+    get:
+      operationId: PlatformListInstanceUsers
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: listInstanceUsers
+      tags:
+        - Users
+      summary: List instance users
+      description: |
+        List all users for an application instance.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Use the `query` parameter to filter users by searching across email addresses, phone numbers,
+        usernames, web3 wallets, user IDs, first names, and last names.
+
+        Use the `order_by` parameter to sort the results. Prefix with `+` for ascending or `-` for descending order.
+        Valid fields: `created_at`, `updated_at`, `last_sign_in_at`, `last_active_at`, `email_address`, `first_name`,
+        `last_name`, `username`, `phone_number`, `web3_wallet`. Default is `-created_at` (most recent first).
+
+        Requires the `users:read` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: query
+          in: query
+          description: |
+            A search query to filter users. Searches across email addresses, phone numbers,
+            usernames, web3 wallets, user IDs, first names, and last names.
+          required: false
+          schema:
+            type: string
+        - name: order_by
+          in: query
+          description: |
+            Field to order results by. Prefix with `+` for ascending or `-` for descending order.
+            Valid fields: `created_at`, `updated_at`, `last_sign_in_at`, `last_active_at`, `email_address`,
+            `first_name`, `last_name`, `username`, `phone_number`, `web3_wallet`.
+          required: false
+          schema:
+            type: string
+            default: '-created_at'
+        - name: limit
+          in: query
+          description: Number of results to return per page (1-500, default 10).
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 10
+        - name: offset
+          in: query
+          description: Number of results to skip for pagination.
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Users retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformListInstanceUsersResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}/ban:
+    post:
+      operationId: PlatformBanUser
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: banUser
+      tags:
+        - Users
+      summary: Ban a user
+      description: |
+        Marks a user as banned within an application instance. This terminates their active sessions
+        (marks them as revoked) and prevents them from signing in again.
+
+        Requires the `users:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: userID
+          in: path
+          description: User ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User banned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}/unban:
+    post:
+      operationId: PlatformUnbanUser
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: unbanUser
+      tags:
+        - Users
+      summary: Unban a user
+      description: |
+        Removes the ban from a user within an application instance. This allows them to sign in again.
+
+        Requires the `users:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: userID
+          in: path
+          description: User ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User unbanned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/config:
+    get:
+      operationId: PlatformGetConfig
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: getConfig
+      tags:
+        - Config
+      summary: Get instance config
+      description: |
+        Get the configuration for an application instance.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Optionally filter to specific config keys using the `keys` query parameter.
+
+        Requires the `applications:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: keys
+          in: query
+          description: Config keys to retrieve. If not specified, all keys are returned.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Instance config retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformConfigResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    patch:
+      operationId: PlatformPatchConfig
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: patchConfig
+      tags:
+        - Config
+      summary: Update instance config
+      description: |
+        Update the configuration for an application instance.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Use the `dry_run` query parameter to preview changes without applying them.
+        Use the `destructive` query parameter to allow clearing config keys by setting them to null.
+        Use the `If-Match` header to provide optimistic concurrency control via config version.
+
+        Requires the `applications:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: dry_run
+          in: query
+          description: If true, preview the changes without applying them.
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: destructive
+          in: query
+          description: If true, allow clearing config keys by setting them to null.
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: keys
+          in: query
+          description: Config keys to return in the response. If not specified, only updated keys are returned.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: If-Match
+          in: header
+          description: Config version for optimistic concurrency control.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        description: Config updates to apply.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformConfigPatchRequest'
+      responses:
+        '200':
+          description: Instance config updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformConfigPatchResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/config/schema:
+    get:
+      operationId: PlatformGetConfigSchema
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: getConfigSchema
+      tags:
+        - Config
+      summary: Get instance config schema
+      description: |
+        Get the JSON Schema for the instance configuration.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Optionally filter to specific config keys using the `keys` query parameter.
+
+        Requires the `applications:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: keys
+          in: query
+          description: Config keys to retrieve schema for. If not specified, all keys are returned.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Instance config schema retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformConfigSchemaResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+components:
+  securitySchemes:
+    platform_api_access_token:
+      type: http
+      scheme: bearer
+      description: Platform API access token.
+  schemas:
+    PlatformApplicationInstance:
+      title: Application Instance
+      description: Represents an instance (environment) within a Clerk application. Each application can have multiple instances, typically one for development and one for production.
+      type: object
+      additionalProperties: false
+      properties:
+        instance_id:
+          type: string
+          description: The unique identifier for this instance. Use this ID when making API calls that target a specific instance.
+          example: ins_2abc123def456
+        environment_type:
+          type: string
+          description: The environment type of the instance. Determines whether this instance is used for development/testing or production workloads.
+          enum:
+            - development
+            - production
+          example: production
+        secret_key:
+          type: string
+          description: The secret key for authenticating server-side API requests to this instance. Keep this value secure and never expose it in client-side code.
+          example: sk_live_abc123...
+          x-sensitive: true
+        publishable_key:
+          type: string
+          description: The publishable key for this instance. Safe to include in client-side code and used to initialize Clerk SDKs in the browser.
+          example: pk_live_abc123...
+      required:
+        - instance_id
+        - environment_type
+        - publishable_key
+    PlatformApplicationResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        application_id:
+          type: string
+          description: The ID of the application.
+        instances:
+          type: array
+          description: List of instances associated with this application.
+          items:
+            $ref: '#/components/schemas/PlatformApplicationInstance'
+      required:
+        - application_id
+        - instances
+    PlatformListApplicationsResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/PlatformApplicationResponse'
+      minItems: 0
+    ClerkError:
+      type: object
+      properties:
+        message:
+          type: string
+        long_message:
+          type: string
+        code:
+          type: string
+        meta:
+          type: object
+      required:
+        - message
+        - long_message
+        - code
+    ClerkErrors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClerkError'
+        meta:
+          type: object
+        clerk_trace_id:
+          type: string
+      required:
+        - errors
+    PlatformCreateApplicationRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: The name of the application.
+        domain:
+          type: string
+          description: The domain for the application (optional).
+        proxy_path:
+          type: string
+          description: Custom proxy path for provider domains (e.g., "/__clerk"). Must start with a leading slash and be a single path segment. Defaults to "/__clerk" if not provided.
+        environment_types:
+          type: array
+          items:
+            type: string
+            enum:
+              - development
+              - production
+          description: List of environment types to create instances for.
+        template:
+          type: string
+          description: Application template to use for configuring the application (e.g., "b2b-saas", "b2c-saas", "waitlist").
+      required:
+        - name
+    PlatformDeletedObjectResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        deleted:
+          type: boolean
+          description: Whether the object was deleted.
+        object:
+          type: string
+          example: deleted
+        id:
+          type: string
+          description: The ID of the deleted resource.
+      required:
+        - deleted
+        - object
+        - id
+    PlatformUpdateApplicationRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: The name of the application.
+    PlatformUpdateApplicationDomainRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: The domain name.
+        proxy_path:
+          type: string
+          description: Optional proxy path for provider domains.
+      required:
+        - name
+    PlatformDomainResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - domain
+        id:
+          type: string
+          description: The ID of the domain.
+        name:
+          type: string
+          description: The domain name.
+        is_satellite:
+          type: boolean
+          description: Whether this is a satellite domain.
+        is_provider_domain:
+          type: boolean
+          description: Whether this is a provider domain.
+        frontend_api_url:
+          type: string
+          description: The frontend API URL.
+        development_origin:
+          type: string
+          description: The development origin.
+        accounts_portal_url:
+          type: string
+          description: The accounts portal URL.
+        proxy_url:
+          type: string
+          description: The proxy URL.
+        cname_targets:
+          type: array
+          items:
+            type: object
+            properties:
+              host:
+                type: string
+              value:
+                type: string
+              required:
+                type: boolean
+          description: CNAME targets for the domain.
+      required:
+        - object
+        - id
+        - name
+        - frontend_api_url
+        - development_origin
+        - cname_targets
+    PlatformListApplicationDomainsResponse:
+      title: List Application Domains Response
+      description: A paginated list of application domains.
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: The list of application domains.
+          items:
+            $ref: '#/components/schemas/PlatformDomainResponse'
+        total_count:
+          type: integer
+          format: int64
+          description: The total number of application domains for the application.
+          example: 2
+      required:
+        - data
+        - total_count
+    PlatformCreateApplicationDomainRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: The provider domain name.
+        proxy_path:
+          type: string
+          description: Optional proxy path for provider domains.
+      required:
+        - name
+    FailureHint:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    CNAMEStatus:
+      type: object
+      additionalProperties: false
+      properties:
+        clerk_subdomain:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        verified:
+          type: boolean
+        required:
+          type: boolean
+        failure_hints:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/FailureHint'
+      required:
+        - clerk_subdomain
+        - from
+        - to
+        - verified
+        - required
+        - failure_hints
+    DNSStatus:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - not_started
+            - in_progress
+            - complete
+        cnames:
+          type: object
+          properties:
+            accounts:
+              $ref: '#/components/schemas/CNAMEStatus'
+            clerk:
+              $ref: '#/components/schemas/CNAMEStatus'
+            clk._domainkey:
+              $ref: '#/components/schemas/CNAMEStatus'
+            clk2._domainkey:
+              $ref: '#/components/schemas/CNAMEStatus'
+            clkmail:
+              $ref: '#/components/schemas/CNAMEStatus'
+      required:
+        - status
+        - cnames
+    SSLStatus:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+        required:
+          type: boolean
+        failure_hints:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/FailureHint'
+      required:
+        - status
+        - required
+        - failure_hints
+    PlatformDomainStatusResponse:
+      type: object
+      properties:
+        dns:
+          type: object
+          $ref: '#/components/schemas/DNSStatus'
+        ssl:
+          type: object
+          properties:
+            status:
+              type: string
+              enum:
+                - complete
+                - in_process
+                - not_started
+                - failed
+                - incomplete
+            required:
+              type: boolean
+            failure_hints:
+              type: array
+              nullable: true
+              items:
+                $ref: '#/components/schemas/FailureHint'
+        ssl_hosts:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/SSLStatus'
+        mail:
+          type: object
+          properties:
+            status:
+              type: string
+            required:
+              type: boolean
+          required:
+            - status
+            - required
+        proxy:
+          type: object
+          properties:
+            status:
+              type: string
+            required:
+              type: boolean
+          required:
+            - status
+            - required
+        status:
+          type: string
+          enum:
+            - complete
+            - incomplete
+      required:
+        - dns
+        - ssl
+        - status
+    PlatformDNSCheckResponse:
+      description: |
+        Response from triggering a DNS check. Includes the current domain status
+        along with metadata about the check.
+      allOf:
+        - $ref: '#/components/schemas/PlatformDomainStatusResponse'
+        - type: object
+          properties:
+            domain_id:
+              type: string
+              description: The ID of the domain.
+              example: dmn_abcdefghijklmnopqrstuvwxyz0
+            last_run_at:
+              type: integer
+              format: int64
+              nullable: true
+              description: |
+                The timestamp in epoch milliseconds of the last DNS check, if any.
+                Will be `null` if no check has been performed yet.
+          required:
+            - domain_id
+            - last_run_at
+    PlatformApplicationTransferResponse:
+      title: Application Transfer
+      description: Represents an application transfer request. Application transfers allow transferring ownership of an application from one organization to another.
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - application_transfer
+          description: The object type.
+        id:
+          type: string
+          description: The unique identifier for the application transfer.
+          example: appxfr_2abc123def456
+        code:
+          type: string
+          description: A unique code for the transfer that can be shared with the recipient to claim the application.
+          example: 550e8400-e29b-41d4-a716-446655440000
+        application_id:
+          type: string
+          description: The ID of the application being transferred.
+          example: app_2abc123def456
+        status:
+          type: string
+          description: The current status of the transfer.
+          enum:
+            - pending
+            - completed
+            - canceled
+            - expired
+          example: pending
+        expires_at:
+          type: string
+          format: date-time
+          description: The timestamp when the transfer expires if not completed.
+          example: '2024-01-16T12:00:00Z'
+        created_at:
+          type: string
+          format: date-time
+          description: The timestamp when the transfer was created.
+          example: '2024-01-15T12:00:00Z'
+        canceled_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: The timestamp when the transfer was canceled, or null if not canceled.
+          example: null
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: The timestamp when the transfer was completed, or null if not completed.
+          example: null
+      required:
+        - object
+        - id
+        - code
+        - application_id
+        - status
+        - expires_at
+        - created_at
+        - canceled_at
+        - completed_at
+    PlatformListApplicationTransfersResponse:
+      title: List Application Transfers Response
+      description: A paginated list of application transfers.
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: The list of application transfers.
+          items:
+            $ref: '#/components/schemas/PlatformApplicationTransferResponse'
+        total_count:
+          type: integer
+          format: int64
+          description: The total number of application transfers matching the query.
+          example: 5
+      required:
+        - data
+        - total_count
+    verification_otp:
+      x-speakeasy-name-override: OTP
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_otp
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+        strategy:
+          x-speakeasy-unknown-values: allow
+          type: string
+          enum:
+            - phone_code
+            - email_code
+            - reset_password_email_code
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    verification_admin:
+      x-speakeasy-name-override: Admin
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_admin
+        status:
+          type: string
+          enum:
+            - verified
+        strategy:
+          x-speakeasy-unknown-values: allow
+          type: string
+          enum:
+            - admin
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    verification_from_oauth:
+      x-speakeasy-name-override: FromOAuth
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_from_oauth
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+        strategy:
+          type: string
+          pattern: ^from_oauth_(?:(?:token_)|(?:custom_))?[a-z]+$
+        error:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/ClerkError'
+        expire_at:
+          type: integer
+          nullable: true
+        attempts:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    verification_ticket:
+      x-speakeasy-name-override: Ticket
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_ticket
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - expired
+        strategy:
+          x-speakeasy-unknown-values: allow
+          type: string
+          enum:
+            - ticket
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    verification_saml:
+      x-speakeasy-name-override: SAML
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_saml
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+            - transferable
+        strategy:
+          type: string
+          enum:
+            - saml
+        external_verification_redirect_url:
+          nullable: true
+          type: string
+        error:
+          nullable: true
+          type: object
+          oneOf:
+            - $ref: '#/components/schemas/ClerkError'
+        expire_at:
+          type: integer
+          nullable: true
+        attempts:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+    verification_email_link:
+      x-speakeasy-name-override: EmailLink
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_email_link
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+        strategy:
+          type: string
+          enum:
+            - email_link
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    IdentificationLink:
+      type: object
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+          pattern: ^oauth_[a-z]+$
+        id:
+          type: string
+      required:
+        - type
+        - id
+    EmailAddress:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          x-speakeasy-unknown-values: allow
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - email_address
+        email_address:
+          type: string
+        reserved:
+          type: boolean
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/verification_otp'
+            - $ref: '#/components/schemas/verification_admin'
+            - $ref: '#/components/schemas/verification_from_oauth'
+            - $ref: '#/components/schemas/verification_ticket'
+            - $ref: '#/components/schemas/verification_saml'
+            - $ref: '#/components/schemas/verification_email_link'
+          discriminator:
+            propertyName: object
+            mapping:
+              verification_otp: '#/components/schemas/verification_otp'
+              verification_admin: '#/components/schemas/verification_admin'
+              verification_from_oauth: '#/components/schemas/verification_from_oauth'
+              verification_ticket: '#/components/schemas/verification_ticket'
+              verification_saml: '#/components/schemas/verification_saml'
+              verification_email_link: '#/components/schemas/verification_email_link'
+        linked_to:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentificationLink'
+        matches_sso_connection:
+          description: |
+            Indicates whether this email address domain matches an active enterprise connection.
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+      required:
+        - object
+        - email_address
+        - verification
+        - linked_to
+        - reserved
+        - created_at
+        - updated_at
+    PhoneNumber:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - phone_number
+        phone_number:
+          type: string
+        reserved_for_second_factor:
+          type: boolean
+        default_second_factor:
+          type: boolean
+        reserved:
+          type: boolean
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/verification_otp'
+            - $ref: '#/components/schemas/verification_admin'
+          discriminator:
+            propertyName: object
+            mapping:
+              verification_otp: '#/components/schemas/verification_otp'
+              verification_admin: '#/components/schemas/verification_admin'
+        linked_to:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentificationLink'
+        backup_codes:
+          type: array
+          items:
+            type: string
+          nullable: true
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+      required:
+        - object
+        - phone_number
+        - verification
+        - linked_to
+        - reserved
+        - created_at
+        - updated_at
+    verification_web3:
+      x-speakeasy-name-override: Web3Signature
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_web3
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+        strategy:
+          type: string
+          enum:
+            - web3_metamask_signature
+            - web3_base_signature
+            - web3_coinbase_wallet_signature
+            - web3_okx_wallet_signature
+            - web3_solana_signature
+        nonce:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    Web3Wallet:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - web3_wallet
+        web3_wallet:
+          type: string
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/verification_web3'
+            - $ref: '#/components/schemas/verification_admin'
+          discriminator:
+            propertyName: object
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+      required:
+        - object
+        - web3_wallet
+        - verification
+        - created_at
+        - updated_at
+    verification_passkey:
+      x-speakeasy-name-override: Passkey
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_passkey
+        status:
+          type: string
+          enum:
+            - verified
+        strategy:
+          type: string
+          enum:
+            - passkey
+        nonce:
+          type: string
+          enum:
+            - nonce
+        message:
+          type: string
+          nullable: true
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    Passkey:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - passkey
+        name:
+          type: string
+        last_used_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of when the passkey was last used.
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/verification_passkey'
+          discriminator:
+            propertyName: object
+      required:
+        - object
+        - name
+        - last_used_at
+        - verification
+    verification_oauth:
+      x-speakeasy-name-override: Oauth
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_oauth
+        status:
+          type: string
+          x-speakeasy-unknown-values: allow
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+            - transferable
+        strategy:
+          type: string
+          x-speakeasy-unknown-values: allow
+          pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z]+$
+        external_verification_redirect_url:
+          type: string
+        error:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/ClerkError'
+        expire_at:
+          type: integer
+        attempts:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    verification_google_one_tap:
+      x-speakeasy-name-override: GoogleOneTap
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_google_one_tap
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+        strategy:
+          type: string
+          enum:
+            - google_one_tap
+        expire_at:
+          type: integer
+          nullable: true
+        attempts:
+          type: integer
+          nullable: true
+        verified_at_client:
+          type: string
+          nullable: true
+        error:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/ClerkError'
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
+    ExternalAccountWithVerification:
+      type: object
+      additionalProperties: true
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - external_account
+            - facebook_account
+            - google_account
+        id:
+          type: string
+        provider:
+          type: string
+        identification_id:
+          type: string
+        provider_user_id:
+          description: The unique ID of the user in the external provider's system
+          type: string
+        approved_scopes:
+          type: string
+        email_address:
+          type: string
+        email_address_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Whether the email was verified by the OAuth provider at creation time. null = unknown (pre-migration data or custom OAuth providers), true = provider confirmed email was verified, false = provider confirmed email was NOT verified
+        first_name:
+          type: string
+        last_name:
+          type: string
+        avatar_url:
+          type: string
+          deprecated: true
+          description: Please use `image_url` instead
+        image_url:
+          type: string
+          nullable: true
+        username:
+          type: string
+          nullable: true
+        phone_number:
+          type: string
+          nullable: true
+        public_metadata:
+          type: object
+          additionalProperties: true
+        label:
+          type: string
+          nullable: true
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/verification_oauth'
+            - $ref: '#/components/schemas/verification_google_one_tap'
+          discriminator:
+            propertyName: object
+      required:
+        - object
+        - id
+        - provider
+        - identification_id
+        - provider_user_id
+        - approved_scopes
+        - email_address
+        - first_name
+        - last_name
+        - public_metadata
+        - created_at
+        - updated_at
+        - verification
+    SAMLConnection:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        domain:
+          type: string
+          deprecated: true
+        domains:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+        provider:
+          type: string
+        sync_user_attributes:
+          type: boolean
+        allow_subdomains:
+          type: boolean
+        allow_idp_initiated:
+          type: boolean
+        disable_additional_identifications:
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - id
+        - name
+        - active
+        - provider
+        - sync_user_attributes
+        - created_at
+        - updated_at
+      anyOf:
+        - required:
+            - domain
+        - required:
+            - domains
+    SAMLAccount:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - saml_account
+        provider:
+          type: string
+        active:
+          type: boolean
+        email_address:
+          type: string
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        provider_user_id:
+          type: string
+          nullable: true
+        last_authenticated_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp of last authentication.
+        public_metadata:
+          type: object
+          additionalProperties: true
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/verification_saml'
+            - $ref: '#/components/schemas/verification_ticket'
+          discriminator:
+            propertyName: object
+        saml_connection:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/SAMLConnection'
+      required:
+        - id
+        - object
+        - provider
+        - active
+        - email_address
+        - verification
+    EnterpriseConnection:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        protocol:
+          type: string
+        provider:
+          type: string
+        name:
+          type: string
+        logo_public_url:
+          type: string
+          nullable: true
+        domain:
+          type: string
+          deprecated: true
+        domains:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+        sync_user_attributes:
+          type: boolean
+        allow_subdomains:
+          type: boolean
+        allow_idp_initiated:
+          type: boolean
+        disable_additional_identifications:
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - id
+        - protocol
+        - name
+        - logo_public_url
+        - active
+        - provider
+        - sync_user_attributes
+        - disable_additional_identifications
+        - allow_subdomains
+        - allow_idp_initiated
+        - created_at
+        - updated_at
+      anyOf:
+        - required:
+            - domain
+        - required:
+            - domains
+    EnterpriseAccount:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - enterprise_account
+        protocol:
+          type: string
+          description: |
+            The authentication protocol used to sign in.
+          enum:
+            - oauth
+            - saml
+        provider:
+          type: string
+        active:
+          type: boolean
+        email_address:
+          type: string
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        provider_user_id:
+          description: The unique ID of the user in the external provider's system
+          type: string
+          nullable: true
+        enterprise_connection_id:
+          type: string
+          nullable: true
+        public_metadata:
+          type: object
+          additionalProperties: true
+        verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/verification_ticket'
+            - $ref: '#/components/schemas/verification_saml'
+            - $ref: '#/components/schemas/verification_oauth'
+          discriminator:
+            propertyName: object
+        enterprise_connection:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/EnterpriseConnection'
+        last_authenticated_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp of last authentication.
+      required:
+        - id
+        - object
+        - provider
+        - active
+        - email_address
+        - verification
+    Organization:
+      type: object
+      properties:
+        object:
+          type: string
+          enum:
+            - organization
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+        members_count:
+          type: integer
+        missing_member_with_elevated_permissions:
+          type: boolean
+        pending_invitations_count:
+          type: integer
+        max_allowed_memberships:
+          type: integer
+        admin_delete_enabled:
+          type: boolean
+        public_metadata:
+          type: object
+          additionalProperties: true
+        private_metadata:
+          type: object
+          additionalProperties: true
+        created_by:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+        last_active_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last activity.
+        role_set_key:
+          type: string
+          description: |
+            The key of the [role set](https://clerk.com/docs/guides/organizations/control-access/role-sets) assigned to this organization.
+          nullable: true
+      required:
+        - object
+        - id
+        - name
+        - slug
+        - has_image
+        - max_allowed_memberships
+        - admin_delete_enabled
+        - public_metadata
+        - created_at
+        - updated_at
+    OrganizationMembershipPublicUserData:
+      description: An organization membership with public user data populated
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          type: string
+          nullable: false
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        profile_image_url:
+          type: string
+          nullable: true
+          deprecated: true
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+        identifier:
+          type: string
+          nullable: true
+        username:
+          type: string
+          nullable: true
+      required:
+        - user_id
+        - first_name
+        - last_name
+        - profile_image_url
+        - image_url
+        - has_image
+    OrganizationMembership:
+      description: A user's membership in an organization
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - organization_membership
+        role:
+          type: string
+        role_name:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        public_metadata:
+          type: object
+          description: Metadata saved on the organization membership, accessible from both Frontend and Backend APIs
+          additionalProperties: true
+        private_metadata:
+          type: object
+          description: Metadata saved on the organization membership, accessible only from the Backend API
+          additionalProperties: true
+        organization:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Organization'
+        public_user_data:
+          $ref: '#/components/schemas/OrganizationMembershipPublicUserData'
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - role
+        - permissions
+        - public_metadata
+        - created_at
+        - updated_at
+        - organization
+    User:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - user
+        external_id:
+          nullable: true
+          type: string
+        primary_email_address_id:
+          nullable: true
+          type: string
+        primary_phone_number_id:
+          nullable: true
+          type: string
+        primary_web3_wallet_id:
+          nullable: true
+          type: string
+        username:
+          nullable: true
+          type: string
+        first_name:
+          nullable: true
+          type: string
+        last_name:
+          nullable: true
+          type: string
+        locale:
+          nullable: true
+          type: string
+        profile_image_url:
+          type: string
+          deprecated: true
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+        public_metadata:
+          type: object
+          additionalProperties: true
+        private_metadata:
+          nullable: true
+          type: object
+          additionalProperties: true
+        unsafe_metadata:
+          type: object
+          additionalProperties: true
+        email_addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmailAddress'
+        phone_numbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhoneNumber'
+        web3_wallets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Web3Wallet'
+        passkeys:
+          type: array
+          items:
+            $ref: '#/components/schemas/Passkey'
+        password_enabled:
+          type: boolean
+        two_factor_enabled:
+          type: boolean
+        totp_enabled:
+          type: boolean
+        backup_code_enabled:
+          type: boolean
+        mfa_enabled_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of when MFA was last enabled for this user. It should be noted that this field is not nullified if MFA is disabled.
+          nullable: true
+        mfa_disabled_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of when MFA was last disabled for this user. It should be noted that this field is not nullified if MFA is enabled again.
+          nullable: true
+        password_last_updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of when the user's password was last updated.
+          nullable: true
+        external_accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalAccountWithVerification'
+        saml_accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SAMLAccount'
+        enterprise_accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnterpriseAccount'
+        organization_memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizationMembership'
+        last_sign_in_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp of last sign-in.
+        banned:
+          type: boolean
+          description: |
+            Flag to denote whether user is banned or not.
+        locked:
+          type: boolean
+          description: |
+            Flag to denote whether user is currently locked, i.e. restricted from signing in or not.
+        lockout_expires_in_seconds:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            The number of seconds remaining until the lockout period expires for a locked user. A null value for a locked user indicates that lockout never expires.
+        verification_attempts_remaining:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            The number of verification attempts remaining until the user is locked. Null if account lockout is not enabled. Note: if a user is locked explicitly via the Backend API, they may still have verification attempts remaining.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        delete_self_enabled:
+          type: boolean
+          description: |
+            If enabled, user can delete themselves via FAPI.
+        create_organization_enabled:
+          type: boolean
+          description: |
+            If enabled, user can create organizations via FAPI.
+        create_organizations_limit:
+          type: integer
+          description: |
+            The maximum number of organizations the user can create. 0 means unlimited.
+          nullable: true
+        last_active_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp of the latest session activity, with day precision.
+          example: 1700690400000
+        legal_accepted_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp of when the user accepted the legal requirements.
+          example: 1700690400000
+        bypass_client_trust:
+          type: boolean
+          description: When set to `true`, the user will bypass client trust checks during sign-in.
+          default: false
+      required:
+        - id
+        - object
+        - username
+        - first_name
+        - last_name
+        - has_image
+        - primary_email_address_id
+        - primary_phone_number_id
+        - primary_web3_wallet_id
+        - password_enabled
+        - two_factor_enabled
+        - totp_enabled
+        - backup_code_enabled
+        - email_addresses
+        - phone_numbers
+        - web3_wallets
+        - passkeys
+        - external_accounts
+        - saml_accounts
+        - enterprise_accounts
+        - public_metadata
+        - external_id
+        - last_sign_in_at
+        - banned
+        - locked
+        - lockout_expires_in_seconds
+        - verification_attempts_remaining
+        - created_at
+        - updated_at
+        - delete_self_enabled
+        - create_organization_enabled
+        - last_active_at
+        - mfa_enabled_at
+        - mfa_disabled_at
+        - legal_accepted_at
+    PlatformListInstanceUsersResponse:
+      title: List Instance Users Response
+      description: A paginated list of users for an application instance.
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: The list of users.
+          items:
+            $ref: '#/components/schemas/User'
+        total_count:
+          type: integer
+          format: int64
+          description: The total number of users in the instance.
+          example: 100
+      required:
+        - data
+        - total_count
+    PlatformConfigResponse:
+      type: object
+      description: Instance configuration response containing key-value pairs and metadata.
+      properties:
+        config_version:
+          type: string
+          description: Configuration version for optimistic concurrency control.
+      additionalProperties: true
+    PlatformConfigPatchRequest:
+      type: object
+      description: Configuration updates to apply. Keys should match config key names.
+      additionalProperties: true
+    PlatformConfigPatchResponse:
+      type: object
+      description: Configuration patch response containing the result of the operation.
+      properties:
+        config_version:
+          type: string
+          description: Updated configuration version.
+        dry_run:
+          type: boolean
+          description: Whether this was a dry run (changes were not applied).
+        before:
+          type: object
+          description: Configuration state before the patch was applied.
+          additionalProperties: true
+        after:
+          type: object
+          description: Configuration state after the patch was applied.
+          additionalProperties: true
+      additionalProperties: true
+    PlatformConfigSchemaResponse:
+      type: object
+      description: JSON Schema describing the available configuration options.
+      properties:
+        $schema:
+          type: string
+          description: JSON Schema version.
+        $id:
+          type: string
+          description: Schema identifier.
+        type:
+          type: string
+        properties:
+          type: object
+          description: Schema definitions for each configuration key.
+          additionalProperties: true
+      additionalProperties: true
+  responses:
+    ClerkErrors:
+      description: Request was not successful
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    AuthenticationInvalid:
+      description: Authentication invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    AuthorizationInvalid:
+      description: Authorization invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    UnprocessableEntity:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    ResourceNotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+x-tagGroups:
+  - name: Core Resources
+    tags:
+      - Applications
+      - Domains
+      - Application Transfers
+      - Users
+      - Config
