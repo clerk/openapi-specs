@@ -5715,6 +5715,16 @@ paths:
           schema:
             type: string
         - in: query
+          name: domains
+          description: Filter by exact domain names. Accepts multiple values (e.g. domains=example.com&domains=test.org).
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - in: query
           name: order_by
           description: |
             Allows to return organization domains in a particular order.
