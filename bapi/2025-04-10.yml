@@ -366,6 +366,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /email_addresses/{email_address_id}:
@@ -462,6 +464,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
   /phone_numbers:
     post:
       operationId: CreatePhoneNumber
@@ -2073,6 +2077,8 @@ paths:
           $ref: '#/components/responses/AuthenticationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
@@ -14449,6 +14455,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ClerkErrors'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
     DeletedObject:
       description: Deleted Object
       content:
@@ -14775,12 +14787,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/MachineScope'
-    Conflict:
-      description: Conflict
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClerkErrors'
     MachineScope.Deleted:
       description: Machine scope deleted successfully for a machine
       content:
