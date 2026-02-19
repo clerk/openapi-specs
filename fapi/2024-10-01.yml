@@ -7626,10 +7626,19 @@ components:
         orgs_api_keys_enabled:
           type: boolean
           description: Indicates whether Organization API Keys are enabled.
+        usage_alerts_enabled:
+          type: boolean
+          description: Indicates whether usage alerts are enabled for API Keys.
+        usage_alerts_monthly_limit_cents:
+          type: integer
+          nullable: true
+          description: The monthly usage limit in cents. Null if not set.
       required:
         - enabled
         - user_api_keys_enabled
         - orgs_api_keys_enabled
+        - usage_alerts_enabled
+        - usage_alerts_monthly_limit_cents
     Client.ProtectConfig.Loader:
       type: object
       additionalProperties: false

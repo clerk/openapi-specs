@@ -370,6 +370,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /email_addresses/{email_address_id}:
@@ -466,6 +468,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
   /phone_numbers:
     post:
       operationId: CreatePhoneNumber
@@ -2077,6 +2081,8 @@ paths:
           $ref: '#/components/responses/AuthenticationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
@@ -7155,32 +7161,6 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
   /accountless_applications: {}
   /accountless_applications/complete: {}
-  /platform/users: {}
-  /platform/organizations: {}
-  /platform/applications: {}
-  /platform/organizations/{organizationID}: {}
-  /platform/applications/{applicationID}: {}
-  /platform/applications/{applicationID}/transfer_ownership: {}
-  /platform/applications/{applicationID}/usage: {}
-  /platform/applications/{applicationID}/subscription: {}
-  /platform/applications/{applicationID}/rotate_secret_keys: {}
-  /platform/applications/{applicationID}/logo: {}
-  /platform/applications/{applicationID}/favicon: {}
-  /platform/applications/{applicationID}/domain: {}
-  /platform/applications/{applicationID}/domains: {}
-  /platform/applications/{applicationID}/domains/{domainIDOrName}: {}
-  /platform/applications/{applicationID}/domains/{domainIDOrName}/status: {}
-  /platform/applications/{applicationID}/domains/{domainIDOrName}/dns_check: {}
-  /platform/applications/{applicationID}/transfers: {}
-  /platform/applications/{applicationID}/transfers/{transferID}: {}
-  /platform/application_transfers: {}
-  /platform/applications/{applicationID}/instances/{envOrInsID}/users: {}
-  /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}/ban: {}
-  /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}/unban: {}
-  /platform/applications/{applicationID}/instances/{instanceID}/config: {}
-  /platform/applications/{applicationID}/instances/{instanceID}/config/schema: {}
-  /platform/applications/{applicationID}/instances/{envOrInsID}/jwt_templates: {}
-  /platform/applications/{applicationID}/instances/{envOrInsID}/jwt_templates/{templateID}: {}
   /billing/plans:
     get:
       operationId: GetCommercePlanList
@@ -8098,6 +8078,8 @@ paths:
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /audit_logs: {}
+  /scim_directories: {}
+  /scim_directories/{scim_directory_id}: {}
   /api_keys:
     post:
       operationId: createApiKey
@@ -10199,10 +10181,6 @@ components:
       scheme: bearer
       description: Secret key, obtained under "API Keys" in the Clerk Dashboard.
       bearerFormat: sk_<environment>_<secret value>
-    platformToken:
-      type: http
-      scheme: bearer
-      description: Internal auth.
   schemas:
     JWKS.ed25519.PublicKey:
       type: object
@@ -14219,6 +14197,7 @@ components:
         - annual_monthly_amount
         - fee
         - annual_monthly_fee
+        - is_default
         - created_at
       properties:
         object:
@@ -14257,6 +14236,9 @@ components:
           type: string
           nullable: true
           description: The description of the price.
+        is_default:
+          type: boolean
+          description: Whether this price is the default price for its plan.
         created_at:
           type: integer
           format: int64
@@ -15339,6 +15321,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ClerkErrors'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
     DeletedObject:
       description: Deleted Object
       content:
@@ -15665,12 +15653,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/MachineScope'
-    Conflict:
-      description: Conflict
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClerkErrors'
     MachineScope.Deleted:
       description: Machine scope deleted successfully for a machine
       content:
