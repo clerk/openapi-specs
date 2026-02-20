@@ -1922,6 +1922,55 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '500':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/agents/tasks:
+    get:
+      x-speakeasy-ignore: true
+      x-speakeasy-group: agentTasks
+      x-speakeasy-name-override: create
+      summary: Create session from agent task
+      description: |
+        Creates a new session directly from an agent task without requiring navigation to the sign-in page.
+        Agent tasks are single-use tokens created via the Backend API that bypass MFA requirements.
+
+        The endpoint returns a redirect with a handshake cookie containing all session cookies,
+        enabling cookie sync to the app domain in a single step. This is useful for browser
+        automation tools (Puppeteer, Playwright) that need cookies on the application domain.
+      tags:
+        - Client
+      operationId: createAgentTask
+      security:
+        - {}
+        - DevBrowser: []
+      parameters:
+        - in: query
+          name: ticket
+          required: true
+          schema:
+            type: string
+          description: The agent task ticket value obtained from the Backend API.
+      responses:
+        '307':
+          description: |
+            Redirect to the `redirect_url` specified when the agent task was created.
+
+            Before redirecting, the URL is validated:
+            - Must be a valid absolute URL with an `https` scheme in production.
+              In development instances, `http` is also permitted.
+            - The URL's domain must belong to one of the instance's associated domains
+              (primary or satellite).
+
+            In production, the handshake payload is set as a cookie.
+            In development, the handshake payload is passed as a query parameter.
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /v1/dev_browser:
     post:
       summary: Create a Dev Browser token
@@ -4222,6 +4271,7 @@ paths:
               - pending
               - accepted
               - revoked
+              - expired
               - invalid
               - completed
       responses:
@@ -7612,10 +7662,19 @@ components:
         orgs_api_keys_enabled:
           type: boolean
           description: Indicates whether Organization API Keys are enabled.
+        usage_alerts_enabled:
+          type: boolean
+          description: Indicates whether usage alerts are enabled for API Keys.
+        usage_alerts_monthly_limit_cents:
+          type: integer
+          nullable: true
+          description: The monthly usage limit in cents. Null if not set.
       required:
         - enabled
         - user_api_keys_enabled
         - orgs_api_keys_enabled
+        - usage_alerts_enabled
+        - usage_alerts_monthly_limit_cents
     Client.ProtectConfig.Loader:
       type: object
       additionalProperties: false
@@ -10210,6 +10269,7 @@ components:
             - pending
             - revoked
             - accepted
+            - expired
             - completed
         public_metadata:
           type: object
