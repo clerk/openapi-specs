@@ -32,6 +32,8 @@ tags:
     description: An object representing a transfer request for an application between workspaces.
   - name: Users
     description: Operations for managing users within an application instance.
+  - name: JWT Templates
+    description: Operations for managing JWT templates within an application instance.
   - name: Config
     description: Operations for managing instance configuration. The config API provides a unified interface for reading and updating instance settings, including authentication methods, SSO connections, and other instance-level configuration options.
 externalDocs:
@@ -685,7 +687,6 @@ paths:
         '404':
           $ref: '#/components/responses/ResourceNotFound'
         '409':
-          description: A DNS check is already in progress or a recent check was performed. Wait for the current check to complete or for the cooldown period to expire before retrying.
           $ref: '#/components/responses/Conflict'
   /platform/application_transfers:
     get:
@@ -1060,6 +1061,322 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/jwt_templates:
+    get:
+      operationId: PlatformListJWTTemplates
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: listJWTTemplates
+      tags:
+        - JWT Templates
+      summary: List JWT templates
+      description: |
+        List all JWT templates for an application instance.
+
+        Requires the `jwt_templates:read` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: JWT templates retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JWTTemplate'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    post:
+      operationId: PlatformCreateJWTTemplate
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: createJWTTemplate
+      tags:
+        - JWT Templates
+      summary: Create a JWT template
+      description: |
+        Create a new JWT template for an application instance.
+
+        Requires the `jwt_templates:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: JWT template data to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: JWT template name
+                claims:
+                  type: object
+                  description: JWT template claims in JSON format
+                lifetime:
+                  type: integer
+                  minimum: 30
+                  maximum: 315360000
+                  description: JWT token lifetime in seconds
+                  nullable: true
+                allowed_clock_skew:
+                  type: integer
+                  minimum: 0
+                  maximum: 300
+                  description: JWT allowed clock skew in seconds
+                  nullable: true
+                custom_signing_key:
+                  type: boolean
+                  description: Whether a custom signing key/algorithm is also provided for this template
+                signing_algorithm:
+                  type: string
+                  description: The custom signing algorithm to use when minting JWTs. Required if `custom_signing_key` is `true`.
+                  nullable: true
+                signing_key:
+                  type: string
+                  description: The custom signing private key to use when minting JWTs. Required if `custom_signing_key` is `true`.
+                  nullable: true
+              required:
+                - name
+                - claims
+      responses:
+        '200':
+          description: JWT template created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JWTTemplate'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/jwt_templates/{templateID}:
+    get:
+      operationId: PlatformGetJWTTemplate
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: getJWTTemplate
+      tags:
+        - JWT Templates
+      summary: Get a JWT template
+      description: |
+        Retrieve a specific JWT template for an application instance.
+
+        Requires the `jwt_templates:read` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: templateID
+          in: path
+          description: JWT Template ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: JWT template retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JWTTemplate'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    patch:
+      operationId: PlatformUpdateJWTTemplate
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: updateJWTTemplate
+      tags:
+        - JWT Templates
+      summary: Update a JWT template
+      description: |
+        Update an existing JWT template for an application instance.
+
+        Requires the `jwt_templates:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: templateID
+          in: path
+          description: JWT Template ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: JWT template data to update.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: JWT template name
+                claims:
+                  type: object
+                  description: JWT template claims in JSON format
+                lifetime:
+                  type: integer
+                  minimum: 30
+                  maximum: 315360000
+                  description: JWT token lifetime in seconds
+                  nullable: true
+                allowed_clock_skew:
+                  type: integer
+                  minimum: 0
+                  maximum: 300
+                  description: JWT allowed clock skew in seconds
+                  nullable: true
+                custom_signing_key:
+                  type: boolean
+                  description: Whether a custom signing key/algorithm is also provided for this template
+                signing_algorithm:
+                  type: string
+                  description: The custom signing algorithm to use when minting JWTs. Required if `custom_signing_key` is `true`.
+                  nullable: true
+                signing_key:
+                  type: string
+                  description: The custom signing private key to use when minting JWTs. Required if `custom_signing_key` is `true`.
+                  nullable: true
+              required:
+                - name
+                - claims
+      responses:
+        '200':
+          description: JWT template updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JWTTemplate'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      operationId: PlatformDeleteJWTTemplate
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: deleteJWTTemplate
+      tags:
+        - JWT Templates
+      summary: Delete a JWT template
+      description: |
+        Delete a JWT template from an application instance.
+
+        Requires the `jwt_templates:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: templateID
+          in: path
+          description: JWT Template ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /platform/applications/{applicationID}/instances/{envOrInsID}/config:
     get:
       operationId: PlatformGetConfig
@@ -1200,6 +1517,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '401':
           $ref: '#/components/responses/AuthenticationInvalid'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
         '403':
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
@@ -1302,7 +1621,6 @@ components:
       required:
         - instance_id
         - environment_type
-        - publishable_key
     PlatformApplicationResponse:
       type: object
       additionalProperties: false
@@ -1368,10 +1686,7 @@ components:
           type: array
           items:
             type: string
-            enum:
-              - development
-              - production
-          description: List of environment types to create instances for.
+          description: List of environment types to create instances for. Accepted values are "development" and "production". Defaults to "development" if not provided.
         template:
           type: string
           description: Application template to use for configuring the application (e.g., "b2b-saas", "b2c-saas", "waitlist").
@@ -3017,6 +3332,66 @@ components:
       required:
         - data
         - total_count
+    JWTTemplate:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - jwt_template
+        id:
+          type: string
+        name:
+          type: string
+        claims:
+          type: object
+        lifetime:
+          type: integer
+        allowed_clock_skew:
+          type: integer
+        custom_signing_key:
+          type: boolean
+        signing_algorithm:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - name
+        - claims
+        - lifetime
+        - allowed_clock_skew
+        - custom_signing_key
+        - signing_algorithm
+        - created_at
+        - updated_at
+    DeletedObject:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+        id:
+          type: string
+        slug:
+          type: string
+        deleted:
+          type: boolean
+        external_id:
+          type: string
+      required:
+        - object
+        - deleted
     PlatformConfigResponse:
       type: object
       description: Instance configuration response containing key-value pairs and metadata.
@@ -3102,6 +3477,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ClerkErrors'
+    PaymentRequired:
+      description: Payment required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    DeletedObject:
+      description: Deleted Object
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeletedObject'
 x-tagGroups:
   - name: Core Resources
     tags:
@@ -3109,4 +3496,5 @@ x-tagGroups:
       - Domains
       - Application Transfers
       - Users
+      - JWT Templates
       - Config
