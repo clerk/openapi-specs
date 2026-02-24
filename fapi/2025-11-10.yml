@@ -2386,6 +2386,8 @@ paths:
                     type: string
         '401':
           $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
   /v1/client/sessions/{session_id}/tokens/{template_name}:
@@ -3938,6 +3940,8 @@ paths:
         '200':
           $ref: '#/components/responses/responses-Client.ClientWrappedUser'
         '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
@@ -7914,6 +7918,7 @@ components:
             - verified
             - failed
             - expired
+            - transferable
         strategy:
           type: string
           enum:
@@ -9912,6 +9917,8 @@ components:
             type: string
         verify_at_sign_up:
           type: boolean
+        immutable:
+          type: boolean
       required:
         - enabled
         - required
@@ -9921,6 +9928,7 @@ components:
         - second_factors
         - verifications
         - verify_at_sign_up
+        - immutable
     UserSettings.Attributes:
       type: object
       additionalProperties: false
