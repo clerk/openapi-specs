@@ -4061,6 +4061,49 @@ components:
         - data
         - delivered_by_clerk
         - created_at_ms
+    BillingSubscriptionItemEventPlanUnitPriceTier:
+      type: object
+      properties:
+        starts_at_block:
+          type: integer
+          format: int64
+          description: The block number at which this tier begins
+        ends_after_block:
+          type: integer
+          format: int64
+          nullable: true
+          description: The block number at which this tier ends. Null means this tier has no upper bound (unlimited).
+        amount_per_block:
+          type: integer
+          format: int64
+          description: Price per block in the smallest currency unit (e.g., cents for USD)
+        currency:
+          type: string
+          description: Three letter ISO 4217 currency code for this tier's pricing (e.g., "USD")
+      required:
+        - starts_at_block
+        - ends_after_block
+        - amount_per_block
+        - currency
+    BillingSubscriptionItemEventPlanUnitPrice:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the unit being priced (e.g., "seats")
+        block_size:
+          type: integer
+          format: int64
+          description: Number of units per pricing block
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingSubscriptionItemEventPlanUnitPriceTier'
+          description: Pricing tiers sorted by starts_at_block
+      required:
+        - name
+        - block_size
+        - tiers
     BillingSubscriptionItemEventPlan:
       type: object
       properties:
@@ -4083,6 +4126,11 @@ components:
         currency:
           type: string
           description: Three-letter ISO 4217 currency code for this plan's pricing (e.g., "USD")
+        unit_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingSubscriptionItemEventPlanUnitPrice'
+          description: Tiered unit pricing for this plan. Only present for plans with unit-based pricing.
       required:
         - id
         - slug
@@ -4090,6 +4138,16 @@ components:
         - is_recurring
         - amount
         - currency
+    BillingSeats:
+      type: object
+      properties:
+        quantity:
+          type: integer
+          format: int64
+          nullable: true
+          description: Number of seats available. null means unlimited
+      required:
+        - quantity
     BillingSubscriptionItemEventPayload:
       type: object
       properties:
@@ -4160,6 +4218,9 @@ components:
           type: string
           nullable: true
           description: Unique identifier for the parent subscription. Only populated when this item is sent as a standalone event, null when included within a subscription event.
+        seats:
+          description: Seat entitlement for this subscription item
+          $ref: '#/components/schemas/BillingSeats'
       required:
         - object
         - id
@@ -4744,6 +4805,16 @@ components:
                 is_recurring: true
                 amount: 2000
                 currency: USD
+                unit_prices:
+                  - name: seats
+                    block_size: 1
+                    tiers:
+                      - starts_at_block: 1
+                        ends_after_block: 5
+                        amount_per_block: 0
+                        currency: USD
+              seats:
+                quantity: 5
               subscription_id: null
     SubscriptionUpdatedEventExample:
       value:
@@ -4976,6 +5047,16 @@ components:
             is_recurring: false
             amount: 0
             currency: USD
+            unit_prices:
+              - name: seats
+                block_size: 1
+                tiers:
+                  - starts_at_block: 1
+                    ends_after_block: 5
+                    amount_per_block: 0
+                    currency: USD
+          seats:
+            quantity: 5
           payer:
             object: commerce_payer
             id: cpayer_2g7np7Hrk0SN6kj5EDMLDaKNL0S
