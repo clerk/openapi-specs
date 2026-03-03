@@ -841,6 +841,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/enterprise_connections: {}
+  /v1/enterprise_connections/{enterpriseConnectionID}: {}
   /v1/enterprise_connections/{enterpriseConnectionID}/init_test_run: {}
   /v1/health:
     get:
@@ -2310,6 +2312,8 @@ paths:
                   jwt:
                     type: string
         '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
@@ -3863,6 +3867,8 @@ paths:
         '200':
           $ref: '#/components/responses/responses-Client.ClientWrappedUser'
         '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
@@ -7116,6 +7122,8 @@ components:
             type: string
         verify_at_sign_up:
           type: boolean
+        immutable:
+          type: boolean
       required:
         - enabled
         - required
@@ -7125,6 +7133,7 @@ components:
         - second_factors
         - verifications
         - verify_at_sign_up
+        - immutable
     UserSettings.Attributes:
       type: object
       additionalProperties: false
@@ -7663,19 +7672,10 @@ components:
         orgs_api_keys_enabled:
           type: boolean
           description: Indicates whether Organization API Keys are enabled.
-        usage_alerts_enabled:
-          type: boolean
-          description: Indicates whether usage alerts are enabled for API Keys.
-        usage_alerts_monthly_limit_cents:
-          type: integer
-          nullable: true
-          description: The monthly usage limit in cents. Null if not set.
       required:
         - enabled
         - user_api_keys_enabled
         - orgs_api_keys_enabled
-        - usage_alerts_enabled
-        - usage_alerts_monthly_limit_cents
     Client.ProtectConfig.Loader:
       type: object
       additionalProperties: false
@@ -7726,6 +7726,8 @@ components:
         protect_config:
           $ref: '#/components/schemas/Client.ProtectConfig'
         client_debug_mode:
+          type: boolean
+        partitioned_cookies:
           type: boolean
         maintenance_mode:
           type: boolean
@@ -7873,6 +7875,7 @@ components:
             - verified
             - failed
             - expired
+            - transferable
         strategy:
           type: string
           enum:
