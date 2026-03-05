@@ -1628,6 +1628,9 @@ components:
         application_id:
           type: string
           description: The ID of the application.
+        name:
+          type: string
+          description: The name of the application.
         instances:
           type: array
           description: List of instances associated with this application.
@@ -1635,6 +1638,7 @@ components:
             $ref: '#/components/schemas/PlatformApplicationInstance'
       required:
         - application_id
+        - name
         - instances
     PlatformListApplicationsResponse:
       type: array

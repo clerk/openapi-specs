@@ -915,6 +915,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/enterprise_connections: {}
+  /v1/enterprise_connections/{enterpriseConnectionID}: {}
   /v1/enterprise_connections/{enterpriseConnectionID}/init_test_run: {}
   /v1/enterprise_connections/{enterpriseConnectionID}/test_runs/{testRunID}: {}
   /v1/health:
@@ -2385,6 +2387,8 @@ paths:
                   jwt:
                     type: string
         '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
@@ -3938,6 +3942,8 @@ paths:
         '200':
           $ref: '#/components/responses/responses-Client.ClientWrappedUser'
         '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
@@ -7914,6 +7920,7 @@ components:
             - verified
             - failed
             - expired
+            - transferable
         strategy:
           type: string
           enum:
@@ -9912,6 +9919,8 @@ components:
             type: string
         verify_at_sign_up:
           type: boolean
+        immutable:
+          type: boolean
       required:
         - enabled
         - required
@@ -9921,6 +9930,7 @@ components:
         - second_factors
         - verifications
         - verify_at_sign_up
+        - immutable
     UserSettings.Attributes:
       type: object
       additionalProperties: false
@@ -10453,19 +10463,10 @@ components:
         orgs_api_keys_enabled:
           type: boolean
           description: Indicates whether Organization API Keys are enabled.
-        usage_alerts_enabled:
-          type: boolean
-          description: Indicates whether usage alerts are enabled for API Keys.
-        usage_alerts_monthly_limit_cents:
-          type: integer
-          nullable: true
-          description: The monthly usage limit in cents. Null if not set.
       required:
         - enabled
         - user_api_keys_enabled
         - orgs_api_keys_enabled
-        - usage_alerts_enabled
-        - usage_alerts_monthly_limit_cents
     Client.ProtectConfig.Loader:
       type: object
       additionalProperties: false
@@ -10516,6 +10517,8 @@ components:
         protect_config:
           $ref: '#/components/schemas/Client.ProtectConfig'
         client_debug_mode:
+          type: boolean
+        partitioned_cookies:
           type: boolean
         maintenance_mode:
           type: boolean
@@ -11291,6 +11294,66 @@ components:
         - cycle_days_remaining
         - cycle_days_total
         - cycle_remaining_percent
+    BillingProrationCreditDetail:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Credit amount with formatting
+        cycle_days_remaining:
+          type: integer
+          format: int64
+          description: Number of days remaining in the billing cycle
+        cycle_days_total:
+          type: integer
+          format: int64
+          description: Total number of days in the billing cycle
+        cycle_remaining_percent:
+          type: number
+          format: double
+          description: Percentage of the billing cycle remaining
+      required:
+        - amount
+        - cycle_days_remaining
+        - cycle_days_total
+        - cycle_remaining_percent
+    BillingPayerCreditResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        remaining_balance:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The payer's remaining credit balance after credit is applied for this checkout (in cents)
+        applied_amount:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The amount of payer credit applied to this checkout (in cents)
+      required:
+        - remaining_balance
+        - applied_amount
+    BillingCreditsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        proration:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingProrationCreditDetail'
+          description: Proration credit details from unused subscription time
+        payer:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingPayerCreditResponse'
+          description: Payer credit details from the payer's credit balance
+        total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Total credits applied
+      required:
+        - proration
+        - payer
+        - total
     BillingFee:
       type: object
       additionalProperties: false
@@ -11314,6 +11377,45 @@ components:
         - amount_formatted
         - currency
         - currency_symbol
+    BillingPlanUnitPriceTier:
+      type: object
+      additionalProperties: false
+      properties:
+        starts_at_block:
+          type: integer
+          format: int64
+          description: Start block (inclusive) for this tier
+        ends_after_block:
+          type: integer
+          format: int64
+          nullable: true
+          description: End block (inclusive) for this tier; null means unlimited
+        fee_per_block:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Price charged per block in this tier
+      required:
+        - starts_at_block
+        - fee_per_block
+    BillingPlanUnitPrice:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: Name of the billable unit (for example, seats)
+        block_size:
+          type: integer
+          format: int64
+          description: Number of units included in each pricing block
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPlanUnitPriceTier'
+          description: Tiered pricing configuration for this unit
+      required:
+        - name
+        - block_size
+        - tiers
     BillingPlan:
       type: object
       additionalProperties: false
@@ -11379,6 +11481,11 @@ components:
           type: integer
           nullable: true
           description: Number of free trial days for this plan
+        unit_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPlanUnitPrice'
+          description: Per-unit pricing tiers for this plan (for example, seats)
         features:
           type: array
           description: The features included in this plan
@@ -11514,6 +11621,44 @@ components:
         - last4
         - status
         - card_type
+    BillingPerUnitTotalTier:
+      type: object
+      additionalProperties: false
+      properties:
+        quantity:
+          type: integer
+          format: int64
+          nullable: true
+          description: Units billed in this tier; null means unlimited
+        fee_per_block:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Price charged per block in this tier
+        total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Total charge for this tier
+      required:
+        - fee_per_block
+        - total
+    BillingPerUnitTotal:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: Name of the billable unit (for example, seats)
+        block_size:
+          type: integer
+          format: int64
+          description: Number of units included in each pricing block
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPerUnitTotalTier'
+          description: Computed totals for each pricing tier
+      required:
+        - name
+        - block_size
+        - tiers
     BillingSubscriptionItemNextPayment:
       type: object
       additionalProperties: false
@@ -11525,6 +11670,11 @@ components:
           type: integer
           format: int64
           description: Unix timestamp (in milliseconds) for the next payment date
+        per_unit_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPerUnitTotal'
+          description: Per-unit total breakdown for the next payment
     BillingPayer:
       type: object
       additionalProperties: false
@@ -11586,6 +11736,76 @@ components:
         - instance_id
         - user_id
         - organization_id
+    BillingSubscriptionItemSeats:
+      type: object
+      additionalProperties: false
+      properties:
+        quantity:
+          type: integer
+          format: int64
+          nullable: true
+          description: Seat quantity being billed; null means unlimited
+      required:
+        - quantity
+    BillingTotalsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        subtotal:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Subtotal before adjustments
+        base_fee:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Base fee component before per-unit charges and adjustments
+        tax_total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Total tax amount
+        grand_total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Grand total amount
+        total_due_after_free_trial:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: Total amount due after free trial ends
+        credit:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: Credit amount
+        past_due:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: Past due amount
+        total_due_now:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: Total amount due now
+        per_unit_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPerUnitTotal'
+          description: Per-unit total breakdown (for example, seats)
+        credits:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditsResponse'
+          nullable: true
+          description: Unified credits breakdown
+        proration:
+          type: object
+          nullable: true
+          additionalProperties: false
+          properties:
+            credit:
+              $ref: '#/components/schemas/BillingMoneyResponse'
+              description: Proration credit amount
+      required:
+        - subtotal
+        - base_fee
+        - tax_total
+        - grand_total
     BillingSubscriptionItem:
       type: object
       additionalProperties: false
@@ -11615,6 +11835,11 @@ components:
         credit:
           $ref: '#/components/schemas/BillingSubscriptionCreditResponse'
           description: Credit information for this subscription (available in payment attempt events)
+        credits:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditsResponse'
+          nullable: true
+          description: Unified credits breakdown for this subscription item
         plan_id:
           type: string
           description: Unique identifier for the associated plan
@@ -11690,6 +11915,16 @@ components:
           type: integer
           format: int64
           description: Unix timestamp (in milliseconds) when the subscription was last updated
+        seats:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionItemSeats'
+          nullable: true
+          description: Seat quantity for seat-based billing
+        totals:
+          allOf:
+            - $ref: '#/components/schemas/BillingTotalsResponse'
+          nullable: true
+          description: Totals for this subscription item
       required:
         - object
         - id
@@ -11917,66 +12152,6 @@ components:
       required:
         - response
         - client
-    BillingProrationCreditDetail:
-      type: object
-      additionalProperties: false
-      properties:
-        amount:
-          $ref: '#/components/schemas/BillingMoneyResponse'
-          description: Credit amount with formatting
-        cycle_days_remaining:
-          type: integer
-          format: int64
-          description: Number of days remaining in the billing cycle
-        cycle_days_total:
-          type: integer
-          format: int64
-          description: Total number of days in the billing cycle
-        cycle_remaining_percent:
-          type: number
-          format: double
-          description: Percentage of the billing cycle remaining
-      required:
-        - amount
-        - cycle_days_remaining
-        - cycle_days_total
-        - cycle_remaining_percent
-    BillingPayerCreditResponse:
-      type: object
-      additionalProperties: false
-      properties:
-        remaining_balance:
-          $ref: '#/components/schemas/BillingMoneyResponse'
-          description: The payer's remaining credit balance after credit is applied for this checkout (in cents)
-        applied_amount:
-          $ref: '#/components/schemas/BillingMoneyResponse'
-          description: The amount of payer credit applied to this checkout (in cents)
-      required:
-        - remaining_balance
-        - applied_amount
-    BillingCreditsResponse:
-      type: object
-      additionalProperties: false
-      properties:
-        proration:
-          type: object
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/BillingProrationCreditDetail'
-          description: Proration credit details from unused subscription time
-        payer:
-          type: object
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/BillingPayerCreditResponse'
-          description: Payer credit details from the payer's credit balance
-        total:
-          $ref: '#/components/schemas/BillingMoneyResponse'
-          description: Total credits applied
-      required:
-        - proration
-        - payer
-        - total
     BillingCheckoutTotals:
       type: object
       additionalProperties: false
@@ -11984,6 +12159,9 @@ components:
         subtotal:
           $ref: '#/components/schemas/BillingMoneyResponse'
           description: The total, pre-tax, that will be due
+        base_fee:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Base fee component before per-unit charges and adjustments
         tax_total:
           $ref: '#/components/schemas/BillingMoneyResponse'
           description: The total amount of tax that will be due
@@ -12020,8 +12198,14 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingCreditsResponse'
           description: Unified credits breakdown
+        per_unit_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPerUnitTotal'
+          description: Per-unit total breakdown (for example, seats)
       required:
         - subtotal
+        - base_fee
         - tax_total
         - grand_total
         - total_due_after_free_trial
@@ -12179,6 +12363,11 @@ components:
         amount:
           $ref: '#/components/schemas/BillingMoneyResponse'
           description: Payment amount with formatting
+        totals:
+          allOf:
+            - $ref: '#/components/schemas/BillingTotalsResponse'
+          nullable: true
+          description: Totals breakdown for this payment attempt
         payment_method_id:
           type: string
           description: Unique identifier for the payment method used
@@ -12288,7 +12477,10 @@ components:
       properties:
         subtotal:
           $ref: '#/components/schemas/BillingMoneyResponse'
-          description: Subtotal amount
+          description: Subtotal amount (base fee + unit price totals)
+        base_fee:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Base plan fee before unit pricing
         tax_total:
           $ref: '#/components/schemas/BillingMoneyResponse'
           description: Total tax amount
@@ -12297,6 +12489,7 @@ components:
           description: Grand total amount
       required:
         - subtotal
+        - base_fee
         - tax_total
         - grand_total
     BillingStatementResponseGroup:
