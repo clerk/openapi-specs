@@ -625,8 +625,11 @@ paths:
         - Sessions
       summary: List all sessions
       description: |-
-        Returns a list of all sessions.
+        Returns a list of sessions matching the provided criteria.
         The sessions are returned sorted by creation date, with the newest sessions appearing first.
+
+        Note: This endpoint does not return all sessions that have ever existed. Old and inactive sessions are periodically cleaned up and will not be included in the results.
+
         **Deprecation Notice (2024-01-01):** All parameters were initially considered optional, however
         moving forward at least one of `client_id` or `user_id` parameters should be provided.
       parameters:
@@ -2416,6 +2419,83 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+  /users/{user_id}/billing/credits:
+    get:
+      operationId: GetUserBillingCreditBalance
+      x-speakeasy-group: users
+      x-speakeasy-name-override: getBillingCreditBalance
+      summary: Retrieve a user's credit balance
+      description: |-
+        Retrieves the current credit balance for the specified user.
+        Credits can be applied during checkout to reduce the charge or automatically applied to upcoming recurring charges
+      tags:
+        - Users
+        - Billing
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the user whose credit balance to retrieve
+      responses:
+        '200':
+          $ref: '#/components/responses/CommerceCreditBalance'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
+    post:
+      operationId: AdjustUserBillingCreditBalance
+      x-speakeasy-group: users
+      x-speakeasy-name-override: adjustBillingCreditBalance
+      summary: Adjust a user's credit balance
+      description: |-
+        Increases or decreases the credit balance for the specified user.
+        Each adjustment is recorded as a ledger entry. The idempotency_key parameter
+        ensures that duplicate requests are safely handled.
+      tags:
+        - Users
+        - Billing
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the user whose credit balance to adjust
+      requestBody:
+        description: Parameters for the credit balance adjustment
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdjustCreditBalanceRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/CommerceCreditLedger'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/oauth_access_tokens/{provider}:
     get:
       operationId: GetOAuthAccessToken
@@ -3682,6 +3762,46 @@ paths:
           $ref: '#/components/responses/InstanceProtect'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+  /instance/oauth_application_settings:
+    get:
+      operationId: GetInstanceOAuthApplicationSettings
+      x-speakeasy-group: instanceSettings
+      x-speakeasy-name-override: getOAuthApplicationSettings
+      summary: Get OAuth application settings
+      description: Retrieves the settings for OAuth applications for the instance (dynamic client registration, JWT access tokens, etc.).
+      tags:
+        - Instance Settings
+      responses:
+        '200':
+          $ref: '#/components/responses/InstanceOAuthApplicationSettings'
+    patch:
+      operationId: UpdateInstanceOAuthApplicationSettings
+      x-speakeasy-group: instanceSettings
+      x-speakeasy-name-override: updateOAuthApplicationSettings
+      summary: Update OAuth application settings
+      description: Updates the OAuth application settings for the instance.
+      tags:
+        - Instance Settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                dynamic_oauth_client_registration:
+                  type: boolean
+                  nullable: true
+                  description: Whether dynamic OAuth client registration is enabled for the instance (RFC 7591).
+                oauth_jwt_access_tokens:
+                  type: boolean
+                  nullable: true
+                  description: Whether OAuth JWT access tokens are enabled for the instance (disabled indicates opaque access tokens).
+      responses:
+        '200':
+          $ref: '#/components/responses/InstanceOAuthApplicationSettings'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /instance/change_domain:
     post:
       operationId: ChangeProductionInstanceDomain
@@ -4603,6 +4723,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Organization'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
         '402':
           $ref: '#/components/responses/ResourceNotFound'
         '403':
@@ -4788,6 +4910,83 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
         '500':
           $ref: '#/components/responses/ClerkErrors'
+  /organizations/{organization_id}/billing/credits:
+    get:
+      operationId: GetOrganizationBillingCreditBalance
+      x-speakeasy-group: organizations
+      x-speakeasy-name-override: getBillingCreditBalance
+      summary: Retrieve an organization's credit balance
+      description: |-
+        Retrieves the current credit balance for the specified organization.
+        Credits can be applied during checkout to reduce the charge or automatically applied to upcoming recurring charges.
+      tags:
+        - Organizations
+        - Billing
+      parameters:
+        - in: path
+          name: organization_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the organization whose credit balance to retrieve
+      responses:
+        '200':
+          $ref: '#/components/responses/CommerceCreditBalance'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
+    post:
+      operationId: AdjustOrganizationBillingCreditBalance
+      x-speakeasy-group: organizations
+      x-speakeasy-name-override: adjustBillingCreditBalance
+      summary: Adjust an organization's credit balance
+      description: |-
+        Increases or decreases the credit balance for the specified organization.
+        Each adjustment is recorded as a ledger entry. The idempotency_key parameter
+        ensures that duplicate requests are safely handled.
+      tags:
+        - Organizations
+        - Billing
+      parameters:
+        - in: path
+          name: organization_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the organization whose credit balance to adjust
+      requestBody:
+        description: Parameters for the credit balance adjustment
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdjustCreditBalanceRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/CommerceCreditLedger'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /organizations/{organization_id}/invitations:
     post:
       operationId: CreateOrganizationInvitation
@@ -4877,6 +5076,8 @@ paths:
           $ref: '#/components/responses/OrganizationInvitation'
         '400':
           $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
         '403':
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
@@ -6558,6 +6759,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /enterprise_connections: {}
+  /enterprise_connections/{enterprise_connection_id}: {}
   /testing_tokens:
     post:
       operationId: CreateTestingToken
@@ -8981,6 +9184,8 @@ paths:
       description: |-
         Fetches M2M tokens for a specific machine.
 
+        Only tokens created with the opaque token format are returned by this endpoint. JWT-format M2M tokens are stateless and are not stored.
+
         This endpoint can be authenticated by either a Machine Secret Key or by a Clerk Secret Key.
 
         - When fetching M2M tokens with a Machine Secret Key, only tokens associated with the authenticated machine can be retrieved.
@@ -9197,6 +9402,8 @@ paths:
       summary: Revoke a M2M Token
       description: |-
         Revokes a M2M Token.
+
+        This endpoint only revokes stored opaque-format M2M tokens. JWT-format M2M tokens are stateless and cannot be revoked.
 
         This endpoint can be authenticated by either a Machine Secret Key or by a Clerk Secret Key.
 
@@ -11554,6 +11761,113 @@ components:
       required:
         - object
         - total_count
+    CommerceMoneyResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          type: integer
+          format: int64
+          description: The amount in cents.
+        amount_formatted:
+          type: string
+          description: The formatted amount as a string (e.g., "$49.99").
+        currency:
+          type: string
+          description: The currency code (e.g., "USD").
+        currency_symbol:
+          type: string
+          description: The currency symbol (e.g., "$").
+      required:
+        - amount
+        - amount_formatted
+        - currency
+        - currency_symbol
+    CommerceCreditBalanceResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - object
+        - balance
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Always "commerce_credit_balance".
+        balance:
+          allOf:
+            - $ref: '#/components/schemas/CommerceMoneyResponse'
+          nullable: true
+          description: The current credit balance. Null when the payer has never had credits.
+    AdjustCreditBalanceRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - amount
+        - action
+        - idempotency_key
+      properties:
+        amount:
+          type: integer
+          format: int64
+          description: The credit amount in cents. Must be greater than zero.
+        action:
+          type: string
+          enum:
+            - increase
+            - decrease
+          description: Whether to increase or decrease the credit balance.
+        currency:
+          type: string
+          description: The currency code (e.g. "USD"). Defaults to USD if not provided.
+        idempotency_key:
+          type: string
+          description: A unique key to ensure the adjustment is applied only once. Repeated requests with the same key return the original ledger entry.
+        note:
+          type: string
+          description: An optional note to attach to the ledger entry.
+    CommerceCreditLedgerResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - object
+        - id
+        - payer_id
+        - amount
+        - currency
+        - source_type
+        - source_id
+        - created_at
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Always "commerce_credit_ledger".
+        id:
+          type: string
+          description: Unique identifier for the ledger entry.
+        payer_id:
+          type: string
+          description: The ID of the payer whose balance was adjusted.
+        amount:
+          type: integer
+          format: int64
+          description: The signed credit amount. Positive for increases, negative for decreases.
+        currency:
+          type: string
+          description: The currency code of the credit adjustment.
+        source_type:
+          type: string
+          description: The type of source that originated the adjustment (e.g. "grant").
+        source_id:
+          type: string
+          description: The ID of the source that originated the adjustment.
+        note:
+          type: string
+          nullable: true
+          description: An optional note attached to the ledger entry.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the ledger entry was created.
     OAuthAccessToken:
       type: array
       items:
@@ -12068,6 +12382,24 @@ components:
         - object
         - rules_enabled
         - specter_enabled
+    OAuthApplicationSettings:
+      type: object
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - oauth_application_settings
+        dynamic_oauth_client_registration:
+          type: boolean
+          description: Whether dynamic OAuth client registration is enabled for the instance (RFC 7591).
+        oauth_jwt_access_tokens:
+          type: boolean
+          description: Whether OAuth JWT access tokens are enabled for the instance (disabled indicates opaque access tokens).
+      required:
+        - object
+        - dynamic_oauth_client_registration
+        - oauth_jwt_access_tokens
     OrganizationSettings:
       type: object
       additionalProperties: false
@@ -12279,28 +12611,6 @@ components:
           required:
             - image_url
             - has_image
-    CommerceMoneyResponse:
-      type: object
-      additionalProperties: false
-      properties:
-        amount:
-          type: integer
-          format: int64
-          description: The amount in cents.
-        amount_formatted:
-          type: string
-          description: The formatted amount as a string (e.g., "$49.99").
-        currency:
-          type: string
-          description: The currency code (e.g., "USD").
-        currency_symbol:
-          type: string
-          description: The currency symbol (e.g., "$").
-      required:
-        - amount
-        - amount_formatted
-        - currency
-        - currency_symbol
     CommerceSubscriptionCreditResponse:
       type: object
       additionalProperties: false
@@ -14181,6 +14491,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/TotalCount'
+    CommerceCreditBalance:
+      description: A payer's credit balance.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommerceCreditBalanceResponse'
+    CommerceCreditLedger:
+      description: A credit ledger entry.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommerceCreditLedgerResponse'
     OAuthAccessToken:
       description: Success
       content:
@@ -14316,6 +14638,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/InstanceProtect'
+    InstanceOAuthApplicationSettings:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OAuthApplicationSettings'
     OrganizationSettings:
       description: Success
       content:
