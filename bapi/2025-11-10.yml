@@ -632,8 +632,11 @@ paths:
         - Sessions
       summary: List all sessions
       description: |-
-        Returns a list of all sessions.
+        Returns a list of sessions matching the provided criteria.
         The sessions are returned sorted by creation date, with the newest sessions appearing first.
+
+        Note: This endpoint does not return all sessions that have ever existed. Old and inactive sessions are periodically cleaned up and will not be included in the results.
+
         **Deprecation Notice (2024-01-01):** All parameters were initially considered optional, however
         moving forward at least one of `client_id` or `user_id` parameters should be provided.
       parameters:
@@ -3747,6 +3750,46 @@ paths:
           $ref: '#/components/responses/InstanceProtect'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+  /instance/oauth_application_settings:
+    get:
+      operationId: GetInstanceOAuthApplicationSettings
+      x-speakeasy-group: instanceSettings
+      x-speakeasy-name-override: getOAuthApplicationSettings
+      summary: Get OAuth application settings
+      description: Retrieves the settings for OAuth applications for the instance (dynamic client registration, JWT access tokens, etc.).
+      tags:
+        - Instance Settings
+      responses:
+        '200':
+          $ref: '#/components/responses/InstanceOAuthApplicationSettings'
+    patch:
+      operationId: UpdateInstanceOAuthApplicationSettings
+      x-speakeasy-group: instanceSettings
+      x-speakeasy-name-override: updateOAuthApplicationSettings
+      summary: Update OAuth application settings
+      description: Updates the OAuth application settings for the instance.
+      tags:
+        - Instance Settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                dynamic_oauth_client_registration:
+                  type: boolean
+                  nullable: true
+                  description: Whether dynamic OAuth client registration is enabled for the instance (RFC 7591).
+                oauth_jwt_access_tokens:
+                  type: boolean
+                  nullable: true
+                  description: Whether OAuth JWT access tokens are enabled for the instance (disabled indicates opaque access tokens).
+      responses:
+        '200':
+          $ref: '#/components/responses/InstanceOAuthApplicationSettings'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /instance/change_domain:
     post:
       operationId: ChangeProductionInstanceDomain
@@ -4668,6 +4711,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Organization'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
         '402':
           $ref: '#/components/responses/ResourceNotFound'
         '403':
@@ -6896,6 +6941,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /enterprise_connections: {}
+  /enterprise_connections/{enterprise_connection_id}: {}
   /testing_tokens:
     post:
       operationId: CreateTestingToken
@@ -6913,8 +6960,6 @@ paths:
       operationId: CreateAgentTask
       x-speakeasy-group: agentTasks
       x-speakeasy-name-override: create
-      x-speakeasy-ignore: true
-      x-ignore: true
       summary: Create agent task
       description: |-
         Create an agent task on behalf of a user.
@@ -6990,8 +7035,6 @@ paths:
       operationId: RevokeAgentTask
       x-speakeasy-group: agentTasks
       x-speakeasy-name-override: revoke
-      x-speakeasy-ignore: true
-      x-ignore: true
       summary: Revoke agent task
       description: Revokes a pending agent task.
       tags:
@@ -9611,6 +9654,8 @@ paths:
       description: |-
         Fetches M2M tokens for a specific machine.
 
+        Only tokens created with the opaque token format are returned by this endpoint. JWT-format M2M tokens are stateless and are not stored.
+
         This endpoint can be authenticated by either a Machine Secret Key or by a Clerk Secret Key.
 
         - When fetching M2M tokens with a Machine Secret Key, only tokens associated with the authenticated machine can be retrieved.
@@ -9827,6 +9872,8 @@ paths:
       summary: Revoke a M2M Token
       description: |-
         Revokes a M2M Token.
+
+        This endpoint only revokes stored opaque-format M2M tokens. JWT-format M2M tokens are stateless and cannot be revoked.
 
         This endpoint can be authenticated by either a Machine Secret Key or by a Clerk Secret Key.
 
@@ -12232,6 +12279,55 @@ components:
           type: number
           format: float
           description: Percentage of the billing cycle remaining.
+    CommerceProrationCreditDetailResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        cycle_days_remaining:
+          type: integer
+          format: int64
+        cycle_days_total:
+          type: integer
+          format: int64
+        cycle_remaining_percent:
+          type: number
+          format: double
+      required:
+        - amount
+        - cycle_days_remaining
+        - cycle_days_total
+        - cycle_remaining_percent
+    CommercePayerCreditResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        remaining_balance:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        applied_amount:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+      required:
+        - remaining_balance
+        - applied_amount
+    CommerceCreditsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        proration:
+          allOf:
+            - $ref: '#/components/schemas/CommerceProrationCreditDetailResponse'
+          nullable: true
+        payer:
+          allOf:
+            - $ref: '#/components/schemas/CommercePayerCreditResponse'
+          nullable: true
+        total:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+      required:
+        - proration
+        - payer
+        - total
     FeatureResponse:
       type: object
       additionalProperties: false
@@ -12265,6 +12361,45 @@ components:
           type: string
           nullable: true
           description: The URL of the feature's avatar image.
+    CommercePlanUnitPriceTier:
+      type: object
+      additionalProperties: false
+      properties:
+        starts_at_block:
+          type: integer
+          format: int64
+          description: Start block (inclusive) for this tier
+        ends_after_block:
+          type: integer
+          format: int64
+          nullable: true
+          description: End block (inclusive) for this tier; null means unlimited
+        fee_per_block:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+          description: Price charged per block in this tier
+      required:
+        - starts_at_block
+        - fee_per_block
+    CommercePlanUnitPrice:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: Name of the billable unit (for example, seats)
+        block_size:
+          type: integer
+          format: int64
+          description: Number of units included in each pricing block
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercePlanUnitPriceTier'
+          description: Tiered pricing configuration for this unit
+      required:
+        - name
+        - block_size
+        - tiers
     CommercePlan:
       type: object
       additionalProperties: false
@@ -12351,6 +12486,11 @@ components:
           format: int64
           nullable: true
           description: Number of free trial days for this plan.
+        unit_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercePlanUnitPrice'
+          description: Per-unit pricing tiers for this plan (for example, seats)
     CommercePaymentMethodResponse:
       type: object
       additionalProperties: false
@@ -12504,6 +12644,80 @@ components:
           type: integer
           format: int64
           description: Unix timestamp (in milliseconds) when the payer was last updated.
+    CommerceSubscriptionItemSeatsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        quantity:
+          type: integer
+          format: int64
+          nullable: true
+          description: Seat quantity being billed; null means unlimited
+      required:
+        - quantity
+    CommercePerUnitTotalTier:
+      type: object
+      additionalProperties: false
+      properties:
+        quantity:
+          type: integer
+          format: int64
+          nullable: true
+          description: Units billed in this tier; null means unlimited
+        fee_per_block:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+          description: Price charged per block in this tier
+        total:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+          description: Total charge for this tier
+      required:
+        - fee_per_block
+        - total
+    CommercePerUnitTotal:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: Name of the billable unit (for example, seats)
+        block_size:
+          type: integer
+          format: int64
+          description: Number of units included in each pricing block
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercePerUnitTotalTier'
+          description: Computed totals for each pricing tier
+      required:
+        - name
+        - block_size
+        - tiers
+    CommerceTotalsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        subtotal:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        base_fee:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        tax_total:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        grand_total:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        per_unit_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercePerUnitTotal'
+        credits:
+          allOf:
+            - $ref: '#/components/schemas/CommerceCreditsResponse'
+          nullable: true
+      required:
+        - subtotal
+        - base_fee
+        - tax_total
+        - grand_total
     CommerceSubscriptionItem:
       type: object
       additionalProperties: false
@@ -12548,6 +12762,11 @@ components:
         credit:
           $ref: '#/components/schemas/CommerceSubscriptionCreditResponse'
           description: Credit information (only available in PaymentAttempt events).
+        credits:
+          allOf:
+            - $ref: '#/components/schemas/CommerceCreditsResponse'
+          nullable: true
+          description: Unified credits breakdown for this subscription item.
         plan_id:
           type: string
           description: Unique identifier for the associated plan.
@@ -12622,6 +12841,16 @@ components:
           type: integer
           format: int64
           description: Unix timestamp (in milliseconds) when the subscription item was last updated.
+        seats:
+          allOf:
+            - $ref: '#/components/schemas/CommerceSubscriptionItemSeatsResponse'
+          nullable: true
+          description: Seat quantity for seat-based billing.
+        totals:
+          allOf:
+            - $ref: '#/components/schemas/CommerceTotalsResponse'
+          nullable: true
+          description: Totals for this subscription item.
     CommerceSubscriptionNextPayment:
       type: object
       additionalProperties: false
@@ -13218,6 +13447,24 @@ components:
         - object
         - rules_enabled
         - specter_enabled
+    OAuthApplicationSettings:
+      type: object
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - oauth_application_settings
+        dynamic_oauth_client_registration:
+          type: boolean
+          description: Whether dynamic OAuth client registration is enabled for the instance (RFC 7591).
+        oauth_jwt_access_tokens:
+          type: boolean
+          description: Whether OAuth JWT access tokens are enabled for the instance (disabled indicates opaque access tokens).
+      required:
+        - object
+        - dynamic_oauth_client_registration
+        - oauth_jwt_access_tokens
     OrganizationSettings:
       type: object
       additionalProperties: false
@@ -15024,6 +15271,11 @@ components:
         amount:
           $ref: '#/components/schemas/CommerceMoneyResponse'
           description: The amount for this payment attempt.
+        totals:
+          allOf:
+            - $ref: '#/components/schemas/CommerceTotalsResponse'
+          nullable: true
+          description: Totals breakdown for this payment attempt.
         payment_method_id:
           type: string
           description: Unique identifier for the payment method.
@@ -15109,6 +15361,7 @@ components:
           required:
             - grand_total
             - subtotal
+            - base_fee
             - tax_total
           properties:
             grand_total:
@@ -15116,7 +15369,10 @@ components:
               description: The grand total amount for the statement.
             subtotal:
               $ref: '#/components/schemas/CommerceMoneyResponse'
-              description: The subtotal amount for the statement.
+              description: The subtotal amount for the statement (base fee + unit price totals).
+            base_fee:
+              $ref: '#/components/schemas/CommerceMoneyResponse'
+              description: The base plan fee before unit pricing.
             tax_total:
               $ref: '#/components/schemas/CommerceMoneyResponse'
               description: The tax total amount for the statement.
@@ -15677,6 +15933,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/InstanceProtect'
+    InstanceOAuthApplicationSettings:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OAuthApplicationSettings'
     OrganizationSettings:
       description: Success
       content:
