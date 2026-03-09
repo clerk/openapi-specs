@@ -8,6 +8,8 @@ jobs:
   slack-notify:
     name: Slack Notification
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     env:
       PULL_REQUEST_BODY: ${{ github.event.pull_request.body || 'The person did not write a PR description 😢' }}
     steps:
