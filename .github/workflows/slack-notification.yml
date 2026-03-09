@@ -29,8 +29,9 @@ jobs:
           TITLE: ${{ github.event.pull_request.title }}
           USER_LOGIN: ${{ github.event.pull_request.user.login }}
           HTML_URL: ${{ github.event.pull_request.html_url }}
+          SLACKIFIED_BODY: ${{ steps.slackify.outputs.text }}
         run: |
-          payload=$(node ./.github/utils/slack-notify.mjs '${{ env.TITLE }}' '${{ env.USER_LOGIN }}' '${{ env.HTML_URL }}' '${{ steps.slackify.outputs.text }}')
+          payload=$(node ./.github/utils/slack-notify.mjs "$TITLE" "$USER_LOGIN" "$HTML_URL" "$SLACKIFIED_BODY")
           echo "payload=${payload//$'\n'/'%0A'}" >> $GITHUB_OUTPUT
       - name: Send PR to Slack
         id: slack
