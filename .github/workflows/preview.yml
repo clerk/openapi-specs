@@ -13,8 +13,10 @@ jobs:
     steps:
       - name: Encode branch name
         id: encode-branch
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
         run: |
-          encoded=$(printf '%s' "${{ github.head_ref }}" | jq -sRr @uri)
+          encoded=$(printf '%s' "$$BRANCH_NAME" | jq -sRr @uri)
           echo "branch=$encoded" >> $GITHUB_OUTPUT
 
       - name: Find existing comment
