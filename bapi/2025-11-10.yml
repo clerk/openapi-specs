@@ -7286,6 +7286,31 @@ paths:
                       type: boolean
                       description: Whether PKCE is required (must be true for public clients with no client secret)
                       nullable: true
+                custom_attributes:
+                  type: array
+                  description: Custom attributes to map from the IdP to the user's profile via SSO or SCIM provisioning. Requires the custom attributes feature to be enabled for the instance.
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required:
+                      - name
+                      - key
+                    properties:
+                      name:
+                        type: string
+                        description: Display name for the custom attribute
+                        minLength: 1
+                      key:
+                        type: string
+                        description: Key used to store the attribute in the user's metadata
+                        minLength: 1
+                        pattern: ^[^_][A-Za-z0-9_-]*$
+                      sso_path:
+                        type: string
+                        description: Path to extract the attribute value from SSO claims
+                      scim_path:
+                        type: string
+                        description: GJSON path to extract the attribute value from SCIM user resources
       responses:
         '201':
           $ref: '#/components/responses/EnterpriseConnection'
@@ -7468,6 +7493,32 @@ paths:
                       type: boolean
                       description: Whether PKCE is required (must be true for public clients with no client secret)
                       nullable: true
+                custom_attributes:
+                  type: array
+                  description: Custom attributes to map from the IdP to the user's profile via SSO or SCIM provisioning. Requires the custom attributes feature to be enabled for the instance.
+                  nullable: true
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required:
+                      - name
+                      - key
+                    properties:
+                      name:
+                        type: string
+                        description: Display name for the custom attribute
+                        minLength: 1
+                      key:
+                        type: string
+                        description: Key used to store the attribute in the user's metadata
+                        minLength: 1
+                        pattern: ^[^_][A-Za-z0-9_-]*$
+                      sso_path:
+                        type: string
+                        description: Path to extract the attribute value from SSO claims
+                      scim_path:
+                        type: string
+                        description: GJSON path to extract the attribute value from SCIM user resources
       responses:
         '200':
           $ref: '#/components/responses/EnterpriseConnection'
@@ -15140,6 +15191,28 @@ components:
         disable_additional_identifications:
           type: boolean
           description: When true, users cannot add additional identifications when using this connection
+        custom_attributes:
+          type: array
+          description: Custom attributes to map from the IdP to the user's profile via SSO or SCIM provisioning
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - name
+              - key
+            properties:
+              name:
+                type: string
+                description: Display name for the custom attribute
+              key:
+                type: string
+                description: Key used to store the attribute in the user's public/private/unsafe metadata
+              sso_path:
+                type: string
+                description: Path to extract the attribute value from SSO claims (SAML assertions or OIDC claims)
+              scim_path:
+                type: string
+                description: GJSON path to extract the attribute value from SCIM user resources
         saml_connection:
           type: object
           nullable: true
@@ -15445,11 +15518,13 @@ components:
         amount:
           type: integer
           format: int64
-          description: The amount in cents for the price. Must be at least $1 (100 cents).
+          nullable: true
+          description: The monthly amount in cents. Must be at least $1 (100 cents) if not null.
         annual_monthly_amount:
           type: integer
           format: int64
-          description: The monthly amount in cents when billed annually. Optional.
+          nullable: true
+          description: The monthly amount in cents when billed annually. Must be at least $1 (100 cents) if not null.
         description:
           type: string
           description: An optional description for this custom price.
