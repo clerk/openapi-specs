@@ -2686,6 +2686,7 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/me/enterprise_connections: {}
   /v1/me/email_addresses:
     get:
       operationId: getEmailAddresses
@@ -11430,7 +11431,9 @@ components:
           type: string
           description: The name of the plan
         fee:
-          $ref: '#/components/schemas/BillingFee'
+          allOf:
+            - $ref: '#/components/schemas/BillingFee'
+          nullable: true
           description: The monthly fee for this plan
         annual_monthly_fee:
           allOf:
