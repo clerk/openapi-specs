@@ -2548,7 +2548,7 @@ components:
         amount:
           type: integer
           format: int64
-          description: Monthly billing amount in the smallest denomination of the currency (actual charge may differ for annual plans)
+          description: Billing amount in the smallest denomination of the currency for the subscription item's billing period (month or annual)
         currency:
           type: string
           description: Three-letter ISO 4217 currency code for this plan's pricing
