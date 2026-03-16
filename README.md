@@ -12,7 +12,7 @@ Versioned specs are in the [`fapi/`](./fapi) directory.
 
 ### Backend API (BAPI)
 
-The [Backend API](https://clerk.com/docs/references/api/overview) is meant to be accessed by backend servers. Use it to manage resources and perform operations outside the context of a user session, such as coordinating with third parties or managing configuration.
+The [Backend API](https://clerk.com/docs/reference/backend-api) is meant to be accessed by backend servers. Use it to manage resources and perform operations outside the context of a user session, such as coordinating with third parties or managing configuration.
 
 Versioned specs are in the [`bapi/`](./bapi) directory.
 
