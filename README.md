@@ -6,7 +6,7 @@ This repo contains Clerk's public [OpenAPI](https://www.openapis.org/) specs.
 
 ### Frontend API (FAPI)
 
-The [Frontend API](https://clerk.com/docs/references/api/overview) is meant to be accessed from a browser or native clients. It powers the client-side functionality used by Clerk's SDKs.
+The [Frontend API](https://clerk.com/docs/reference/frontend-api) is meant to be accessed from a browser or native clients. It powers the client-side functionality used by Clerk's SDKs.
 
 Versioned specs are in the [`fapi/`](./fapi) directory.
 
