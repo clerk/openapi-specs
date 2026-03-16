@@ -1,5 +1,36 @@
 # Clerk OpenAPI Specs
 
-This repo contains Clerk's public OpenAPI specs. These specs are used to generate our [FAPI](https://clerk.com/docs/reference/frontend-api) and [BAPI](https://clerk.com/docs/reference/backend-api) documentation.
+This repo contains Clerk's public [OpenAPI](https://www.openapis.org/) specs.
 
-This repo is not meant to be contributed to directly, as the specs are synced either manually or via CI from an internal repository. If you are a Clerk employee and are looking to make changes to the OpenAPI specs, please bring this up internally and someone will point you to the correct repo where the source of the specs are generated. If you are an external contributor looking to make adjustments or fixed, please open an issue!
+## Specs
+
+### Frontend API (FAPI)
+
+The [Frontend API](https://clerk.com/docs/references/api/overview) is meant to be accessed from a browser or native clients. It powers the client-side functionality used by Clerk's SDKs.
+
+Versioned specs are in the [`fapi/`](./fapi) directory.
+
+### Backend API (BAPI)
+
+The [Backend API](https://clerk.com/docs/references/api/overview) is meant to be accessed by backend servers. Use it to manage resources and perform operations outside the context of a user session, such as coordinating with third parties or managing configuration.
+
+Versioned specs are in the [`bapi/`](./bapi) directory.
+
+### Webhooks
+
+Webhook event payload schemas are in the [`webhooks/`](./webhooks) directory.
+
+### Platform (Beta)
+
+The Platform API spec is in the [`platform/`](./platform) directory. This spec is currently in beta.
+
+## Versioning
+
+Each API directory contains dated YAML files (e.g. `2025-11-10.yml`) representing the spec for that API version. Use the most recent file for the latest version.
+
+## Contributing
+
+This repo is not meant to be contributed to directly. The specs are synced from an internal repository either manually or via CI.
+
+- **Clerk employees:** Bring up changes internally and you'll be pointed to the source repo.
+- **External contributors:** Please [open an issue](https://github.com/clerk/openapi-specs/issues)!
