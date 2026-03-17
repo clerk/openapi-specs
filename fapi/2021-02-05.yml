@@ -701,7 +701,10 @@ paths:
   /v1/me/oauth/consent/{client_id}:
     get:
       summary: Get consent information
-      description: Get required consent information for a given OAuth Application Client ID
+      description: |
+        Returns the scopes for a given OAuth Application Client ID.
+        An optional `scope` query parameter can restrict the returned scopes to only those requested.
+        The OAuth application must have consent screen enabled.
       operationId: getOAuthConsent
       security:
         - {}
@@ -716,10 +719,11 @@ paths:
             type: string
           description: The OAuth Application Client ID to get consent information for.
         - in: query
-          name: _clerk_session_id
+          name: scope
+          required: false
           schema:
             type: string
-          description: The session_id associated with the requesting user.
+          description: Optional space-separated list of scopes to restrict the response to only those requested.
       responses:
         '200':
           $ref: '#/components/responses/OAuth.ConsentInfo'
@@ -1835,6 +1839,8 @@ paths:
       responses:
         '307':
           description: Redirect
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '422':
@@ -10691,7 +10697,7 @@ components:
           schema:
             $ref: '#/components/schemas/OAuth.TokenInfo'
     OAuth.ConsentInfo:
-      description: OAuth2 consent information for a given OAuth Application Client ID and State
+      description: OAuth2 consent information (scopes with descriptions) for a given OAuth Application Client ID
       content:
         application/json:
           schema:
