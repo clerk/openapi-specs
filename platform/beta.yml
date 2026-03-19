@@ -29,7 +29,15 @@ tags:
   - name: Domains
     description: An object representing a domain associated with a Clerk application. In development `instances`, a domain is provided by Clerk. Production `instances` require additional configuration to be set up.
   - name: Application Transfers
-    description: An object representing a transfer request for an application between workspaces.
+    description: |-
+      An object representing a transfer request for an application between workspaces.
+
+      The high-level flow for application transfer:
+
+      1. The initial workspace can create an application transfer. A single-use `code` will be generated which may be distributed to any end-user of Clerk.
+      2. The code must be claimed through the clerk dashboard: https://dashboard.clerk.com/apps/transfer?code=<...>
+
+      Note that once a transfer is claimed, the original workspace will no longer have access to the application.
   - name: Users
     description: Operations for managing users within an application instance.
   - name: JWT Templates
@@ -1989,7 +1997,7 @@ components:
           example: appxfr_2abc123def456
         code:
           type: string
-          description: A unique code for the transfer that can be shared with the recipient to claim the application.
+          description: 'A unique code for the transfer that can be shared with the recipient to claim the application through the clerk dashboard: https://dashboard.clerk.com/apps/transfer?code=<CODE>'
           example: 550e8400-e29b-41d4-a716-446655440000
         application_id:
           type: string
