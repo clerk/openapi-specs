@@ -29,11 +29,21 @@ tags:
   - name: Domains
     description: An object representing a domain associated with a Clerk application. In development `instances`, a domain is provided by Clerk. Production `instances` require additional configuration to be set up.
   - name: Application Transfers
-    description: An object representing a transfer request for an application between workspaces.
+    description: |-
+      An object representing a transfer request for an application between workspaces.
+
+      The high-level flow for application transfer:
+
+      1. The initial workspace can create an application transfer. A single-use `code` will be generated which may be distributed to any end-user of Clerk.
+      2. The code must be claimed through the clerk dashboard: https://dashboard.clerk.com/apps/transfer?code=<...>
+
+      Note that once a transfer is claimed, the original workspace will no longer have access to the application.
   - name: Users
     description: Operations for managing users within an application instance.
   - name: JWT Templates
     description: Operations for managing JWT templates within an application instance.
+  - name: Redirect URLs
+    description: Operations for managing redirect URLs within an application instance.
   - name: Config
     description: Operations for managing instance configuration. The config API provides a unified interface for reading and updating instance settings, including authentication methods, SSO connections, and other instance-level configuration options.
 externalDocs:
@@ -872,6 +882,73 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/usage:
+    get:
+      operationId: PlatformGetInstanceUsage
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: getInstanceUsage
+      tags:
+        - Applications
+      summary: Get instance usage
+      description: |
+        Get usage metrics for an application instance, including per-meter breakdowns
+        for MAU, MAO, SMS, and enterprise connections.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Requires the `application_usage:read` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: start
+          in: query
+          description: |
+            Start of the date range for usage data in YYYY-MM-DD format.
+            Both `start` and `end` must be provided together.
+            When omitted, the current billing cycle is used.
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: end
+          in: query
+          description: |
+            Inclusive end of the date range for usage data in YYYY-MM-DD format.
+            Both `start` and `end` must be provided together.
+            When omitted, the current billing cycle is used.
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Instance usage retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformInstanceUsageResponse'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
   /platform/applications/{applicationID}/instances/{envOrInsID}/users:
     get:
       operationId: PlatformListInstanceUsers
@@ -1363,6 +1440,231 @@ paths:
         - name: templateID
           in: path
           description: JWT Template ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/redirect_urls:
+    get:
+      operationId: PlatformListRedirectURLs
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: listRedirectURLs
+      tags:
+        - Redirect URLs
+      summary: List redirect URLs
+      description: |
+        List all redirect URLs for an application instance.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Requires the `applications:read` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page (1-500, default 10).
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 10
+        - name: offset
+          in: query
+          description: Number of results to skip for pagination.
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Redirect URLs retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformListRedirectURLsResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    post:
+      operationId: PlatformCreateRedirectURL
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: createRedirectURL
+      tags:
+        - Redirect URLs
+      summary: Create a redirect URL
+      description: |
+        Create a redirect URL for an application instance.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Requires the `applications:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Redirect URL data to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                url:
+                  type: string
+                  description: The full URL value prefixed with `https://` or a custom scheme e.g. `"https://my-app.com/oauth-callback"` or `"my-app://oauth-callback"`.
+              required:
+                - url
+      responses:
+        '200':
+          description: Redirect URL created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedirectURL'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/redirect_urls/{redirectURLID}:
+    get:
+      operationId: PlatformGetRedirectURL
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: getRedirectURL
+      tags:
+        - Redirect URLs
+      summary: Get a redirect URL
+      description: |
+        Retrieve a redirect URL for an application instance.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Requires the `applications:read` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: redirectURLID
+          in: path
+          description: Redirect URL ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Redirect URL retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedirectURL'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    delete:
+      operationId: PlatformDeleteRedirectURL
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: deleteRedirectURL
+      tags:
+        - Redirect URLs
+      summary: Delete a redirect URL
+      description: |
+        Delete a redirect URL from an application instance.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Requires the `applications:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: redirectURLID
+          in: path
+          description: Redirect URL ID.
           required: true
           schema:
             type: string
@@ -1989,7 +2291,7 @@ components:
           example: appxfr_2abc123def456
         code:
           type: string
-          description: A unique code for the transfer that can be shared with the recipient to claim the application.
+          description: 'A unique code for the transfer that can be shared with the recipient to claim the application through the clerk dashboard: https://dashboard.clerk.com/apps/transfer?code=<CODE>'
           example: 550e8400-e29b-41d4-a716-446655440000
         application_id:
           type: string
@@ -2055,6 +2357,122 @@ components:
       required:
         - data
         - total_count
+    UsageTierBreakdown:
+      title: Usage Tier Breakdown
+      description: Usage distributed into a single volume tier bracket.
+      type: object
+      additionalProperties: false
+      properties:
+        from:
+          type: integer
+          description: The starting unit for this tier (inclusive).
+        to:
+          type: integer
+          nullable: true
+          description: The ending unit for this tier (inclusive), or null for unlimited.
+        total_usage:
+          type: integer
+          format: int64
+          description: The number of units consumed in this tier.
+      required:
+        - from
+        - to
+        - total_usage
+    InstanceUsageMeter:
+      title: Instance Usage Meter
+      description: Total usage count for a single meter, with optional volume tier breakdowns.
+      type: object
+      additionalProperties: false
+      properties:
+        total_usage:
+          type: integer
+          format: int64
+          description: Total quantity for this meter.
+        tiers:
+          type: array
+          description: Volume tier breakdown of the total usage.
+          items:
+            $ref: '#/components/schemas/UsageTierBreakdown'
+      required:
+        - total_usage
+    InstanceSMSUsage:
+      title: Instance SMS Usage
+      description: Total SMS usage with per-geographic-tier breakdowns.
+      type: object
+      additionalProperties: false
+      properties:
+        total_usage:
+          type: integer
+          format: int64
+          description: Total SMS messages across all tiers.
+        tier_a:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+        tier_b:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+        tier_c:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+        tier_d:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+        tier_e:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+        tier_f:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+      required:
+        - total_usage
+        - tier_a
+        - tier_b
+        - tier_c
+        - tier_d
+        - tier_e
+        - tier_f
+    PlatformInstanceUsageResponse:
+      title: Instance Usage Report
+      description: Usage report for an application instance containing total usage counts and tier breakdowns per meter.
+      type: object
+      additionalProperties: false
+      properties:
+        application_id:
+          type: string
+          description: The ID of the application.
+        instance_id:
+          type: string
+          description: The ID of the instance.
+        period_start:
+          type: string
+          format: date-time
+          description: |
+            Inclusive start of the usage period boundary (RFC3339). When an
+            explicit date range is provided, this is midnight UTC on the start
+            date. When no date range is provided, this is the start of the
+            current billing cycle.
+        period_end:
+          type: string
+          format: date-time
+          description: |
+            Exclusive end of the usage period boundary (RFC3339). When an
+            explicit date range is provided, this is midnight UTC immediately
+            after the requested end date. When no date range is provided, this
+            is the end of the current billing cycle.
+        mau:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+        mao:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+        custom_domains:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+        sms_messages:
+          $ref: '#/components/schemas/InstanceSMSUsage'
+        enterprise_connections:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+      required:
+        - application_id
+        - instance_id
+        - period_start
+        - period_end
+        - mau
+        - mao
+        - custom_domains
+        - sms_messages
+        - enterprise_connections
     verification_otp:
       x-speakeasy-name-override: OTP
       type: object
@@ -3396,6 +3814,53 @@ components:
       required:
         - object
         - deleted
+    RedirectURL:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - redirect_url
+        id:
+          type: string
+        url:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - url
+        - created_at
+        - updated_at
+    PlatformListRedirectURLsResponse:
+      title: List Redirect URLs Response
+      description: A paginated list of redirect URLs for an application instance.
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: The list of redirect URLs.
+          items:
+            $ref: '#/components/schemas/RedirectURL'
+        total_count:
+          type: integer
+          format: int64
+          description: The total number of redirect URLs in the instance.
+          example: 3
+      required:
+        - data
+        - total_count
     PlatformConfigResponse:
       type: object
       description: Instance configuration response containing key-value pairs and metadata.
@@ -3501,4 +3966,5 @@ x-tagGroups:
       - Application Transfers
       - Users
       - JWT Templates
+      - Redirect URLs
       - Config
