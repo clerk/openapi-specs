@@ -882,6 +882,73 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/usage:
+    get:
+      operationId: PlatformGetInstanceUsage
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: getInstanceUsage
+      tags:
+        - Applications
+      summary: Get instance usage
+      description: |
+        Get usage metrics for an application instance, including per-meter breakdowns
+        for MAU, MAO, SMS, and enterprise connections.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Requires the `application_usage:read` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: start
+          in: query
+          description: |
+            Start of the date range for usage data in YYYY-MM-DD format.
+            Both `start` and `end` must be provided together.
+            When omitted, the current billing cycle is used.
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: end
+          in: query
+          description: |
+            Inclusive end of the date range for usage data in YYYY-MM-DD format.
+            Both `start` and `end` must be provided together.
+            When omitted, the current billing cycle is used.
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Instance usage retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformInstanceUsageResponse'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
   /platform/applications/{applicationID}/instances/{envOrInsID}/users:
     get:
       operationId: PlatformListInstanceUsers
@@ -2290,6 +2357,122 @@ components:
       required:
         - data
         - total_count
+    UsageTierBreakdown:
+      title: Usage Tier Breakdown
+      description: Usage distributed into a single volume tier bracket.
+      type: object
+      additionalProperties: false
+      properties:
+        from:
+          type: integer
+          description: The starting unit for this tier (inclusive).
+        to:
+          type: integer
+          nullable: true
+          description: The ending unit for this tier (inclusive), or null for unlimited.
+        total_usage:
+          type: integer
+          format: int64
+          description: The number of units consumed in this tier.
+      required:
+        - from
+        - to
+        - total_usage
+    InstanceUsageMeter:
+      title: Instance Usage Meter
+      description: Total usage count for a single meter, with optional volume tier breakdowns.
+      type: object
+      additionalProperties: false
+      properties:
+        total_usage:
+          type: integer
+          format: int64
+          description: Total quantity for this meter.
+        tiers:
+          type: array
+          description: Volume tier breakdown of the total usage.
+          items:
+            $ref: '#/components/schemas/UsageTierBreakdown'
+      required:
+        - total_usage
+    InstanceSMSUsage:
+      title: Instance SMS Usage
+      description: Total SMS usage with per-geographic-tier breakdowns.
+      type: object
+      additionalProperties: false
+      properties:
+        total_usage:
+          type: integer
+          format: int64
+          description: Total SMS messages across all tiers.
+        tier_a:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+        tier_b:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+        tier_c:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+        tier_d:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+        tier_e:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+        tier_f:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+      required:
+        - total_usage
+        - tier_a
+        - tier_b
+        - tier_c
+        - tier_d
+        - tier_e
+        - tier_f
+    PlatformInstanceUsageResponse:
+      title: Instance Usage Report
+      description: Usage report for an application instance containing total usage counts and tier breakdowns per meter.
+      type: object
+      additionalProperties: false
+      properties:
+        application_id:
+          type: string
+          description: The ID of the application.
+        instance_id:
+          type: string
+          description: The ID of the instance.
+        period_start:
+          type: string
+          format: date-time
+          description: |
+            Inclusive start of the usage period boundary (RFC3339). When an
+            explicit date range is provided, this is midnight UTC on the start
+            date. When no date range is provided, this is the start of the
+            current billing cycle.
+        period_end:
+          type: string
+          format: date-time
+          description: |
+            Exclusive end of the usage period boundary (RFC3339). When an
+            explicit date range is provided, this is midnight UTC immediately
+            after the requested end date. When no date range is provided, this
+            is the end of the current billing cycle.
+        mau:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+        mao:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+        custom_domains:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+        sms_messages:
+          $ref: '#/components/schemas/InstanceSMSUsage'
+        enterprise_connections:
+          $ref: '#/components/schemas/InstanceUsageMeter'
+      required:
+        - application_id
+        - instance_id
+        - period_start
+        - period_end
+        - mau
+        - mao
+        - custom_domains
+        - sms_messages
+        - enterprise_connections
     verification_otp:
       x-speakeasy-name-override: OTP
       type: object
