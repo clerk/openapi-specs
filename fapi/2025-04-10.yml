@@ -3454,11 +3454,15 @@ paths:
                 strategy:
                   type: string
                   description: |-
-                    The OAuth strategy that the external account provider supports.
+                    The OAuth strategy that the external account provider supports. Optional when `enterprise_connection_id` is provided.
                     Can be one of `oauth_[provider]` or `oauth_token_[provider]`.
                     The `oauth_[provider]` strategy can be used for regular OAuth flows with redirects and a `redirect_url` parameter is also required.
                     The `oauth_token_[provider]` strategy can be used for native flows, along with a `token` or `code` parameter.
                   pattern: ^oauth_(?:(?:token_)|(?:custom_))?[a-z0-9_]+$
+                enterprise_connection_id:
+                  type: string
+                  description: The ID of an enterprise connection to link. When provided, strategy is not required.
+                  nullable: true
                 redirect_url:
                   type: string
                   nullable: true
@@ -3484,8 +3488,6 @@ paths:
                   type: string
                   description: Used with `oauth_[provider]` or `enterprise_sso`. The given value will be forwarded to the OIDC `prompt` parameter of the generated redirect URL. When using shared credentials this value might be adjusted for security reasons.
                   nullable: true
-              required:
-                - strategy
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedExternalAccount'
@@ -8614,6 +8616,8 @@ components:
         allow_idp_initiated:
           type: boolean
         disable_additional_identifications:
+          type: boolean
+        allow_organization_account_linking:
           type: boolean
         created_at:
           type: integer
