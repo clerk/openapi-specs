@@ -891,8 +891,8 @@ paths:
         - Applications
       summary: Get instance usage
       description: |
-        Get usage metrics for an application instance, including per-meter breakdowns
-        for MAU, MAO, SMS, and enterprise connections.
+        Get usage totals for an application instance across meters such as MAU, MAO,
+        SMS, custom domains, and enterprise connections.
 
         The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
         or an instance ID.
@@ -2357,42 +2357,33 @@ components:
       required:
         - data
         - total_count
-    UsageTierBreakdown:
-      title: Usage Tier Breakdown
-      description: Usage distributed into a single volume tier bracket.
+    InstanceUsageMeterWithBillable:
+      title: Instance Usage Meter With Billable
+      description: Usage totals for a meter that includes both total and billable quantities.
       type: object
       additionalProperties: false
       properties:
-        from:
-          type: integer
-          description: The starting unit for this tier (inclusive).
-        to:
-          type: integer
-          nullable: true
-          description: The ending unit for this tier (inclusive), or null for unlimited.
         total_usage:
           type: integer
           format: int64
-          description: The number of units consumed in this tier.
+          description: Total quantity for this meter in the selected period.
+        total_billable_usage:
+          type: integer
+          format: int64
+          description: Billable subset of total usage for this meter in the selected period.
       required:
-        - from
-        - to
         - total_usage
+        - total_billable_usage
     InstanceUsageMeter:
       title: Instance Usage Meter
-      description: Total usage count for a single meter, with optional volume tier breakdowns.
+      description: Usage totals for a single meter.
       type: object
       additionalProperties: false
       properties:
         total_usage:
           type: integer
           format: int64
-          description: Total quantity for this meter.
-        tiers:
-          type: array
-          description: Volume tier breakdown of the total usage.
-          items:
-            $ref: '#/components/schemas/UsageTierBreakdown'
+          description: Total quantity for this meter in the selected period.
       required:
         - total_usage
     InstanceSMSUsage:
@@ -2427,7 +2418,7 @@ components:
         - tier_f
     PlatformInstanceUsageResponse:
       title: Instance Usage Report
-      description: Usage report for an application instance containing total usage counts and tier breakdowns per meter.
+      description: Usage report for an application instance containing per-meter totals.
       type: object
       additionalProperties: false
       properties:
@@ -2454,9 +2445,9 @@ components:
             after the requested end date. When no date range is provided, this
             is the end of the current billing cycle.
         mau:
-          $ref: '#/components/schemas/InstanceUsageMeter'
+          $ref: '#/components/schemas/InstanceUsageMeterWithBillable'
         mao:
-          $ref: '#/components/schemas/InstanceUsageMeter'
+          $ref: '#/components/schemas/InstanceUsageMeterWithBillable'
         custom_domains:
           $ref: '#/components/schemas/InstanceUsageMeter'
         sms_messages:
