@@ -6695,6 +6695,51 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /oauth_applications/{oauth_application_id}/logo:
+    put:
+      operationId: UploadOAuthApplicationLogo
+      x-speakeasy-group: oauthApplications
+      x-speakeasy-name-override: uploadLogo
+      summary: Upload a logo for the OAuth application
+      description: |-
+        Set or replace an OAuth application's logo by uploading an image file.
+        This endpoint uses the `multipart/form-data` request content type and accepts a file of image type.
+        The file size cannot exceed 10MB.
+        Only the following file content types are supported: `image/jpeg`, `image/png`, `image/gif`, `image/webp`.
+      tags:
+        - OAuth Applications
+      parameters:
+        - name: oauth_application_id
+          in: path
+          description: The ID of the OAuth application for which to upload a logo
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                uploader_user_id:
+                  type: string
+                  description: The ID of the user that will be credited with the image upload.
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      responses:
+        '200':
+          $ref: '#/components/responses/OAuthApplication'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '413':
+          $ref: '#/components/responses/ClerkErrors'
   /oauth_applications/{oauth_application_id}/rotate_secret:
     post:
       operationId: RotateOAuthApplicationSecret
@@ -14704,6 +14749,7 @@ components:
       required:
         - id
         - name
+        - provider
         - active
         - domains
         - created_at
@@ -14715,6 +14761,11 @@ components:
         name:
           type: string
           description: The display name of the connection
+        provider:
+          type: string
+        logo_public_url:
+          type: string
+          nullable: true
         active:
           type: boolean
           description: Whether the enterprise connection is active
