@@ -3578,7 +3578,7 @@ components:
         - created_at
         - updated_at
         - verification
-    SAMLConnection:
+    SAMLAccountConnection:
       type: object
       additionalProperties: false
       properties:
@@ -3676,7 +3676,7 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/SAMLConnection'
+            - $ref: '#/components/schemas/SAMLAccountConnection'
       required:
         - id
         - object
@@ -3684,7 +3684,7 @@ components:
         - active
         - email_address
         - verification
-    EnterpriseConnection:
+    EnterpriseAccountConnection:
       type: object
       additionalProperties: false
       properties:
@@ -3798,7 +3798,7 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/EnterpriseConnection'
+            - $ref: '#/components/schemas/EnterpriseAccountConnection'
         last_authenticated_at:
           type: integer
           format: int64
