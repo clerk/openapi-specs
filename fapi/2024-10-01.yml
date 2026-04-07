@@ -659,7 +659,7 @@ paths:
           description: Unauthorized error, for example the provided client is invalid.
         '422':
           description: You are currently using the legacy OAuth 2.0 provider, please migrate to the new one via Clerk Dashboard.
-  /v1/oauth/consent/{client_id}:
+  /v1/me/oauth/consent/{client_id}:
     get:
       summary: Get consent information
       description: |
