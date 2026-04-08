@@ -1829,6 +1829,91 @@ paths:
           $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+    put:
+      operationId: PlatformPutConfig
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: putConfig
+      tags:
+        - Config
+      summary: Replace instance config
+      description: |
+        Replace the full configuration for an application instance.
+
+        Unlike PATCH, PUT requires all config keys to be included in the request body.
+        If any keys are missing, a 400 error is returned listing the missing keys.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Use the `dry_run` query parameter to preview changes without applying them.
+        Use the `destructive` query parameter to allow clearing config keys by setting them to null.
+        Use the `If-Match` header to provide optimistic concurrency control via config version.
+
+        Requires the `applications:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: dry_run
+          in: query
+          description: If true, preview the changes without applying them.
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: destructive
+          in: query
+          description: If true, allow clearing config keys by setting them to null.
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: If-Match
+          in: header
+          description: Config version for optimistic concurrency control.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        description: Complete config to apply. All config keys must be included.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformConfigPatchRequest'
+      responses:
+        '200':
+          description: Instance config replaced successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformConfigPatchResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /platform/applications/{applicationID}/instances/{envOrInsID}/config/schema:
     get:
       operationId: PlatformGetConfigSchema
@@ -3125,7 +3210,7 @@ components:
         - created_at
         - updated_at
         - verification
-    SAMLConnection:
+    SAMLAccountConnection:
       type: object
       additionalProperties: false
       properties:
@@ -3223,7 +3308,7 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/SAMLConnection'
+            - $ref: '#/components/schemas/SAMLAccountConnection'
       required:
         - id
         - object
@@ -3231,7 +3316,7 @@ components:
         - active
         - email_address
         - verification
-    EnterpriseConnection:
+    EnterpriseAccountConnection:
       type: object
       additionalProperties: false
       properties:
@@ -3345,7 +3430,7 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/EnterpriseConnection'
+            - $ref: '#/components/schemas/EnterpriseAccountConnection'
         last_authenticated_at:
           type: integer
           format: int64
@@ -3453,6 +3538,8 @@ components:
         username:
           type: string
           nullable: true
+        banned:
+          type: boolean
       required:
         - user_id
         - first_name

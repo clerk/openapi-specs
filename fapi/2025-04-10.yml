@@ -8374,6 +8374,8 @@ components:
         username:
           type: string
           nullable: true
+        banned:
+          type: boolean
       required:
         - first_name
         - last_name
