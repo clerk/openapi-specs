@@ -6429,6 +6429,51 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /oauth_applications/{oauth_application_id}/logo:
+    put:
+      operationId: UploadOAuthApplicationLogo
+      x-speakeasy-group: oauthApplications
+      x-speakeasy-name-override: uploadLogo
+      summary: Upload a logo for the OAuth application
+      description: |-
+        Set or replace an OAuth application's logo by uploading an image file.
+        This endpoint uses the `multipart/form-data` request content type and accepts a file of image type.
+        The file size cannot exceed 10MB.
+        Only the following file content types are supported: `image/jpeg`, `image/png`, `image/gif`, `image/webp`.
+      tags:
+        - OAuth Applications
+      parameters:
+        - name: oauth_application_id
+          in: path
+          description: The ID of the OAuth application for which to upload a logo
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                uploader_user_id:
+                  type: string
+                  description: The ID of the user that will be credited with the image upload.
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      responses:
+        '200':
+          $ref: '#/components/responses/OAuthApplication'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '413':
+          $ref: '#/components/responses/ClerkErrors'
   /oauth_applications/{oauth_application_id}/rotate_secret:
     post:
       operationId: RotateOAuthApplicationSecret
@@ -11604,7 +11649,7 @@ components:
         - created_at
         - updated_at
         - verification
-    SAMLConnection:
+    SAMLAccountConnection:
       type: object
       additionalProperties: false
       properties:
@@ -11702,7 +11747,7 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/SAMLConnection'
+            - $ref: '#/components/schemas/SAMLAccountConnection'
       required:
         - id
         - object
@@ -11710,7 +11755,7 @@ components:
         - active
         - email_address
         - verification
-    EnterpriseConnection:
+    EnterpriseAccountConnection:
       type: object
       additionalProperties: false
       properties:
@@ -11824,7 +11869,7 @@ components:
           type: object
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/EnterpriseConnection'
+            - $ref: '#/components/schemas/EnterpriseAccountConnection'
         last_authenticated_at:
           type: integer
           format: int64
@@ -11932,6 +11977,8 @@ components:
         username:
           type: string
           nullable: true
+        banned:
+          type: boolean
       required:
         - user_id
         - first_name
@@ -12211,9 +12258,10 @@ components:
         The hashing algorithm that was used to generate the password digest.
 
         The algorithms we support at the moment are [`bcrypt`](https://en.wikipedia.org/wiki/Bcrypt), [`bcrypt_sha256_django`](https://docs.djangoproject.com/en/4.0/topics/auth/passwords/), [`md5`](https://en.wikipedia.org/wiki/MD5), `pbkdf2_sha1`, `pbkdf2_sha256`, [`pbkdf2_sha256_django`](https://docs.djangoproject.com/en/4.0/topics/auth/passwords/),
-        [`phpass`](https://www.openwall.com/phpass/), `md5_phpass`, [`scrypt_firebase`](https://firebaseopensource.com/projects/firebase/scrypt/),
+        `pbkdf2_sha512`, [`phpass`](https://www.openwall.com/phpass/), `md5_phpass`, [`scrypt_firebase`](https://firebaseopensource.com/projects/firebase/scrypt/),
         [`scrypt_werkzeug`](https://werkzeug.palletsprojects.com/en/3.0.x/utils/#werkzeug.security.generate_password_hash), [`sha256`](https://en.wikipedia.org/wiki/SHA-2),
-        [`ldap_ssha`](https://www.openldap.org/faq/data/cache/347.html), the [`argon2`](https://argon2.online/) variants: `argon2i` and `argon2id`, and `sha512_symfony`, the SHA-512 variant of the [Symfony](https://symfony.com/doc/current/security/passwords.html) legacy hasher.
+        [`ldap_ssha`](https://www.openldap.org/faq/data/cache/347.html), the [`argon2`](https://argon2.online/) variants: `argon2i` and `argon2id`, `sha512_symfony`, the SHA-512 variant of the [Symfony](https://symfony.com/doc/current/security/passwords.html) legacy hasher,
+        and `pbkdf2_sha512_hex`, a variant of `pbkdf2_sha512` that accepts hex-encoded salt and hash.
 
         Each of the supported hashers expects the incoming digest to be in a particular format. See the [Clerk docs](https://clerk.com/docs/references/backend/user/create-user) for more information.
     TotalCount:
@@ -12888,6 +12936,8 @@ components:
           type: integer
         max_role_sets_allowed:
           type: integer
+        max_allowed_domains:
+          type: integer
         max_allowed_permissions:
           deprecated: true
           description: max_allowed_permissions is now a no-op, as permissions are now unlimited
@@ -12922,6 +12972,7 @@ components:
         - enabled
         - max_allowed_memberships
         - max_allowed_roles
+        - max_allowed_domains
         - creator_role
         - admin_delete_enabled
         - domains_enabled
@@ -14206,7 +14257,7 @@ components:
         - email_address
         - first_name
         - last_name
-    schemas-SAMLConnection:
+    SAMLConnection:
       type: object
       properties:
         object:
@@ -14300,6 +14351,7 @@ components:
         - allow_idp_initiated
         - disable_additional_identifications
         - allow_organization_account_linking
+        - authenticatable
         - force_authn
         - created_at
         - updated_at
@@ -14315,7 +14367,7 @@ components:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/schemas-SAMLConnection'
+            $ref: '#/components/schemas/SAMLConnection'
         total_count:
           type: integer
           format: int64
@@ -14324,13 +14376,15 @@ components:
       required:
         - data
         - total_count
-    schemas-EnterpriseConnection:
+    EnterpriseConnection:
       type: object
       required:
         - id
         - name
+        - provider
         - active
         - domains
+        - authenticatable
         - created_at
         - updated_at
       properties:
@@ -14340,6 +14394,11 @@ components:
         name:
           type: string
           description: The display name of the connection
+        provider:
+          type: string
+        logo_public_url:
+          type: string
+          nullable: true
         active:
           type: boolean
           description: Whether the enterprise connection is active
@@ -14433,7 +14492,7 @@ components:
         oauth_config:
           type: object
           nullable: true
-          description: Present when the enterprise connection uses OIDC
+          description: Present when the enterprise connection uses OIDC or EASIE
           properties:
             id:
               type: string
@@ -14479,7 +14538,7 @@ components:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/schemas-EnterpriseConnection'
+            $ref: '#/components/schemas/EnterpriseConnection'
         total_count:
           type: integer
           format: int64
@@ -15547,7 +15606,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/schemas-SAMLConnection'
+            $ref: '#/components/schemas/SAMLConnection'
     EnterpriseConnections:
       description: A list of enterprise connections
       content:
@@ -15559,7 +15618,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/schemas-EnterpriseConnection'
+            $ref: '#/components/schemas/EnterpriseConnection'
     TestingToken:
       description: A Testing Token
       content:
