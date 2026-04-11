@@ -659,7 +659,7 @@ paths:
           description: Unauthorized error, for example the provided client is invalid.
         '422':
           description: You are currently using the legacy OAuth 2.0 provider, please migrate to the new one via Clerk Dashboard.
-  /v1/oauth/consent/{client_id}:
+  /v1/me/oauth/consent/{client_id}:
     get:
       summary: Get consent information
       description: |
@@ -688,6 +688,74 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/OAuth.ConsentInfo'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
+    post:
+      summary: Submit OAuth2 consent decision
+      description: |
+        Submits the user's consent decision for an OAuth2 authorization request.
+        This endpoint allows building custom consent portals as a replacement for
+        the default account-portal-rendered consent screen.
+
+        The OAuth application must have the consent screen enabled. On grant, the
+        flow continues just like the standard `/oauth/authorize` endpoint and
+        returns the appropriate redirect.
+
+        In addition to the fields documented below, the request body must
+        re-submit the standard OAuth2 authorize parameters from the original
+        `/oauth/authorize` request: `response_type`, `redirect_uri`, `scope`,
+        `state`, `nonce`, `code_challenge`, and `code_challenge_method`. These
+        are forwarded as-is to the authorize flow.
+      operationId: submitOAuthConsent
+      security:
+        - {}
+        - DevBrowser: []
+      tags:
+        - OAuth2 Identity Provider
+      parameters:
+        - in: path
+          name: client_id
+          required: true
+          schema:
+            type: string
+          description: The OAuth Application Client ID the consent decision applies to.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - consented
+              properties:
+                consented:
+                  type: boolean
+                  description: |
+                    The user's consent decision. `true` grants the requested
+                    scopes and continues the authorization flow; any other value
+                    is treated as a denial and returns an `access_denied` error
+                    in the redirect.
+                organization_id:
+                  type: string
+                  nullable: true
+                  description: |
+                    Optional. The organization to scope the issued token to. The
+                    authenticated user must be a member of this organization. If
+                    omitted, the user's currently active organization is used.
+      responses:
+        '200':
+          description: Success for 'form_post' response mode
+        '302':
+          description: Redirect, no body.
+        '303':
+          description: Redirect, no body.
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '401':
@@ -8375,6 +8443,8 @@ components:
         username:
           type: string
           nullable: true
+        banned:
+          type: boolean
       required:
         - first_name
         - last_name
