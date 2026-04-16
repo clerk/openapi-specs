@@ -987,10 +987,6 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
-  /v1/enterprise_connections: {}
-  /v1/enterprise_connections/{enterpriseConnectionID}: {}
-  /v1/enterprise_connections/{enterpriseConnectionID}/init_test_run: {}
-  /v1/enterprise_connections/{enterpriseConnectionID}/test_runs/{testRunID}: {}
   /v1/health:
     get:
       summary: Get Health
@@ -2769,6 +2765,10 @@ paths:
         '404':
           $ref: '#/components/responses/ClerkErrors'
   /v1/me/enterprise_connections: {}
+  /v1/me/enterprise_connections/{enterprise_connection_id}: {}
+  /v1/me/enterprise_connections/{enterprise_connection_id}/test_runs: {}
+  /v1/enterprise_connections/{enterpriseConnectionID}/init_test_run: {}
+  /v1/enterprise_connections/{enterpriseConnectionID}/test_runs/{testRunID}: {}
   /v1/me/email_addresses:
     get:
       operationId: getEmailAddresses
@@ -8061,6 +8061,9 @@ components:
           type: string
           enum:
             - verified
+            - unverified
+            - failed
+            - expired
         strategy:
           type: string
           enum:
