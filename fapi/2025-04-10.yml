@@ -913,8 +913,7 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
-  /v1/enterprise_connections: {}
-  /v1/enterprise_connections/{enterpriseConnectionID}: {}
+  /v1/me/enterprise_connections/{enterprise_connection_id}: {}
   /v1/enterprise_connections/{enterpriseConnectionID}/init_test_run: {}
   /v1/health:
     get:
@@ -1524,6 +1523,7 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/client/sign_ins/{sign_in_id}/protect_check: {}
   /v1/client/sign_ups:
     post:
       summary: Create Sign-up
@@ -8015,6 +8015,9 @@ components:
           type: string
           enum:
             - verified
+            - unverified
+            - failed
+            - expired
         strategy:
           type: string
           enum:
@@ -9228,6 +9231,7 @@ components:
             - needs_second_factor
             - needs_client_trust
             - needs_new_password
+            - needs_protect_check
             - complete
         supported_identifiers:
           type: array
@@ -9639,6 +9643,7 @@ components:
             - needs_second_factor
             - needs_client_trust
             - needs_new_password
+            - needs_protect_check
             - complete
         supported_identifiers:
           type: array
