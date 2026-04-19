@@ -873,8 +873,6 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
-  /v1/enterprise_connections: {}
-  /v1/enterprise_connections/{enterpriseConnectionID}: {}
   /v1/enterprise_connections/{enterpriseConnectionID}/init_test_run: {}
   /v1/health:
     get:
@@ -8012,6 +8010,9 @@ components:
           type: string
           enum:
             - verified
+            - unverified
+            - failed
+            - expired
         strategy:
           type: string
           enum:
