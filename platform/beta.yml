@@ -2073,6 +2073,56 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /platform/accountless_applications/claim:
+    post:
+      operationId: PlatformClaimAccountlessApplication
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: claimAccountlessApplication
+      tags:
+        - Applications
+      summary: Claim an accountless application
+      description: |
+        Claim an accountless application by assigning it to the authenticated principal's workspace.
+        The application is identified by a single-use claim token that was generated when the
+        accountless application was created. Once claimed, the token is invalidated and cannot be reused.
+      security:
+        - platform_api_access_token: []
+      requestBody:
+        description: Claim token and application name.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                token:
+                  type: string
+                  description: The single-use claim token for the accountless application.
+                name:
+                  type: string
+                  description: The name to assign to the claimed application.
+                  maxLength: 50
+              required:
+                - token
+                - name
+      responses:
+        '200':
+          description: Application claimed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformApplicationResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
 components:
   securitySchemes:
     platform_api_access_token:
