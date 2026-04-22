@@ -3913,6 +3913,23 @@ paths:
         '422':
           $ref: '#/components/responses/ClerkErrors'
   /instance/organization_settings:
+    get:
+      operationId: GetInstanceOrganizationSettings
+      x-speakeasy-group: instanceSettings
+      x-speakeasy-name-override: getOrganizationSettings
+      summary: Get instance organization settings
+      description: Retrieves the organization settings of the instance
+      tags:
+        - Instance Settings
+      responses:
+        '200':
+          $ref: '#/components/responses/OrganizationSettings'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     patch:
       operationId: UpdateInstanceOrganizationSettings
       x-speakeasy-group: instanceSettings
@@ -6990,6 +7007,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /saml_connections/{saml_connection_id}:
@@ -7139,6 +7158,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
@@ -7377,6 +7398,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /enterprise_connections/{enterprise_connection_id}:
@@ -8902,6 +8925,7 @@ paths:
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /audit_logs: {}
+  /audit_logs/{event_time_and_id}: {}
   /scim_directories: {}
   /scim_directories/{scim_directory_id}: {}
   /api_keys:
