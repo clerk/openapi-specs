@@ -3846,6 +3846,23 @@ paths:
         '422':
           $ref: '#/components/responses/ClerkErrors'
   /instance/organization_settings:
+    get:
+      operationId: GetInstanceOrganizationSettings
+      x-speakeasy-group: instanceSettings
+      x-speakeasy-name-override: getOrganizationSettings
+      summary: Get instance organization settings
+      description: Retrieves the organization settings of the instance
+      tags:
+        - Instance Settings
+      responses:
+        '200':
+          $ref: '#/components/responses/OrganizationSettings'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     patch:
       operationId: UpdateInstanceOrganizationSettings
       x-speakeasy-group: instanceSettings
@@ -8549,6 +8566,7 @@ paths:
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /audit_logs: {}
+  /audit_logs/{event_time_and_id}: {}
   /api_keys:
     post:
       operationId: createApiKey
