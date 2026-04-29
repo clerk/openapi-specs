@@ -913,8 +913,7 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
-  /v1/enterprise_connections: {}
-  /v1/enterprise_connections/{enterpriseConnectionID}: {}
+  /v1/me/enterprise_connections/{enterprise_connection_id}: {}
   /v1/enterprise_connections/{enterpriseConnectionID}/init_test_run: {}
   /v1/health:
     get:
@@ -7365,6 +7364,9 @@ components:
       properties:
         enabled:
           type: boolean
+        self_serve_sso:
+          type: boolean
+          description: When true, end-users may manage enterprise connections for this environment.
       required:
         - enabled
     UserSettings.SignIn:
@@ -8015,6 +8017,9 @@ components:
           type: string
           enum:
             - verified
+            - unverified
+            - failed
+            - expired
         strategy:
           type: string
           enum:
