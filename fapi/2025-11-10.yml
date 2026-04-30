@@ -987,10 +987,6 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
-  /v1/enterprise_connections: {}
-  /v1/enterprise_connections/{enterpriseConnectionID}: {}
-  /v1/enterprise_connections/{enterpriseConnectionID}/init_test_run: {}
-  /v1/enterprise_connections/{enterpriseConnectionID}/test_runs/{testRunID}: {}
   /v1/health:
     get:
       summary: Get Health
@@ -2769,6 +2765,10 @@ paths:
         '404':
           $ref: '#/components/responses/ClerkErrors'
   /v1/me/enterprise_connections: {}
+  /v1/me/enterprise_connections/{enterprise_connection_id}: {}
+  /v1/me/enterprise_connections/{enterprise_connection_id}/test_runs: {}
+  /v1/enterprise_connections/{enterpriseConnectionID}/init_test_run: {}
+  /v1/enterprise_connections/{enterpriseConnectionID}/test_runs/{testRunID}: {}
   /v1/me/email_addresses:
     get:
       operationId: getEmailAddresses
@@ -4266,6 +4266,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '401':
           $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
         '409':
           $ref: '#/components/responses/ClerkErrors'
         '422':
@@ -4513,6 +4515,8 @@ paths:
           $ref: '#/components/responses/AuthenticationInvalid'
         '403':
           $ref: '#/components/responses/AuthorizationInvalid'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /v1/organizations/{organizationID}/billing/checkouts/{checkoutID}:
@@ -8061,6 +8065,9 @@ components:
           type: string
           enum:
             - verified
+            - unverified
+            - failed
+            - expired
         strategy:
           type: string
           enum:
@@ -10167,6 +10174,9 @@ components:
       properties:
         enabled:
           type: boolean
+        self_serve_sso:
+          type: boolean
+          description: When true, end-users may manage enterprise connections for this environment.
       required:
         - enabled
     UserSettings.SignIn:
@@ -11851,6 +11861,11 @@ components:
           format: int64
           nullable: true
           description: Seat quantity being billed; null means unlimited
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPerUnitTotalTier'
+          description: Per-unit cost breakdown by pricing tier
       required:
         - quantity
     BillingTotalsResponse:
