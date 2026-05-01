@@ -1140,6 +1140,56 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}:
+    delete:
+      operationId: PlatformDeleteUser
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: deleteUser
+      tags:
+        - Users
+      summary: Delete a user
+      description: |
+        Delete a user within an application instance. Returns the deleted user object.
+
+        Deleting a user that does not exist (or has already been deleted) returns 404.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Requires the `users:delete` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: userID
+          in: path
+          description: User ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}/ban:
     post:
       operationId: PlatformBanUser
@@ -2073,6 +2123,56 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /platform/accountless_applications/claim:
+    post:
+      operationId: PlatformClaimAccountlessApplication
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: claimAccountlessApplication
+      tags:
+        - Applications
+      summary: Claim an accountless application
+      description: |
+        Claim an accountless application by assigning it to the authenticated principal's workspace.
+        The application is identified by a single-use claim token that was generated when the
+        accountless application was created. Once claimed, the token is invalidated and cannot be reused.
+      security:
+        - platform_api_access_token: []
+      requestBody:
+        description: Claim token and application name.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                token:
+                  type: string
+                  description: The single-use claim token for the accountless application.
+                name:
+                  type: string
+                  description: The name to assign to the claimed application.
+                  maxLength: 50
+              required:
+                - token
+                - name
+      responses:
+        '200':
+          description: Application claimed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformApplicationResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
 components:
   securitySchemes:
     platform_api_access_token:
@@ -2381,6 +2481,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        actual:
+          type: array
+          items:
+            type: string
         clerk_subdomain:
           type: string
         from:
@@ -4024,6 +4128,23 @@ components:
       required:
         - data
         - total_count
+    DeletedObject:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+        id:
+          type: string
+        slug:
+          type: string
+        deleted:
+          type: boolean
+        external_id:
+          type: string
+      required:
+        - object
+        - deleted
     JWTTemplate:
       type: object
       additionalProperties: false
@@ -4067,23 +4188,6 @@ components:
         - signing_algorithm
         - created_at
         - updated_at
-    DeletedObject:
-      type: object
-      additionalProperties: false
-      properties:
-        object:
-          type: string
-        id:
-          type: string
-        slug:
-          type: string
-        deleted:
-          type: boolean
-        external_id:
-          type: string
-      required:
-        - object
-        - deleted
     RedirectURL:
       type: object
       additionalProperties: false
@@ -4216,18 +4320,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ClerkErrors'
-    PaymentRequired:
-      description: Payment required
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClerkErrors'
     DeletedObject:
       description: Deleted Object
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/DeletedObject'
+    PaymentRequired:
+      description: Payment required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
 x-tagGroups:
   - name: Core Resources
     tags:
