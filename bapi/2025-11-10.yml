@@ -3913,6 +3913,23 @@ paths:
         '422':
           $ref: '#/components/responses/ClerkErrors'
   /instance/organization_settings:
+    get:
+      operationId: GetInstanceOrganizationSettings
+      x-speakeasy-group: instanceSettings
+      x-speakeasy-name-override: getOrganizationSettings
+      summary: Get instance organization settings
+      description: Retrieves the organization settings of the instance
+      tags:
+        - Instance Settings
+      responses:
+        '200':
+          $ref: '#/components/responses/OrganizationSettings'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     patch:
       operationId: UpdateInstanceOrganizationSettings
       x-speakeasy-group: instanceSettings
@@ -6990,6 +7007,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /saml_connections/{saml_connection_id}:
@@ -7139,6 +7158,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
@@ -7377,6 +7398,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /enterprise_connections/{enterprise_connection_id}:
@@ -8902,6 +8925,7 @@ paths:
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /audit_logs: {}
+  /audit_logs/{event_time_and_id}: {}
   /scim_directories: {}
   /scim_directories/{scim_directory_id}: {}
   /api_keys:
@@ -13323,17 +13347,6 @@ components:
           type: integer
           format: int64
           description: Unix timestamp (in milliseconds) when the payer was last updated.
-    CommerceSubscriptionItemSeatsResponse:
-      type: object
-      additionalProperties: false
-      properties:
-        quantity:
-          type: integer
-          format: int64
-          nullable: true
-          description: Seat quantity being billed; null means unlimited
-      required:
-        - quantity
     CommercePerUnitTotalTier:
       type: object
       additionalProperties: false
@@ -13352,6 +13365,22 @@ components:
       required:
         - fee_per_block
         - total
+    CommerceSubscriptionItemSeatsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        quantity:
+          type: integer
+          format: int64
+          nullable: true
+          description: Seat quantity being billed; null means unlimited
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercePerUnitTotalTier'
+          description: Per-unit cost breakdown by pricing tier
+      required:
+        - quantity
     CommercePerUnitTotal:
       type: object
       additionalProperties: false
@@ -15365,6 +15394,21 @@ components:
               type: string
               description: OIDC discovery URL
               nullable: true
+            auth_url:
+              type: string
+              description: OAuth authorization endpoint URL (present when configured or resolved from discovery)
+              nullable: true
+            token_url:
+              type: string
+              description: OAuth token endpoint URL (present when configured or resolved from discovery)
+              nullable: true
+            user_info_url:
+              type: string
+              description: OIDC userinfo endpoint URL (present when configured or resolved from discovery)
+              nullable: true
+            requires_pkce:
+              type: boolean
+              description: Whether PKCE is required for this OAuth client
             logo_public_url:
               type: string
               description: Logo URL for the provider
