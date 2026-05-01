@@ -3835,6 +3835,51 @@ paths:
           $ref: '#/components/responses/InstanceProtect'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+  /instance/communication:
+    get:
+      operationId: GetInstanceCommunication
+      x-speakeasy-group: instanceSettings
+      x-speakeasy-name-override: getCommunication
+      summary: Get instance communication settings
+      description: Retrieves the per-instance SMS communication settings, including the SMS country blocklist.
+      tags:
+        - Instance Settings
+      responses:
+        '200':
+          $ref: '#/components/responses/InstanceCommunication'
+    patch:
+      operationId: UpdateInstanceCommunication
+      x-speakeasy-group: instanceSettings
+      x-speakeasy-name-override: updateCommunication
+      summary: Update instance communication settings
+      description: |
+        Replaces the SMS country blocklist for this instance. Pass the full set of ISO 3166-1
+        alpha-2 country codes that should be blocked; codes that aren't recognized as SMS-tier
+        countries are silently dropped from the persisted list. Omitting `blocked_country_codes`
+        is a no-op.
+      tags:
+        - Instance Settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                blocked_country_codes:
+                  type: array
+                  nullable: true
+                  description: ISO 3166-1 alpha-2 country codes to block for SMS delivery. Whole-list replacement. Codes must be uppercase, 2-letter, and unique within the array.
+                  maxItems: 250
+                  uniqueItems: true
+                  items:
+                    type: string
+                    pattern: ^[A-Z]{2}$
+      responses:
+        '200':
+          $ref: '#/components/responses/InstanceCommunication'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /instance/oauth_application_settings:
     get:
       operationId: GetInstanceOAuthApplicationSettings
@@ -3913,6 +3958,23 @@ paths:
         '422':
           $ref: '#/components/responses/ClerkErrors'
   /instance/organization_settings:
+    get:
+      operationId: GetInstanceOrganizationSettings
+      x-speakeasy-group: instanceSettings
+      x-speakeasy-name-override: getOrganizationSettings
+      summary: Get instance organization settings
+      description: Retrieves the organization settings of the instance
+      tags:
+        - Instance Settings
+      responses:
+        '200':
+          $ref: '#/components/responses/OrganizationSettings'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     patch:
       operationId: UpdateInstanceOrganizationSettings
       x-speakeasy-group: instanceSettings
@@ -6990,6 +7052,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /saml_connections/{saml_connection_id}:
@@ -7139,6 +7203,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
     delete:
@@ -7377,6 +7443,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /enterprise_connections/{enterprise_connection_id}:
@@ -8902,6 +8970,7 @@ paths:
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /audit_logs: {}
+  /audit_logs/{event_time_and_id}: {}
   /scim_directories: {}
   /scim_directories/{scim_directory_id}: {}
   /api_keys:
@@ -13323,17 +13392,6 @@ components:
           type: integer
           format: int64
           description: Unix timestamp (in milliseconds) when the payer was last updated.
-    CommerceSubscriptionItemSeatsResponse:
-      type: object
-      additionalProperties: false
-      properties:
-        quantity:
-          type: integer
-          format: int64
-          nullable: true
-          description: Seat quantity being billed; null means unlimited
-      required:
-        - quantity
     CommercePerUnitTotalTier:
       type: object
       additionalProperties: false
@@ -13352,6 +13410,22 @@ components:
       required:
         - fee_per_block
         - total
+    CommerceSubscriptionItemSeatsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        quantity:
+          type: integer
+          format: int64
+          nullable: true
+          description: Seat quantity being billed; null means unlimited
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercePerUnitTotalTier'
+          description: Per-unit cost breakdown by pricing tier
+      required:
+        - quantity
     CommercePerUnitTotal:
       type: object
       additionalProperties: false
@@ -14211,6 +14285,22 @@ components:
         - object
         - rules_enabled
         - specter_enabled
+    InstanceCommunication:
+      type: object
+      description: Per-instance SMS communication settings, including the SMS country blocklist.
+      properties:
+        object:
+          type: string
+          enum:
+            - instance_communication
+        blocked_country_codes:
+          type: array
+          description: ISO 3166-1 alpha-2 country codes that are blocked for SMS delivery on this instance. Codes that aren't recognized are silently dropped.
+          items:
+            type: string
+      required:
+        - object
+        - blocked_country_codes
     OAuthApplicationSettings:
       type: object
       properties:
@@ -15365,6 +15455,21 @@ components:
               type: string
               description: OIDC discovery URL
               nullable: true
+            auth_url:
+              type: string
+              description: OAuth authorization endpoint URL (present when configured or resolved from discovery)
+              nullable: true
+            token_url:
+              type: string
+              description: OAuth token endpoint URL (present when configured or resolved from discovery)
+              nullable: true
+            user_info_url:
+              type: string
+              description: OIDC userinfo endpoint URL (present when configured or resolved from discovery)
+              nullable: true
+            requires_pkce:
+              type: boolean
+              description: Whether PKCE is required for this OAuth client
             logo_public_url:
               type: string
               description: Logo URL for the provider
@@ -16904,6 +17009,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/InstanceProtect'
+    InstanceCommunication:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InstanceCommunication'
     InstanceOAuthApplicationSettings:
       description: Success
       content:
