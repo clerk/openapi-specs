@@ -12301,6 +12301,9 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingMoneyResponse'
           description: The total, including tax, that will be charged upon checkout
+        total_due_per_period:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The expected total payment for each future billing period.
         past_due:
           type: object
           nullable: true
@@ -12333,6 +12336,7 @@ components:
         - credit
         - credits
         - total_due_now
+        - total_due_per_period
     BillingCheckout:
       type: object
       additionalProperties: false
