@@ -8885,6 +8885,10 @@ components:
           type: boolean
           description: |
             Flag to denote whether user is currently locked, i.e. restricted from signing in or not.
+        deprovisioned:
+          type: boolean
+          description: |
+            Flag to denote whether the user has been deprovisioned via SCIM and is restricted from signing in. Only present on instances with SCIM enabled.
         lockout_expires_in_seconds:
           type: integer
           format: int64
