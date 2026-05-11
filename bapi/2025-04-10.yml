@@ -12398,6 +12398,28 @@ components:
         - created_at
         - updated_at
         - organization
+    SCIMUserMetadata:
+      type: object
+      additionalProperties: false
+      description: |
+        Metadata describing a user's linkage to a SCIM directory. This object is only delivered on `user.created` and `user.updated` webhook events, and only when the user is provisioned through a SCIM directory. Its absence does not necessarily mean the user is not SCIM-managed.
+      properties:
+        directory_id:
+          type: string
+          description: |
+            The ID of the SCIM directory the user is provisioned from.
+        directory_enabled:
+          type: boolean
+          description: |
+            Whether the SCIM directory is currently enabled. Omitted when false.
+        external_id:
+          type: string
+          nullable: true
+          description: |
+            The user's external ID as reported by the SCIM directory, if any.
+      required:
+        - directory_id
+        - external_id
     User:
       type: object
       additionalProperties: false
@@ -12523,6 +12545,10 @@ components:
           type: boolean
           description: |
             Flag to denote whether user is currently locked, i.e. restricted from signing in or not.
+        deprovisioned:
+          type: boolean
+          description: |
+            Flag to denote whether user has been deprovisioned and is restricted from signing in.
         lockout_expires_in_seconds:
           type: integer
           format: int64
@@ -12576,6 +12602,10 @@ components:
           type: boolean
           description: When set to `true`, the user will bypass client trust checks during sign-in.
           default: false
+        scim:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/SCIMUserMetadata'
       required:
         - id
         - object

@@ -1595,6 +1595,7 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/client/sign_ins/{sign_in_id}/protect_check: {}
   /v1/client/sign_ups:
     post:
       summary: Create Sign-up
@@ -9281,6 +9282,7 @@ components:
             - needs_second_factor
             - needs_client_trust
             - needs_new_password
+            - needs_protect_check
             - complete
         supported_identifiers:
           type: array
@@ -10737,6 +10739,7 @@ components:
             - needs_second_factor
             - needs_client_trust
             - needs_new_password
+            - needs_protect_check
             - complete
         supported_identifiers:
           type: array
