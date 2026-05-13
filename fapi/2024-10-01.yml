@@ -3802,6 +3802,50 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '500':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/me/metadata:
+    patch:
+      summary: Merge and update the current user's metadata
+      description: |-
+        Update the current user's metadata attributes by merging existing values with the provided parameters.
+
+        This endpoint behaves differently than the *Update User* endpoint.
+        Metadata values will not be replaced entirely.
+        Instead, a deep merge will be performed.
+        Deep means that any nested JSON objects will be merged as well.
+
+        You can remove metadata keys at any level by setting their value to `null`.
+
+        Only `unsafe_metadata` can be updated through the Frontend API. `public_metadata` and `private_metadata` must be modified through the Backend API.
+      tags:
+        - User
+      operationId: patchUserMetadata
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - unsafe_metadata
+              properties:
+                unsafe_metadata:
+                  type: string
+                  description: |-
+                    A stringified JSON object containing the unsafe metadata patch to merge into the current user's `unsafe_metadata`.
+                    Existing keys are deep-merged; keys at any level with `null` values are removed.
+      responses:
+        '200':
+          $ref: '#/components/responses/responses-Client.ClientWrappedUser'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
   /v1/me/tokens:
     post:
       description: Create a JWT for the requested user.
@@ -7509,10 +7553,14 @@ components:
           nullable: true
         allow_extended_special_characters:
           type: boolean
+        allow_numeric_usernames:
+          description: Whether usernames may contain only digits. When enabled, phone-number inputs must be provided in explicit E.164 format.
+          type: boolean
       required:
         - min_length
         - max_length
         - allow_extended_special_characters
+        - allow_numeric_usernames
     UserSettings.ActionsSettings:
       type: object
       additionalProperties: false
@@ -8885,6 +8933,10 @@ components:
           type: boolean
           description: |
             Flag to denote whether user is currently locked, i.e. restricted from signing in or not.
+        deprovisioned:
+          type: boolean
+          description: |
+            Flag to denote whether the user has been deprovisioned via SCIM and is restricted from signing in. Only present on instances with SCIM enabled.
         lockout_expires_in_seconds:
           type: integer
           format: int64
@@ -10005,6 +10057,302 @@ components:
       required:
         - response
         - client
+    Client.SessionTask:
+      type: object
+      properties:
+        key:
+          type: string
+      required:
+        - key
+    schemas-Client.SessionBase:
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - session
+        status:
+          type: string
+          enum:
+            - active
+            - revoked
+            - ended
+            - expired
+            - removed
+            - abandoned
+            - pending
+        expire_at:
+          type: integer
+          format: int64
+        abandon_at:
+          type: integer
+          format: int64
+        last_active_at:
+          type: integer
+          format: int64
+        last_active_token:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Token'
+        actor:
+          type: object
+          nullable: true
+          additionalProperties: true
+        tasks:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/Client.SessionTask'
+      required:
+        - id
+        - object
+        - status
+        - expire_at
+        - abandon_at
+        - last_active_at
+    schemas-Client.Session:
+      allOf:
+        - $ref: '#/components/schemas/schemas-Client.SessionBase'
+        - type: object
+          properties:
+            last_active_organization_id:
+              type: string
+              nullable: true
+            user:
+              $ref: '#/components/schemas/Client.User'
+            public_user_data:
+              type: object
+              nullable: true
+              allOf:
+                - $ref: '#/components/schemas/Client.PublicUserData'
+            factor_verification_age:
+              type: array
+              description: Each item represents the minutes that have passed since the last time a first or second factor were verified.
+              items:
+                type: integer
+            created_at:
+              type: integer
+              format: int64
+              description: Unix timestamp of creation.
+              example: 1700690400000
+            updated_at:
+              type: integer
+              format: int64
+              description: Unix timestamp of last update.
+              example: 1700690400000
+          required:
+            - last_active_organization_id
+            - public_user_data
+            - factor_verification_age
+            - created_at
+            - updated_at
+    schemas-Client.SignIn:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - sign_in_attempt
+        id:
+          type: string
+        status:
+          type: string
+          enum:
+            - abandoned
+            - needs_identifier
+            - needs_first_factor
+            - needs_second_factor
+            - needs_client_trust
+            - needs_new_password
+            - needs_protect_check
+            - complete
+        supported_identifiers:
+          type: array
+          description: List of supported identifiers that can be used to sign in.
+          items:
+            type: string
+            enum:
+              - email_address
+              - phone_number
+              - username
+              - web3_wallet
+              - passkey
+        supported_first_factors:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/Stubs.SignInFactor'
+        supported_second_factors:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/Stubs.SignInFactor'
+        first_factor_verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Stubs.Verification.Password'
+            - $ref: '#/components/schemas/Stubs.Verification.Oauth'
+            - $ref: '#/components/schemas/Stubs.Verification.OTP'
+            - $ref: '#/components/schemas/Stubs.Verification.Link'
+            - $ref: '#/components/schemas/Stubs.Verification.Web3Signature'
+            - $ref: '#/components/schemas/Stubs.Verification.Ticket'
+            - $ref: '#/components/schemas/Stubs.Verification.SAML'
+            - $ref: '#/components/schemas/Stubs.Verification.Passkey'
+            - $ref: '#/components/schemas/Stubs.Verification.GoogleOneTap'
+        second_factor_verification:
+          type: object
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Stubs.Verification.OTP'
+            - $ref: '#/components/schemas/Stubs.Verification.Link'
+            - $ref: '#/components/schemas/Stubs.Verification.TOTP'
+            - $ref: '#/components/schemas/Stubs.Verification.Ticket'
+            - $ref: '#/components/schemas/Stubs.Verification.BackupCode'
+        identifier:
+          nullable: true
+          type: string
+        user_data:
+          type: object
+          additionalProperties: false
+          nullable: true
+          properties:
+            first_name:
+              type: string
+              nullable: true
+            last_name:
+              type: string
+              nullable: true
+            image_url:
+              type: string
+            has_image:
+              type: boolean
+            profile_image_url:
+              type: string
+              nullable: true
+              deprecated: true
+              description: Use `image_url` instead.
+          required:
+            - first_name
+            - last_name
+            - has_image
+        created_session_id:
+          nullable: true
+          type: string
+        abandon_at:
+          type: integer
+          format: int64
+          description: Unix timestamp at which the sign in will be abandoned.
+          example: 1700690400000
+        client_trust_state:
+          type: string
+          nullable: true
+          description: |
+            The trust state of the client for this sign-in attempt. - `pending`: The identifier has not been set yet. - `new`: The user has not had a session on this client before. - `known`: The user has had a session on this client before.
+          enum:
+            - pending
+            - new
+            - known
+      required:
+        - object
+        - id
+        - status
+        - supported_identifiers
+        - supported_first_factors
+        - supported_second_factors
+        - first_factor_verification
+        - second_factor_verification
+        - identifier
+        - user_data
+        - created_session_id
+        - abandon_at
+    schemas-Client.Client:
+      type: object
+      nullable: true
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - client
+        id:
+          type: string
+          description: String representing the identifier of the session.
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/schemas-Client.Session'
+        sign_in:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/schemas-Client.SignIn'
+        sign_up:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.SignUp'
+        last_active_session_id:
+          nullable: true
+          type: string
+          description: Last active session_id.
+        last_authentication_strategy:
+          nullable: true
+          type: string
+          description: |
+            The authentication strategy that was last used to authenticate the user on this client.
+        cookie_expires_at:
+          nullable: true
+          type: integer
+          format: int64
+          description: Unix timestamp of the cookie expiration.
+        captcha_bypass:
+          type: boolean
+          description: Whether the client can bypass CAPTCHA.
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - sessions
+        - sign_in
+        - sign_up
+        - last_active_session_id
+        - last_authentication_strategy
+        - cookie_expires_at
+        - captcha_bypass
+        - created_at
+        - updated_at
+    schemas-Client.ClientWrappedUser:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Client.User'
+        client:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/schemas-Client.Client'
+      required:
+        - response
+        - client
     Client.ClientWrappedImage:
       type: object
       properties:
@@ -10929,6 +11277,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedBackupCodes'
+    responses-Client.ClientWrappedUser:
+      description: Returns the response for Session wrapped User object.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/schemas-Client.ClientWrappedUser'
     Token:
       description: Success
       content:
