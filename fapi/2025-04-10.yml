@@ -3824,6 +3824,50 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '500':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/me/metadata:
+    patch:
+      summary: Merge and update the current user's metadata
+      description: |-
+        Update the current user's metadata attributes by merging existing values with the provided parameters.
+
+        This endpoint behaves differently than the *Update User* endpoint.
+        Metadata values will not be replaced entirely.
+        Instead, a deep merge will be performed.
+        Deep means that any nested JSON objects will be merged as well.
+
+        You can remove metadata keys at any level by setting their value to `null`.
+
+        Only `unsafe_metadata` can be updated through the Frontend API. `public_metadata` and `private_metadata` must be modified through the Backend API.
+      tags:
+        - User
+      operationId: patchUserMetadata
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - unsafe_metadata
+              properties:
+                unsafe_metadata:
+                  type: string
+                  description: |-
+                    A stringified JSON object containing the unsafe metadata patch to merge into the current user's `unsafe_metadata`.
+                    Existing keys are deep-merged; keys at any level with `null` values are removed.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedUser'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
   /v1/me/tokens:
     post:
       description: Create a JWT for the requested user.
@@ -7496,10 +7540,14 @@ components:
           nullable: true
         allow_extended_special_characters:
           type: boolean
+        allow_numeric_usernames:
+          description: Whether usernames may contain only digits. When enabled, phone-number inputs must be provided in explicit E.164 format.
+          type: boolean
       required:
         - min_length
         - max_length
         - allow_extended_special_characters
+        - allow_numeric_usernames
     UserSettings.ActionsSettings:
       type: object
       additionalProperties: false
@@ -8885,6 +8933,10 @@ components:
           type: boolean
           description: |
             Flag to denote whether user is currently locked, i.e. restricted from signing in or not.
+        deprovisioned:
+          type: boolean
+          description: |
+            Flag to denote whether the user has been deprovisioned via SCIM and is restricted from signing in. Only present on instances with SCIM enabled.
         lockout_expires_in_seconds:
           type: integer
           format: int64
