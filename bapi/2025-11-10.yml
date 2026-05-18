@@ -221,6 +221,24 @@ paths:
           description: The sign in URL of your instance
           schema:
             type: string
+        - name: application_name
+          in: query
+          required: false
+          description: The application name shown in the interstitial UI
+          schema:
+            type: string
+        - name: logo_url
+          in: query
+          required: false
+          description: The absolute HTTP(S) application logo URL shown in the interstitial UI
+          schema:
+            type: string
+        - name: flow
+          in: query
+          required: false
+          description: The authentication flow shown in the interstitial UI
+          schema:
+            type: string
         - name: use_domain_for_script
           in: query
           required: false
@@ -8973,6 +8991,446 @@ paths:
   /audit_logs/{event_time_and_id}: {}
   /scim_directories: {}
   /scim_directories/{scim_directory_id}: {}
+  /admin_portal_link_tokens:
+    post:
+      operationId: createAdminPortalLinkToken
+      summary: Create an Admin Portal Link Token
+      tags:
+        - Admin Portal Link Tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                organization_id:
+                  type: string
+                  pattern: ^org_\w{27}$
+                it_contact_id:
+                  type: string
+                  minLength: 1
+                scopes:
+                  type: array
+                  items:
+                    type: string
+                    minLength: 1
+                seconds_until_expiration:
+                  type: integer
+                  minimum: 0
+                  exclusiveMinimum: true
+                  maximum: 86400
+                  default: 3600
+              additionalProperties: false
+      responses:
+        '201':
+          description: 201 Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum:
+                      - admin_portal_link_token
+                  id:
+                    type: string
+                    pattern: ^aplt_[0-9A-Fa-f]{32}$
+                    example: aplt_3beecc9c60adb5f9b850e91a83beecc9
+                  admin_portal_link_id:
+                    type: string
+                    pattern: ^apl_\w{27}$
+                    description: The origin-level admin_portal_link this token was issued for.
+                    example: apl_3beecc9c60adb5f9b850e91a8d2
+                  instance_id:
+                    type: string
+                    pattern: ^ins_\w{27}$
+                    example: ins_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                  organization_id:
+                    type: string
+                    nullable: true
+                    pattern: ^org_\w{27}$
+                    description: Optional. Present only when the link is scoped to an existing org.
+                    example: org_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                  it_contact_id:
+                    type: string
+                    nullable: true
+                    description: Optional opaque reference to the IT contact associated with this link.
+                    example: usr_abc123
+                  scopes:
+                    type: array
+                    nullable: true
+                    items:
+                      type: string
+                    description: Caller-provided scopes for this token.
+                    example:
+                      - admin_portal:read
+                  token:
+                    type: string
+                    description: The single-use admin portal link token. Returned only on creation. URL-borne; treat as a secret.
+                    example: aplt_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+                  revoked:
+                    type: boolean
+                    example: false
+                  revocation_reason:
+                    type: string
+                    nullable: true
+                    example: Revoked by user
+                  expired:
+                    type: boolean
+                    example: false
+                  expiration:
+                    type: number
+                    nullable: true
+                    description: The timestamp for when the token will expire, in milliseconds.
+                    example: 1716883200000
+                  created_at:
+                    type: number
+                    description: The timestamp for when the token was created, in milliseconds.
+                    example: 1716883200000
+                  updated_at:
+                    type: number
+                    description: The timestamp for when the token was last updated, in milliseconds.
+                    example: 1716883200000
+                required:
+                  - object
+                  - id
+                  - admin_portal_link_id
+                  - instance_id
+                  - organization_id
+                  - it_contact_id
+                  - scopes
+                  - token
+                  - revoked
+                  - revocation_reason
+                  - expired
+                  - expiration
+                  - created_at
+                  - updated_at
+                additionalProperties: false
+        '400':
+          description: 400 Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: Bad Request
+                        long_message:
+                          type: string
+                          example: 'Invalid ''url_parameter.example'': Failed regex check'
+                        code:
+                          type: string
+                          example: bad_request
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '401':
+          description: 401 Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '403':
+          description: 403 Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '409':
+          description: 409 Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+  /admin_portal_link_tokens/{adminPortalLinkTokenID}/revoke:
+    post:
+      operationId: revokeAdminPortalLinkToken
+      summary: Revoke an Admin Portal Link Token
+      tags:
+        - Admin Portal Link Tokens
+      parameters:
+        - schema:
+            type: string
+            pattern: ^aplt_[0-9A-Fa-f]{32}$
+          required: true
+          name: adminPortalLinkTokenID
+          in: path
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                revocation_reason:
+                  type: string
+                  nullable: true
+              additionalProperties: false
+      responses:
+        '200':
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum:
+                      - admin_portal_link_token
+                  id:
+                    type: string
+                    pattern: ^aplt_[0-9A-Fa-f]{32}$
+                    example: aplt_3beecc9c60adb5f9b850e91a83beecc9
+                  admin_portal_link_id:
+                    type: string
+                    pattern: ^apl_\w{27}$
+                    description: The origin-level admin_portal_link this token was issued for.
+                    example: apl_3beecc9c60adb5f9b850e91a8d2
+                  instance_id:
+                    type: string
+                    pattern: ^ins_\w{27}$
+                    example: ins_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                  organization_id:
+                    type: string
+                    nullable: true
+                    pattern: ^org_\w{27}$
+                    description: Optional. Present only when the link is scoped to an existing org.
+                    example: org_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                  it_contact_id:
+                    type: string
+                    nullable: true
+                    description: Optional opaque reference to the IT contact associated with this link.
+                    example: usr_abc123
+                  scopes:
+                    type: array
+                    nullable: true
+                    items:
+                      type: string
+                    description: Caller-provided scopes for this token.
+                    example:
+                      - admin_portal:read
+                  revoked:
+                    type: boolean
+                    example: false
+                  revocation_reason:
+                    type: string
+                    nullable: true
+                    example: Revoked by user
+                  expired:
+                    type: boolean
+                    example: false
+                  expiration:
+                    type: number
+                    nullable: true
+                    description: The timestamp for when the token will expire, in milliseconds.
+                    example: 1716883200000
+                  created_at:
+                    type: number
+                    description: The timestamp for when the token was created, in milliseconds.
+                    example: 1716883200000
+                  updated_at:
+                    type: number
+                    description: The timestamp for when the token was last updated, in milliseconds.
+                    example: 1716883200000
+                required:
+                  - object
+                  - id
+                  - admin_portal_link_id
+                  - instance_id
+                  - organization_id
+                  - it_contact_id
+                  - scopes
+                  - revoked
+                  - revocation_reason
+                  - expired
+                  - expiration
+                  - created_at
+                  - updated_at
+                additionalProperties: false
+        '400':
+          description: 400 Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: Bad Request
+                        long_message:
+                          type: string
+                          example: 'Invalid ''url_parameter.example'': Failed regex check'
+                        code:
+                          type: string
+                          example: bad_request
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '401':
+          description: 401 Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '403':
+          description: 403 Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
+        '404':
+          description: 404 Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: some details about the error
+                        long_message:
+                          type: string
+                          example: some details about the error
+                        code:
+                          type: string
+                          example: some_error_code
+                      required:
+                        - message
+                        - long_message
+                        - code
+                required:
+                  - errors
   /api_keys:
     post:
       operationId: createApiKey
