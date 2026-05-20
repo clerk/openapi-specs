@@ -348,7 +348,6 @@ paths:
           description: Unauthorized error, for example the provided client is invalid.
         '403':
           description: Forbidden error, for example you are trying to use a satellite domain
-  /oauth/internal-consent: {}
   /oauth/register:
     post:
       summary: Register OAuth 2.0 Client
@@ -702,6 +701,7 @@ paths:
       summary: Submit OAuth2 consent decision
       description: |
         Submits the user's consent decision for an OAuth2 authorization request.
+
         This endpoint allows building custom consent portals as a replacement for
         the default account-portal-rendered consent screen.
 
