@@ -214,7 +214,7 @@ paths:
           required: false
           style: spaceDelimited
           explode: false
-          description: Space-separated list of scopes being requested. Available scopes are `email`, `profile`, `openid`, `public_metadata`, and `private_metadata`. Defaults to `profile email` if not provided.
+          description: Space-separated list of scopes being requested. Available scopes are `email`, `profile`, `openid`, `public_metadata`, `private_metadata`, and `user:org:read` (when Organizations are enabled). Defaults to `profile email` if not provided.
           schema:
             type: array
             items:
@@ -226,6 +226,7 @@ paths:
                 - offline_access
                 - public_metadata
                 - private_metadata
+                - user:org:read
         - name: state
           in: query
           required: false
@@ -319,7 +320,7 @@ paths:
                 scope:
                   type: string
                   nullable: true
-                  description: Space-separated list of scopes being requested. Available scopes are `email`, `profile`, `openid`, `public_metadata`, and `private_metadata`. Defaults to `profile email` if not provided. Multiple values should be space-delimited (e.g., "email profile openid").
+                  description: Space-separated list of scopes being requested. Available scopes are `email`, `profile`, `openid`, `public_metadata`, `private_metadata`, and `user:org:read` (when Organizations are enabled). Defaults to `profile email` if not provided. Multiple values should be space-delimited (e.g., "email profile openid").
                 state:
                   type: string
                   nullable: true
@@ -366,7 +367,6 @@ paths:
           description: Unauthorized error, for example the provided client is invalid.
         '403':
           description: Forbidden error, for example you are trying to use a satellite domain
-  /oauth/internal-consent: {}
   /oauth/register:
     post:
       summary: Register OAuth 2.0 Client
@@ -760,6 +760,7 @@ paths:
       summary: Submit OAuth2 consent decision
       description: |
         Submits the user's consent decision for an OAuth2 authorization request.
+
         This endpoint allows building custom consent portals as a replacement for
         the default account-portal-rendered consent screen.
 
@@ -7856,6 +7857,23 @@ components:
           type: object
           nullable: true
           additionalProperties: true
+        org_id:
+          type: string
+          nullable: true
+          description: |-
+            The organization ID associated with the access token.
+            Present when the `user:org:read` scope was granted and the user
+            belongs to an organization. The value is determined at authorization
+            time from the explicit `organization_id` consent parameter, the
+            session's active organization, or the user's last active organization.
+        org_name:
+          type: string
+          nullable: true
+          description: The name of the user's organization associated with the access token.
+        org_slug:
+          type: string
+          nullable: true
+          description: The slug of the user's organization associated with the access token.
       required:
         - object
         - instance_id
@@ -7883,6 +7901,13 @@ components:
         sub:
           type: string
           description: Subject of the token, as defined in JWT [RFC7519].
+          nullable: true
+        org_id:
+          type: string
+          description: |-
+            The organization ID associated with the token.
+            Present when the `user:org:read` scope was granted and the user
+            belongs to an organization.
           nullable: true
       required:
         - active
@@ -8190,6 +8215,30 @@ components:
       required:
         - status
         - strategy
+    Stubs.Verification.SCIM:
+      type: object
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_scim
+        status:
+          type: string
+          enum:
+            - verified
+        strategy:
+          type: string
+          enum:
+            - scim
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+      required:
+        - status
+        - strategy
     Stubs.Identification.Link:
       type: object
       additionalProperties: false
@@ -8234,6 +8283,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.Admin'
             - $ref: '#/components/schemas/Stubs.Verification.FromOauth'
             - $ref: '#/components/schemas/Stubs.Verification.SAML'
+            - $ref: '#/components/schemas/Stubs.Verification.SCIM'
         linked_to:
           type: array
           items:

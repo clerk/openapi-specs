@@ -3134,6 +3134,34 @@ components:
         - strategy
         - attempts
         - expire_at
+    verification_scim:
+      x-speakeasy-name-override: SCIM
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_scim
+        status:
+          type: string
+          enum:
+            - verified
+        strategy:
+          type: string
+          enum:
+            - scim
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
     IdentificationLink:
       type: object
       additionalProperties: false
@@ -3173,6 +3201,7 @@ components:
             - $ref: '#/components/schemas/verification_ticket'
             - $ref: '#/components/schemas/verification_saml'
             - $ref: '#/components/schemas/verification_email_link'
+            - $ref: '#/components/schemas/verification_scim'
           discriminator:
             propertyName: object
             mapping:
@@ -3182,6 +3211,7 @@ components:
               verification_ticket: '#/components/schemas/verification_ticket'
               verification_saml: '#/components/schemas/verification_saml'
               verification_email_link: '#/components/schemas/verification_email_link'
+              verification_scim: '#/components/schemas/verification_scim'
         linked_to:
           type: array
           items:

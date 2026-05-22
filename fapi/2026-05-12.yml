@@ -87,6 +87,8 @@ tags:
     description: Used to interact with the current user's organization memberships, invitations and suggestions.
   - name: Organization
     description: Used to interact with an organization and its properties. The current user must be an administrator to access them.
+  - name: Organization Creation Defaults
+    description: Used to get suggested defaults when creating a new organization.
   - name: Invitations
     description: Used to interact with the invitations of an organization. The current user must be an administrator to access them.
   - name: Members
@@ -101,6 +103,22 @@ tags:
     description: Used to interact with the waitlist.
   - name: API Keys
     description: Endpoints for managing API Keys
+  - name: Enterprise Connections
+    description: Endpoints for managing enterprise connections.
+  - name: Plans
+    description: Used to interact with plans that users and organizations can purchase.
+  - name: Subscriptions
+    description: Used to interact with subscriptions belonging to users and organizations.
+  - name: Subscription Items
+    description: Used to interact with subscription items belonging to users and organizations.
+  - name: Checkouts
+    description: Used to interact with the checkout flow.
+  - name: Payment Methods
+    description: Used to interact with payment methods belonging to users and organizations.
+  - name: Statements
+    description: Used to interact with billing statements for users and organizations.
+  - name: Payment Attempts
+    description: Used to interact with payment attempts for users and organizations.
 paths:
   /.well-known/assetlinks.json:
     get:
@@ -807,6 +825,60 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/me/organization_creation_defaults:
+    get:
+      operationId: getOrganizationCreationDefaults
+      tags:
+        - Organization Creation Defaults
+      summary: Get organization creation defaults
+      description: |
+        Get suggested organization name and other defaults for creating a new organization.
+        Returns suggestions based on the user's email domain or configured naming templates.
+      responses:
+        '200':
+          description: Organization creation defaults
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: object
+                    properties:
+                      form:
+                        type: object
+                        nullable: true
+                        properties:
+                          name:
+                            type: string
+                            nullable: true
+                            description: Suggested organization name
+                          logo:
+                            type: string
+                            nullable: true
+                            description: Suggested organization logo URL
+                        description: Suggested form values for creating an organization
+                      advisory:
+                        type: object
+                        nullable: true
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              - warning
+                              - error
+                              - info
+                            description: Type of advisory message
+                          message:
+                            type: string
+                            description: Advisory message text
+                        description: Advisory message if applicable (e.g., organization already exists)
+                  client:
+                    $ref: '#/components/schemas/Client.Client'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
   /v1/account_portal:
     get:
       summary: Get account portal
@@ -850,7 +922,7 @@ paths:
       parameters:
         - in: header
           name: Origin
-          description: The origin of the request
+          description: Origin of the request
           required: true
           schema:
             type: string
@@ -858,6 +930,8 @@ paths:
         '200':
           $ref: '#/components/responses/Client.Environment'
         '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
           $ref: '#/components/responses/ClerkErrors'
   /v1/saml/metadata/{saml_connection_id}.xml:
     get:
@@ -914,8 +988,6 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
-  /v1/me/enterprise_connections/{enterprise_connection_id}: {}
-  /v1/enterprise_connections/{enterpriseConnectionID}/init_test_run: {}
   /v1/health:
     get:
       summary: Get Health
@@ -2694,6 +2766,11 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/me/enterprise_connections: {}
+  /v1/me/enterprise_connections/{enterprise_connection_id}: {}
+  /v1/me/enterprise_connections/{enterprise_connection_id}/test_runs: {}
+  /v1/enterprise_connections/{enterpriseConnectionID}/init_test_run: {}
+  /v1/enterprise_connections/{enterpriseConnectionID}/test_runs/{testRunID}: {}
   /v1/me/email_addresses:
     get:
       operationId: getEmailAddresses
@@ -3763,7 +3840,11 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
     patch:
       summary: Update User
-      description: Update the current user with the given attributes.
+      description: |-
+        Update the current user with the given attributes.
+
+        `unsafe_metadata` is not accepted on this endpoint as of API version 2026-05-12.
+        Use `PATCH /v1/me/metadata` to update `unsafe_metadata`.
       tags:
         - User
       operationId: patchUser
@@ -3791,10 +3872,6 @@ paths:
                 primary_web3_wallet_id:
                   nullable: true
                   type: string
-                unsafe_metadata:
-                  nullable: true
-                  type: string
-                  description: A stringified JSON containing the unsafe metadata of the current user.
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedUser'
@@ -3999,6 +4076,991 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/me/billing/subscription:
+    get:
+      operationId: GetUserMainBillingSubscription
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getUserMainSubscription
+      tags:
+        - Subscriptions
+      summary: Get user's main billing subscription
+      description: Returns the main billing subscription for the current user.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingSubscription'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/me/billing/subscription_items:
+    get:
+      operationId: GetUserBillingSubscriptionItems
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: listUserSubscriptionItems
+      tags:
+        - Subscription Items
+      summary: List user's subscription items
+      description: Returns a list of subscription items for the current user.
+      parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/Paginated'
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingSubscriptionItemList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+  /v1/me/billing/subscription_items/{subscriptionItemID}:
+    delete:
+      operationId: DeleteUserBillingSubscriptionItem
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: cancelUserSubscriptionItem
+      tags:
+        - Subscription Items
+      summary: Cancel user's subscription item
+      description: Cancels a subscription item for the current user.
+      parameters:
+        - name: subscriptionItemID
+          in: path
+          description: The ID of the subscription item to cancel
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingSubscriptionItem'
+        '204':
+          description: Subscription item canceled successfully
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
+  /v1/me/billing/payment_methods:
+    get:
+      operationId: GetUserPaymentMethods
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: listUserPaymentMethods
+      tags:
+        - Payment Methods
+      summary: List user payment methods
+      description: Returns a list of all payment methods for the current user.
+      parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/Paginated'
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentMethodList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    post:
+      operationId: CreateUserPaymentMethod
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: createUserPaymentMethod
+      tags:
+        - Payment Methods
+      summary: Create user payment method
+      description: Creates a new payment method for the current user.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                gateway:
+                  type: string
+                  description: Payment gateway to use
+                payment_token:
+                  type: string
+                  nullable: true
+                  description: Payment token for the method
+                org_id:
+                  type: string
+                  nullable: true
+                  description: Organization ID (optional)
+              required:
+                - gateway
+                - payment_token
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentMethod'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/me/billing/payment_methods/initialize:
+    post:
+      operationId: InitializeUserPaymentMethod
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: initializeUserPaymentMethod
+      tags:
+        - Payment Methods
+      summary: Initialize user payment method
+      description: Initializes a payment method setup process for the current user.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentMethodInitialize'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/me/billing/payment_methods/{paymentMethodID}:
+    delete:
+      operationId: DeleteUserPaymentMethod
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: deleteUserPaymentMethod
+      tags:
+        - Payment Methods
+      summary: Delete user payment method
+      description: Deletes a specific payment method for the current user.
+      parameters:
+        - name: paymentMethodID
+          in: path
+          description: The ID of the payment method to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentMethod'
+        '204':
+          description: Payment method deleted successfully
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
+  /v1/me/billing/checkouts:
+    post:
+      operationId: CreateUserBillingCheckout
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: createUserCheckout
+      tags:
+        - Checkouts
+      summary: Create billing checkout
+      description: Creates a new billing checkout for the current user.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                plan_id:
+                  type: string
+                  description: The ID of the plan to checkout
+                plan_period:
+                  type: string
+                  enum:
+                    - month
+                    - annual
+                  description: The billing period for the plan
+                  default: month
+                org_id:
+                  type: string
+                  nullable: true
+                  description: Organization ID (if creating org checkout)
+                payment_method_id:
+                  type: string
+                  nullable: true
+                  description: Payment method ID to use
+              required:
+                - plan_id
+                - plan_period
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingCheckout'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/me/billing/checkouts/{checkoutID}:
+    get:
+      operationId: GetUserBillingCheckout
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getUserCheckout
+      tags:
+        - Checkouts
+      summary: Get billing checkout
+      description: Returns a billing checkout for the current user.
+      parameters:
+        - name: checkoutID
+          in: path
+          description: The ID of the checkout
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingCheckout'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/me/billing/checkouts/{checkoutID}/confirm:
+    patch:
+      operationId: ConfirmUserBillingCheckout
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: confirmUserCheckout
+      tags:
+        - Checkouts
+      summary: Confirm billing checkout
+      description: Confirms a billing checkout for the current user.
+      parameters:
+        - name: checkoutID
+          in: path
+          description: The ID of the checkout to confirm
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                payment_method_id:
+                  type: string
+                  nullable: true
+                  description: The ID of the payment method to use for this checkout
+                gateway:
+                  type: string
+                  nullable: true
+                  description: The payment gateway to use (e.g., stripe)
+                payment_token:
+                  type: string
+                  nullable: true
+                  description: A payment token for processing the payment
+                use_test_card:
+                  type: boolean
+                  nullable: true
+                  description: Whether to use a test card for payment processing
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingCheckout'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/me/billing/payment_attempts:
+    get:
+      operationId: GetUserPaymentAttempts
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: listUserPaymentAttempts
+      tags:
+        - Payment Attempts
+      summary: List user payment attempts
+      description: Returns a list of payment attempts for the current user.
+      parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/Paginated'
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentAttemptList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+  /v1/me/billing/payment_attempts/{paymentAttemptID}:
+    get:
+      operationId: GetUserPaymentAttempt
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getUserPaymentAttempt
+      tags:
+        - Payment Attempts
+      summary: Get user payment attempt
+      description: Returns details of a specific payment attempt for the current user.
+      parameters:
+        - name: paymentAttemptID
+          in: path
+          description: The ID of the payment attempt to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentAttempt'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/me/billing/payers/default_payment_method:
+    put:
+      operationId: SetUserDefaultPaymentMethod
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: setUserDefaultPaymentMethod
+      tags:
+        - Payment Methods
+      summary: Set user default payment method
+      description: Sets the default payment method for the current user.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentMethod'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/me/billing/statements:
+    get:
+      operationId: GetUserStatements
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: listUserStatements
+      tags:
+        - Statements
+      summary: List user statements
+      description: Returns a list of billing statements for the current user.
+      parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/Paginated'
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingStatementList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+  /v1/me/billing/statements/{statementID}:
+    get:
+      operationId: GetUserStatement
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getUserStatement
+      tags:
+        - Statements
+      summary: Get user statement
+      description: Returns details of a specific billing statement for the current user.
+      parameters:
+        - name: statementID
+          in: path
+          description: The ID of the statement to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingStatement'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/organizations/{organizationID}/billing/checkouts:
+    post:
+      operationId: CreateOrganizationBillingCheckout
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: createOrganizationCheckout
+      tags:
+        - Checkouts
+      summary: Create organization billing checkout
+      description: Creates a new billing checkout for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                plan_id:
+                  type: string
+                  description: The ID of the plan to checkout
+                plan_period:
+                  type: string
+                  enum:
+                    - month
+                    - annual
+                  description: The billing period for the plan
+                  default: month
+                payment_method_id:
+                  type: string
+                  nullable: true
+                  description: Payment method ID to use
+              required:
+                - plan_id
+                - plan_period
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingCheckout'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/organizations/{organizationID}/billing/checkouts/{checkoutID}:
+    get:
+      operationId: GetOrganizationBillingCheckout
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getOrganizationCheckout
+      tags:
+        - Checkouts
+      summary: Get organization billing checkout
+      description: Returns a billing checkout for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+        - name: checkoutID
+          in: path
+          description: The ID of the checkout
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingCheckout'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/organizations/{organizationID}/billing/checkouts/{checkoutID}/confirm:
+    patch:
+      operationId: ConfirmOrganizationBillingCheckout
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: confirmOrganizationCheckout
+      tags:
+        - Checkouts
+      summary: Confirm organization billing checkout
+      description: Confirms a billing checkout for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+        - name: checkoutID
+          in: path
+          description: The ID of the checkout to confirm
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                payment_method_id:
+                  type: string
+                  nullable: true
+                  description: The ID of the payment method to use for this checkout
+                gateway:
+                  type: string
+                  nullable: true
+                  description: The payment gateway to use (e.g., stripe)
+                payment_token:
+                  type: string
+                  nullable: true
+                  description: A payment token for processing the payment
+                use_test_card:
+                  type: boolean
+                  nullable: true
+                  description: Whether to use a test card for payment processing
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingCheckout'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/organizations/{organizationID}/billing/payment_methods:
+    get:
+      operationId: GetOrganizationPaymentMethods
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getOrganizationPaymentMethods
+      tags:
+        - Payment Methods
+      summary: List organization payment methods
+      description: Lists all payment methods for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentMethodList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    post:
+      operationId: CreateOrganizationPaymentMethod
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: createOrganizationPaymentMethod
+      tags:
+        - Payment Methods
+      summary: Create organization payment method
+      description: Creates a new payment method for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                payment_token:
+                  type: string
+                  description: The payment token for the payment method
+                gateway:
+                  type: string
+                  description: The payment gateway to use
+                  enum:
+                    - stripe
+              required:
+                - payment_token
+                - gateway
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                payment_token:
+                  type: string
+                  description: The payment token for the payment method
+                gateway:
+                  type: string
+                  description: The payment gateway to use
+                  enum:
+                    - stripe
+              required:
+                - payment_token
+                - gateway
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingGenericObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/organizations/{organizationID}/billing/payment_methods/initialize:
+    post:
+      operationId: InitializeOrganizationPaymentMethod
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: initializeOrganizationPaymentMethod
+      tags:
+        - Payment Methods
+      summary: Initialize organization payment method
+      description: Initializes a payment method for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingPaymentMethodInitialize'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/organizations/{organizationID}/billing/payment_methods/{paymentMethodID}:
+    delete:
+      operationId: DeleteOrganizationPaymentMethod
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: deleteOrganizationPaymentMethod
+      tags:
+        - Payment Methods
+      summary: Delete organization payment method
+      description: Deletes a payment method for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+        - name: paymentMethodID
+          in: path
+          description: The ID of the payment method to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingGenericObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/organizations/{organizationID}/billing/statements:
+    get:
+      operationId: GetOrganizationStatements
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getOrganizationStatements
+      tags:
+        - Statements
+      summary: List organization statements
+      description: Lists all statements for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingGenericArray'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/organizations/{organizationID}/billing/statements/{statementID}:
+    get:
+      operationId: GetOrganizationStatement
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getOrganizationStatement
+      tags:
+        - Statements
+      summary: Get organization statement
+      description: Gets a specific statement for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+        - name: statementID
+          in: path
+          description: The ID of the statement to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingGenericObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/organizations/{organizationID}/billing/payers/default_payment_method:
+    put:
+      operationId: SetOrganizationDefaultPaymentMethod
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: setOrganizationDefaultPaymentMethod
+      tags:
+        - Payment Methods
+      summary: Set organization default payment method
+      description: Sets the default payment method for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                payment_method_id:
+                  type: string
+                  description: The ID of the payment method to set as default
+              required:
+                - payment_method_id
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                payment_method_id:
+                  type: string
+                  description: The ID of the payment method to set as default
+              required:
+                - payment_method_id
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingGenericObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/organizations/{organizationID}/billing/subscription:
+    get:
+      operationId: GetOrganizationBillingSubscription
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getOrganizationSubscription
+      tags:
+        - Subscriptions
+      summary: Get organization's billing subscription
+      description: Returns the billing subscription for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingSubscription'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/organizations/{organizationID}/billing/subscription_items:
+    get:
+      operationId: GetOrganizationBillingSubscriptionItems
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: listOrganizationSubscriptionItems
+      tags:
+        - Subscription Items
+      summary: List organization's subscription items
+      description: Returns a list of subscription items for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingSubscriptionItemList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/organizations/{organizationID}/billing/subscription_items/{subscriptionItemID}:
+    delete:
+      operationId: DeleteOrganizationBillingSubscriptionItem
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: cancelOrganizationSubscriptionItem
+      tags:
+        - Subscription Items
+      summary: Cancel organization's subscription item
+      description: Cancels a subscription item for the organization.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+        - name: subscriptionItemID
+          in: path
+          description: The ID of the subscription item to cancel
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingSubscriptionItem'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/billing/plans:
+    get:
+      operationId: GetBillingPlanList
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: listPlans
+      tags:
+        - Plans
+      summary: List billing plans
+      description: Returns a list of all publicly visible billing plans.
+      parameters:
+        - in: query
+          name: payer_type
+          description: Filter plans by payer type
+          required: false
+          schema:
+            type: string
+            enum:
+              - user
+              - org
+      responses:
+        '200':
+          $ref: '#/components/responses/BillingPlanList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/billing/plans/{planIdOrSlug}:
+    get:
+      operationId: GetBillingPlan
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: getPlan
+      tags:
+        - Plans
+      summary: Get a billing plan
+      description: Returns a billing plan by ID or slug.
+      parameters:
+        - name: planIdOrSlug
+          in: path
+          description: The ID or slug of the plan
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/BillingPlan'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /v1/me/organization_memberships:
     get:
       summary: Get Organization Memberships
@@ -6888,1011 +7950,6 @@ components:
         - oauth_application_name
         - client_id
         - scopes
-    Client.AccountPortal:
-      type: object
-      additionalProperties: false
-      properties:
-        object:
-          type: string
-          enum:
-            - account_portal
-        allowed:
-          type: boolean
-        enabled:
-          type: boolean
-        internal_linking:
-          type: boolean
-        after_sign_in_url:
-          type: string
-        after_sign_up_url:
-          type: string
-        after_join_waitlist_url:
-          type: string
-        after_create_organization_url:
-          type: string
-        after_leave_organization_url:
-          type: string
-        logo_link_url:
-          type: string
-        customization:
-          type: object
-          properties:
-            appearance:
-              type: string
-              enum:
-                - auto
-                - dark
-                - light
-              nullable: true
-            background_color_dark:
-              type: string
-              nullable: true
-            background_color_light:
-              type: string
-              nullable: true
-            primary_color_dark:
-              type: string
-              nullable: true
-            primary_color_light:
-              type: string
-              nullable: true
-          required:
-            - appearance
-            - background_color_dark
-            - background_color_light
-            - primary_color_dark
-            - primary_color_light
-      required:
-        - object
-        - allowed
-        - enabled
-        - internal_linking
-        - after_sign_in_url
-        - after_sign_up_url
-        - after_join_waitlist_url
-        - after_create_organization_url
-        - after_leave_organization_url
-        - logo_link_url
-        - customization
-    Client.AuthConfig:
-      type: object
-      additionalProperties: false
-      properties:
-        object:
-          type: string
-          enum:
-            - auth_config
-        id:
-          type: string
-        first_name:
-          type: string
-          enum:
-            - 'on'
-            - 'off'
-            - required
-        last_name:
-          type: string
-          enum:
-            - 'on'
-            - 'off'
-            - required
-        email_address:
-          type: string
-          enum:
-            - 'on'
-            - 'off'
-            - required
-        phone_number:
-          type: string
-          enum:
-            - 'on'
-            - 'off'
-            - required
-        username:
-          type: string
-          enum:
-            - 'on'
-            - 'off'
-            - required
-        password:
-          type: string
-          enum:
-            - 'on'
-            - 'off'
-            - required
-        identification_requirements:
-          type: array
-          items:
-            type: array
-            items:
-              type: string
-        identification_strategies:
-          type: array
-          items:
-            type: string
-        first_factors:
-          type: array
-          items:
-            type: string
-        second_factors:
-          type: array
-          items:
-            type: string
-        email_address_verification_strategies:
-          type: array
-          items:
-            type: string
-        single_session_mode:
-          type: boolean
-        enhanced_email_deliverability:
-          type: boolean
-        test_mode:
-          type: boolean
-        cookieless_dev:
-          type: boolean
-          description: Please use `url_based_session_syncing` instead
-          deprecated: true
-        url_based_session_syncing:
-          type: boolean
-        claimed_at:
-          type: integer
-          format: int64
-          nullable: true
-        reverification:
-          type: boolean
-      required:
-        - object
-        - id
-        - first_name
-        - last_name
-        - email_address
-        - phone_number
-        - username
-        - password
-        - identification_requirements
-        - identification_strategies
-        - first_factors
-        - second_factors
-        - email_address_verification_strategies
-        - single_session_mode
-        - enhanced_email_deliverability
-        - test_mode
-        - url_based_session_syncing
-        - claimed_at
-        - reverification
-    Image:
-      type: object
-      properties:
-        object:
-          type: string
-          description: The object type. Always "image".
-        id:
-          type: string
-          description: Unique identifier for the image.
-        name:
-          type: string
-          description: The file name of the uploaded image.
-        public_url:
-          type: string
-          description: The publicly accessible URL for the image.
-    Client.DisplayConfig:
-      type: object
-      additionalProperties: false
-      properties:
-        object:
-          type: string
-          enum:
-            - display_config
-        id:
-          type: string
-        instance_environment_type:
-          type: string
-          enum:
-            - production
-            - development
-            - staging
-        application_name:
-          type: string
-        theme:
-          type: object
-        preferred_sign_in_strategy:
-          type: string
-          enum:
-            - password
-            - otp
-        logo_image_url:
-          nullable: true
-          type: string
-        favicon_image_url:
-          nullable: true
-          type: string
-        home_url:
-          type: string
-        sign_in_url:
-          type: string
-        sign_up_url:
-          type: string
-        user_profile_url:
-          type: string
-        waitlist_url:
-          type: string
-        after_sign_in_url:
-          type: string
-        after_sign_up_url:
-          type: string
-        after_sign_out_one_url:
-          type: string
-        after_sign_out_all_url:
-          type: string
-        after_switch_session_url:
-          type: string
-        after_join_waitlist_url:
-          type: string
-        organization_profile_url:
-          type: string
-        create_organization_url:
-          type: string
-        after_leave_organization_url:
-          type: string
-        after_create_organization_url:
-          type: string
-        logo_link_url:
-          type: string
-        support_email:
-          type: string
-          nullable: true
-        branded:
-          type: boolean
-        experimental_force_oauth_first:
-          type: boolean
-        clerk_js_version:
-          type: string
-          nullable: true
-        show_devmode_warning:
-          type: boolean
-        google_one_tap_client_id:
-          type: string
-          nullable: true
-        help_url:
-          type: string
-          nullable: true
-        privacy_policy_url:
-          type: string
-          nullable: true
-        terms_url:
-          type: string
-          nullable: true
-        logo_url:
-          nullable: true
-          type: string
-          deprecated: true
-          description: Use `logo_image_url` instead
-        favicon_url:
-          nullable: true
-          type: string
-          deprecated: true
-          description: Use `favicon_image_url` instead
-        logo_image:
-          type: object
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/Image'
-          deprecated: true
-          description: Use `logo_image_url` instead
-        favicon_image:
-          type: object
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/Image'
-          deprecated: true
-          description: Use `favicon_image_url` instead
-        captcha_public_key:
-          type: string
-          nullable: true
-        captcha_widget_type:
-          type: string
-          nullable: true
-          enum:
-            - smart
-            - invisible
-        captcha_public_key_invisible:
-          type: string
-          nullable: true
-        captcha_provider:
-          type: string
-          nullable: true
-          enum:
-            - turnstile
-        captcha_oauth_bypass:
-          type: array
-          items:
-            type: string
-        captcha_heartbeat:
-          type: boolean
-          nullable: true
-      required:
-        - object
-        - id
-        - instance_environment_type
-        - application_name
-        - theme
-        - preferred_sign_in_strategy
-        - home_url
-        - sign_in_url
-        - sign_up_url
-        - user_profile_url
-        - waitlist_url
-        - after_sign_in_url
-        - after_sign_up_url
-        - after_sign_out_one_url
-        - after_sign_out_all_url
-        - after_switch_session_url
-        - after_join_waitlist_url
-        - organization_profile_url
-        - create_organization_url
-        - after_leave_organization_url
-        - after_create_organization_url
-        - logo_link_url
-        - support_email
-        - branded
-        - experimental_force_oauth_first
-        - clerk_js_version
-        - show_devmode_warning
-        - google_one_tap_client_id
-        - help_url
-        - privacy_policy_url
-        - terms_url
-        - logo_url
-        - favicon_url
-        - logo_image
-        - favicon_image
-        - captcha_public_key
-        - captcha_widget_type
-        - captcha_public_key_invisible
-        - captcha_provider
-        - captcha_oauth_bypass
-    UserSettings.Attribute:
-      type: object
-      additionalProperties: false
-      properties:
-        enabled:
-          type: boolean
-        required:
-          type: boolean
-        used_for_first_factor:
-          type: boolean
-        first_factors:
-          type: array
-          items:
-            type: string
-        used_for_second_factor:
-          type: boolean
-        second_factors:
-          type: array
-          items:
-            type: string
-        verifications:
-          type: array
-          items:
-            type: string
-        verify_at_sign_up:
-          type: boolean
-        immutable:
-          type: boolean
-      required:
-        - enabled
-        - required
-        - used_for_first_factor
-        - first_factors
-        - used_for_second_factor
-        - second_factors
-        - verifications
-        - verify_at_sign_up
-        - immutable
-    UserSettings.Attributes:
-      type: object
-      additionalProperties: false
-      properties:
-        email_address:
-          $ref: '#/components/schemas/UserSettings.Attribute'
-        phone_number:
-          $ref: '#/components/schemas/UserSettings.Attribute'
-        username:
-          $ref: '#/components/schemas/UserSettings.Attribute'
-        web3_wallet:
-          $ref: '#/components/schemas/UserSettings.Attribute'
-        first_name:
-          $ref: '#/components/schemas/UserSettings.Attribute'
-        last_name:
-          $ref: '#/components/schemas/UserSettings.Attribute'
-        password:
-          $ref: '#/components/schemas/UserSettings.Attribute'
-        authenticator_app:
-          $ref: '#/components/schemas/UserSettings.Attribute'
-        ticket:
-          $ref: '#/components/schemas/UserSettings.Attribute'
-        backup_code:
-          $ref: '#/components/schemas/UserSettings.Attribute'
-        passkey:
-          $ref: '#/components/schemas/UserSettings.Attribute'
-      required:
-        - email_address
-        - phone_number
-        - username
-        - web3_wallet
-        - first_name
-        - last_name
-        - password
-        - authenticator_app
-        - ticket
-        - backup_code
-        - passkey
-    UserSettings.Social:
-      type: object
-      additionalProperties: false
-      properties:
-        enabled:
-          type: boolean
-        required:
-          type: boolean
-        authenticatable:
-          type: boolean
-        block_email_subaddresses:
-          type: boolean
-        strategy:
-          type: string
-        not_selectable:
-          type: boolean
-        deprecated:
-          type: boolean
-        name:
-          type: string
-          description: A human readable name for the social provider.
-          example: Google
-        logo_url:
-          type: string
-          nullable: true
-          description: A URL pointing to the logo of the social provider.
-          example: https://img.clerk.com/static/google.png
-      required:
-        - enabled
-        - required
-        - authenticatable
-        - block_email_subaddresses
-        - strategy
-        - not_selectable
-        - deprecated
-    UserSettings.Socials:
-      type: object
-      additionalProperties: false
-      properties:
-        oauth_apple:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_atlassian:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_bitbucket:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_box:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_coinbase:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_custom_mock:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_discord:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_dropbox:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_enstall:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_expressen:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_facebook:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_github:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_gitlab:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_google:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_hubspot:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_huggingface:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_instagram:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_line:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_linear:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_linkedin:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_linkedin_oidc:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_microsoft:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_mock:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_notion:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_slack:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_spotify:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_tiktok:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_twitch:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_twitter:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_x:
-          $ref: '#/components/schemas/UserSettings.Social'
-        oauth_xero:
-          $ref: '#/components/schemas/UserSettings.Social'
-    UserSettings.EnterpriseSSO:
-      type: object
-      additionalProperties: false
-      properties:
-        enabled:
-          type: boolean
-        self_serve_sso:
-          type: boolean
-          description: When true, end-users may manage enterprise connections for this environment.
-      required:
-        - enabled
-    UserSettings.SignIn:
-      type: object
-      additionalProperties: false
-      properties:
-        second_factor:
-          type: object
-          additionalProperties: false
-          properties:
-            required:
-              type: boolean
-          required:
-            - required
-      required:
-        - second_factor
-    UserSettings.SignUp:
-      type: object
-      additionalProperties: false
-      properties:
-        captcha_enabled:
-          type: boolean
-        captcha_widget_type:
-          type: string
-          enum:
-            - smart
-            - invisible
-        custom_action_required:
-          type: boolean
-        progressive:
-          type: boolean
-        mode:
-          type: string
-          enum:
-            - public
-            - restricted
-            - waitlist
-        legal_consent_enabled:
-          type: boolean
-      required:
-        - captcha_enabled
-        - captcha_widget_type
-        - custom_action_required
-        - progressive
-        - mode
-        - legal_consent_enabled
-    UserSettings.Restrictions.Enabled:
-      type: object
-      additionalProperties: false
-      properties:
-        enabled:
-          type: boolean
-      required:
-        - enabled
-    UserSettings.Restrictions:
-      type: object
-      additionalProperties: false
-      properties:
-        allowlist:
-          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
-        blocklist:
-          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
-        allowlist_blocklist_disabled_on_sign_in:
-          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
-        block_email_subaddresses:
-          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
-        block_disposable_email_domains:
-          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
-      required:
-        - allowlist
-        - blocklist
-        - allowlist_blocklist_disabled_on_sign_in
-        - block_email_subaddresses
-        - block_disposable_email_domains
-    UserSettings.PasswordSettings:
-      type: object
-      additionalProperties: false
-      properties:
-        disable_hibp:
-          type: boolean
-        min_length:
-          type: integer
-        max_length:
-          type: integer
-        require_special_char:
-          type: boolean
-          description: |
-            Denotes whether given passwords should contain at least one of the following special characters: #%$&_!
-        require_numbers:
-          type: boolean
-        require_uppercase:
-          type: boolean
-        require_lowercase:
-          type: boolean
-        show_zxcvbn:
-          type: boolean
-        min_zxcvbn_strength:
-          type: integer
-          minimum: 0
-          maximum: 4
-        enforce_hibp_on_sign_in:
-          type: boolean
-        allowed_special_characters:
-          type: string
-      required:
-        - disable_hibp
-        - min_length
-        - max_length
-        - require_special_char
-        - require_numbers
-        - require_uppercase
-        - require_lowercase
-        - show_zxcvbn
-        - min_zxcvbn_strength
-        - enforce_hibp_on_sign_in
-        - allowed_special_characters
-    UserSettings.UsernameSettings:
-      type: object
-      additionalProperties: false
-      properties:
-        min_length:
-          type: integer
-          nullable: true
-        max_length:
-          type: integer
-          nullable: true
-        allow_extended_special_characters:
-          type: boolean
-        allow_numeric_usernames:
-          description: Whether usernames may contain only digits. When enabled, phone-number inputs must be provided in explicit E.164 format.
-          type: boolean
-      required:
-        - min_length
-        - max_length
-        - allow_extended_special_characters
-        - allow_numeric_usernames
-    UserSettings.ActionsSettings:
-      type: object
-      additionalProperties: false
-      properties:
-        delete_self:
-          type: boolean
-        create_organization:
-          type: boolean
-        create_organizations_limit:
-          type: boolean
-          nullable: true
-      required:
-        - delete_self
-        - create_organization
-        - create_organizations_limit
-    UserSettings.AttackProtectionSettings.UserLockout:
-      type: object
-      additionalProperties: false
-      properties:
-        enabled:
-          type: boolean
-        max_attempts:
-          type: integer
-        duration_in_minutes:
-          type: integer
-      required:
-        - enabled
-        - max_attempts
-        - duration_in_minutes
-    UserSettings.AttackProtectionSettings.PII:
-      type: object
-      additionalProperties: false
-      properties:
-        enabled:
-          type: boolean
-      required:
-        - enabled
-    UserSettings.AttackProtectionSettings.EmailLink:
-      type: object
-      additionalProperties: false
-      properties:
-        require_same_client:
-          type: boolean
-      required:
-        - require_same_client
-    UserSettings.AttackProtectionSettings.EnumerationProtection:
-      type: object
-      additionalProperties: false
-      properties:
-        enabled:
-          type: boolean
-      required:
-        - enabled
-    UserSettings.AttackProtectionSettings:
-      type: object
-      additionalProperties: false
-      properties:
-        user_lockout:
-          $ref: '#/components/schemas/UserSettings.AttackProtectionSettings.UserLockout'
-        pii:
-          $ref: '#/components/schemas/UserSettings.AttackProtectionSettings.PII'
-        email_link:
-          $ref: '#/components/schemas/UserSettings.AttackProtectionSettings.EmailLink'
-        enumeration_protection:
-          $ref: '#/components/schemas/UserSettings.AttackProtectionSettings.EnumerationProtection'
-      required:
-        - user_lockout
-        - pii
-        - email_link
-        - enumeration_protection
-    UserSettings.PasskeySettings:
-      type: object
-      additionalProperties: false
-      properties:
-        allow_autofill:
-          type: boolean
-          description: Passkey UI will be shown when user interacts with the text input.
-          default: true
-        show_sign_in_button:
-          type: boolean
-          description: Passkey UI will be shown when user clicks on a button.
-          default: true
-      required:
-        - allow_autofill
-        - show_sign_in_button
-    Client.UserSettings:
-      type: object
-      additionalProperties: false
-      properties:
-        attributes:
-          $ref: '#/components/schemas/UserSettings.Attributes'
-        social:
-          $ref: '#/components/schemas/UserSettings.Socials'
-        saml:
-          $ref: '#/components/schemas/UserSettings.EnterpriseSSO'
-        enterprise_sso:
-          $ref: '#/components/schemas/UserSettings.EnterpriseSSO'
-        sign_in:
-          $ref: '#/components/schemas/UserSettings.SignIn'
-        sign_up:
-          $ref: '#/components/schemas/UserSettings.SignUp'
-        restrictions:
-          $ref: '#/components/schemas/UserSettings.Restrictions'
-        password_settings:
-          $ref: '#/components/schemas/UserSettings.PasswordSettings'
-        username_settings:
-          $ref: '#/components/schemas/UserSettings.UsernameSettings'
-        actions:
-          $ref: '#/components/schemas/UserSettings.ActionsSettings'
-        attack_protection:
-          $ref: '#/components/schemas/UserSettings.AttackProtectionSettings'
-        passkey_settings:
-          $ref: '#/components/schemas/UserSettings.PasskeySettings'
-      required:
-        - attributes
-        - social
-        - saml
-        - enterprise_sso
-        - sign_in
-        - sign_up
-        - restrictions
-        - password_settings
-        - username_settings
-        - actions
-        - attack_protection
-        - passkey_settings
-    OrganizationSettings.ActionsSettings:
-      type: object
-      additionalProperties: false
-      properties:
-        admin_delete:
-          type: boolean
-      required:
-        - admin_delete
-    OrganizationSettings.DomainsSettings:
-      type: object
-      additionalProperties: false
-      properties:
-        enabled:
-          type: boolean
-        enrollment_modes:
-          type: array
-          items:
-            type: string
-            enum:
-              - manual_invitation
-              - automatic_invitation
-              - automatic_suggestion
-        default_role:
-          type: string
-          description: The role key that it will be used in order to create an organization invitation or suggestion.
-      required:
-        - enabled
-        - enrollment_modes
-        - default_role
-    OrganizationSettings.SlugSettings:
-      type: object
-      additionalProperties: false
-      properties:
-        disabled:
-          type: boolean
-      required:
-        - disabled
-    Client.OrganizationSettings:
-      type: object
-      additionalProperties: false
-      properties:
-        enabled:
-          type: boolean
-        max_allowed_memberships:
-          type: integer
-        actions:
-          $ref: '#/components/schemas/OrganizationSettings.ActionsSettings'
-        domains:
-          $ref: '#/components/schemas/OrganizationSettings.DomainsSettings'
-        slug:
-          $ref: '#/components/schemas/OrganizationSettings.SlugSettings'
-        creator_role:
-          type: string
-          description: The role key that a user will be assigned after creating an organization.
-      required:
-        - enabled
-        - max_allowed_memberships
-        - actions
-        - domains
-        - creator_role
-    FraudSettings.NativeSettings:
-      type: object
-      additionalProperties: false
-      properties:
-        device_attestation_mode:
-          type: string
-          enum:
-            - disabled
-            - onboarding
-            - enforced
-      required:
-        - device_attestation_mode
-    Client.FraudSettings:
-      type: object
-      additionalProperties: false
-      properties:
-        object:
-          type: string
-          description: String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - fraud_settings
-        native:
-          $ref: '#/components/schemas/FraudSettings.NativeSettings'
-      required:
-        - native
-    Client.CommerceSettings:
-      type: object
-      additionalProperties: false
-      properties:
-        billing:
-          type: object
-          additionalProperties: false
-          properties:
-            enabled:
-              type: boolean
-            stripe_publishable_key:
-              type: string
-              nullable: true
-            has_paid_user_plans:
-              type: boolean
-            has_paid_org_plans:
-              type: boolean
-            free_trial_requires_payment_method:
-              type: boolean
-            user:
-              type: object
-              additionalProperties: false
-              properties:
-                enabled:
-                  type: boolean
-                has_paid_plans:
-                  type: boolean
-            organization:
-              type: object
-              additionalProperties: false
-              properties:
-                enabled:
-                  type: boolean
-                has_paid_plans:
-                  type: boolean
-      required:
-        - billing
-    Client.ApiKeysSettings:
-      type: object
-      additionalProperties: false
-      properties:
-        enabled:
-          type: boolean
-          description: Indicates whether the API Keys feature is enabled.
-        user_api_keys_enabled:
-          type: boolean
-          description: Indicates whether User API Keys are enabled.
-        orgs_api_keys_enabled:
-          type: boolean
-          description: Indicates whether Organization API Keys are enabled.
-      required:
-        - enabled
-        - user_api_keys_enabled
-        - orgs_api_keys_enabled
-    Client.ProtectConfig.Loader:
-      type: object
-      additionalProperties: false
-      description: Configuration for the Clerk Protect loader.
-      properties:
-        rollout:
-          type: number
-          format: float
-          description: rollout percentage (between 0.0 and 1.0)
-          minimum: 0
-          maximum: 1
-        type:
-          type: string
-        target:
-          type: string
-        attributes:
-          type: object
-          additionalProperties:
-            type: string
-        textContent:
-          type: string
-    Client.ProtectConfig:
-      type: object
-      additionalProperties: false
-      properties:
-        loaders:
-          type: array
-          items:
-            $ref: '#/components/schemas/Client.ProtectConfig.Loader'
-    Client.Environment:
-      type: object
-      additionalProperties: false
-      properties:
-        auth_config:
-          $ref: '#/components/schemas/Client.AuthConfig'
-        display_config:
-          $ref: '#/components/schemas/Client.DisplayConfig'
-        user_settings:
-          $ref: '#/components/schemas/Client.UserSettings'
-        organization_settings:
-          $ref: '#/components/schemas/Client.OrganizationSettings'
-        fraud_settings:
-          $ref: '#/components/schemas/Client.FraudSettings'
-        commerce_settings:
-          $ref: '#/components/schemas/Client.CommerceSettings'
-        api_keys_settings:
-          $ref: '#/components/schemas/Client.ApiKeysSettings'
-        protect_config:
-          $ref: '#/components/schemas/Client.ProtectConfig'
-        client_debug_mode:
-          type: boolean
-        partitioned_cookies:
-          type: boolean
-        maintenance_mode:
-          type: boolean
     Token:
       type: object
       additionalProperties: false
@@ -7910,13 +7967,6 @@ components:
       required:
         - object
         - jwt
-    Client.SessionTask:
-      type: object
-      properties:
-        key:
-          type: string
-      required:
-        - key
     Client.SessionBase:
       type: object
       properties:
@@ -7937,7 +7987,6 @@ components:
             - expired
             - removed
             - abandoned
-            - pending
         expire_at:
           type: integer
           format: int64
@@ -7956,11 +8005,6 @@ components:
           type: object
           nullable: true
           additionalProperties: true
-        tasks:
-          type: array
-          nullable: true
-          items:
-            $ref: '#/components/schemas/Client.SessionTask'
       required:
         - id
         - object
@@ -9377,7 +9421,6 @@ components:
           nullable: true
           oneOf:
             - $ref: '#/components/schemas/Stubs.Verification.OTP'
-            - $ref: '#/components/schemas/Stubs.Verification.Link'
             - $ref: '#/components/schemas/Stubs.Verification.TOTP'
             - $ref: '#/components/schemas/Stubs.Verification.Ticket'
             - $ref: '#/components/schemas/Stubs.Verification.BackupCode'
@@ -9685,49 +9728,1099 @@ components:
         - captcha_bypass
         - created_at
         - updated_at
-    Client.ClientWrappedClient:
+    Client.AccountPortal:
       type: object
       additionalProperties: false
       properties:
-        response:
+        object:
+          type: string
+          enum:
+            - account_portal
+        allowed:
+          type: boolean
+        enabled:
+          type: boolean
+        internal_linking:
+          type: boolean
+        after_sign_in_url:
+          type: string
+        after_sign_up_url:
+          type: string
+        after_join_waitlist_url:
+          type: string
+        after_create_organization_url:
+          type: string
+        after_leave_organization_url:
+          type: string
+        logo_link_url:
+          type: string
+        customization:
           type: object
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/Client.Client'
-        client:
-          type: object
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/Client.Client'
+          properties:
+            appearance:
+              type: string
+              enum:
+                - auto
+                - dark
+                - light
+              nullable: true
+            background_color_dark:
+              type: string
+              nullable: true
+            background_color_light:
+              type: string
+              nullable: true
+            primary_color_dark:
+              type: string
+              nullable: true
+            primary_color_light:
+              type: string
+              nullable: true
+          required:
+            - appearance
+            - background_color_dark
+            - background_color_light
+            - primary_color_dark
+            - primary_color_light
       required:
-        - response
-        - client
-    Client.DeleteSession:
+        - object
+        - allowed
+        - enabled
+        - internal_linking
+        - after_sign_in_url
+        - after_sign_up_url
+        - after_join_waitlist_url
+        - after_create_organization_url
+        - after_leave_organization_url
+        - logo_link_url
+        - customization
+    Client.AuthConfig:
       type: object
       additionalProperties: false
       properties:
-        response:
-          type: object
+        object:
+          type: string
+          enum:
+            - auth_config
+        id:
+          type: string
+        first_name:
+          type: string
+          enum:
+            - 'on'
+            - 'off'
+            - required
+        last_name:
+          type: string
+          enum:
+            - 'on'
+            - 'off'
+            - required
+        email_address:
+          type: string
+          enum:
+            - 'on'
+            - 'off'
+            - required
+        phone_number:
+          type: string
+          enum:
+            - 'on'
+            - 'off'
+            - required
+        username:
+          type: string
+          enum:
+            - 'on'
+            - 'off'
+            - required
+        password:
+          type: string
+          enum:
+            - 'on'
+            - 'off'
+            - required
+        identification_requirements:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+        identification_strategies:
+          type: array
+          items:
+            type: string
+        first_factors:
+          type: array
+          items:
+            type: string
+        second_factors:
+          type: array
+          items:
+            type: string
+        email_address_verification_strategies:
+          type: array
+          items:
+            type: string
+        single_session_mode:
+          type: boolean
+        enhanced_email_deliverability:
+          type: boolean
+        test_mode:
+          type: boolean
+        cookieless_dev:
+          type: boolean
+          description: Please use `url_based_session_syncing` instead
+          deprecated: true
+        url_based_session_syncing:
+          type: boolean
+        claimed_at:
+          type: integer
+          format: int64
           nullable: true
-          allOf:
-            - $ref: '#/components/schemas/Client.Client'
-        client:
-          type: object
-          nullable: true
+        reverification:
+          type: boolean
       required:
-        - response
-        - client
-    Client.ClientWrappedSignIn:
+        - object
+        - id
+        - first_name
+        - last_name
+        - email_address
+        - phone_number
+        - username
+        - password
+        - identification_requirements
+        - identification_strategies
+        - first_factors
+        - second_factors
+        - email_address_verification_strategies
+        - single_session_mode
+        - enhanced_email_deliverability
+        - test_mode
+        - url_based_session_syncing
+        - claimed_at
+        - reverification
+    Image:
+      type: object
+      properties:
+        object:
+          type: string
+          description: The object type. Always "image".
+        id:
+          type: string
+          description: Unique identifier for the image.
+        name:
+          type: string
+          description: The file name of the uploaded image.
+        public_url:
+          type: string
+          description: The publicly accessible URL for the image.
+    Client.DisplayConfig:
       type: object
       additionalProperties: false
       properties:
-        response:
-          $ref: '#/components/schemas/Client.SignIn'
-        client:
-          $ref: '#/components/schemas/Client.Client'
+        object:
+          type: string
+          enum:
+            - display_config
+        id:
+          type: string
+        instance_environment_type:
+          type: string
+          enum:
+            - production
+            - development
+            - staging
+        application_name:
+          type: string
+        theme:
+          type: object
+        preferred_sign_in_strategy:
+          type: string
+          enum:
+            - password
+            - otp
+        logo_image_url:
+          nullable: true
+          type: string
+        favicon_image_url:
+          nullable: true
+          type: string
+        home_url:
+          type: string
+        sign_in_url:
+          type: string
+        sign_up_url:
+          type: string
+        user_profile_url:
+          type: string
+        waitlist_url:
+          type: string
+        after_sign_in_url:
+          type: string
+        after_sign_up_url:
+          type: string
+        after_sign_out_one_url:
+          type: string
+        after_sign_out_all_url:
+          type: string
+        after_switch_session_url:
+          type: string
+        after_join_waitlist_url:
+          type: string
+        organization_profile_url:
+          type: string
+        create_organization_url:
+          type: string
+        after_leave_organization_url:
+          type: string
+        after_create_organization_url:
+          type: string
+        logo_link_url:
+          type: string
+        support_email:
+          type: string
+          nullable: true
+        branded:
+          type: boolean
+        experimental_force_oauth_first:
+          type: boolean
+        clerk_js_version:
+          type: string
+          nullable: true
+        show_devmode_warning:
+          type: boolean
+        google_one_tap_client_id:
+          type: string
+          nullable: true
+        help_url:
+          type: string
+          nullable: true
+        privacy_policy_url:
+          type: string
+          nullable: true
+        terms_url:
+          type: string
+          nullable: true
+        logo_url:
+          nullable: true
+          type: string
+          deprecated: true
+          description: Use `logo_image_url` instead
+        favicon_url:
+          nullable: true
+          type: string
+          deprecated: true
+          description: Use `favicon_image_url` instead
+        logo_image:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Image'
+          deprecated: true
+          description: Use `logo_image_url` instead
+        favicon_image:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Image'
+          deprecated: true
+          description: Use `favicon_image_url` instead
+        captcha_public_key:
+          type: string
+          nullable: true
+        captcha_widget_type:
+          type: string
+          nullable: true
+          enum:
+            - smart
+            - invisible
+        captcha_public_key_invisible:
+          type: string
+          nullable: true
+        captcha_provider:
+          type: string
+          nullable: true
+          enum:
+            - turnstile
+        captcha_oauth_bypass:
+          type: array
+          items:
+            type: string
+        captcha_heartbeat:
+          type: boolean
+          nullable: true
       required:
-        - response
-        - client
+        - object
+        - id
+        - instance_environment_type
+        - application_name
+        - theme
+        - preferred_sign_in_strategy
+        - home_url
+        - sign_in_url
+        - sign_up_url
+        - user_profile_url
+        - waitlist_url
+        - after_sign_in_url
+        - after_sign_up_url
+        - after_sign_out_one_url
+        - after_sign_out_all_url
+        - after_switch_session_url
+        - after_join_waitlist_url
+        - organization_profile_url
+        - create_organization_url
+        - after_leave_organization_url
+        - after_create_organization_url
+        - logo_link_url
+        - support_email
+        - branded
+        - experimental_force_oauth_first
+        - clerk_js_version
+        - show_devmode_warning
+        - google_one_tap_client_id
+        - help_url
+        - privacy_policy_url
+        - terms_url
+        - logo_url
+        - favicon_url
+        - logo_image
+        - favicon_image
+        - captcha_public_key
+        - captcha_widget_type
+        - captcha_public_key_invisible
+        - captcha_provider
+        - captcha_oauth_bypass
+    UserSettings.Attribute:
+      type: object
+      additionalProperties: false
+      properties:
+        enabled:
+          type: boolean
+        required:
+          type: boolean
+        used_for_first_factor:
+          type: boolean
+        first_factors:
+          type: array
+          items:
+            type: string
+        used_for_second_factor:
+          type: boolean
+        second_factors:
+          type: array
+          items:
+            type: string
+        verifications:
+          type: array
+          items:
+            type: string
+        verify_at_sign_up:
+          type: boolean
+        immutable:
+          type: boolean
+      required:
+        - enabled
+        - required
+        - used_for_first_factor
+        - first_factors
+        - used_for_second_factor
+        - second_factors
+        - verifications
+        - verify_at_sign_up
+        - immutable
+    UserSettings.Attributes:
+      type: object
+      additionalProperties: false
+      properties:
+        email_address:
+          $ref: '#/components/schemas/UserSettings.Attribute'
+        phone_number:
+          $ref: '#/components/schemas/UserSettings.Attribute'
+        username:
+          $ref: '#/components/schemas/UserSettings.Attribute'
+        web3_wallet:
+          $ref: '#/components/schemas/UserSettings.Attribute'
+        first_name:
+          $ref: '#/components/schemas/UserSettings.Attribute'
+        last_name:
+          $ref: '#/components/schemas/UserSettings.Attribute'
+        password:
+          $ref: '#/components/schemas/UserSettings.Attribute'
+        authenticator_app:
+          $ref: '#/components/schemas/UserSettings.Attribute'
+        ticket:
+          $ref: '#/components/schemas/UserSettings.Attribute'
+        backup_code:
+          $ref: '#/components/schemas/UserSettings.Attribute'
+        passkey:
+          $ref: '#/components/schemas/UserSettings.Attribute'
+      required:
+        - email_address
+        - phone_number
+        - username
+        - web3_wallet
+        - first_name
+        - last_name
+        - password
+        - authenticator_app
+        - ticket
+        - backup_code
+        - passkey
+    UserSettings.Social:
+      type: object
+      additionalProperties: false
+      properties:
+        enabled:
+          type: boolean
+        required:
+          type: boolean
+        authenticatable:
+          type: boolean
+        block_email_subaddresses:
+          type: boolean
+        strategy:
+          type: string
+        not_selectable:
+          type: boolean
+        deprecated:
+          type: boolean
+        name:
+          type: string
+          description: A human readable name for the social provider.
+          example: Google
+        logo_url:
+          type: string
+          nullable: true
+          description: A URL pointing to the logo of the social provider.
+          example: https://img.clerk.com/static/google.png
+      required:
+        - enabled
+        - required
+        - authenticatable
+        - block_email_subaddresses
+        - strategy
+        - not_selectable
+        - deprecated
+    UserSettings.Socials:
+      type: object
+      additionalProperties: false
+      properties:
+        oauth_apple:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_atlassian:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_bitbucket:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_box:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_coinbase:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_custom_mock:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_discord:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_dropbox:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_enstall:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_expressen:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_facebook:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_github:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_gitlab:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_google:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_hubspot:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_huggingface:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_instagram:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_line:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_linear:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_linkedin:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_linkedin_oidc:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_microsoft:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_mock:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_notion:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_slack:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_spotify:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_tiktok:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_twitch:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_twitter:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_x:
+          $ref: '#/components/schemas/UserSettings.Social'
+        oauth_xero:
+          $ref: '#/components/schemas/UserSettings.Social'
+    UserSettings.EnterpriseSSO:
+      type: object
+      additionalProperties: false
+      properties:
+        enabled:
+          type: boolean
+        self_serve_sso:
+          type: boolean
+          description: When true, end-users may manage enterprise connections for this environment.
+      required:
+        - enabled
+    UserSettings.SignIn:
+      type: object
+      additionalProperties: false
+      properties:
+        second_factor:
+          type: object
+          additionalProperties: false
+          properties:
+            required:
+              type: boolean
+          required:
+            - required
+      required:
+        - second_factor
+    UserSettings.SignUp:
+      type: object
+      additionalProperties: false
+      properties:
+        captcha_enabled:
+          type: boolean
+        captcha_widget_type:
+          type: string
+          enum:
+            - smart
+            - invisible
+        custom_action_required:
+          type: boolean
+        progressive:
+          type: boolean
+        mode:
+          type: string
+          enum:
+            - public
+            - restricted
+            - waitlist
+        legal_consent_enabled:
+          type: boolean
+      required:
+        - captcha_enabled
+        - captcha_widget_type
+        - custom_action_required
+        - progressive
+        - mode
+        - legal_consent_enabled
+    UserSettings.Restrictions.Enabled:
+      type: object
+      additionalProperties: false
+      properties:
+        enabled:
+          type: boolean
+      required:
+        - enabled
+    UserSettings.Restrictions:
+      type: object
+      additionalProperties: false
+      properties:
+        allowlist:
+          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
+        blocklist:
+          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
+        allowlist_blocklist_disabled_on_sign_in:
+          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
+        block_email_subaddresses:
+          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
+        block_disposable_email_domains:
+          $ref: '#/components/schemas/UserSettings.Restrictions.Enabled'
+      required:
+        - allowlist
+        - blocklist
+        - allowlist_blocklist_disabled_on_sign_in
+        - block_email_subaddresses
+        - block_disposable_email_domains
+    UserSettings.PasswordSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        disable_hibp:
+          type: boolean
+        min_length:
+          type: integer
+        max_length:
+          type: integer
+        require_special_char:
+          type: boolean
+          description: |
+            Denotes whether given passwords should contain at least one of the following special characters: #%$&_!
+        require_numbers:
+          type: boolean
+        require_uppercase:
+          type: boolean
+        require_lowercase:
+          type: boolean
+        show_zxcvbn:
+          type: boolean
+        min_zxcvbn_strength:
+          type: integer
+          minimum: 0
+          maximum: 4
+        enforce_hibp_on_sign_in:
+          type: boolean
+        allowed_special_characters:
+          type: string
+      required:
+        - disable_hibp
+        - min_length
+        - max_length
+        - require_special_char
+        - require_numbers
+        - require_uppercase
+        - require_lowercase
+        - show_zxcvbn
+        - min_zxcvbn_strength
+        - enforce_hibp_on_sign_in
+        - allowed_special_characters
+    UserSettings.UsernameSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        min_length:
+          type: integer
+          nullable: true
+        max_length:
+          type: integer
+          nullable: true
+        allow_extended_special_characters:
+          type: boolean
+        allow_numeric_usernames:
+          description: Whether usernames may contain only digits. When enabled, phone-number inputs must be provided in explicit E.164 format.
+          type: boolean
+      required:
+        - min_length
+        - max_length
+        - allow_extended_special_characters
+        - allow_numeric_usernames
+    UserSettings.ActionsSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        delete_self:
+          type: boolean
+        create_organization:
+          type: boolean
+        create_organizations_limit:
+          type: boolean
+          nullable: true
+      required:
+        - delete_self
+        - create_organization
+        - create_organizations_limit
+    UserSettings.AttackProtectionSettings.UserLockout:
+      type: object
+      additionalProperties: false
+      properties:
+        enabled:
+          type: boolean
+        max_attempts:
+          type: integer
+        duration_in_minutes:
+          type: integer
+      required:
+        - enabled
+        - max_attempts
+        - duration_in_minutes
+    UserSettings.AttackProtectionSettings.PII:
+      type: object
+      additionalProperties: false
+      properties:
+        enabled:
+          type: boolean
+      required:
+        - enabled
+    UserSettings.AttackProtectionSettings.EmailLink:
+      type: object
+      additionalProperties: false
+      properties:
+        require_same_client:
+          type: boolean
+      required:
+        - require_same_client
+    UserSettings.AttackProtectionSettings.EnumerationProtection:
+      type: object
+      additionalProperties: false
+      properties:
+        enabled:
+          type: boolean
+      required:
+        - enabled
+    UserSettings.AttackProtectionSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        user_lockout:
+          $ref: '#/components/schemas/UserSettings.AttackProtectionSettings.UserLockout'
+        pii:
+          $ref: '#/components/schemas/UserSettings.AttackProtectionSettings.PII'
+        email_link:
+          $ref: '#/components/schemas/UserSettings.AttackProtectionSettings.EmailLink'
+        enumeration_protection:
+          $ref: '#/components/schemas/UserSettings.AttackProtectionSettings.EnumerationProtection'
+      required:
+        - user_lockout
+        - pii
+        - email_link
+        - enumeration_protection
+    UserSettings.PasskeySettings:
+      type: object
+      additionalProperties: false
+      properties:
+        allow_autofill:
+          type: boolean
+          description: Passkey UI will be shown when user interacts with the text input.
+          default: true
+        show_sign_in_button:
+          type: boolean
+          description: Passkey UI will be shown when user clicks on a button.
+          default: true
+      required:
+        - allow_autofill
+        - show_sign_in_button
+    Client.UserSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        attributes:
+          $ref: '#/components/schemas/UserSettings.Attributes'
+        social:
+          $ref: '#/components/schemas/UserSettings.Socials'
+        saml:
+          $ref: '#/components/schemas/UserSettings.EnterpriseSSO'
+        enterprise_sso:
+          $ref: '#/components/schemas/UserSettings.EnterpriseSSO'
+        sign_in:
+          $ref: '#/components/schemas/UserSettings.SignIn'
+        sign_up:
+          $ref: '#/components/schemas/UserSettings.SignUp'
+        restrictions:
+          $ref: '#/components/schemas/UserSettings.Restrictions'
+        password_settings:
+          $ref: '#/components/schemas/UserSettings.PasswordSettings'
+        username_settings:
+          $ref: '#/components/schemas/UserSettings.UsernameSettings'
+        actions:
+          $ref: '#/components/schemas/UserSettings.ActionsSettings'
+        attack_protection:
+          $ref: '#/components/schemas/UserSettings.AttackProtectionSettings'
+        passkey_settings:
+          $ref: '#/components/schemas/UserSettings.PasskeySettings'
+      required:
+        - attributes
+        - social
+        - saml
+        - enterprise_sso
+        - sign_in
+        - sign_up
+        - restrictions
+        - password_settings
+        - username_settings
+        - actions
+        - attack_protection
+        - passkey_settings
+    OrganizationSettings.ActionsSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        admin_delete:
+          type: boolean
+      required:
+        - admin_delete
+    OrganizationSettings.DomainsSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        enabled:
+          type: boolean
+        enrollment_modes:
+          type: array
+          items:
+            type: string
+            enum:
+              - manual_invitation
+              - automatic_invitation
+              - automatic_suggestion
+        default_role:
+          type: string
+          description: The role key that it will be used in order to create an organization invitation or suggestion.
+      required:
+        - enabled
+        - enrollment_modes
+        - default_role
+    OrganizationSettings.SlugSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        disabled:
+          type: boolean
+      required:
+        - disabled
+    Client.OrganizationSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        enabled:
+          type: boolean
+        max_allowed_memberships:
+          type: integer
+        actions:
+          $ref: '#/components/schemas/OrganizationSettings.ActionsSettings'
+        domains:
+          $ref: '#/components/schemas/OrganizationSettings.DomainsSettings'
+        slug:
+          $ref: '#/components/schemas/OrganizationSettings.SlugSettings'
+        creator_role:
+          type: string
+          description: The role key that a user will be assigned after creating an organization.
+      required:
+        - enabled
+        - max_allowed_memberships
+        - actions
+        - domains
+        - creator_role
+    FraudSettings.NativeSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        device_attestation_mode:
+          type: string
+          enum:
+            - disabled
+            - onboarding
+            - enforced
+      required:
+        - device_attestation_mode
+    Client.FraudSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - fraud_settings
+        native:
+          $ref: '#/components/schemas/FraudSettings.NativeSettings'
+      required:
+        - native
+    Client.CommerceSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        billing:
+          type: object
+          additionalProperties: false
+          properties:
+            stripe_publishable_key:
+              type: string
+              nullable: true
+            free_trial_requires_payment_method:
+              type: boolean
+            user:
+              type: object
+              additionalProperties: false
+              properties:
+                enabled:
+                  type: boolean
+                has_paid_plans:
+                  type: boolean
+            organization:
+              type: object
+              additionalProperties: false
+              properties:
+                enabled:
+                  type: boolean
+                has_paid_plans:
+                  type: boolean
+      required:
+        - billing
+    Client.ApiKeysSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        enabled:
+          type: boolean
+          description: Indicates whether the API Keys feature is enabled.
+        user_api_keys_enabled:
+          type: boolean
+          description: Indicates whether User API Keys are enabled.
+        orgs_api_keys_enabled:
+          type: boolean
+          description: Indicates whether Organization API Keys are enabled.
+      required:
+        - enabled
+        - user_api_keys_enabled
+        - orgs_api_keys_enabled
+    Client.ProtectConfig.Loader:
+      type: object
+      additionalProperties: false
+      description: Configuration for the Clerk Protect loader.
+      properties:
+        rollout:
+          type: number
+          format: float
+          description: rollout percentage (between 0.0 and 1.0)
+          minimum: 0
+          maximum: 1
+        type:
+          type: string
+        target:
+          type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+        textContent:
+          type: string
+    Client.ProtectConfig:
+      type: object
+      additionalProperties: false
+      properties:
+        loaders:
+          type: array
+          items:
+            $ref: '#/components/schemas/Client.ProtectConfig.Loader'
+    Client.Environment:
+      type: object
+      additionalProperties: false
+      properties:
+        auth_config:
+          $ref: '#/components/schemas/Client.AuthConfig'
+        display_config:
+          $ref: '#/components/schemas/Client.DisplayConfig'
+        user_settings:
+          $ref: '#/components/schemas/Client.UserSettings'
+        organization_settings:
+          $ref: '#/components/schemas/Client.OrganizationSettings'
+        fraud_settings:
+          $ref: '#/components/schemas/Client.FraudSettings'
+        commerce_settings:
+          $ref: '#/components/schemas/Client.CommerceSettings'
+        api_keys_settings:
+          $ref: '#/components/schemas/Client.ApiKeysSettings'
+        protect_config:
+          $ref: '#/components/schemas/Client.ProtectConfig'
+        client_debug_mode:
+          type: boolean
+        partitioned_cookies:
+          type: boolean
+        maintenance_mode:
+          type: boolean
+    Client.SessionTask:
+      type: object
+      properties:
+        key:
+          type: string
+      required:
+        - key
+    schemas-Client.SessionBase:
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - session
+        status:
+          type: string
+          enum:
+            - active
+            - revoked
+            - ended
+            - expired
+            - removed
+            - abandoned
+            - pending
+        expire_at:
+          type: integer
+          format: int64
+        abandon_at:
+          type: integer
+          format: int64
+        last_active_at:
+          type: integer
+          format: int64
+        last_active_token:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Token'
+        actor:
+          type: object
+          nullable: true
+          additionalProperties: true
+        tasks:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/Client.SessionTask'
+      required:
+        - id
+        - object
+        - status
+        - expire_at
+        - abandon_at
+        - last_active_at
+    schemas-Client.Session:
+      allOf:
+        - $ref: '#/components/schemas/schemas-Client.SessionBase'
+        - type: object
+          properties:
+            last_active_organization_id:
+              type: string
+              nullable: true
+            user:
+              $ref: '#/components/schemas/Client.User'
+            public_user_data:
+              type: object
+              nullable: true
+              allOf:
+                - $ref: '#/components/schemas/Client.PublicUserData'
+            factor_verification_age:
+              type: array
+              description: Each item represents the minutes that have passed since the last time a first or second factor were verified.
+              items:
+                type: integer
+            created_at:
+              type: integer
+              format: int64
+              description: Unix timestamp of creation.
+              example: 1700690400000
+            updated_at:
+              type: integer
+              format: int64
+              description: Unix timestamp of last update.
+              example: 1700690400000
+          required:
+            - last_active_organization_id
+            - public_user_data
+            - factor_verification_age
+            - created_at
+            - updated_at
     schemas-Client.SignIn:
       type: object
       additionalProperties: false
@@ -9789,6 +10882,7 @@ components:
           nullable: true
           oneOf:
             - $ref: '#/components/schemas/Stubs.Verification.OTP'
+            - $ref: '#/components/schemas/Stubs.Verification.Link'
             - $ref: '#/components/schemas/Stubs.Verification.TOTP'
             - $ref: '#/components/schemas/Stubs.Verification.Ticket'
             - $ref: '#/components/schemas/Stubs.Verification.BackupCode'
@@ -9849,87 +10943,6 @@ components:
         - user_data
         - created_session_id
         - abandon_at
-    schemas-Client.SessionBase:
-      type: object
-      properties:
-        id:
-          type: string
-        object:
-          type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - session
-        status:
-          type: string
-          enum:
-            - active
-            - revoked
-            - ended
-            - expired
-            - removed
-            - abandoned
-        expire_at:
-          type: integer
-          format: int64
-        abandon_at:
-          type: integer
-          format: int64
-        last_active_at:
-          type: integer
-          format: int64
-        last_active_token:
-          type: object
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/Token'
-        actor:
-          type: object
-          nullable: true
-          additionalProperties: true
-      required:
-        - id
-        - object
-        - status
-        - expire_at
-        - abandon_at
-        - last_active_at
-    schemas-Client.Session:
-      allOf:
-        - $ref: '#/components/schemas/schemas-Client.SessionBase'
-        - type: object
-          properties:
-            last_active_organization_id:
-              type: string
-              nullable: true
-            user:
-              $ref: '#/components/schemas/Client.User'
-            public_user_data:
-              type: object
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/Client.PublicUserData'
-            factor_verification_age:
-              type: array
-              description: Each item represents the minutes that have passed since the last time a first or second factor were verified.
-              items:
-                type: integer
-            created_at:
-              type: integer
-              format: int64
-              description: Unix timestamp of creation.
-              example: 1700690400000
-            updated_at:
-              type: integer
-              format: int64
-              description: Unix timestamp of last update.
-              example: 1700690400000
-          required:
-            - last_active_organization_id
-            - public_user_data
-            - factor_verification_age
-            - created_at
-            - updated_at
     schemas-Client.Client:
       type: object
       nullable: true
@@ -9993,7 +11006,39 @@ components:
         - captcha_bypass
         - created_at
         - updated_at
-    schemas-Client.ClientWrappedSignIn:
+    Client.ClientWrappedClient:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/schemas-Client.Client'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/schemas-Client.Client'
+      required:
+        - response
+        - client
+    Client.DeleteSession:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/schemas-Client.Client'
+        client:
+          type: object
+          nullable: true
+      required:
+        - response
+        - client
+    Client.ClientWrappedSignIn:
       type: object
       additionalProperties: false
       properties:
@@ -10004,6 +11049,17 @@ components:
       required:
         - response
         - client
+    schemas-Client.ClientWrappedSignIn:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          $ref: '#/components/schemas/Client.SignIn'
+        client:
+          $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
     Client.ClientWrappedSignUp:
       type: object
       additionalProperties: false
@@ -10011,7 +11067,7 @@ components:
         response:
           $ref: '#/components/schemas/Client.SignUp'
         client:
-          $ref: '#/components/schemas/Client.Client'
+          $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10020,9 +11076,9 @@ components:
       additionalProperties: false
       properties:
         response:
-          $ref: '#/components/schemas/Client.Session'
+          $ref: '#/components/schemas/schemas-Client.Session'
         client:
-          $ref: '#/components/schemas/Client.Client'
+          $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10031,10 +11087,10 @@ components:
       additionalProperties: false
       properties:
         response:
-          $ref: '#/components/schemas/Client.Session'
+          $ref: '#/components/schemas/schemas-Client.Session'
         client:
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
           nullable: true
       required:
         - response
@@ -10066,7 +11122,7 @@ components:
         - is_mobile
     Client.ActiveSession:
       allOf:
-        - $ref: '#/components/schemas/Client.SessionBase'
+        - $ref: '#/components/schemas/schemas-Client.SessionBase'
         - type: object
           properties:
             latest_activity:
@@ -10120,7 +11176,7 @@ components:
         session:
           type: object
           oneOf:
-            - $ref: '#/components/schemas/Client.SessionBase'
+            - $ref: '#/components/schemas/schemas-Client.SessionBase'
       required:
         - object
         - level
@@ -10136,14 +11192,14 @@ components:
         response:
           $ref: '#/components/schemas/Client.SessionReverification'
         client:
-          $ref: '#/components/schemas/Client.Client'
+          $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
     Server.Sessions:
       type: array
       items:
-        $ref: '#/components/schemas/Client.Session'
+        $ref: '#/components/schemas/schemas-Client.Session'
     Server.UserEmailAddresses:
       type: array
       items:
@@ -10161,7 +11217,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10190,7 +11246,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10211,7 +11267,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10232,7 +11288,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10249,7 +11305,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10266,7 +11322,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10283,7 +11339,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10337,7 +11393,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10380,7 +11436,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10390,7 +11446,7 @@ components:
         response:
           $ref: '#/components/schemas/Image'
         client:
-          $ref: '#/components/schemas/schemas-Client.Client'
+          $ref: '#/components/schemas/Client.Client'
       required:
         - response
         - client
@@ -10406,6 +11462,1401 @@ components:
         client:
           type: object
           nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
+    BillingMoneyResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          type: integer
+          format: int64
+          description: Amount in cents
+        amount_formatted:
+          type: string
+          description: Formatted amount as a string (e.g., "$10.00")
+        currency:
+          type: string
+          description: Currency code (e.g., "USD")
+        currency_symbol:
+          type: string
+          description: Currency symbol (e.g., "$")
+      required:
+        - amount
+        - amount_formatted
+        - currency
+        - currency_symbol
+    BillingSubscriptionCreditResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Credit amount with formatting
+        cycle_days_remaining:
+          type: integer
+          format: int64
+          description: Number of days remaining in the billing cycle
+        cycle_days_total:
+          type: integer
+          format: int64
+          description: Total number of days in the billing cycle
+        cycle_remaining_percent:
+          type: number
+          format: double
+          description: Percentage of the billing cycle remaining
+      required:
+        - amount
+        - cycle_days_remaining
+        - cycle_days_total
+        - cycle_remaining_percent
+    BillingProrationCreditDetail:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Credit amount with formatting
+        cycle_days_remaining:
+          type: integer
+          format: int64
+          description: Number of days remaining in the billing cycle
+        cycle_days_total:
+          type: integer
+          format: int64
+          description: Total number of days in the billing cycle
+        cycle_remaining_percent:
+          type: number
+          format: double
+          description: Percentage of the billing cycle remaining
+      required:
+        - amount
+        - cycle_days_remaining
+        - cycle_days_total
+        - cycle_remaining_percent
+    BillingPayerCreditResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        remaining_balance:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The payer's remaining credit balance after credit is applied for this checkout (in cents)
+        applied_amount:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The amount of payer credit applied to this checkout (in cents)
+      required:
+        - remaining_balance
+        - applied_amount
+    BillingCreditsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        proration:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingProrationCreditDetail'
+          description: Proration credit details from unused subscription time
+        payer:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingPayerCreditResponse'
+          description: Payer credit details from the payer's credit balance
+        total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Total credits applied
+      required:
+        - proration
+        - payer
+        - total
+    BillingFee:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          type: integer
+          format: int64
+          description: Amount in the smallest currency unit (e.g., cents)
+          minimum: 0
+        amount_formatted:
+          type: string
+          description: The formatted amount as a string (e.g., "$49.99")
+        currency:
+          type: string
+          description: The currency code (e.g., "USD")
+        currency_symbol:
+          type: string
+          description: The currency symbol (e.g., "$")
+      required:
+        - amount
+        - amount_formatted
+        - currency
+        - currency_symbol
+    BillingPlanUnitPriceTier:
+      type: object
+      additionalProperties: false
+      properties:
+        starts_at_block:
+          type: integer
+          format: int64
+          description: Start block (inclusive) for this tier
+        ends_after_block:
+          type: integer
+          format: int64
+          nullable: true
+          description: End block (inclusive) for this tier; null means unlimited
+        fee_per_block:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Price charged per block in this tier
+      required:
+        - starts_at_block
+        - fee_per_block
+    BillingPlanUnitPrice:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: Name of the billable unit (for example, seats)
+        block_size:
+          type: integer
+          format: int64
+          description: Number of units included in each pricing block
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPlanUnitPriceTier'
+          description: Tiered pricing configuration for this unit
+      required:
+        - name
+        - block_size
+        - tiers
+    BillingPlan:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_plan
+        id:
+          type: string
+          description: Unique identifier for the plan
+        name:
+          type: string
+          description: The name of the plan
+        fee:
+          allOf:
+            - $ref: '#/components/schemas/BillingFee'
+          nullable: true
+          description: The monthly fee for this plan
+        annual_monthly_fee:
+          allOf:
+            - $ref: '#/components/schemas/BillingFee'
+          nullable: true
+          description: The monthly equivalent when billed annually
+        annual_fee:
+          allOf:
+            - $ref: '#/components/schemas/BillingFee'
+          nullable: true
+          description: The annual fee for this plan
+        description:
+          type: string
+          description: The description of the plan
+          nullable: true
+        product_id:
+          type: string
+          description: The ID of the product this plan belongs to
+          deprecated: true
+        is_default:
+          type: boolean
+          description: Whether this is the default plan
+        is_recurring:
+          type: boolean
+          description: Whether this is a recurring plan
+        publicly_visible:
+          type: boolean
+          description: Whether this plan is publicly visible
+        has_base_fee:
+          type: boolean
+          description: Whether this plan has a base fee
+        for_payer_type:
+          type: string
+          description: The payer type this plan is designed for
+        slug:
+          type: string
+          description: The URL-friendly slug for the plan
+        avatar_url:
+          type: string
+          description: The URL of the plan's avatar image
+          nullable: true
+        free_trial_enabled:
+          type: boolean
+          description: Whether free trial is enabled for this plan
+        free_trial_days:
+          type: integer
+          nullable: true
+          description: Number of free trial days for this plan
+        unit_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPlanUnitPrice'
+          description: Per-unit pricing tiers for this plan (for example, seats)
+        features:
+          type: array
+          description: The features included in this plan
+          items:
+            type: object
+            properties:
+              object:
+                type: string
+                enum:
+                  - feature
+                description: String representing the object's type
+              id:
+                type: string
+                description: Unique identifier for the feature
+              name:
+                type: string
+                description: Name of the feature
+              description:
+                type: string
+                nullable: true
+                description: Description of the feature
+              slug:
+                type: string
+                description: URL-friendly representation of the feature's name
+              avatar_url:
+                type: string
+                nullable: true
+                description: URL for an image to represent the feature
+            required:
+              - object
+              - id
+              - name
+              - description
+              - slug
+              - avatar_url
+      required:
+        - object
+        - id
+        - name
+        - fee
+        - annual_monthly_fee
+        - annual_fee
+        - description
+        - product_id
+        - is_default
+        - is_recurring
+        - publicly_visible
+        - has_base_fee
+        - for_payer_type
+        - slug
+        - avatar_url
+        - free_trial_enabled
+        - free_trial_days
+    BillingPaymentMethod:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_payment_method
+        id:
+          type: string
+          description: Unique identifier for the payment method
+        payer_id:
+          type: string
+          description: Unique identifier for the payer
+        payment_type:
+          type: string
+          description: The payment method type
+          enum:
+            - card
+            - link
+        is_default:
+          type: boolean
+          description: Whether this is the default payment method for the payer
+        gateway:
+          type: string
+          description: The payment gateway
+        gateway_external_id:
+          type: string
+          description: External ID in the payment gateway
+        gateway_external_account_id:
+          type: string
+          nullable: true
+          description: External account ID in the payment gateway
+        last4:
+          type: string
+          description: Last 4 digits of the card (for card payment methods)
+          nullable: true
+        status:
+          type: string
+          description: Status of the payment method
+          enum:
+            - active
+            - disconnected
+        wallet_type:
+          type: string
+          description: Type of wallet (if applicable)
+          nullable: true
+        card_type:
+          type: string
+          description: Type of card (if applicable)
+          nullable: true
+        expiry_year:
+          type: integer
+          description: Card expiration year (for card payment methods)
+          nullable: true
+        expiry_month:
+          type: integer
+          description: Card expiration month (for card payment methods)
+          nullable: true
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the payment method was created
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the payment method was last updated
+        is_removable:
+          type: boolean
+          description: Whether this payment method can be removed
+      required:
+        - object
+        - id
+        - payer_id
+        - payment_type
+        - gateway
+        - gateway_external_id
+        - gateway_external_account_id
+        - last4
+        - status
+        - card_type
+    BillingPerUnitTotalTier:
+      type: object
+      additionalProperties: false
+      properties:
+        quantity:
+          type: integer
+          format: int64
+          nullable: true
+          description: Units billed in this tier; null means unlimited
+        fee_per_block:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Price charged per block in this tier
+        total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Total charge for this tier
+      required:
+        - fee_per_block
+        - total
+    BillingPerUnitTotal:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: Name of the billable unit (for example, seats)
+        block_size:
+          type: integer
+          format: int64
+          description: Number of units included in each pricing block
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPerUnitTotalTier'
+          description: Computed totals for each pricing tier
+      required:
+        - name
+        - block_size
+        - tiers
+    BillingSubscriptionItemNextPayment:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          $ref: '#/components/schemas/BillingFee'
+          description: Amount for the next payment
+        date:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) for the next payment date
+        per_unit_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPerUnitTotal'
+          description: Per-unit total breakdown for the next payment
+    BillingPayer:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_payer
+        id:
+          type: string
+          description: Unique identifier for the payer
+        instance_id:
+          type: string
+          description: Unique identifier for the Clerk instance
+        user_id:
+          type: string
+          description: User ID for user-type payers
+          nullable: true
+        first_name:
+          type: string
+          description: First name of the payer (only set when user_id isn't null)
+          nullable: true
+        last_name:
+          type: string
+          description: Last name of the payer (only set when user_id isn't null)
+          nullable: true
+        email:
+          type: string
+          format: email
+          description: Email address of the payer (only set when user_id isn't null)
+          nullable: true
+        organization_id:
+          type: string
+          description: Organization ID for org-type payers
+          nullable: true
+        organization_name:
+          type: string
+          description: Organization name for org-type payers (only set when organization_id isn't null)
+          nullable: true
+        image_url:
+          type: string
+          format: uri
+          description: URL of the payer's image/avatar
+        credits_balance:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Current credits balance for the payer
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the payer was created
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the payer was last updated
+      required:
+        - object
+        - id
+        - instance_id
+        - user_id
+        - organization_id
+    BillingSubscriptionItemSeats:
+      type: object
+      additionalProperties: false
+      properties:
+        quantity:
+          type: integer
+          format: int64
+          nullable: true
+          description: Seat quantity being billed; null means unlimited
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPerUnitTotalTier'
+          description: Per-unit cost breakdown by pricing tier
+      required:
+        - quantity
+    BillingTotalsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        subtotal:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Subtotal before adjustments
+        base_fee:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Base fee component before per-unit charges and adjustments
+        tax_total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Total tax amount
+        grand_total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Grand total amount
+        total_due_after_free_trial:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: Total amount due after free trial ends
+        credit:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: Credit amount
+        past_due:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: Past due amount
+        total_due_now:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: Total amount due now
+        per_unit_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPerUnitTotal'
+          description: Per-unit total breakdown (for example, seats)
+        credits:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditsResponse'
+          nullable: true
+          description: Unified credits breakdown
+        proration:
+          type: object
+          nullable: true
+          additionalProperties: false
+          properties:
+            credit:
+              $ref: '#/components/schemas/BillingMoneyResponse'
+              description: Proration credit amount
+      required:
+        - subtotal
+        - base_fee
+        - tax_total
+        - grand_total
+    BillingSubscriptionItem:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_subscription_item
+        id:
+          type: string
+          description: Unique identifier for the subscription item
+        instance_id:
+          type: string
+          description: Unique identifier for the Clerk instance
+        status:
+          type: string
+          description: Current status of the subscription item
+          enum:
+            - active
+            - canceled
+            - ended
+            - past_due
+            - upcoming
+            - incomplete
+            - abandoned
+        credit:
+          $ref: '#/components/schemas/BillingSubscriptionCreditResponse'
+          description: Credit information for this subscription (available in payment attempt events)
+        credits:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditsResponse'
+          nullable: true
+          description: Unified credits breakdown for this subscription item
+        plan_id:
+          type: string
+          description: Unique identifier for the associated plan
+        price_id:
+          type: string
+          description: Unique identifier for the associated price
+        plan:
+          $ref: '#/components/schemas/BillingPlan'
+          description: The associated plan
+        plan_period:
+          type: string
+          description: The billing period for this subscription
+          enum:
+            - month
+            - annual
+        payment_method_id:
+          type: string
+          description: Unique identifier for the payment method
+        payment_method:
+          $ref: '#/components/schemas/BillingPaymentMethod'
+          description: The payment method associated with this subscription
+        lifetime_paid:
+          $ref: '#/components/schemas/BillingFee'
+          description: Total amount paid over the lifetime of this subscription
+        amount:
+          $ref: '#/components/schemas/BillingFee'
+          description: Current amount due every period for this subscription
+        next_payment:
+          $ref: '#/components/schemas/BillingSubscriptionItemNextPayment'
+          nullable: true
+          description: Information about the next payment
+        payer_id:
+          type: string
+          description: Unique identifier for the payer
+        payer:
+          $ref: '#/components/schemas/BillingPayer'
+          description: The payer associated with this subscription
+        is_free_trial:
+          type: boolean
+          description: Whether this subscription is currently on a free trial
+        period_start:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the current period started
+        period_end:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) when the current period ends
+        proration_date:
+          type: string
+          description: Date used for proration calculations
+        canceled_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) when the subscription was canceled
+        past_due_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) when the subscription became past due
+        ended_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) when the subscription ended
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the subscription was created
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the subscription was last updated
+        seats:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionItemSeats'
+          nullable: true
+          description: Seat quantity for seat-based billing
+        totals:
+          allOf:
+            - $ref: '#/components/schemas/BillingTotalsResponse'
+          nullable: true
+          description: Totals for this subscription item
+      required:
+        - object
+        - id
+        - instance_id
+        - status
+        - plan_id
+        - plan_period
+        - payer_id
+        - is_free_trial
+        - period_start
+        - period_end
+        - canceled_at
+        - past_due_at
+        - ended_at
+    BillingSubscriptionNextPayment:
+      type: object
+      additionalProperties: false
+      properties:
+        date:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) of the next payment date
+        amount:
+          $ref: '#/components/schemas/BillingFee'
+          description: The amount of the next payment
+      required:
+        - date
+        - amount
+    BillingSubscription:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_subscription
+        id:
+          type: string
+          description: Unique identifier for the commerce subscription
+        instance_id:
+          type: string
+          description: The ID of the instance this subscription belongs to
+        status:
+          type: string
+          description: The current status of the subscription
+          enum:
+            - active
+            - past_due
+            - canceled
+            - ended
+            - abandoned
+            - incomplete
+        payer_id:
+          type: string
+          description: The ID of the payer for this subscription
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) of creation
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) of last update
+        active_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (milliseconds) when the subscription became active
+        past_due_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (milliseconds) when the subscription became past due
+        subscription_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingSubscriptionItem'
+          description: Array of subscription items in this subscription
+        next_payment:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionNextPayment'
+          nullable: true
+          description: Information about the next scheduled payment
+        eligible_for_free_trial:
+          type: boolean
+          description: Whether the payer is eligible for a free trial
+      required:
+        - object
+        - id
+        - instance_id
+        - status
+        - payer_id
+        - created_at
+        - updated_at
+        - active_at
+        - past_due_at
+        - subscription_items
+    Client.BillingSubscription:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          $ref: '#/components/schemas/BillingSubscription'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/schemas-Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingSubscriptionItemList:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          additionalProperties: false
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/BillingSubscriptionItem'
+            total_count:
+              type: integer
+              format: int64
+              description: Total number of subscription items
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/schemas-Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingSubscriptionItem:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          $ref: '#/components/schemas/BillingSubscriptionItem'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/schemas-Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingPaymentMethodList:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          additionalProperties: false
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/BillingPaymentMethod'
+            total_count:
+              type: integer
+              format: int64
+              description: Total number of payment methods
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/schemas-Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingPaymentMethod:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/BillingPaymentMethod'
+          nullable: true
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/schemas-Client.Client'
+      required:
+        - response
+        - client
+    BillingPaymentMethodInitialize:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_payment_method_initialize
+        external_client_secret:
+          type: string
+          description: Client secret from the payment gateway for setting up payment method
+        external_gateway_id:
+          type: string
+          description: External gateway identifier
+        payment_method_order:
+          type: array
+          items:
+            type: string
+          description: Ordered list of supported payment methods
+      required:
+        - object
+        - payment_method_order
+    Client.BillingPaymentMethodInitialize:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          $ref: '#/components/schemas/BillingPaymentMethodInitialize'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/schemas-Client.Client'
+      required:
+        - response
+        - client
+    BillingCheckoutTotals:
+      type: object
+      additionalProperties: false
+      properties:
+        subtotal:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The total, pre-tax, that will be due
+        base_fee:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Base fee component before per-unit charges and adjustments
+        tax_total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The total amount of tax that will be due
+        grand_total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The total, including tax, that will be due
+        total_due_after_free_trial:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The total, including tax, that will be charged after the free trial ends
+        total_due_now:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The total, including tax, that will be charged upon checkout
+        total_due_per_period:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The expected total payment for each future billing period.
+        past_due:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The amount that is past due for the subscription
+        credit:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The amount of credit that will be consumed before the payment method is charged
+        credits:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditsResponse'
+          description: Unified credits breakdown
+        per_unit_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPerUnitTotal'
+          description: Per-unit total breakdown (for example, seats)
+      required:
+        - subtotal
+        - base_fee
+        - tax_total
+        - grand_total
+        - total_due_after_free_trial
+        - credit
+        - credits
+        - total_due_now
+        - total_due_per_period
+    BillingCheckout:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_checkout
+        id:
+          type: string
+          description: Unique identifier for the checkout
+        plan:
+          $ref: '#/components/schemas/BillingPlan'
+          description: The plan that is being purchased.
+        plan_period:
+          type: string
+          description: How frequently the plan being purchased will be renewed
+          enum:
+            - month
+            - annual
+        payer:
+          $ref: '#/components/schemas/BillingPayer'
+          description: The payer that will be charged
+        payment_method:
+          $ref: '#/components/schemas/BillingPaymentMethod'
+          description: The payment method that will be charged
+        external_gateway_id:
+          type: string
+          description: The external ID of the object in the payment processor that will receive the funds
+        status:
+          type: string
+          description: Current status of the subscription item
+          enum:
+            - completed
+            - needs_confirmation
+        totals:
+          $ref: '#/components/schemas/BillingCheckoutTotals'
+          description: The various subtotals and totals owed
+        subscription_item:
+          type: object
+          $ref: '#/components/schemas/BillingSubscriptionItem'
+          description: The subscription item created as a result of the checkout
+        plan_period_start:
+          type: integer
+          format: int64
+          description: When the first billing period of the plan will start, as milliseconds since the Unix epoch
+        is_immediate_plan_change:
+          type: boolean
+          description: Whether the checkout will take effect upon completion or at the start of the next billing period
+        free_trial_ends_at:
+          type: integer
+          format: int64
+          description: When the free trial will end, as milliseconds since the Unix epoch
+        needs_payment_method:
+          type: boolean
+          description: Whether this checkout requires an active payment method or not
+      required:
+        - object
+        - id
+        - plan
+        - plan_period
+        - payer
+        - external_gateway_id
+        - status
+        - totals
+        - is_immediate_plan_change
+        - needs_payment_method
+    Client.BillingCheckout:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          $ref: '#/components/schemas/BillingCheckout'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/schemas-Client.Client'
+      required:
+        - response
+        - client
+    BillingPayee:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_payee
+        id:
+          type: string
+          description: Unique identifier for the payee
+        gateway_type:
+          type: string
+          description: Type of payment gateway
+        gateway_external_id:
+          type: string
+          description: External ID in the payment gateway
+        gateway_status:
+          type: string
+          description: Status of the gateway connection
+      required:
+        - object
+        - id
+        - gateway_type
+        - gateway_external_id
+        - gateway_status
+    BillingPaymentAttempt:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_payment
+        id:
+          type: string
+          description: Unique identifier for the payment attempt
+        payment_id:
+          type: string
+          description: Unique identifier for the payment
+        instance_id:
+          type: string
+          description: Unique identifier for the instance
+        charge_type:
+          type: string
+          description: Type of charge
+        payee_id:
+          type: string
+          description: Unique identifier for the payee
+        payee:
+          $ref: '#/components/schemas/BillingPayee'
+          description: The payee associated with this payment
+        payer_id:
+          type: string
+          description: Unique identifier for the payer
+        payer:
+          $ref: '#/components/schemas/BillingPayer'
+          description: The payer associated with this payment
+        subscription_item_id:
+          type: string
+          description: Unique identifier for the subscription item (only present for recurring payments)
+        subscription_item:
+          $ref: '#/components/schemas/BillingSubscriptionItem'
+          description: The subscription item associated with this payment
+        amount:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Payment amount with formatting
+        totals:
+          allOf:
+            - $ref: '#/components/schemas/BillingTotalsResponse'
+          nullable: true
+          description: Totals breakdown for this payment attempt
+        payment_method_id:
+          type: string
+          description: Unique identifier for the payment method used
+        payment_method:
+          $ref: '#/components/schemas/BillingPaymentMethod'
+          nullable: true
+          description: The payment method used for this payment
+        statement_id:
+          type: string
+          description: Unique identifier for the statement
+        gateway_external_id:
+          type: string
+          nullable: true
+          description: External ID from the payment gateway
+        gateway_external_url:
+          type: string
+          nullable: true
+          description: URL to view this payment in the gateway dashboard
+        status:
+          type: string
+          description: Status of the payment attempt
+        paid_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) when the payment was completed
+        failed_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (in milliseconds) when the payment failed
+        failed_reason:
+          type: object
+          description: Reason for payment failure
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the payment attempt was created
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the payment attempt was last updated
+      required:
+        - object
+        - id
+        - payment_id
+        - instance_id
+        - charge_type
+        - payee_id
+        - payee
+        - payer_id
+        - payer
+        - subscription_item_id
+        - subscription_item
+        - amount
+        - payment_method_id
+        - payment_method
+        - statement_id
+        - gateway_external_id
+        - gateway_external_url
+        - status
+        - paid_at
+        - failed_at
+        - created_at
+        - updated_at
+    Client.BillingPaymentAttemptList:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          additionalProperties: false
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/BillingPaymentAttempt'
+            total_count:
+              type: integer
+              format: int64
+              description: Total number of payment attempts
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/schemas-Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingPaymentAttempt:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          $ref: '#/components/schemas/BillingPaymentAttempt'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/schemas-Client.Client'
+      required:
+        - response
+        - client
+    BillingStatementTotalsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        subtotal:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Subtotal amount (base fee + unit price totals)
+        base_fee:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Base plan fee before unit pricing
+        tax_total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Total tax amount
+        grand_total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Grand total amount
+      required:
+        - subtotal
+        - base_fee
+        - tax_total
+        - grand_total
+    BillingStatementResponseGroup:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+        timestamp:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) for the group
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPaymentAttempt'
+          description: Payment items in this group
+      required:
+        - object
+        - timestamp
+        - items
+    BillingStatement:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type
+          enum:
+            - commerce_statement
+        instance_id:
+          type: string
+          description: Unique identifier for the instance
+        id:
+          type: string
+          description: Unique identifier for the statement
+        timestamp:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) for the statement
+        payer:
+          $ref: '#/components/schemas/BillingPayer'
+          description: The payer associated with this statement
+        status:
+          type: string
+          description: Status of the statement
+        totals:
+          $ref: '#/components/schemas/BillingStatementTotalsResponse'
+          description: Totals breakdown for the statement
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingStatementResponseGroup'
+          description: Groups of payment items in the statement
+      required:
+        - object
+        - instance_id
+        - id
+        - timestamp
+        - payer
+        - status
+        - totals
+        - groups
+    Client.BillingStatementList:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          additionalProperties: false
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/BillingStatement'
+            total_count:
+              type: integer
+              format: int64
+              description: Total number of statements
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/schemas-Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingStatement:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          $ref: '#/components/schemas/BillingStatement'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/schemas-Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingGenericObject:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          nullable: true
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/schemas-Client.Client'
+      required:
+        - response
+        - client
+    Client.BillingGenericArray:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          properties:
+            data:
+              type: array
+              items:
+                type: object
+            total_count:
+              type: integer
+              format: int64
+          required:
+            - data
+            - total_count
+        client:
+          type: object
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/schemas-Client.Client'
       required:
@@ -10434,7 +12885,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10545,7 +12996,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10560,7 +13011,7 @@ components:
           nullable: false
         client:
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
           type: object
           nullable: false
       required:
@@ -10614,7 +13065,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10631,7 +13082,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10648,7 +13099,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10665,7 +13116,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client'
       required:
         - response
         - client
@@ -10691,7 +13142,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10708,7 +13159,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10725,7 +13176,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10820,7 +13271,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10837,7 +13288,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10894,7 +13345,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -10911,7 +13362,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -11014,7 +13465,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/Client.Client'
+            - $ref: '#/components/schemas/schemas-Client.Client'
       required:
         - response
         - client
@@ -11179,6 +13630,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/OAuth.ConsentInfo'
+    AuthenticationInvalid:
+      description: Authentication invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    AuthorizationInvalid:
+      description: Authorization invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
     Client.AccountPortal:
       description: Returns the account portal.
       content:
@@ -11365,6 +13828,120 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/schemas-Client.ClientWrappedUser'
+    Client.BillingSubscription:
+      description: Returns a commerce subscription.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingSubscription'
+    ResourceNotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    Client.BillingSubscriptionItemList:
+      description: Returns a list of commerce subscription items.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingSubscriptionItemList'
+    Client.BillingSubscriptionItem:
+      description: Returns a commerce subscription item.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingSubscriptionItem'
+    UnprocessableEntity:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    Client.BillingPaymentMethodList:
+      description: Returns a list of commerce payment methods.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingPaymentMethodList'
+    Client.BillingPaymentMethod:
+      description: Returns a commerce payment method.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingPaymentMethod'
+    Client.BillingPaymentMethodInitialize:
+      description: Returns payment method initialization data.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingPaymentMethodInitialize'
+    Client.BillingCheckout:
+      description: Returns a commerce checkout.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingCheckout'
+    Client.BillingPaymentAttemptList:
+      description: Returns a list of commerce payment attempts.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingPaymentAttemptList'
+    Client.BillingPaymentAttempt:
+      description: Returns a commerce payment attempt.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingPaymentAttempt'
+    Client.BillingStatementList:
+      description: Returns a list of commerce statements.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingStatementList'
+    Client.BillingStatement:
+      description: Returns a commerce statement.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingStatement'
+    Client.BillingGenericObject:
+      description: Returns a generic commerce object.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingGenericObject'
+    Client.BillingGenericArray:
+      description: Returns a generic commerce array.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.BillingGenericArray'
+    BillingPlanList:
+      description: Returns a list of commerce plans.
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required:
+              - data
+              - total_count
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BillingPlan'
+              total_count:
+                type: integer
+                format: int64
+    BillingPlan:
+      description: Returns a commerce plan.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BillingPlan'
     Client.ClientWrappedOrganizationMemberships:
       description: Returns the response for Client wrapped array of OrganizationMembership objects.
       content:
@@ -11502,6 +14079,7 @@ components:
       required: false
       schema:
         type: boolean
+x-unreleased: true
 x-tagGroups:
   - name: Environment
     tags:
@@ -11528,11 +14106,21 @@ x-tagGroups:
   - name: Organizations
     tags:
       - Organization
+      - Organization Creation Defaults
       - Invitations
       - Membership Requests
       - Members
       - Domains
       - Roles
+  - name: Billing
+    tags:
+      - Plans
+      - Subscriptions
+      - Subscription Items
+      - Checkouts
+      - Payment Methods
+      - Statements
+      - Payment Attempts
   - name: Other
     tags:
       - Well Known
@@ -11543,3 +14131,4 @@ x-tagGroups:
       - OAuth2 Callbacks
       - SAML
       - Waitlist
+      - Enterprise Connections
