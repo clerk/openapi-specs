@@ -2036,10 +2036,7 @@ components:
       properties:
         status:
           type: string
-          description: Status of the verification. It can be `unverified` or `verified`
-          enum:
-            - unverified
-            - verified
+          description: Status of the verification. It can be `unverified`, `verified`, `failed`, or `expired`.
         strategy:
           type: string
           description: Name of the strategy used to verify the domain
@@ -2052,11 +2049,18 @@ components:
           nullable: true
           format: int64
           description: Unix timestamp of when the verification will expire
+        verified_at:
+          type: integer
+          nullable: true
+          format: int64
+          description: |
+            Unix timestamp of when ownership was verified. Only populated on `ownership_verification`; null on `affiliation_verification`.
       required:
         - status
         - strategy
         - attempts
         - expire_at
+        - verified_at
     OrganizationInvitationPublicOrganizationData:
       type: object
       additionalProperties: false
@@ -2106,12 +2110,28 @@ components:
           type: string
           nullable: true
           description: Affiliation email address for the domain, if available.
-        verification:
+        affiliation_verification:
           type: object
           nullable: true
           allOf:
             - $ref: '#/components/schemas/OrganizationDomainVerification'
-          description: Verification details for the domain
+          description: |
+            Verification details for the user-facing affiliation between the domain and the organization (e.g. affiliation_email_code).
+        ownership_verification:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/OrganizationDomainVerification'
+          description: |
+            Verification details for the underlying DNS domain ownership proof (TXT challenge or dashboard override). Null until ownership has been attempted.
+        verification:
+          type: object
+          nullable: true
+          deprecated: true
+          allOf:
+            - $ref: '#/components/schemas/OrganizationDomainVerification'
+          description: |
+            Deprecated alias for `affiliation_verification`. Kept for backward compatibility on the current API version; will be removed in the next API version. Prefer `affiliation_verification`.
         total_pending_invitations:
           type: integer
           format: int32
@@ -2141,6 +2161,8 @@ components:
         - name
         - enrollment_mode
         - affiliation_email_address
+        - affiliation_verification
+        - ownership_verification
         - verification
         - total_pending_invitations
         - total_pending_suggestions
@@ -3134,6 +3156,34 @@ components:
         - strategy
         - attempts
         - expire_at
+    verification_scim:
+      x-speakeasy-name-override: SCIM
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_scim
+        status:
+          type: string
+          enum:
+            - verified
+        strategy:
+          type: string
+          enum:
+            - scim
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
     IdentificationLink:
       type: object
       additionalProperties: false
@@ -3173,6 +3223,7 @@ components:
             - $ref: '#/components/schemas/verification_ticket'
             - $ref: '#/components/schemas/verification_saml'
             - $ref: '#/components/schemas/verification_email_link'
+            - $ref: '#/components/schemas/verification_scim'
           discriminator:
             propertyName: object
             mapping:
@@ -3182,6 +3233,7 @@ components:
               verification_ticket: '#/components/schemas/verification_ticket'
               verification_saml: '#/components/schemas/verification_saml'
               verification_email_link: '#/components/schemas/verification_email_link'
+              verification_scim: '#/components/schemas/verification_scim'
         linked_to:
           type: array
           items:
