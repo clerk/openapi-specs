@@ -2123,6 +2123,104 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /platform/applications/{applicationID}/instances:
+    post:
+      operationId: PlatformCreateInstance
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: createInstance
+      tags:
+        - Applications
+      summary: Create instance
+      description: |
+        Creates a production instance for the given application. Optionally clones
+        configuration from an existing development instance.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                domain:
+                  type: string
+                  description: The production domain for the instance (e.g. "example.com").
+                environment_type:
+                  type: string
+                  enum:
+                    - production
+                  default: production
+                  description: Instance environment type. Only production is currently supported.
+                clone_instance_id:
+                  type: string
+                  nullable: true
+                  description: The ID of a development instance to clone configuration from.
+              required:
+                - domain
+      responses:
+        '201':
+          description: Instance created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  object:
+                    type: string
+                    enum:
+                      - instance
+                  id:
+                    type: string
+                  environment_type:
+                    type: string
+                    enum:
+                      - production
+                  active_domain:
+                    $ref: '#/components/schemas/PlatformDomainResponse'
+                  secret_key:
+                    type: string
+                    x-sensitive: true
+                  publishable_key:
+                    type: string
+                  created_at:
+                    type: integer
+                    format: int64
+                    description: Unix timestamp in milliseconds.
+                  updated_at:
+                    type: integer
+                    format: int64
+                    description: Unix timestamp in milliseconds.
+                required:
+                  - object
+                  - id
+                  - environment_type
+                  - active_domain
+                  - secret_key
+                  - publishable_key
+                  - created_at
+                  - updated_at
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /platform/accountless_applications/claim:
     post:
       operationId: PlatformClaimAccountlessApplication
@@ -3060,6 +3158,34 @@ components:
         - strategy
         - attempts
         - expire_at
+    verification_scim:
+      x-speakeasy-name-override: SCIM
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_scim
+        status:
+          type: string
+          enum:
+            - verified
+        strategy:
+          type: string
+          enum:
+            - scim
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+      required:
+        - status
+        - strategy
+        - attempts
+        - expire_at
     IdentificationLink:
       type: object
       additionalProperties: false
@@ -3099,6 +3225,7 @@ components:
             - $ref: '#/components/schemas/verification_ticket'
             - $ref: '#/components/schemas/verification_saml'
             - $ref: '#/components/schemas/verification_email_link'
+            - $ref: '#/components/schemas/verification_scim'
           discriminator:
             propertyName: object
             mapping:
@@ -3108,6 +3235,7 @@ components:
               verification_ticket: '#/components/schemas/verification_ticket'
               verification_saml: '#/components/schemas/verification_saml'
               verification_email_link: '#/components/schemas/verification_email_link'
+              verification_scim: '#/components/schemas/verification_scim'
         linked_to:
           type: array
           items:
