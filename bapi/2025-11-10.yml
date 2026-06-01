@@ -4221,6 +4221,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '402':
           $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
         '422':
@@ -14191,6 +14193,46 @@ components:
         - name
         - block_size
         - tiers
+    BillingProrationDiscountDetail:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+          description: Credit amount with formatting
+        cycle_days_passed:
+          type: integer
+          format: int64
+          description: Number of days that have passed in the billing cycle
+        cycle_days_total:
+          type: integer
+          format: int64
+          description: Total number of days in the billing cycle
+        cycle_passed_percent:
+          type: number
+          format: double
+          description: Percentage of the billing cycle that has passed
+      required:
+        - amount
+        - cycle_days_passed
+        - cycle_days_total
+        - cycle_passed_percent
+    BillingDiscountsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        proration:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingProrationDiscountDetail'
+          description: Proration details from passed subscription time
+        total:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+          description: Total discounts applied
+      required:
+        - proration
+        - total
     CommerceTotalsResponse:
       type: object
       additionalProperties: false
@@ -14211,6 +14253,12 @@ components:
           allOf:
             - $ref: '#/components/schemas/CommerceCreditsResponse'
           nullable: true
+        discounts:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingDiscountsResponse'
+          description: Information about the discounts applied to the payment
       required:
         - subtotal
         - base_fee
@@ -16402,6 +16450,7 @@ components:
         - annual_monthly_fee
         - is_default
         - created_at
+        - supported_billing_periods
       properties:
         object:
           type: string
@@ -16450,6 +16499,13 @@ components:
           type: integer
           format: int64
           description: Unix timestamp (milliseconds) of creation.
+        supported_billing_periods:
+          type: string
+          description: Which billing periods this price supports.
+          enum:
+            - month
+            - annual
+            - both
     PaginatedBillingPriceResponse:
       type: object
       additionalProperties: false
@@ -16493,6 +16549,13 @@ components:
         description:
           type: string
           description: An optional description for this custom price.
+        supported_billing_periods:
+          type: string
+          description: Which billing periods this price supports. Inferred from amounts if omitted.
+          enum:
+            - month
+            - annual
+            - both
     PaginatedCommerceSubscriptionItemResponse:
       type: object
       additionalProperties: false
