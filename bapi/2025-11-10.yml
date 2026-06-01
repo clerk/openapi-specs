@@ -4221,6 +4221,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '402':
           $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
         '422':
@@ -16402,6 +16404,7 @@ components:
         - annual_monthly_fee
         - is_default
         - created_at
+        - supported_billing_periods
       properties:
         object:
           type: string
@@ -16450,6 +16453,13 @@ components:
           type: integer
           format: int64
           description: Unix timestamp (milliseconds) of creation.
+        supported_billing_periods:
+          type: string
+          description: Which billing periods this price supports.
+          enum:
+            - month
+            - annual
+            - both
     PaginatedBillingPriceResponse:
       type: object
       additionalProperties: false
@@ -16493,6 +16503,13 @@ components:
         description:
           type: string
           description: An optional description for this custom price.
+        supported_billing_periods:
+          type: string
+          description: Which billing periods this price supports. Inferred from amounts if omitted.
+          enum:
+            - month
+            - annual
+            - both
     PaginatedCommerceSubscriptionItemResponse:
       type: object
       additionalProperties: false

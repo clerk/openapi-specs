@@ -4147,6 +4147,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '402':
           $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
         '422':
@@ -15930,6 +15932,7 @@ components:
         - annual_monthly_fee
         - is_default
         - created_at
+        - supported_billing_periods
       properties:
         object:
           type: string
@@ -15978,6 +15981,13 @@ components:
           type: integer
           format: int64
           description: Unix timestamp (milliseconds) of creation.
+        supported_billing_periods:
+          type: string
+          description: Which billing periods this price supports.
+          enum:
+            - month
+            - annual
+            - both
     CommercePriceTransitionDetails:
       type: object
       additionalProperties: false
