@@ -213,24 +213,6 @@ paths:
           description: The sign in URL of your instance
           schema:
             type: string
-        - name: application_name
-          in: query
-          required: false
-          description: The application name shown in the interstitial UI
-          schema:
-            type: string
-        - name: logo_url
-          in: query
-          required: false
-          description: The absolute HTTP(S) application logo URL shown in the interstitial UI
-          schema:
-            type: string
-        - name: flow
-          in: query
-          required: false
-          description: The authentication flow shown in the interstitial UI
-          schema:
-            type: string
         - name: use_domain_for_script
           in: query
           required: false
@@ -4154,6 +4136,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '402':
           $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
         '422':
@@ -14221,6 +14205,155 @@ components:
           type: boolean
           nullable: true
           description: Whether this payment source can be removed.
+    CommercePerUnitTotalTier:
+      type: object
+      additionalProperties: false
+      required:
+        - fee_per_block
+        - total
+      properties:
+        quantity:
+          type: integer
+          format: int64
+          nullable: true
+          description: Units billed in this tier; null means unlimited.
+        fee_per_block:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+          description: Price charged per block in this tier.
+        total:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+          description: Total charge for this tier.
+    CommercePerUnitTotal:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - block_size
+        - tiers
+      properties:
+        name:
+          type: string
+          description: Name of the billable unit (for example, `seats`).
+        block_size:
+          type: integer
+          format: int64
+          description: Number of units included in each pricing block.
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercePerUnitTotalTier'
+          description: Computed totals for each pricing tier.
+    CommerceProrationCreditDetailResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - amount
+        - cycle_days_remaining
+        - cycle_days_total
+        - cycle_remaining_percent
+      properties:
+        amount:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        cycle_days_remaining:
+          type: integer
+          format: int64
+        cycle_days_total:
+          type: integer
+          format: int64
+        cycle_remaining_percent:
+          type: number
+          format: double
+    CommercePayerCreditResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - remaining_balance
+        - applied_amount
+      properties:
+        remaining_balance:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        applied_amount:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+    CommerceCreditsResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - proration
+        - payer
+        - total
+      properties:
+        proration:
+          allOf:
+            - $ref: '#/components/schemas/CommerceProrationCreditDetailResponse'
+          nullable: true
+        payer:
+          allOf:
+            - $ref: '#/components/schemas/CommercePayerCreditResponse'
+          nullable: true
+        total:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+    CommerceProrationDiscountResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - amount
+        - cycle_days_passed
+        - cycle_days_total
+        - cycle_passed_percent
+      properties:
+        amount:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        cycle_days_passed:
+          type: integer
+          format: int64
+        cycle_days_total:
+          type: integer
+          format: int64
+        cycle_passed_percent:
+          type: number
+          format: float
+    CommerceDiscountsResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - proration
+        - total
+      properties:
+        proration:
+          allOf:
+            - $ref: '#/components/schemas/CommerceProrationDiscountResponse'
+          nullable: true
+        total:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+    CommerceTotalsResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - subtotal
+        - base_fee
+        - tax_total
+        - grand_total
+      properties:
+        subtotal:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        base_fee:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        tax_total:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        grand_total:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        per_unit_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercePerUnitTotal'
+        credits:
+          allOf:
+            - $ref: '#/components/schemas/CommerceCreditsResponse'
+          nullable: true
+        discounts:
+          allOf:
+            - $ref: '#/components/schemas/CommerceDiscountsResponse'
+          nullable: true
     CommerceSubscriptionItemNextPaymentResponse:
       type: object
       additionalProperties: false
@@ -14229,12 +14362,22 @@ components:
           allOf:
             - $ref: '#/components/schemas/CommerceMoneyResponse'
           nullable: true
-          description: Amount for the next payment.
+          description: Base plan fee for the next payment. Does not include per-unit (e.g. seat) charges; see `totals.grand_total` for the full amount.
         date:
           type: integer
           format: int64
           nullable: true
           description: Unix timestamp (in milliseconds) for the next payment date.
+        per_unit_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercePerUnitTotal'
+          description: Per-unit total breakdown (for example, seats) for the next payment.
+        totals:
+          allOf:
+            - $ref: '#/components/schemas/CommerceTotalsResponse'
+          nullable: true
+          description: Breakdown of the recurring amount that will be billed at renewal (base fee + per-unit charges). Tax and credits are not previewed.
     CommercePayerResponse:
       type: object
       additionalProperties: false
@@ -14446,7 +14589,17 @@ components:
           description: Unix timestamp (milliseconds) of the next payment date.
         amount:
           $ref: '#/components/schemas/CommerceMoneyResponse'
-          description: The amount of the next payment.
+          description: Base plan fee for the next payment. Does not include per-unit (e.g. seat) charges; see `totals.grand_total` for the full amount.
+        per_unit_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercePerUnitTotal'
+          description: Per-unit total breakdown (for example, seats) for the next payment.
+        totals:
+          allOf:
+            - $ref: '#/components/schemas/CommerceTotalsResponse'
+          nullable: true
+          description: Breakdown of the recurring amount that will be billed at renewal for the earliest upcoming item (base fee + per-unit charges). Tax and credits are not previewed.
     CommerceSubscription:
       type: object
       additionalProperties: false
@@ -15555,6 +15708,7 @@ components:
         - annual_monthly_fee
         - is_default
         - created_at
+        - supported_billing_periods
       properties:
         object:
           type: string
@@ -15603,6 +15757,13 @@ components:
           type: integer
           format: int64
           description: Unix timestamp (milliseconds) of creation.
+        supported_billing_periods:
+          type: string
+          description: Which billing periods this price supports.
+          enum:
+            - month
+            - annual
+            - both
     CommercePriceTransitionDetails:
       type: object
       additionalProperties: false
