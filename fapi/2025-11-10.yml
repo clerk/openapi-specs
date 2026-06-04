@@ -743,6 +743,17 @@ paths:
           schema:
             type: string
           description: Optional space-separated list of scopes to restrict the response to only those requested.
+        - in: query
+          name: redirect_uri
+          required: false
+          schema:
+            type: string
+            format: uri
+          description: |
+            Optional redirect URI from the original OAuth authorize request.
+            When provided and registered for the OAuth application, the response will include
+            a `redirect_domain` field containing the PSL-resolved root domain for display on the consent screen.
+            Unregistered or malformed URIs are silently ignored and `redirect_domain` will be null.
       responses:
         '200':
           $ref: '#/components/responses/OAuth.ConsentInfo'
@@ -4346,6 +4357,8 @@ paths:
           $ref: '#/components/responses/AuthenticationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '410':
+          $ref: '#/components/responses/ClerkErrors'
   /v1/me/billing/checkouts/{checkoutID}/confirm:
     patch:
       operationId: ConfirmUserBillingCheckout
@@ -4601,6 +4614,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '410':
+          $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /v1/organizations/{organizationID}/billing/checkouts/{checkoutID}/confirm:
@@ -7945,6 +7960,15 @@ components:
           description: URL to the OAuth application's website or homepage
         client_id:
           type: string
+        redirect_domain:
+          type: string
+          nullable: true
+          description: |
+            The PSL-resolved registrable domain of the redirect URI (e.g. `example.co.uk` for
+            `https://app.example.co.uk/callback`). Null when no `redirect_uri` query parameter
+            was provided, when the URI is not registered for the OAuth application, or when the
+            URI points to an IP address or localhost. The frontend should fall back to client-side
+            display logic when this field is null.
         scopes:
           type: array
           items:
@@ -7952,6 +7976,7 @@ components:
       required:
         - oauth_application_name
         - client_id
+        - redirect_domain
         - scopes
     Token:
       type: object
@@ -11883,13 +11908,118 @@ components:
         - name
         - block_size
         - tiers
+    BillingProrationDiscountDetail:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Credit amount with formatting
+        cycle_days_passed:
+          type: integer
+          format: int64
+          description: Number of days that have passed in the billing cycle
+        cycle_days_total:
+          type: integer
+          format: int64
+          description: Total number of days in the billing cycle
+        cycle_passed_percent:
+          type: number
+          format: double
+          description: Percentage of the billing cycle that has passed
+      required:
+        - amount
+        - cycle_days_passed
+        - cycle_days_total
+        - cycle_passed_percent
+    BillingDiscountsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        proration:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingProrationDiscountDetail'
+          description: Proration details from passed subscription time
+        total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Total discounts applied
+      required:
+        - proration
+        - total
+    BillingTotalsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        subtotal:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Subtotal before adjustments
+        base_fee:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Base fee component before per-unit charges and adjustments
+        tax_total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Total tax amount
+        grand_total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Grand total amount
+        total_due_after_free_trial:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: Total amount due after free trial ends
+        credit:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: Credit amount
+        past_due:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: Past due amount
+        total_due_now:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: Total amount due now
+        per_unit_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPerUnitTotal'
+          description: Per-unit total breakdown (for example, seats)
+        credits:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditsResponse'
+          nullable: true
+          description: Unified credits breakdown
+        discounts:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingDiscountsResponse'
+          description: Information about the discounts applied to the payment
+        proration:
+          type: object
+          nullable: true
+          additionalProperties: false
+          properties:
+            credit:
+              $ref: '#/components/schemas/BillingMoneyResponse'
+              description: Proration credit amount
+      required:
+        - subtotal
+        - base_fee
+        - tax_total
+        - grand_total
     BillingSubscriptionItemNextPayment:
       type: object
       additionalProperties: false
       properties:
         amount:
           $ref: '#/components/schemas/BillingFee'
-          description: Amount for the next payment
+          description: Base plan fee for the next payment.
         date:
           type: integer
           format: int64
@@ -11899,6 +12029,11 @@ components:
           items:
             $ref: '#/components/schemas/BillingPerUnitTotal'
           description: Per-unit total breakdown for the next payment
+        totals:
+          allOf:
+            - $ref: '#/components/schemas/BillingTotalsResponse'
+          nullable: true
+          description: Breakdown of the recurring amount that will be billed at renewal (base fee + per-unit charges). Tax and credits are not included.
     BillingPayer:
       type: object
       additionalProperties: false
@@ -11976,65 +12111,6 @@ components:
           description: Per-unit cost breakdown by pricing tier
       required:
         - quantity
-    BillingTotalsResponse:
-      type: object
-      additionalProperties: false
-      properties:
-        subtotal:
-          $ref: '#/components/schemas/BillingMoneyResponse'
-          description: Subtotal before adjustments
-        base_fee:
-          $ref: '#/components/schemas/BillingMoneyResponse'
-          description: Base fee component before per-unit charges and adjustments
-        tax_total:
-          $ref: '#/components/schemas/BillingMoneyResponse'
-          description: Total tax amount
-        grand_total:
-          $ref: '#/components/schemas/BillingMoneyResponse'
-          description: Grand total amount
-        total_due_after_free_trial:
-          allOf:
-            - $ref: '#/components/schemas/BillingMoneyResponse'
-          nullable: true
-          description: Total amount due after free trial ends
-        credit:
-          allOf:
-            - $ref: '#/components/schemas/BillingMoneyResponse'
-          nullable: true
-          description: Credit amount
-        past_due:
-          allOf:
-            - $ref: '#/components/schemas/BillingMoneyResponse'
-          nullable: true
-          description: Past due amount
-        total_due_now:
-          allOf:
-            - $ref: '#/components/schemas/BillingMoneyResponse'
-          nullable: true
-          description: Total amount due now
-        per_unit_totals:
-          type: array
-          items:
-            $ref: '#/components/schemas/BillingPerUnitTotal'
-          description: Per-unit total breakdown (for example, seats)
-        credits:
-          allOf:
-            - $ref: '#/components/schemas/BillingCreditsResponse'
-          nullable: true
-          description: Unified credits breakdown
-        proration:
-          type: object
-          nullable: true
-          additionalProperties: false
-          properties:
-            credit:
-              $ref: '#/components/schemas/BillingMoneyResponse'
-              description: Proration credit amount
-      required:
-        - subtotal
-        - base_fee
-        - tax_total
-        - grand_total
     BillingSubscriptionItem:
       type: object
       additionalProperties: false
@@ -12178,7 +12254,12 @@ components:
           description: Unix timestamp (milliseconds) of the next payment date
         amount:
           $ref: '#/components/schemas/BillingFee'
-          description: The amount of the next payment
+          description: The base plan fee for the next payment.
+        totals:
+          allOf:
+            - $ref: '#/components/schemas/BillingTotalsResponse'
+          nullable: true
+          description: Breakdown of the recurring amount that will be billed at renewal (base fee + per-unit charges). Tax and credits are not included.
       required:
         - date
         - amount
@@ -12381,6 +12462,32 @@ components:
       required:
         - response
         - client
+    BillingPerPeriodTotals:
+      type: object
+      additionalProperties: false
+      properties:
+        subtotal:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The total, pre-tax, that will be due
+        base_fee:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Base fee component before per-unit charges and adjustments
+        tax_total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The total amount of tax that will be due
+        grand_total:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: The total, including tax, that will be due
+        per_unit_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPerUnitTotal'
+          description: Per-unit total breakdown (for example, seats)
+      required:
+        - subtotal
+        - base_fee
+        - tax_total
+        - grand_total
     BillingCheckoutTotals:
       type: object
       additionalProperties: false
@@ -12412,6 +12519,10 @@ components:
         total_due_per_period:
           $ref: '#/components/schemas/BillingMoneyResponse'
           description: The expected total payment for each future billing period.
+        totals_due_per_period:
+          type: object
+          $ref: '#/components/schemas/BillingPerPeriodTotals'
+          description: The amounts that will be due per billing period on a recurring basis.
         past_due:
           type: object
           nullable: true
@@ -12430,6 +12541,12 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingCreditsResponse'
           description: Unified credits breakdown
+        discounts:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingDiscountsResponse'
+          description: Information about the discounts applied to the checkout
         per_unit_totals:
           type: array
           items:
