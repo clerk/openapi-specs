@@ -213,24 +213,6 @@ paths:
           description: The sign in URL of your instance
           schema:
             type: string
-        - name: application_name
-          in: query
-          required: false
-          description: The application name shown in the interstitial UI
-          schema:
-            type: string
-        - name: logo_url
-          in: query
-          required: false
-          description: The absolute HTTP(S) application logo URL shown in the interstitial UI
-          schema:
-            type: string
-        - name: flow
-          in: query
-          required: false
-          description: The authentication flow shown in the interstitial UI
-          schema:
-            type: string
         - name: use_domain_for_script
           in: query
           required: false
@@ -498,10 +480,12 @@ paths:
         - Email Addresses
       summary: Replace a user's email address
       description: |-
-        Replaces all of the user's email addresses with a single verified, primary email address.
-        The new email address is created with the admin verification strategy. Any existing email
-        addresses are deleted. If an existing email address is linked to a connected account, the
-        request is rejected; remove the connected account first.
+        Replaces all of the user's email addresses with a single primary email address.
+        By default the new email address is created verified, with the admin verification strategy.
+        When `identification_status` is `reserved` it is created reserved instead: unverified but usable
+        for sign-in and locked so no other user can claim it. Any existing email addresses are deleted.
+        If an existing email address is linked to a connected account, the request is rejected; remove
+        the connected account first.
       parameters:
         - name: user_id
           in: path
@@ -520,6 +504,16 @@ paths:
                 email_address:
                   type: string
                   description: The new email address. Must adhere to the RFC 5322 specification for email address format.
+                identification_status:
+                  type: string
+                  enum:
+                    - verified
+                    - reserved
+                  default: verified
+                  description: |-
+                    Controls the status of the replacement email address. Defaults to `verified`. Set to
+                    `reserved` to create it reserved (unverified but usable for sign-in and locked)
+                    instead of verified.
               required:
                 - email_address
       responses:
@@ -695,10 +689,12 @@ paths:
         - Phone Numbers
       summary: Replace a user's phone number
       description: |-
-        Replaces all of the user's phone numbers with a single verified, primary phone number.
-        The new phone number is created with the admin verification strategy and is not reserved
-        for second factor. Any existing phone numbers are deleted; replacing a phone number that is
-        reserved for second factor disables the user's MFA.
+        Replaces all of the user's phone numbers with a single primary phone number.
+        By default the new phone number is created verified, with the admin verification strategy.
+        When `identification_status` is `reserved` it is created reserved instead: unverified but usable
+        for sign-in and locked so no other user can claim it. The new phone number is never reserved for
+        second factor. Any existing phone numbers are deleted; replacing a phone number that is reserved
+        for second factor disables the user's MFA.
       parameters:
         - name: user_id
           in: path
@@ -717,6 +713,16 @@ paths:
                 phone_number:
                   type: string
                   description: The new phone number. Must adhere to the E.164 standard for phone number format.
+                identification_status:
+                  type: string
+                  enum:
+                    - verified
+                    - reserved
+                  default: verified
+                  description: |-
+                    Controls the status of the replacement phone number. Defaults to `verified`. Set to
+                    `reserved` to create it reserved (unverified but usable for sign-in and locked)
+                    instead of verified.
               required:
                 - phone_number
       responses:
@@ -1640,7 +1646,7 @@ paths:
       description: |-
         Creates a new user. Your user management settings determine how you should setup your user model.
 
-        Any email address and phone number created using this method will be marked as verified.
+        By default, any email address and phone number created using this method is marked as verified. Set `identification_status` to `reserved` to instead create them as reserved (unverified but usable for sign-in and locked so no other user can claim them).
 
         Note: If you are performing a migration, check out our guide on [zero downtime migrations](https://clerk.com/docs/deployments/migrate-overview).
 
@@ -1681,6 +1687,7 @@ paths:
                     Email addresses to add to the user.
                     Must be unique across your instance.
                     The first email address will be set as the user's primary email address.
+                    Created verified by default, or reserved when `identification_status` is `reserved`.
                 phone_number:
                   type: array
                   items:
@@ -1689,6 +1696,18 @@ paths:
                     Phone numbers to add to the user.
                     Must be unique across your instance.
                     The first phone number will be set as the user's primary phone number.
+                    Created verified by default, or reserved when `identification_status` is `reserved`.
+                identification_status:
+                  type: string
+                  enum:
+                    - verified
+                    - reserved
+                  default: verified
+                  description: |-
+                    Controls the status of the provided email addresses and phone numbers. Defaults to
+                    `verified`. Set to `reserved` to create them reserved instead (unverified but usable
+                    for sign-in and locked so no other user can claim them). Applies to email addresses
+                    and phone numbers only; it has no effect on web3 wallets or usernames.
                 web3_wallet:
                   type: array
                   items:
@@ -4154,6 +4173,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '402':
           $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
         '422':
@@ -7845,6 +7866,73 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/DeletedObject'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /enterprise_connections/{enterprise_connection_id}/test_runs:
+    get:
+      operationId: ListEnterpriseConnectionTestRuns
+      x-speakeasy-group: enterpriseConnections
+      x-speakeasy-name-override: listTestRuns
+      summary: List enterprise connection test runs
+      description: Returns a paginated list of SAML or OIDC debug test runs for an enterprise connection.
+      tags:
+        - Enterprise Connections
+      parameters:
+        - in: path
+          name: enterprise_connection_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the enterprise connection
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - pending
+                - success
+                - failed
+          style: form
+          explode: true
+          description: Filter test runs by status (may be repeated)
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+      responses:
+        '200':
+          $ref: '#/components/responses/EnterpriseConnectionTestRuns'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    post:
+      operationId: CreateEnterpriseConnectionTestRun
+      x-speakeasy-group: enterpriseConnections
+      x-speakeasy-name-override: createTestRun
+      summary: Create an enterprise connection test run
+      description: Returns a short-lived URL that starts the IdP test flow for this connection.
+      tags:
+        - Enterprise Connections
+      parameters:
+        - in: path
+          name: enterprise_connection_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the enterprise connection
+      responses:
+        '200':
+          $ref: '#/components/responses/EnterpriseConnectionTestRun'
         '402':
           $ref: '#/components/responses/PaymentRequired'
         '403':
@@ -14494,6 +14582,155 @@ components:
           type: boolean
           nullable: true
           description: Whether this payment source can be removed.
+    CommercePerUnitTotalTier:
+      type: object
+      additionalProperties: false
+      required:
+        - fee_per_block
+        - total
+      properties:
+        quantity:
+          type: integer
+          format: int64
+          nullable: true
+          description: Units billed in this tier; null means unlimited.
+        fee_per_block:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+          description: Price charged per block in this tier.
+        total:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+          description: Total charge for this tier.
+    CommercePerUnitTotal:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - block_size
+        - tiers
+      properties:
+        name:
+          type: string
+          description: Name of the billable unit (for example, `seats`).
+        block_size:
+          type: integer
+          format: int64
+          description: Number of units included in each pricing block.
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercePerUnitTotalTier'
+          description: Computed totals for each pricing tier.
+    CommerceProrationCreditDetailResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - amount
+        - cycle_days_remaining
+        - cycle_days_total
+        - cycle_remaining_percent
+      properties:
+        amount:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        cycle_days_remaining:
+          type: integer
+          format: int64
+        cycle_days_total:
+          type: integer
+          format: int64
+        cycle_remaining_percent:
+          type: number
+          format: double
+    CommercePayerCreditResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - remaining_balance
+        - applied_amount
+      properties:
+        remaining_balance:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        applied_amount:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+    CommerceCreditsResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - proration
+        - payer
+        - total
+      properties:
+        proration:
+          allOf:
+            - $ref: '#/components/schemas/CommerceProrationCreditDetailResponse'
+          nullable: true
+        payer:
+          allOf:
+            - $ref: '#/components/schemas/CommercePayerCreditResponse'
+          nullable: true
+        total:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+    CommerceProrationDiscountResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - amount
+        - cycle_days_passed
+        - cycle_days_total
+        - cycle_passed_percent
+      properties:
+        amount:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        cycle_days_passed:
+          type: integer
+          format: int64
+        cycle_days_total:
+          type: integer
+          format: int64
+        cycle_passed_percent:
+          type: number
+          format: float
+    CommerceDiscountsResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - proration
+        - total
+      properties:
+        proration:
+          allOf:
+            - $ref: '#/components/schemas/CommerceProrationDiscountResponse'
+          nullable: true
+        total:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+    CommerceTotalsResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - subtotal
+        - base_fee
+        - tax_total
+        - grand_total
+      properties:
+        subtotal:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        base_fee:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        tax_total:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        grand_total:
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+        per_unit_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercePerUnitTotal'
+        credits:
+          allOf:
+            - $ref: '#/components/schemas/CommerceCreditsResponse'
+          nullable: true
+        discounts:
+          allOf:
+            - $ref: '#/components/schemas/CommerceDiscountsResponse'
+          nullable: true
     CommerceSubscriptionItemNextPaymentResponse:
       type: object
       additionalProperties: false
@@ -14502,12 +14739,22 @@ components:
           allOf:
             - $ref: '#/components/schemas/CommerceMoneyResponse'
           nullable: true
-          description: Amount for the next payment.
+          description: Base plan fee for the next payment. Does not include per-unit (e.g. seat) charges; see `totals.grand_total` for the full amount.
         date:
           type: integer
           format: int64
           nullable: true
           description: Unix timestamp (in milliseconds) for the next payment date.
+        per_unit_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercePerUnitTotal'
+          description: Per-unit total breakdown (for example, seats) for the next payment.
+        totals:
+          allOf:
+            - $ref: '#/components/schemas/CommerceTotalsResponse'
+          nullable: true
+          description: Breakdown of the recurring amount that will be billed at renewal (base fee + per-unit charges). Tax and credits are not previewed.
     CommercePayerResponse:
       type: object
       additionalProperties: false
@@ -14719,7 +14966,17 @@ components:
           description: Unix timestamp (milliseconds) of the next payment date.
         amount:
           $ref: '#/components/schemas/CommerceMoneyResponse'
-          description: The amount of the next payment.
+          description: Base plan fee for the next payment. Does not include per-unit (e.g. seat) charges; see `totals.grand_total` for the full amount.
+        per_unit_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercePerUnitTotal'
+          description: Per-unit total breakdown (for example, seats) for the next payment.
+        totals:
+          allOf:
+            - $ref: '#/components/schemas/CommerceTotalsResponse'
+          nullable: true
+          description: Breakdown of the recurring amount that will be billed at renewal for the earliest upcoming item (base fee + per-unit charges). Tax and credits are not previewed.
     CommerceSubscription:
       type: object
       additionalProperties: false
@@ -15782,6 +16039,115 @@ components:
       required:
         - data
         - total_count
+    EnterpriseConnectionTestRun:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - status
+        - connection_type
+        - created_at
+      properties:
+        id:
+          type: string
+          description: The test run ID
+        status:
+          type: string
+          description: The status of the test run
+          enum:
+            - pending
+            - success
+            - failed
+        connection_type:
+          type: string
+          description: The type of enterprise connection the test run was performed against
+          enum:
+            - saml
+            - oauth
+        parsed_user_info:
+          type: object
+          nullable: true
+          additionalProperties: false
+          description: The user information parsed from the IdP response
+          properties:
+            email_address:
+              type: string
+            first_name:
+              type: string
+            last_name:
+              type: string
+            user_id:
+              type: string
+        logs:
+          type: array
+          description: Log entries captured during the test run
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - level
+              - message
+            properties:
+              level:
+                type: string
+              code:
+                type: string
+              short_message:
+                type: string
+              message:
+                type: string
+        saml:
+          type: object
+          nullable: true
+          additionalProperties: false
+          description: SAML-specific metadata, present for SAML connections
+          properties:
+            saml_request:
+              type: string
+            saml_response:
+              type: string
+            relay_state:
+              type: string
+        oauth:
+          type: object
+          nullable: true
+          additionalProperties: false
+          description: OAuth-specific metadata, present for OIDC connections
+          properties:
+            id_token:
+              type: string
+            access_token:
+              type: string
+            user_info:
+              type: string
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the test run was created
+    EnterpriseConnectionTestRuns:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - total_count
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnterpriseConnectionTestRun'
+        total_count:
+          type: integer
+          format: int64
+          description: Total number of test runs
+    EnterpriseConnectionTestRunResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          description: A short-lived URL that can be used to initiate the test run flow
     TestingToken:
       type: object
       properties:
@@ -15924,6 +16290,7 @@ components:
         - annual_monthly_fee
         - is_default
         - created_at
+        - supported_billing_periods
       properties:
         object:
           type: string
@@ -15972,6 +16339,13 @@ components:
           type: integer
           format: int64
           description: Unix timestamp (milliseconds) of creation.
+        supported_billing_periods:
+          type: string
+          description: Which billing periods this price supports.
+          enum:
+            - month
+            - annual
+            - both
     CommercePriceTransitionDetails:
       type: object
       additionalProperties: false
@@ -16837,6 +17211,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/EnterpriseConnection'
+    EnterpriseConnectionTestRuns:
+      description: A list of enterprise connection test runs
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EnterpriseConnectionTestRuns'
+    EnterpriseConnectionTestRun:
+      description: A URL to initiate an enterprise connection test run
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EnterpriseConnectionTestRunResponse'
     TestingToken:
       description: A Testing Token
       content:
