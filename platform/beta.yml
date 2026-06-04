@@ -28,6 +28,14 @@ tags:
     description: An object representing a Clerk application. Each `application` can have multiple `instances`, typically one for development and one for production, each with distinct user pools.
   - name: Domains
     description: An object representing a domain associated with a Clerk application. In development `instances`, a domain is provided by Clerk. Production `instances` require additional configuration to be set up.
+  - name: Domain Intents
+    description: |-
+      An object representing the intent to create a Clerk domain.
+
+      The high-level for domain intent consumption:
+
+      1. Create a domain intent, and receive the DNS records for the future domain to function.
+      2. Create a domain, supplying the intent ID.
   - name: Application Transfers
     description: |-
       An object representing a transfer request for an application between workspaces.
@@ -793,6 +801,106 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformWorkspaceDomainResponse'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /platform/domain_intents:
+    post:
+      operationId: PlatformCreateDomainIntent
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: createDomainIntent
+      tags:
+        - Domain Intents
+      summary: Create a domain intent
+      description: |
+        Create a pending domain intent and receive DNS records for
+        the domain name.
+      security:
+        - platform_api_access_token: []
+      requestBody:
+        description: Domain intent data to create.
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformCreateDomainIntentRequest'
+      responses:
+        '201':
+          description: Domain intent created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformDomainIntentResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /platform/domain_intents/{domainIntentIDOrDomainName}:
+    get:
+      operationId: PlatformGetDomainIntent
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: getDomainIntent
+      tags:
+        - Domain Intents
+      summary: Get a domain intent
+      description: |
+        Retrieve a domain intent by ID or domain name.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: domainIntentIDOrDomainName
+          in: path
+          description: Domain intent ID or domain name.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Domain intent retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformDomainIntentResponse'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    delete:
+      operationId: PlatformCancelDomainIntent
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: cancelDomainIntent
+      tags:
+        - Domain Intents
+      summary: Cancel a domain intent
+      description: |
+        Cancel a pending domain intent.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: domainIntentIDOrDomainName
+          in: path
+          description: Domain intent ID or domain name.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Domain intent canceled successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformDomainIntentResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
         '401':
           $ref: '#/components/responses/AuthenticationInvalid'
         '403':
@@ -2559,10 +2667,13 @@ components:
       properties:
         name:
           type: string
-          description: The provider domain name.
+          description: The domain name.
         proxy_path:
           type: string
           description: Optional proxy path for provider domains.
+        domain_intent_id:
+          type: string
+          description: Optional domain intent ID to complete into this domain.
       required:
         - name
     FailureHint:
@@ -2753,6 +2864,82 @@ components:
       required:
         - data
         - total_count
+    PlatformCreateDomainIntentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        domain_name:
+          type: string
+          description: Optional domain name this intent is reserved for. Provider domains are not allowed.
+        expires_in_seconds:
+          type: integer
+          description: Optional number of seconds until the intent expires. Defaults to 86400.
+          minimum: 1
+    PlatformDomainIntentRecord:
+      type: object
+      additionalProperties: false
+      properties:
+        label:
+          type: string
+          description: DNS record label to configure.
+          example: clk._domainkey
+        type:
+          type: string
+          enum:
+            - CNAME
+          description: DNS record type.
+        value:
+          type: string
+          description: DNS record target value.
+          example: dkim1.abcd1234wxyz.clerk.services
+      required:
+        - label
+        - type
+        - value
+    PlatformDomainIntentResponse:
+      title: Domain Intent
+      description: Represents a pending DNS setup reservation that can later be completed into a real application domain.
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - domain_intent
+        id:
+          type: string
+          description: The unique identifier for the domain intent.
+          example: dmnint_2abc123def456
+        status:
+          type: string
+          enum:
+            - pending
+            - completed
+            - expired
+            - canceled
+          description: The current status of the domain intent.
+        expires_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the intent expires.
+        domain_id:
+          type: string
+          description: The completed domain ID, if the intent has been completed.
+        domain_name:
+          type: string
+          description: The domain name reserved or completed for this intent.
+        records:
+          type: array
+          description: DNS records to configure before completion.
+          items:
+            $ref: '#/components/schemas/PlatformDomainIntentRecord'
+      required:
+        - object
+        - domain_name
+        - id
+        - status
+        - expires_at
+        - records
     PlatformApplicationTransferResponse:
       title: Application Transfer
       description: Represents an application transfer request. Application transfers allow transferring ownership of an application from one organization to another.
@@ -2972,6 +3159,10 @@ components:
         expire_at:
           type: integer
           nullable: true
+        channel:
+          type: string
+          nullable: true
+          description: The delivery channel of the code (phone codes only).
         verified_at_client:
           type: string
           nullable: true
