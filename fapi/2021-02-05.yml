@@ -725,6 +725,17 @@ paths:
           schema:
             type: string
           description: Optional space-separated list of scopes to restrict the response to only those requested.
+        - in: query
+          name: redirect_uri
+          required: false
+          schema:
+            type: string
+            format: uri
+          description: |
+            Optional redirect URI from the original OAuth authorize request.
+            When provided and registered for the OAuth application, the response will include
+            a `redirect_domain` field containing the PSL-resolved root domain for display on the consent screen.
+            Unregistered or malformed URIs are silently ignored and `redirect_domain` will be null.
       responses:
         '200':
           $ref: '#/components/responses/OAuth.ConsentInfo'
@@ -6939,6 +6950,15 @@ components:
           description: URL to the OAuth application's website or homepage
         client_id:
           type: string
+        redirect_domain:
+          type: string
+          nullable: true
+          description: |
+            The PSL-resolved registrable domain of the redirect URI (e.g. `example.co.uk` for
+            `https://app.example.co.uk/callback`). Null when no `redirect_uri` query parameter
+            was provided, when the URI is not registered for the OAuth application, or when the
+            URI points to an IP address or localhost. The frontend should fall back to client-side
+            display logic when this field is null.
         scopes:
           type: array
           items:
@@ -6946,6 +6966,7 @@ components:
       required:
         - oauth_application_name
         - client_id
+        - redirect_domain
         - scopes
     Client.AccountPortal:
       type: object
