@@ -2944,7 +2944,7 @@ components:
         - total_count
     PlatformDomainIntentResponse:
       title: Domain Intent
-      description: Represents a pending DNS setup reservation that can later be completed into a real application domain.
+      description: Represents the intent to create a domain. Can later be completed into a real application domain.
       type: object
       additionalProperties: false
       properties:
