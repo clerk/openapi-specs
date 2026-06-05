@@ -2973,7 +2973,7 @@ components:
           description: The completed domain ID, if the intent has been completed.
         domain_name:
           type: string
-          description: The domain name reserved or completed for this intent.
+          description: The intended domain name.
         records:
           type: array
           description: DNS records to configure before completion.
