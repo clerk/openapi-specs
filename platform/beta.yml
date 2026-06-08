@@ -2961,13 +2961,8 @@ components:
           enum:
             - pending
             - completed
-            - expired
             - canceled
           description: The current status of the domain intent.
-        expires_at:
-          type: integer
-          format: int64
-          description: Unix timestamp in milliseconds when the intent expires.
         domain_id:
           type: string
           description: The completed domain ID, if the intent has been completed.
@@ -2983,7 +2978,6 @@ components:
         - object
         - id
         - status
-        - expires_at
         - records
     PlatformListDomainIntentsResponse:
       title: List Domain Intents Response
