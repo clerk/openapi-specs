@@ -7858,6 +7858,9 @@ paths:
                       scim_path:
                         type: string
                         description: GJSON path to extract the attribute value from SCIM user resources
+                      multi_valued:
+                        type: boolean
+                        description: When true, the attribute supports multiple values; values from the IdP are written to public_metadata as an array. Defaults to false.
       responses:
         '201':
           $ref: '#/components/responses/EnterpriseConnection'
@@ -8072,6 +8075,9 @@ paths:
                       scim_path:
                         type: string
                         description: GJSON path to extract the attribute value from SCIM user resources
+                      multi_valued:
+                        type: boolean
+                        description: When true, the attribute supports multiple values; values from the IdP are written to public_metadata as an array. Defaults to false.
       responses:
         '200':
           $ref: '#/components/responses/EnterpriseConnection'
@@ -16581,6 +16587,9 @@ components:
               scim_path:
                 type: string
                 description: GJSON path to extract the attribute value from SCIM user resources
+              multi_valued:
+                type: boolean
+                description: When true, the attribute supports multiple values; values from the IdP are written to public_metadata as an array. Defaults to false.
         saml_connection:
           type: object
           nullable: true

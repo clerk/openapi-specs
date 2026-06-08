@@ -4691,23 +4691,1837 @@ components:
           description: Configuration state after the patch was applied.
           additionalProperties: true
       additionalProperties: true
+    PlatformConfigSchemaNode:
+      type: object
+      description: JSON Schema node describing a config object or field.
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+          description: JSON Schema type.
+        description:
+          type: string
+          description: Human-readable description of the schema node.
+        default:
+          description: Default value for the config field.
+          nullable: true
+        enum:
+          type: array
+          description: Allowed values for the config field.
+          items: {}
+        properties:
+          type: object
+          description: Child schema nodes keyed by property name.
+          additionalProperties:
+            $ref: '#/components/schemas/PlatformConfigSchemaNode'
+        items:
+          $ref: '#/components/schemas/PlatformConfigSchemaNode'
+        required:
+          type: array
+          description: Required child property names.
+          items:
+            type: string
+        minimum:
+          type: number
+          description: Minimum numeric value.
+        maximum:
+          type: number
+          description: Maximum numeric value.
+        minLength:
+          type: integer
+          description: Minimum string length.
+        maxLength:
+          type: integer
+          description: Maximum string length.
+        pattern:
+          type: string
+          description: Regular expression pattern for string values.
+        readOnly:
+          type: boolean
+          description: Whether the config field is read-only.
+        x-clerk-sensitive:
+          type: boolean
+          description: Whether the config field contains sensitive data.
     PlatformConfigSchemaResponse:
       type: object
       description: JSON Schema describing the available configuration options.
+      additionalProperties: false
+      required:
+        - $schema
+        - $id
+        - type
+        - properties
       properties:
         $schema:
           type: string
           description: JSON Schema version.
+          enum:
+            - https://json-schema.org/draft/2020-12/schema
         $id:
           type: string
           description: Schema identifier.
+          enum:
+            - https://clerk.com/schemas/platform-config/2025-01-01
         type:
           type: string
+          enum:
+            - object
         properties:
           type: object
           description: Schema definitions for each configuration key.
-          additionalProperties: true
-      additionalProperties: true
+          additionalProperties:
+            $ref: '#/components/schemas/PlatformConfigSchemaNode'
+          properties:
+            auth_access_control:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Access control configuration
+            auth_attack_protection:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Attack protection configuration
+            auth_email:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Email authentication configuration
+            auth_multi_factor:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Multi-factor authentication configuration
+            auth_passkey:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Passkey authentication configuration
+            auth_password:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Password authentication configuration
+            auth_phone:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Phone authentication configuration
+            auth_username:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Username authentication configuration
+            auth_web3:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Web3 wallet authentication configuration
+            billing:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Billing configuration
+            branding:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Branding configuration
+            compliance:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Compliance configuration
+            connection_oauth_apple:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Apple OAuth SSO connection configuration
+            connection_oauth_atlassian:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Atlassian OAuth SSO connection configuration
+            connection_oauth_bitbucket:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Bitbucket OAuth SSO connection configuration
+            connection_oauth_box:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Box OAuth SSO connection configuration
+            connection_oauth_coinbase:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Coinbase OAuth SSO connection configuration
+            connection_oauth_discord:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Discord OAuth SSO connection configuration
+            connection_oauth_dropbox:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Dropbox OAuth SSO connection configuration
+            connection_oauth_enstall:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Enstall OAuth SSO connection configuration
+            connection_oauth_expressen:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Expressen OAuth SSO connection configuration
+            connection_oauth_facebook:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Facebook OAuth SSO connection configuration
+            connection_oauth_github:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Github OAuth SSO connection configuration
+            connection_oauth_gitlab:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Gitlab OAuth SSO connection configuration
+            connection_oauth_google:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Google OAuth SSO connection configuration
+            connection_oauth_hubspot:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Hubspot OAuth SSO connection configuration
+            connection_oauth_huggingface:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Huggingface OAuth SSO connection configuration
+            connection_oauth_line:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Line OAuth SSO connection configuration
+            connection_oauth_linear:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Linear OAuth SSO connection configuration
+            connection_oauth_linkedin:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Linkedin OAuth SSO connection configuration
+            connection_oauth_linkedin_oidc:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Linkedin Oidc OAuth SSO connection configuration
+            connection_oauth_microsoft:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Microsoft OAuth SSO connection configuration
+            connection_oauth_notion:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Notion OAuth SSO connection configuration
+            connection_oauth_slack:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Slack OAuth SSO connection configuration
+            connection_oauth_spotify:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Spotify OAuth SSO connection configuration
+            connection_oauth_tiktok:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Tiktok OAuth SSO connection configuration
+            connection_oauth_twitch:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Twitch OAuth SSO connection configuration
+            connection_oauth_twitter:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Twitter OAuth SSO connection configuration
+            connection_oauth_vercel:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Vercel OAuth SSO connection configuration
+            connection_oauth_x:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: X OAuth SSO connection configuration
+            connection_oauth_xero:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Xero OAuth SSO connection configuration
+            connections_oauth_custom:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Custom OAuth SSO connections. Each key is a provider slug (e.g., 'myservice').
+            organization_settings:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Organization settings configuration
+            paths:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Display config paths
+            session:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: Session configuration
+            user_model:
+              allOf:
+                - $ref: '#/components/schemas/PlatformConfigSchemaNode'
+              description: User profile attributes configuration
+      example:
+        $schema: https://json-schema.org/draft/2020-12/schema
+        $id: https://clerk.com/schemas/platform-config/2025-01-01
+        type: object
+        properties:
+          auth_access_control:
+            type: object
+            description: Access control configuration
+            properties:
+              allowlist_blocklist_enforced_on_sign_in:
+                type: boolean
+                description: Whether allowlist/blocklist restrictions are also enforced during sign-in
+                default: false
+              allowlist_enabled:
+                type: boolean
+                description: Whether the allowlist is enabled
+                default: false
+              block_disposable_email_domains:
+                type: boolean
+                description: Whether to block disposable email domains
+                default: false
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block email subaddresses (plus addressing)
+                default: false
+              blocklist_enabled:
+                type: boolean
+                description: Whether the blocklist is enabled
+                default: false
+              sign_up_mode:
+                type: string
+                description: Sign-up mode
+                default: public
+                enum:
+                  - public
+                  - restricted
+                  - waitlist
+          auth_attack_protection:
+            type: object
+            description: Attack protection configuration
+            properties:
+              bot_protection:
+                type: object
+                description: Bot protection settings
+                properties:
+                  captcha_enabled:
+                    type: boolean
+                    description: Whether CAPTCHA is enabled for sign-up
+                    default: true
+                  captcha_widget_type:
+                    type: string
+                    description: CAPTCHA widget type
+                    default: smart
+                    enum:
+                      - smart
+                      - invisible
+              email_link_require_same_client:
+                type: boolean
+                description: Whether email links must be opened from the same client
+                default: true
+              enumeration_protection:
+                type: string
+                description: Enumeration protection level
+                default: bulk
+                enum:
+                  - bulk
+                  - strict
+              pii_protection_enabled:
+                type: boolean
+                description: Whether PII protection is enabled
+                default: true
+              user_lockout:
+                type: object
+                description: User lockout settings
+                properties:
+                  duration_in_minutes:
+                    type: integer
+                    description: Lockout duration in minutes (0 = indefinite)
+                    default: 60
+                    minimum: 0
+                    maximum: 525600
+                  enabled:
+                    type: boolean
+                    description: Whether user lockout is enabled
+                    default: true
+                  max_attempts:
+                    type: integer
+                    description: Maximum failed attempts before lockout
+                    default: 100
+                    minimum: 1
+                    maximum: 999
+          auth_email:
+            type: object
+            description: Email authentication configuration
+            properties:
+              immutable:
+                type: boolean
+                description: When enabled, users cannot change their email address after sign-up
+                default: false
+              required_for_sign_up:
+                type: boolean
+                description: Whether email address is required for sign-up
+                default: false
+              sign_in_strategies:
+                type: array
+                description: Strategies available for sign-in via email
+                items:
+                  type: string
+                  enum:
+                    - email_code
+                    - email_link
+              used_for_sign_in:
+                type: boolean
+                description: Whether email address is used for sign-in
+                default: false
+              used_for_sign_up:
+                type: boolean
+                description: Whether email address is used for sign-up
+                default: false
+              verification_strategies:
+                type: array
+                description: Strategies available for email verification
+                items:
+                  type: string
+                  enum:
+                    - email_code
+                    - email_link
+              verify_at_sign_up:
+                type: boolean
+                description: Whether email address must be verified at sign-up
+                default: false
+          auth_multi_factor:
+            type: object
+            description: Multi-factor authentication configuration
+            properties:
+              authenticator_app:
+                type: object
+                description: Authenticator app settings
+                properties:
+                  enabled:
+                    type: boolean
+                    description: Whether authenticator app is enabled
+                    default: false
+              backup_code:
+                type: object
+                description: Backup code settings
+                properties:
+                  enabled:
+                    type: boolean
+                    description: Whether backup codes are enabled
+                    default: false
+              required_for_sign_in:
+                type: boolean
+                description: Whether MFA is required on sign-in
+                default: false
+              required_for_sign_up:
+                type: boolean
+                description: Whether MFA is required on sign-up
+                default: false
+          auth_passkey:
+            type: object
+            description: Passkey authentication configuration
+            properties:
+              allow_autofill:
+                type: boolean
+                description: Whether passkey options appear in autofill UI
+                default: true
+              show_sign_in_button:
+                type: boolean
+                description: Whether a dedicated passkey sign-in button is displayed
+                default: true
+              used_for_sign_in:
+                type: boolean
+                description: Whether passkey authentication is enabled for sign-in
+                default: false
+          auth_password:
+            type: object
+            description: Password authentication configuration
+            properties:
+              device_trust:
+                type: object
+                description: When signing in with a password on a new client (e.g. device), users will always be challenged for a second factor.
+                properties:
+                  enabled:
+                    type: boolean
+                    description: Whether device trust is enabled for this instance
+                    default: true
+              disable_hibp:
+                type: boolean
+                description: Whether to disable Have I Been Pwned check
+                default: false
+              enabled:
+                type: boolean
+                description: Whether password authentication is enabled
+                default: false
+              enforce_hibp_on_sign_in:
+                type: boolean
+                description: Whether to enforce HIBP check on sign-in (not just sign-up)
+                default: false
+              max_length:
+                type: integer
+                description: 'Maximum password length (0 means use default of 72, valid explicit values: 8-72)'
+                default: 72
+                minimum: 0
+                maximum: 72
+              min_length:
+                type: integer
+                description: 'Minimum password length (0 means use default of 8, valid explicit values: 8-72)'
+                default: 8
+                minimum: 0
+                maximum: 72
+              min_zxcvbn_strength:
+                type: integer
+                description: Minimum zxcvbn password strength score (0-4)
+                default: 0
+                minimum: 0
+                maximum: 4
+              require_lowercase:
+                type: boolean
+                description: Whether password must contain lowercase letters
+                default: false
+              require_numbers:
+                type: boolean
+                description: Whether password must contain numbers
+                default: false
+              require_special_char:
+                type: boolean
+                description: Whether password must contain special characters
+                default: false
+              require_uppercase:
+                type: boolean
+                description: Whether password must contain uppercase letters
+                default: false
+              required:
+                type: boolean
+                description: Whether password is required for sign-up
+                default: false
+              show_zxcvbn:
+                type: boolean
+                description: Whether to show password strength indicator
+                default: false
+          auth_phone:
+            type: object
+            description: Phone authentication configuration
+            properties:
+              immutable:
+                type: boolean
+                description: When enabled, users cannot change their phone number after sign-up
+                default: false
+              required_for_sign_up:
+                type: boolean
+                description: Whether phone number is required for sign-up
+                default: false
+              second_factor_strategies:
+                type: array
+                description: Strategies available for phone second factor
+                items:
+                  type: string
+                  enum:
+                    - phone_code
+              sign_in_strategies:
+                type: array
+                description: Strategies available for sign-in via phone
+                items:
+                  type: string
+                  enum:
+                    - phone_code
+              used_for_second_factor:
+                type: boolean
+                description: Whether phone number is used for second factor
+                default: false
+              used_for_sign_in:
+                type: boolean
+                description: Whether phone number is used for sign-in
+                default: false
+              used_for_sign_up:
+                type: boolean
+                description: Whether phone number is used for sign-up
+                default: false
+              verification_strategies:
+                type: array
+                description: Strategies available for phone verification
+                items:
+                  type: string
+                  enum:
+                    - phone_code
+              verify_at_sign_up:
+                type: boolean
+                description: Whether phone number must be verified at sign-up
+                default: false
+          auth_username:
+            type: object
+            description: Username authentication configuration
+            properties:
+              allow_extended_special_characters:
+                type: boolean
+                description: Whether to allow extended special characters (^$. !`#+'~) in usernames beyond the default (-_)
+                default: false
+              allow_numeric_usernames:
+                type: boolean
+                description: Whether to allow usernames that contain only digits. When enabled, phone-number inputs must be provided in explicit E.164 format.
+                default: false
+              immutable:
+                type: boolean
+                description: When enabled, users cannot change their username after sign-up
+                default: false
+              max_length:
+                type: integer
+                description: Maximum username length
+                default: 64
+                minimum: 1
+                maximum: 64
+              min_length:
+                type: integer
+                description: Minimum username length
+                default: 4
+                minimum: 1
+                maximum: 64
+              required_for_sign_up:
+                type: boolean
+                description: Whether username is required for sign-up
+                default: false
+              used_for_sign_in:
+                type: boolean
+                description: Whether username is used for sign-in
+                default: false
+              used_for_sign_up:
+                type: boolean
+                description: Whether username is used for sign-up
+                default: false
+          auth_web3:
+            type: object
+            description: Web3 wallet authentication configuration
+            properties:
+              required_for_sign_up:
+                type: boolean
+                description: Whether web3 wallet is required for sign-up
+                default: false
+              sign_in_strategies:
+                type: array
+                description: Strategies available for sign-in via web3 wallet
+                items:
+                  type: string
+                  enum:
+                    - web3_base_signature
+                    - web3_coinbase_wallet_signature
+                    - web3_metamask_signature
+                    - web3_okx_wallet_signature
+                    - web3_solana_signature
+              used_for_sign_in:
+                type: boolean
+                description: Whether web3 wallet is used for sign-in
+                default: false
+              used_for_sign_up:
+                type: boolean
+                description: Whether web3 wallet is used for sign-up
+                default: false
+              verification_strategies:
+                type: array
+                description: Strategies available for web3 wallet verification
+                items:
+                  type: string
+                  enum:
+                    - web3_base_signature
+                    - web3_coinbase_wallet_signature
+                    - web3_metamask_signature
+                    - web3_okx_wallet_signature
+                    - web3_solana_signature
+              verify_at_sign_up:
+                type: boolean
+                description: Whether web3 wallet must be verified at sign-up
+                default: false
+          billing:
+            type: object
+            description: Billing configuration
+            properties:
+              features:
+                type: object
+                description: Billable features keyed by slug
+                properties:
+                  '*':
+                    type: object
+                    description: Feature configuration
+                    properties:
+                      avatar_url:
+                        type: string
+                        description: Feature avatar URL
+                      description:
+                        type: string
+                        description: Feature description
+                      include_in_jwt:
+                        type: boolean
+                        description: Whether the feature is included in session JWTs
+                        default: true
+                      jwt_value:
+                        type: string
+                        description: Optional custom value included in JWT claims
+                      name:
+                        type: string
+                        description: Feature display name
+                      publicly_visible:
+                        type: boolean
+                        description: Whether the feature is visible to end users
+                        default: false
+              free_trial_requires_payment_method:
+                type: boolean
+                description: Require payment method for free trials
+                default: true
+              organization_enabled:
+                type: boolean
+                description: Enable billing for organizations. When enabled, a default free plan (free_org) is created automatically. Requires organizations to be enabled on the instance.
+                default: false
+              plans:
+                type: object
+                description: Subscription plans keyed by slug
+                properties:
+                  '*':
+                    type: object
+                    description: Subscription plan configuration
+                    properties:
+                      amount:
+                        type: integer
+                        description: Monthly price in cents
+                        default: 0
+                      annual_monthly_amount:
+                        type: integer
+                        description: Monthly equivalent when billed annually, in cents
+                        default: 0
+                      currency:
+                        type: string
+                        description: Currency code (e.g. usd)
+                      description:
+                        type: string
+                        description: Plan description
+                      features:
+                        type: array
+                        description: Feature slugs attached to this plan, in display order. Empty array clears all features; omit to leave attachments unchanged.
+                        items:
+                          type: string
+                      free_trial_days:
+                        type: integer
+                        description: Number of free trial days
+                        default: 0
+                      free_trial_enabled:
+                        type: boolean
+                        description: Whether free trial is available
+                        default: false
+                      is_recurring:
+                        type: boolean
+                        description: Whether plan is subscription-based
+                        default: true
+                      name:
+                        type: string
+                        description: Plan display name
+                      payer_type:
+                        type: string
+                        description: 'Who pays: user or org. Must match an enabled billing type (user_enabled or organization_enabled).'
+                      publicly_visible:
+                        type: boolean
+                        description: Whether plan is visible to end users
+                        default: true
+              user_enabled:
+                type: boolean
+                description: Enable billing for users. When enabled, a default free plan (free_user) is created automatically.
+                default: false
+          branding:
+            type: object
+            description: Branding configuration
+            properties:
+              favicon:
+                type: string
+                description: Source URL for the application favicon (not yet implemented)
+              logo:
+                type: string
+                description: Source URL for the application logo (not yet implemented)
+              show_clerk_branding:
+                type: boolean
+                description: Whether to show Clerk branding in components
+                default: true
+          compliance:
+            type: object
+            description: Compliance configuration
+            properties:
+              legal_consent:
+                type: object
+                description: Legal consent configuration
+                properties:
+                  enabled:
+                    type: boolean
+                    description: Whether legal consent is required during sign-up
+                    default: false
+                  privacy_policy_url:
+                    type: string
+                    description: URL to the privacy policy
+                  terms_of_service_url:
+                    type: string
+                    description: URL to the terms of service
+          connection_oauth_apple:
+            type: object
+            description: Apple OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Apple OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              bundle_id:
+                type: string
+                description: iOS app Bundle ID for native Sign in with Apple (optional)
+              client_id:
+                type: string
+                description: Apple Services ID (e.g., com.example.app) (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Apple OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Apple OAuth is enabled for this instance
+                default: false
+              key_id:
+                type: string
+                description: Apple Key ID from the Apple Developer portal
+                minLength: 1
+              team_id:
+                type: string
+                description: Apple Team ID from the Apple Developer portal
+                minLength: 1
+          connection_oauth_atlassian:
+            type: object
+            description: Atlassian OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Atlassian OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Atlassian OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Atlassian OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Atlassian OAuth is enabled for this instance
+                default: false
+          connection_oauth_bitbucket:
+            type: object
+            description: Bitbucket OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Bitbucket OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Bitbucket OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Bitbucket OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Bitbucket OAuth is enabled for this instance
+                default: false
+          connection_oauth_box:
+            type: object
+            description: Box OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Box OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Box OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Box OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Box OAuth is enabled for this instance
+                default: false
+          connection_oauth_coinbase:
+            type: object
+            description: Coinbase OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Coinbase OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Coinbase OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Coinbase OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Coinbase OAuth is enabled for this instance
+                default: false
+          connection_oauth_discord:
+            type: object
+            description: Discord OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Discord OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Discord OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Discord OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Discord OAuth is enabled for this instance
+                default: false
+          connection_oauth_dropbox:
+            type: object
+            description: Dropbox OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Dropbox OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Dropbox OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Dropbox OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Dropbox OAuth is enabled for this instance
+                default: false
+          connection_oauth_enstall:
+            type: object
+            description: Enstall OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Enstall OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Enstall OAuth client ID
+              client_secret:
+                type: string
+                description: Enstall OAuth client secret
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Enstall OAuth is enabled for this instance
+                default: false
+          connection_oauth_expressen:
+            type: object
+            description: Expressen OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Expressen OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Expressen OAuth client ID
+              client_secret:
+                type: string
+                description: Expressen OAuth client secret
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Expressen OAuth is enabled for this instance
+                default: false
+          connection_oauth_facebook:
+            type: object
+            description: Facebook OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Facebook OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Facebook OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Facebook OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Facebook OAuth is enabled for this instance
+                default: false
+          connection_oauth_github:
+            type: object
+            description: Github OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Github OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Github OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Github OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Github OAuth is enabled for this instance
+                default: false
+          connection_oauth_gitlab:
+            type: object
+            description: Gitlab OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Gitlab OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Gitlab OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Gitlab OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Gitlab OAuth is enabled for this instance
+                default: false
+          connection_oauth_google:
+            type: object
+            description: Google OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Google OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Google OAuth client ID (not required in development — Clerk provides shared credentials)
+                pattern: ^[0-9]+-[a-z0-9]+\.apps\.googleusercontent\.com$
+              client_secret:
+                type: string
+                description: Google OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Google OAuth is enabled for this instance
+                default: false
+              show_account_selector_prompt:
+                type: boolean
+                description: Whether to show the account selector prompt during OAuth flow
+                default: false
+          connection_oauth_hubspot:
+            type: object
+            description: Hubspot OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Hubspot OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Hubspot OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Hubspot OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Hubspot OAuth is enabled for this instance
+                default: false
+          connection_oauth_huggingface:
+            type: object
+            description: Huggingface OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Huggingface OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Huggingface OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Huggingface OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Huggingface OAuth is enabled for this instance
+                default: false
+          connection_oauth_line:
+            type: object
+            description: Line OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Line OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Line OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Line OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Line OAuth is enabled for this instance
+                default: false
+          connection_oauth_linear:
+            type: object
+            description: Linear OAuth SSO connection configuration
+            properties:
+              actor:
+                type: string
+                description: Actor type for Linear OAuth token
+                default: user
+                enum:
+                  - user
+                  - application
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Linear OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Linear OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Linear OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Linear OAuth is enabled for this instance
+                default: false
+          connection_oauth_linkedin:
+            type: object
+            description: Linkedin OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Linkedin OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Linkedin OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Linkedin OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Linkedin OAuth is enabled for this instance
+                default: false
+          connection_oauth_linkedin_oidc:
+            type: object
+            description: Linkedin Oidc OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Linkedin Oidc OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Linkedin Oidc OAuth client ID
+              client_secret:
+                type: string
+                description: Linkedin Oidc OAuth client secret
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Linkedin Oidc OAuth is enabled for this instance
+                default: false
+          connection_oauth_microsoft:
+            type: object
+            description: Microsoft OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Microsoft OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Microsoft Application (client) ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Microsoft OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Microsoft OAuth is enabled for this instance
+                default: false
+              show_account_selector_prompt:
+                type: boolean
+                description: Whether to show the account selector prompt during OAuth flow
+                default: false
+          connection_oauth_notion:
+            type: object
+            description: Notion OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Notion OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Notion OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Notion OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Notion OAuth is enabled for this instance
+                default: false
+          connection_oauth_slack:
+            type: object
+            description: Slack OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Slack OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Slack OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Slack OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Slack OAuth is enabled for this instance
+                default: false
+          connection_oauth_spotify:
+            type: object
+            description: Spotify OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Spotify OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Spotify OAuth client ID
+              client_secret:
+                type: string
+                description: Spotify OAuth client secret
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Spotify OAuth is enabled for this instance
+                default: false
+          connection_oauth_tiktok:
+            type: object
+            description: Tiktok OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Tiktok OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Tiktok OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Tiktok OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Tiktok OAuth is enabled for this instance
+                default: false
+          connection_oauth_twitch:
+            type: object
+            description: Twitch OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Twitch OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Twitch OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Twitch OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Twitch OAuth is enabled for this instance
+                default: false
+          connection_oauth_twitter:
+            type: object
+            description: Twitter OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Twitter OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Twitter OAuth client ID
+              client_secret:
+                type: string
+                description: Twitter OAuth client secret
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Twitter OAuth is enabled for this instance
+                default: false
+          connection_oauth_vercel:
+            type: object
+            description: Vercel OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Vercel OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Vercel OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Vercel OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Vercel OAuth is enabled for this instance
+                default: false
+          connection_oauth_x:
+            type: object
+            description: X OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using X OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: X OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: X OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether X OAuth is enabled for this instance
+                default: false
+          connection_oauth_xero:
+            type: object
+            description: Xero OAuth SSO connection configuration
+            properties:
+              authenticatable:
+                type: boolean
+                description: Whether users can sign in or sign up using Xero OAuth
+                default: true
+              block_email_subaddresses:
+                type: boolean
+                description: Whether to block sign-in/sign-up for accounts with email subaddresses (plus addressing)
+                default: false
+              client_id:
+                type: string
+                description: Xero OAuth client ID (not required in development — Clerk provides shared credentials)
+              client_secret:
+                type: string
+                description: Xero OAuth client secret (not required in development — Clerk provides shared credentials)
+                minLength: 1
+                x-clerk-sensitive: true
+              enabled:
+                type: boolean
+                description: Whether Xero OAuth is enabled for this instance
+                default: false
+          connections_oauth_custom:
+            type: object
+            description: Custom OAuth SSO connections. Each key is a provider slug (e.g., 'myservice').
+            properties:
+              '*':
+                type: object
+                description: Custom OAuth provider configuration
+                properties:
+                  auth_url:
+                    type: string
+                    description: OAuth authorization endpoint URL
+                  authenticatable:
+                    type: boolean
+                    description: Whether users can sign in or sign up using this provider
+                    default: true
+                  base_scopes:
+                    type: array
+                    description: OAuth scopes to request
+                  client_id:
+                    type: string
+                    description: OAuth client ID
+                  client_secret:
+                    type: string
+                    description: OAuth client secret
+                    x-clerk-sensitive: true
+                  discovery_url:
+                    type: string
+                    description: OIDC discovery URL (must contain /.well-known/openid-configuration)
+                  enabled:
+                    type: boolean
+                    description: Whether this OAuth provider is enabled for authentication
+                    default: false
+                  logo_public_url:
+                    type: string
+                    description: URL of the stored logo (read-only)
+                  name:
+                    type: string
+                    description: Display name for the OAuth provider (1-30 characters)
+                    minLength: 1
+                    maxLength: 30
+                  requires_pkce:
+                    type: boolean
+                    description: Whether PKCE is required (must be true for public clients)
+                    default: false
+                  token_url:
+                    type: string
+                    description: OAuth token endpoint URL
+                  user_info_url:
+                    type: string
+                    description: OAuth userinfo endpoint URL
+                  user_mapping:
+                    type: object
+                    description: Maps OAuth provider claims to Clerk user attributes
+                    properties:
+                      email:
+                        type: object
+                        description: Claim mapping configuration
+                        properties:
+                          default_value:
+                            type: string
+                            description: Default value if claim is missing
+                          path:
+                            type: string
+                            description: JSON path to the claim value
+                      email_verified:
+                        type: object
+                        description: Claim mapping configuration
+                        properties:
+                          default_value:
+                            type: string
+                            description: Default value if claim is missing
+                          path:
+                            type: string
+                            description: JSON path to the claim value
+                      first_name:
+                        type: object
+                        description: Claim mapping configuration
+                        properties:
+                          default_value:
+                            type: string
+                            description: Default value if claim is missing
+                          path:
+                            type: string
+                            description: JSON path to the claim value
+                      id:
+                        type: object
+                        description: Claim mapping configuration
+                        properties:
+                          default_value:
+                            type: string
+                            description: Default value if claim is missing
+                          path:
+                            type: string
+                            description: JSON path to the claim value
+                      image_url:
+                        type: object
+                        description: Claim mapping configuration
+                        properties:
+                          default_value:
+                            type: string
+                            description: Default value if claim is missing
+                          path:
+                            type: string
+                            description: JSON path to the claim value
+                      last_name:
+                        type: object
+                        description: Claim mapping configuration
+                        properties:
+                          default_value:
+                            type: string
+                            description: Default value if claim is missing
+                          path:
+                            type: string
+                            description: JSON path to the claim value
+                      name:
+                        type: object
+                        description: Claim mapping configuration
+                        properties:
+                          default_value:
+                            type: string
+                            description: Default value if claim is missing
+                          path:
+                            type: string
+                            description: JSON path to the claim value
+                      phone_number:
+                        type: object
+                        description: Claim mapping configuration
+                        properties:
+                          default_value:
+                            type: string
+                            description: Default value if claim is missing
+                          path:
+                            type: string
+                            description: JSON path to the claim value
+                      phone_number_verified:
+                        type: object
+                        description: Claim mapping configuration
+                        properties:
+                          default_value:
+                            type: string
+                            description: Default value if claim is missing
+                          path:
+                            type: string
+                            description: JSON path to the claim value
+                      username:
+                        type: object
+                        description: Claim mapping configuration
+                        properties:
+                          default_value:
+                            type: string
+                            description: Default value if claim is missing
+                          path:
+                            type: string
+                            description: JSON path to the claim value
+          organization_settings:
+            type: object
+            description: Organization settings configuration
+            properties:
+              admin_delete_enabled:
+                type: boolean
+                description: Whether admins can delete organizations
+                default: true
+              creator_role:
+                type: string
+                description: Role key assigned to organization creators
+              domains_default_role:
+                type: string
+                description: Default role key for domain-based membership
+              domains_enabled:
+                type: boolean
+                description: Whether organization domains are enabled
+                default: false
+              domains_enrollment_modes:
+                type: array
+                description: Domain enrollment modes. manual_invitation is always included.
+                items:
+                  type: string
+                  enum:
+                    - manual_invitation
+                    - automatic_invitation
+                    - automatic_suggestion
+              enabled:
+                type: boolean
+                description: Whether organizations are enabled
+                default: false
+              force_organization_selection:
+                type: boolean
+                description: Require users to select an organization
+                default: false
+              initial_role_set_key:
+                type: string
+                description: Key of the initial role set for new organizations
+              max_allowed_domains:
+                type: integer
+                description: Maximum verified domains per organization.
+                default: 10
+                readOnly: true
+                minimum: 0
+                maximum: 2147483647
+              max_allowed_memberships:
+                type: integer
+                description: Maximum members per organization (0 = unlimited)
+                default: 0
+                minimum: 0
+                maximum: 2147483647
+              max_allowed_roles:
+                type: integer
+                description: Maximum custom roles allowed per instance.
+                default: 10
+                readOnly: true
+                minimum: 0
+                maximum: 2147483647
+              max_role_sets_allowed:
+                type: integer
+                description: Maximum role sets allowed per instance.
+                default: 30
+                readOnly: true
+                minimum: 0
+                maximum: 2147483647
+              organization_creation_defaults:
+                type: object
+                description: Defaults for new organizations
+                properties:
+                  automatic_organization_creation:
+                    type: object
+                    description: Auto-create org settings
+                    properties:
+                      enabled:
+                        type: boolean
+                        description: Auto-create organizations for new users
+                        default: false
+                  detect_from_email_domain:
+                    type: object
+                    description: Email domain detection settings
+                    properties:
+                      enabled:
+                        type: boolean
+                        description: Detect organization from email domain
+                        default: false
+                  enabled:
+                    type: boolean
+                    description: Whether creation defaults are enabled
+                    default: false
+                  fallback:
+                    type: object
+                    description: Fallback settings
+                    properties:
+                      name:
+                        type: string
+                        description: Fallback organization name
+                        maxLength: 255
+                  organization_name_template:
+                    type: object
+                    description: Name template settings
+                    properties:
+                      enabled:
+                        type: boolean
+                        description: Use name template
+                        default: false
+                      template:
+                        type: string
+                        description: Go template for org name
+                        maxLength: 255
+              slug_disabled:
+                type: boolean
+                description: Whether organization slugs are disabled
+                default: false
+          paths:
+            type: object
+            description: Display config paths
+            properties:
+              after_sign_out_all:
+                type: string
+                description: After sign-out-all redirect path
+                pattern: ^(/|\?|#|$)
+              home:
+                type: string
+                description: Home path
+                pattern: ^(/|\?|#|$)
+              oauth_consent:
+                type: string
+                description: OAuth consent path
+                pattern: ^(/|\?|#|$)
+              sign_in:
+                type: string
+                description: Sign-in path
+                pattern: ^(/|\?|#|$)
+              sign_up:
+                type: string
+                description: Sign-up path
+                pattern: ^(/|\?|#|$)
+              unauthorized_sign_in:
+                type: string
+                description: Unauthorized sign-in path
+                pattern: ^(/|\?|#|$)
+              waitlist:
+                type: string
+                description: Waitlist path
+                pattern: ^(/|\?|#|$)
+          session:
+            type: object
+            description: Session configuration
+            properties:
+              allowed_clock_skew:
+                type: integer
+                description: Allowed clock skew in seconds
+                default: 5
+                minimum: 0
+                maximum: 300
+              claims:
+                type: object
+                description: Claims added to session tokens
+              lifetime:
+                type: integer
+                description: Session token lifetime in seconds
+                default: 60
+                minimum: 30
+                maximum: 315360000
+          user_model:
+            type: object
+            description: User profile attributes configuration
+            properties:
+              first_name:
+                type: object
+                description: first name configuration
+                properties:
+                  enabled:
+                    type: boolean
+                    description: Whether first name is collected at sign-up
+                    default: true
+                  required:
+                    type: boolean
+                    description: Whether first name is required at sign-up
+                    default: false
+              last_name:
+                type: object
+                description: last name configuration
+                properties:
+                  enabled:
+                    type: boolean
+                    description: Whether last name is collected at sign-up
+                    default: true
+                  required:
+                    type: boolean
+                    description: Whether last name is required at sign-up
+                    default: false
   responses:
     ClerkErrors:
       description: Request was not successful
