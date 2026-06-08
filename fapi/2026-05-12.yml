@@ -5875,6 +5875,7 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
+  /v1/organizations/{organization_id}/domains/attempt_ownership_verification: {}
   /v1/organizations/{organization_id}/domains/{domain_id}:
     get:
       summary: Get Organization Domain
@@ -12498,8 +12499,11 @@ components:
           $ref: '#/components/schemas/BillingMoneyResponse'
           description: The total, pre-tax, that will be due
         base_fee:
-          $ref: '#/components/schemas/BillingMoneyResponse'
-          description: Base fee component before per-unit charges and adjustments
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Base fee component before per-unit charges and adjustments.
         tax_total:
           $ref: '#/components/schemas/BillingMoneyResponse'
           description: The total amount of tax that will be due
