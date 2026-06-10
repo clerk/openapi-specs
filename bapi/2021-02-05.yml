@@ -5292,6 +5292,58 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+    put:
+      operationId: ReplaceOrganizationMetadata
+      x-speakeasy-group: organizations
+      x-speakeasy-name-override: replaceMetadata
+      summary: Replace metadata for an organization
+      description: |-
+        Replace an organization's metadata attributes with the provided values.
+        Unlike `PATCH /v1/organizations/{organization_id}/metadata` (merge semantics), this
+        endpoint replaces the supplied metadata fields entirely — the prior contents of each
+        supplied field are discarded. Fields omitted from the request body are left unchanged.
+        Prefer the `PATCH` endpoint for partial updates. Use `PUT` only when you explicitly
+        intend to overwrite a metadata field wholesale.
+      tags:
+        - Organizations
+      parameters:
+        - name: organization_id
+          in: path
+          description: The ID of the organization whose metadata will be replaced
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                public_metadata:
+                  type: object
+                  description: |-
+                    Metadata saved on the organization, that is visible to both your frontend and backend.
+                    The existing value will be replaced entirely with the new object.
+                  additionalProperties: true
+                private_metadata:
+                  type: object
+                  description: |-
+                    Metadata saved on the organization that is only visible to your backend.
+                    The existing value will be replaced entirely with the new object.
+                  additionalProperties: true
+      responses:
+        '200':
+          $ref: '#/components/responses/Organization'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /organizations/{organization_id}/logo:
     put:
       operationId: UploadOrganizationLogo
