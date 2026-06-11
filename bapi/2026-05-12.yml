@@ -18,7 +18,7 @@ info:
     Each version is identified by its release date, e.g. `2025-04-10`. For more information, please see [Clerk API Versions](https://clerk.com/docs/versioning/available-versions).
 
     Please see https://clerk.com/docs for more information.
-  version: '2025-11-10'
+  version: '2026-05-12'
   termsOfService: https://clerk.com/terms
   license:
     name: MIT
@@ -2268,7 +2268,7 @@ paths:
         You can remove a user's username by setting the username attribute to null or the blank string "".
 
         As of API version 2026-05-12, this endpoint no longer accepts `public_metadata`, `private_metadata`, or `unsafe_metadata`.
-        Use `PATCH /v1/users/{user_id}/metadata` to update metadata fields with merge semantics.
+        Use `PATCH /v1/users/{user_id}/metadata` to merge updates into existing metadata, or `PUT /v1/users/{user_id}/metadata` to replace a metadata field entirely.
       tags:
         - Users
       parameters:
@@ -2711,12 +2711,12 @@ paths:
         Replace a user's metadata attributes with the provided values.
 
         Unlike `PATCH /v1/users/{user_id}/metadata` (merge semantics), this endpoint
-        replaces the supplied metadata columns entirely — the prior contents of each
-        supplied column are discarded. Columns omitted from the request body are
+        replaces the supplied metadata fields entirely — the prior contents of each
+        supplied field are discarded. Fields omitted from the request body are
         left unchanged.
 
         Prefer the `PATCH` endpoint for partial updates. Use `PUT` only when you
-        explicitly intend to overwrite a metadata column wholesale.
+        explicitly intend to overwrite a metadata field wholesale.
       tags:
         - Users
       parameters:
@@ -5184,7 +5184,11 @@ paths:
       x-speakeasy-group: organizations
       x-speakeasy-name-override: update
       summary: Update an organization
-      description: Updates an existing organization
+      description: |-
+        Updates an existing organization.
+
+        As of API version 2026-05-12, this endpoint no longer accepts `public_metadata` or `private_metadata`.
+        Use `PATCH /v1/organizations/{organization_id}/metadata` to merge updates into existing metadata, or `PUT /v1/organizations/{organization_id}/metadata` to replace a metadata field entirely.
       tags:
         - Organizations
       parameters:
@@ -5202,16 +5206,6 @@ paths:
               type: object
               additionalProperties: false
               properties:
-                public_metadata:
-                  type: object
-                  description: Metadata saved on the organization, that is visible to both your frontend and backend.
-                  additionalProperties: true
-                  nullable: true
-                private_metadata:
-                  type: object
-                  description: Metadata saved on the organization that is only visible to your backend.
-                  additionalProperties: true
-                  nullable: true
                 name:
                   type: string
                   description: |-
@@ -5246,7 +5240,7 @@ paths:
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '402':
-          $ref: '#/components/responses/ResourceNotFound'
+          $ref: '#/components/responses/PaymentRequired'
         '403':
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
@@ -5318,6 +5312,58 @@ paths:
                   description: |-
                     Metadata saved on the organization that is only visible to your backend.
                     The new object will be merged with the existing value.
+                  additionalProperties: true
+      responses:
+        '200':
+          $ref: '#/components/responses/Organization'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    put:
+      operationId: ReplaceOrganizationMetadata
+      x-speakeasy-group: organizations
+      x-speakeasy-name-override: replaceMetadata
+      summary: Replace metadata for an organization
+      description: |-
+        Replace an organization's metadata attributes with the provided values.
+        Unlike `PATCH /v1/organizations/{organization_id}/metadata` (merge semantics), this
+        endpoint replaces the supplied metadata fields entirely — the prior contents of each
+        supplied field are discarded. Fields omitted from the request body are left unchanged.
+        Prefer the `PATCH` endpoint for partial updates. Use `PUT` only when you explicitly
+        intend to overwrite a metadata field wholesale.
+      tags:
+        - Organizations
+      parameters:
+        - name: organization_id
+          in: path
+          description: The ID of the organization whose metadata will be replaced
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                public_metadata:
+                  type: object
+                  description: |-
+                    Metadata saved on the organization, that is visible to both your frontend and backend.
+                    The existing value will be replaced entirely with the new object.
+                  additionalProperties: true
+                private_metadata:
+                  type: object
+                  description: |-
+                    Metadata saved on the organization that is only visible to your backend.
+                    The existing value will be replaced entirely with the new object.
                   additionalProperties: true
       responses:
         '200':
@@ -18833,7 +18879,6 @@ components:
         type: integer
         default: 0
         minimum: 0
-x-unreleased: true
 x-speakeasy-retries:
   strategy: backoff
   backoff:

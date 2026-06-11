@@ -5875,7 +5875,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
-  /v1/organizations/{organization_id}/domains/attempt_ownership_verification: {}
+  /v1/organizations/{organization_id}/domains/bulk: {}
+  /v1/organizations/{organization_id}/domains/attempt_ownership_verification/bulk: {}
   /v1/organizations/{organization_id}/domains/{domain_id}:
     get:
       summary: Get Organization Domain
@@ -14260,7 +14261,6 @@ components:
       required: false
       schema:
         type: boolean
-x-unreleased: true
 x-tagGroups:
   - name: Environment
     tags:
