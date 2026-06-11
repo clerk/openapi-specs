@@ -2382,21 +2382,29 @@ paths:
                     You must provide the backup codes in plain format or the corresponding bcrypt digest.
                 public_metadata:
                   type: object
-                  description: Metadata saved on the user, that is visible to both your Frontend and Backend APIs
+                  description: |-
+                    Metadata saved on the user, that is visible to both your Frontend and Backend APIs.
+                    Deprecated: As of API version 2026-05-12, this field is rejected on `PATCH /v1/users/{user_id}`. Use `PATCH /v1/users/{user_id}/metadata` to merge updates into existing metadata, or `PUT /v1/users/{user_id}/metadata` to replace a metadata field entirely.
                   additionalProperties: true
                   nullable: true
+                  deprecated: true
                 private_metadata:
                   type: object
-                  description: Metadata saved on the user, that is only visible to your Backend API
+                  description: |-
+                    Metadata saved on the user, that is only visible to your Backend API.
+                    Deprecated: As of API version 2026-05-12, this field is rejected on `PATCH /v1/users/{user_id}`. Use `PATCH /v1/users/{user_id}/metadata` to merge updates into existing metadata, or `PUT /v1/users/{user_id}/metadata` to replace a metadata field entirely.
                   additionalProperties: true
                   nullable: true
+                  deprecated: true
                 unsafe_metadata:
                   type: object
                   description: |-
                     Metadata saved on the user, that can be updated from both the Frontend and Backend APIs.
                     Note: Since this data can be modified from the frontend, it is not guaranteed to be safe.
+                    Deprecated: As of API version 2026-05-12, this field is rejected on `PATCH /v1/users/{user_id}`. Use `PATCH /v1/users/{user_id}/metadata` to merge updates into existing metadata, or `PUT /v1/users/{user_id}/metadata` to replace a metadata field entirely.
                   additionalProperties: true
                   nullable: true
+                  deprecated: true
                 delete_self_enabled:
                   type: boolean
                   description: If true, the user can delete themselves with the Frontend API.
@@ -2740,12 +2748,12 @@ paths:
         Replace a user's metadata attributes with the provided values.
 
         Unlike `PATCH /v1/users/{user_id}/metadata` (merge semantics), this endpoint
-        replaces the supplied metadata columns entirely — the prior contents of each
-        supplied column are discarded. Columns omitted from the request body are
+        replaces the supplied metadata fields entirely — the prior contents of each
+        supplied field are discarded. Fields omitted from the request body are
         left unchanged.
 
         Prefer the `PATCH` endpoint for partial updates. Use `PUT` only when you
-        explicitly intend to overwrite a metadata column wholesale.
+        explicitly intend to overwrite a metadata field wholesale.
       tags:
         - Users
       parameters:
@@ -5233,14 +5241,20 @@ paths:
               properties:
                 public_metadata:
                   type: object
-                  description: Metadata saved on the organization, that is visible to both your frontend and backend.
+                  description: |-
+                    Metadata saved on the organization, that is visible to both your frontend and backend.
+                    Deprecated: As of API version 2026-05-12, this field is rejected on `PATCH /v1/organizations/{organization_id}`. Use `PATCH /v1/organizations/{organization_id}/metadata` to merge updates into existing metadata, or `PUT /v1/organizations/{organization_id}/metadata` to replace a metadata field entirely.
                   additionalProperties: true
                   nullable: true
+                  deprecated: true
                 private_metadata:
                   type: object
-                  description: Metadata saved on the organization that is only visible to your backend.
+                  description: |-
+                    Metadata saved on the organization that is only visible to your backend.
+                    Deprecated: As of API version 2026-05-12, this field is rejected on `PATCH /v1/organizations/{organization_id}`. Use `PATCH /v1/organizations/{organization_id}/metadata` to merge updates into existing metadata, or `PUT /v1/organizations/{organization_id}/metadata` to replace a metadata field entirely.
                   additionalProperties: true
                   nullable: true
+                  deprecated: true
                 name:
                   type: string
                   description: |-
@@ -5275,7 +5289,7 @@ paths:
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '402':
-          $ref: '#/components/responses/ResourceNotFound'
+          $ref: '#/components/responses/PaymentRequired'
         '403':
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
@@ -5347,6 +5361,58 @@ paths:
                   description: |-
                     Metadata saved on the organization that is only visible to your backend.
                     The new object will be merged with the existing value.
+                  additionalProperties: true
+      responses:
+        '200':
+          $ref: '#/components/responses/Organization'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    put:
+      operationId: ReplaceOrganizationMetadata
+      x-speakeasy-group: organizations
+      x-speakeasy-name-override: replaceMetadata
+      summary: Replace metadata for an organization
+      description: |-
+        Replace an organization's metadata attributes with the provided values.
+        Unlike `PATCH /v1/organizations/{organization_id}/metadata` (merge semantics), this
+        endpoint replaces the supplied metadata fields entirely — the prior contents of each
+        supplied field are discarded. Fields omitted from the request body are left unchanged.
+        Prefer the `PATCH` endpoint for partial updates. Use `PUT` only when you explicitly
+        intend to overwrite a metadata field wholesale.
+      tags:
+        - Organizations
+      parameters:
+        - name: organization_id
+          in: path
+          description: The ID of the organization whose metadata will be replaced
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                public_metadata:
+                  type: object
+                  description: |-
+                    Metadata saved on the organization, that is visible to both your frontend and backend.
+                    The existing value will be replaced entirely with the new object.
+                  additionalProperties: true
+                private_metadata:
+                  type: object
+                  description: |-
+                    Metadata saved on the organization that is only visible to your backend.
+                    The existing value will be replaced entirely with the new object.
                   additionalProperties: true
       responses:
         '200':
