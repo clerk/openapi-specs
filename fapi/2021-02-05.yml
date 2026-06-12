@@ -4813,6 +4813,15 @@ paths:
                   type: string
                   description: The name of the new domain
                   nullable: false
+                enrollment_mode:
+                  type: string
+                  description: The enrollment mode of the new domain. Defaults to `manual_invitation`.
+                  nullable: true
+                  enum:
+                    - manual_invitation
+                    - automatic_invitation
+                    - automatic_suggestion
+                    - enterprise_sso
               required:
                 - name
       responses:
@@ -6415,6 +6424,7 @@ components:
           type: string
         meta:
           type: object
+          additionalProperties: true
       required:
         - message
         - long_message
@@ -6428,6 +6438,7 @@ components:
             $ref: '#/components/schemas/ClerkError'
         meta:
           type: object
+          additionalProperties: true
         clerk_trace_id:
           type: string
       required:

@@ -3319,7 +3319,10 @@ paths:
       x-speakeasy-group: users
       x-speakeasy-name-override: unsetPasswordCompromised
       summary: Unset a user's password as compromised
-      description: Sets the given user's password as no longer compromised. The user will no longer be prompted to reset their password on their next sign-in.
+      description: |-
+        Sets the given user's password as no longer compromised. The user will no longer be prompted to reset their password on their next sign-in.
+
+        If the user is in reserved-email password quarantine, the quarantine is preserved and the returned user will still have `requires_password_reset` set to `true`. Reserved-email password quarantine can only be cleared by completing a password reset or changing/removing the password.
       tags:
         - Users
       parameters:
@@ -12538,6 +12541,7 @@ components:
           type: string
         meta:
           type: object
+          additionalProperties: true
       required:
         - message
         - long_message
@@ -12551,6 +12555,7 @@ components:
             $ref: '#/components/schemas/ClerkError'
         meta:
           type: object
+          additionalProperties: true
         clerk_trace_id:
           type: string
       required:

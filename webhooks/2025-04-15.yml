@@ -3010,6 +3010,7 @@ components:
           type: string
         meta:
           type: object
+          additionalProperties: true
       required:
         - message
         - long_message

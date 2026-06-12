@@ -11946,6 +11946,7 @@ components:
           type: string
         meta:
           type: object
+          additionalProperties: true
       required:
         - message
         - long_message
@@ -11959,6 +11960,7 @@ components:
             $ref: '#/components/schemas/ClerkError'
         meta:
           type: object
+          additionalProperties: true
         clerk_trace_id:
           type: string
       required:
