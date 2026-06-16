@@ -3319,7 +3319,10 @@ paths:
       x-speakeasy-group: users
       x-speakeasy-name-override: unsetPasswordCompromised
       summary: Unset a user's password as compromised
-      description: Sets the given user's password as no longer compromised. The user will no longer be prompted to reset their password on their next sign-in.
+      description: |-
+        Sets the given user's password as no longer compromised. The user will no longer be prompted to reset their password on their next sign-in.
+
+        If the user is in reserved-email password quarantine, the quarantine is preserved and the returned user will still have `requires_password_reset` set to `true`. Reserved-email password quarantine can only be cleared by completing a password reset or changing/removing the password.
       tags:
         - Users
       parameters:
@@ -6578,7 +6581,7 @@ paths:
                   nullable: false
                 enrollment_mode:
                   type: string
-                  description: The enrollment_mode for the new domain. This can be `automatic_invitation`, `automatic_suggestion` or `manual_invitation`
+                  description: The enrollment_mode for the new domain. This can be `automatic_invitation`, `automatic_suggestion`, `manual_invitation` or `enterprise_sso`
                   nullable: false
                 verified:
                   type: boolean
@@ -6662,7 +6665,7 @@ paths:
               properties:
                 enrollment_mode:
                   type: string
-                  description: The enrollment_mode for the new domain. This can be `automatic_invitation`, `automatic_suggestion` or `manual_invitation`
+                  description: The enrollment_mode for the new domain. This can be `automatic_invitation`, `automatic_suggestion`, `manual_invitation` or `enterprise_sso`
                   nullable: true
                 verified:
                   type: boolean
@@ -6672,6 +6675,8 @@ paths:
         '200':
           $ref: '#/components/responses/OrganizationDomain'
         '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
@@ -6705,6 +6710,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '401':
           $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
   /organizations/{organization_id}/domains/{domain_id}/verify_ownership:
@@ -6791,6 +6798,7 @@ paths:
                 - manual_invitation
                 - automatic_invitation
                 - automatic_suggestion
+                - enterprise_sso
         - in: query
           name: query
           description: |
@@ -12538,6 +12546,7 @@ components:
           type: string
         meta:
           type: object
+          additionalProperties: true
       required:
         - message
         - long_message
@@ -12551,6 +12560,7 @@ components:
             $ref: '#/components/schemas/ClerkError'
         meta:
           type: object
+          additionalProperties: true
         clerk_trace_id:
           type: string
       required:
@@ -15990,6 +16000,7 @@ components:
             - manual_invitation
             - automatic_invitation
             - automatic_suggestion
+            - enterprise_sso
         affiliation_email_address:
           type: string
           nullable: true

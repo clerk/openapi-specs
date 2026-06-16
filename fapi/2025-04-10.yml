@@ -4758,6 +4758,15 @@ paths:
                   type: string
                   description: The name of the new domain
                   nullable: false
+                enrollment_mode:
+                  type: string
+                  description: The enrollment mode of the new domain. Defaults to `manual_invitation`.
+                  nullable: true
+                  enum:
+                    - manual_invitation
+                    - automatic_invitation
+                    - automatic_suggestion
+                    - enterprise_sso
               required:
                 - name
       responses:
@@ -6360,6 +6369,7 @@ components:
           type: string
         meta:
           type: object
+          additionalProperties: true
       required:
         - message
         - long_message
@@ -6373,6 +6383,7 @@ components:
             $ref: '#/components/schemas/ClerkError'
         meta:
           type: object
+          additionalProperties: true
         clerk_trace_id:
           type: string
       required:
@@ -10802,12 +10813,12 @@ components:
           nullable: true
           type: string
           description: |
-            Present only on ownership verification responses immediately after `prepare_ownership_verification`. The fully qualified DNS name the org admin must publish the TXT record under.
+            The fully qualified DNS name the org admin must publish the TXT record under. Present while the domain has an outstanding TXT ownership challenge (status `unverified`): on the `prepare_ownership_verification` response and re-surfaced on domain read paths. Null for verified domains and once the challenge has expired.
         txt_record_value:
           nullable: true
           type: string
           description: |
-            Present only on ownership verification responses immediately after `prepare_ownership_verification`. The exact value the org admin must publish in the TXT record.
+            The exact value the org admin must publish in the TXT record. Present on the `prepare_ownership_verification` response and re-surfaced on domain read paths while the challenge is outstanding and recoverable — but only for requesters holding `org:sys_domains:manage`. Null for verified domains, expired challenges, legacy challenges issued before the value was stored recoverably, and members without the manage permission. A read never regenerates or rotates the challenge.
       required:
         - status
         - strategy

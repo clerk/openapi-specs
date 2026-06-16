@@ -1162,6 +1162,95 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+  /platform/applications/{applicationID}/rotate_secret_keys:
+    post:
+      operationId: PlatformRotateSecretKeys
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: rotateSecretKeys
+      tags:
+        - Applications
+      summary: Rotate application secret keys
+      description: |
+        Rotate the secret keys for an application's instances.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Secret key rotation parameters.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformRotateSecretKeysRequest'
+      responses:
+        '200':
+          description: Secret keys rotated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformRotateSecretKeysResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/rotate_secret_keys:
+    post:
+      operationId: PlatformRotateInstanceSecretKeys
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: rotateInstanceSecretKeys
+      tags:
+        - Applications
+      summary: Rotate instance secret key
+      description: |
+        Rotate the secret key for a single application instance.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: Environment type or instance ID.
+          required: true
+          schema:
+            type: string
+            example: production
+      requestBody:
+        description: Secret key rotation parameters.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformRotateSecretKeysRequest'
+      responses:
+        '200':
+          description: Secret key rotated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformRotateSecretKeysResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /platform/applications/{applicationID}/instances/{envOrInsID}/usage:
     get:
       operationId: PlatformGetInstanceUsage
@@ -2521,6 +2610,7 @@ components:
           type: string
         meta:
           type: object
+          additionalProperties: true
       required:
         - message
         - long_message
@@ -2534,6 +2624,7 @@ components:
             $ref: '#/components/schemas/ClerkError'
         meta:
           type: object
+          additionalProperties: true
         clerk_trace_id:
           type: string
       required:
@@ -3093,6 +3184,61 @@ components:
       required:
         - data
         - total_count
+    PlatformRotateSecretKeysRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        delay_old_secrets_expiration_hours:
+          type: integer
+          description: Number of hours to delay before the old secret keys are deleted. This allows for a graceful transition period where both old and new keys are valid.
+        reason:
+          type: string
+          description: The reason for rotating the secret keys. This is stored for audit purposes.
+    PlatformRotateSecretKeysInstance:
+      title: Rotated Secret Key Instance
+      description: Represents an instance with a newly rotated secret key.
+      type: object
+      additionalProperties: false
+      properties:
+        instance_id:
+          type: string
+          description: The unique identifier for this instance.
+          example: ins_2abc123def456
+        environment_type:
+          type: string
+          description: The environment type of the instance.
+          enum:
+            - development
+            - production
+          example: production
+        secret_key:
+          type: string
+          description: The new secret key for authenticating server-side API requests to this instance. Keep this value secure and never expose it in client-side code.
+          example: sk_live_abc123...
+          x-sensitive: true
+      required:
+        - instance_id
+        - environment_type
+        - secret_key
+    PlatformRotateSecretKeysResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        application_id:
+          type: string
+          description: The ID of the application.
+        name:
+          type: string
+          description: The name of the application.
+        instances:
+          type: array
+          description: List of instances with their newly rotated secret keys.
+          items:
+            $ref: '#/components/schemas/PlatformRotateSecretKeysInstance'
+      required:
+        - application_id
+        - name
+        - instances
     InstanceUsageMeterWithBillable:
       title: Instance Usage Meter With Billable
       description: Usage totals for a meter that includes both total and billable quantities.
