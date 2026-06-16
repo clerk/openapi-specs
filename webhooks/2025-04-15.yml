@@ -2106,6 +2106,7 @@ components:
             - manual_invitation
             - automatic_invitation
             - automatic_suggestion
+            - enterprise_sso
         affiliation_email_address:
           type: string
           nullable: true
@@ -3010,6 +3011,7 @@ components:
           type: string
         meta:
           type: object
+          additionalProperties: true
       required:
         - message
         - long_message
