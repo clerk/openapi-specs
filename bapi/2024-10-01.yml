@@ -6560,7 +6560,7 @@ paths:
                   nullable: false
                 enrollment_mode:
                   type: string
-                  description: The enrollment_mode for the new domain. This can be `automatic_invitation`, `automatic_suggestion` or `manual_invitation`
+                  description: The enrollment_mode for the new domain. This can be `automatic_invitation`, `automatic_suggestion`, `manual_invitation` or `enterprise_sso`
                   nullable: false
                 verified:
                   type: boolean
@@ -6601,7 +6601,9 @@ paths:
         - in: query
           required: false
           name: enrollment_mode
-          description: Filter domains by their enrollment mode
+          description: |-
+            Filter domains by their enrollment mode. Accepts `automatic_invitation`, `automatic_suggestion`, `manual_invitation` or `enterprise_sso`.
+            Prefix a value with `-` to exclude it instead (e.g. `-enterprise_sso`). Include and exclude filters can be combined and compose as AND.
           schema:
             type: string
         - $ref: '#/components/parameters/LimitParameter'
@@ -6644,7 +6646,7 @@ paths:
               properties:
                 enrollment_mode:
                   type: string
-                  description: The enrollment_mode for the new domain. This can be `automatic_invitation`, `automatic_suggestion` or `manual_invitation`
+                  description: The enrollment_mode for the new domain. This can be `automatic_invitation`, `automatic_suggestion`, `manual_invitation` or `enterprise_sso`
                   nullable: true
                 verified:
                   type: boolean
@@ -6654,6 +6656,8 @@ paths:
         '200':
           $ref: '#/components/responses/OrganizationDomain'
         '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
@@ -6687,6 +6691,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '401':
           $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
   /organizations/{organization_id}/domains/{domain_id}/verify_ownership:
@@ -6761,7 +6767,9 @@ paths:
               - 'false'
         - in: query
           name: enrollment_mode
-          description: Filter by enrollment mode
+          description: |-
+            Filter by enrollment mode. Prefix a value with `-` to exclude it instead
+            (e.g. `-enterprise_sso`). Include and exclude filters can be combined and compose as AND.
           required: false
           style: form
           explode: false
@@ -6773,6 +6781,11 @@ paths:
                 - manual_invitation
                 - automatic_invitation
                 - automatic_suggestion
+                - enterprise_sso
+                - '-manual_invitation'
+                - '-automatic_invitation'
+                - '-automatic_suggestion'
+                - '-enterprise_sso'
         - in: query
           name: query
           description: |
@@ -12219,6 +12232,7 @@ components:
           type: string
         meta:
           type: object
+          additionalProperties: true
       required:
         - message
         - long_message
@@ -12232,6 +12246,7 @@ components:
             $ref: '#/components/schemas/ClerkError'
         meta:
           type: object
+          additionalProperties: true
         clerk_trace_id:
           type: string
       required:
@@ -15552,6 +15567,7 @@ components:
             - manual_invitation
             - automatic_invitation
             - automatic_suggestion
+            - enterprise_sso
         affiliation_email_address:
           type: string
           nullable: true
