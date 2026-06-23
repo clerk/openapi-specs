@@ -3893,7 +3893,7 @@ paths:
                     Existing keys are deep-merged; keys at any level with `null` values are removed.
       responses:
         '200':
-          $ref: '#/components/responses/responses-Client.ClientWrappedUser'
+          $ref: '#/components/responses/Client.ClientWrappedUser-2'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '401':
@@ -10192,7 +10192,7 @@ components:
           type: string
       required:
         - key
-    schemas-Client.SessionBase:
+    Client.SessionBase-2:
       type: object
       properties:
         id:
@@ -10243,9 +10243,9 @@ components:
         - expire_at
         - abandon_at
         - last_active_at
-    schemas-Client.Session:
+    Client.Session-2:
       allOf:
-        - $ref: '#/components/schemas/schemas-Client.SessionBase'
+        - $ref: '#/components/schemas/Client.SessionBase-2'
         - type: object
           properties:
             last_active_organization_id:
@@ -10279,7 +10279,7 @@ components:
             - factor_verification_age
             - created_at
             - updated_at
-    schemas-Client.SignIn:
+    Client.SignIn-2:
       type: object
       additionalProperties: false
       properties:
@@ -10401,7 +10401,7 @@ components:
         - user_data
         - created_session_id
         - abandon_at
-    schemas-Client.Client:
+    Client.Client-2:
       type: object
       nullable: true
       properties:
@@ -10416,12 +10416,12 @@ components:
         sessions:
           type: array
           items:
-            $ref: '#/components/schemas/schemas-Client.Session'
+            $ref: '#/components/schemas/Client.Session-2'
         sign_in:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.SignIn'
+            - $ref: '#/components/schemas/Client.SignIn-2'
         sign_up:
           type: object
           nullable: true
@@ -10464,7 +10464,7 @@ components:
         - captcha_bypass
         - created_at
         - updated_at
-    schemas-Client.ClientWrappedUser:
+    Client.ClientWrappedUser-2:
       type: object
       additionalProperties: false
       properties:
@@ -10477,7 +10477,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11460,12 +11460,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedBackupCodes'
-    responses-Client.ClientWrappedUser:
+    Client.ClientWrappedUser-2:
       description: Returns the response for Session wrapped User object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/schemas-Client.ClientWrappedUser'
+            $ref: '#/components/schemas/Client.ClientWrappedUser-2'
     Token:
       description: Success
       content:
