@@ -1334,7 +1334,7 @@ paths:
                 - password
       responses:
         '200':
-          $ref: '#/components/responses/responses-Client.SignIn'
+          $ref: '#/components/responses/Client.SignIn-2'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '422':
@@ -4057,7 +4057,7 @@ paths:
                   nullable: true
       responses:
         '200':
-          $ref: '#/components/responses/responses-Client.ClientWrappedUser'
+          $ref: '#/components/responses/Client.ClientWrappedUser-2'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '403':
@@ -4083,7 +4083,7 @@ paths:
                   type: string
       responses:
         '200':
-          $ref: '#/components/responses/responses-Client.ClientWrappedUser'
+          $ref: '#/components/responses/Client.ClientWrappedUser-2'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '403':
@@ -5373,7 +5373,7 @@ paths:
               format: base64
       responses:
         '200':
-          $ref: '#/components/responses/responses-Client.ClientWrappedOrganization'
+          $ref: '#/components/responses/Client.ClientWrappedOrganization-2'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '401':
@@ -10778,7 +10778,7 @@ components:
           type: string
       required:
         - key
-    schemas-Client.SessionBase:
+    Client.SessionBase-2:
       type: object
       properties:
         id:
@@ -10829,9 +10829,9 @@ components:
         - expire_at
         - abandon_at
         - last_active_at
-    schemas-Client.Session:
+    Client.Session-2:
       allOf:
-        - $ref: '#/components/schemas/schemas-Client.SessionBase'
+        - $ref: '#/components/schemas/Client.SessionBase-2'
         - type: object
           properties:
             last_active_organization_id:
@@ -10865,7 +10865,7 @@ components:
             - factor_verification_age
             - created_at
             - updated_at
-    schemas-Client.SignIn:
+    Client.SignIn-2:
       type: object
       additionalProperties: false
       properties:
@@ -10987,7 +10987,7 @@ components:
         - user_data
         - created_session_id
         - abandon_at
-    schemas-Client.Client:
+    Client.Client-2:
       type: object
       nullable: true
       properties:
@@ -11002,12 +11002,12 @@ components:
         sessions:
           type: array
           items:
-            $ref: '#/components/schemas/schemas-Client.Session'
+            $ref: '#/components/schemas/Client.Session-2'
         sign_in:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.SignIn'
+            - $ref: '#/components/schemas/Client.SignIn-2'
         sign_up:
           type: object
           nullable: true
@@ -11058,12 +11058,12 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
         client:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11075,7 +11075,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
         client:
           type: object
           nullable: true
@@ -11087,13 +11087,13 @@ components:
       additionalProperties: false
       properties:
         response:
-          $ref: '#/components/schemas/schemas-Client.SignIn'
+          $ref: '#/components/schemas/Client.SignIn-2'
         client:
-          $ref: '#/components/schemas/schemas-Client.Client'
+          $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
-    schemas-Client.ClientWrappedSignIn:
+    Client.ClientWrappedSignIn-2:
       type: object
       additionalProperties: false
       properties:
@@ -11111,7 +11111,7 @@ components:
         response:
           $ref: '#/components/schemas/Client.SignUp'
         client:
-          $ref: '#/components/schemas/schemas-Client.Client'
+          $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11120,9 +11120,9 @@ components:
       additionalProperties: false
       properties:
         response:
-          $ref: '#/components/schemas/schemas-Client.Session'
+          $ref: '#/components/schemas/Client.Session-2'
         client:
-          $ref: '#/components/schemas/schemas-Client.Client'
+          $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11131,10 +11131,10 @@ components:
       additionalProperties: false
       properties:
         response:
-          $ref: '#/components/schemas/schemas-Client.Session'
+          $ref: '#/components/schemas/Client.Session-2'
         client:
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
           nullable: true
       required:
         - response
@@ -11166,7 +11166,7 @@ components:
         - is_mobile
     Client.ActiveSession:
       allOf:
-        - $ref: '#/components/schemas/schemas-Client.SessionBase'
+        - $ref: '#/components/schemas/Client.SessionBase-2'
         - type: object
           properties:
             latest_activity:
@@ -11220,7 +11220,7 @@ components:
         session:
           type: object
           oneOf:
-            - $ref: '#/components/schemas/schemas-Client.SessionBase'
+            - $ref: '#/components/schemas/Client.SessionBase-2'
       required:
         - object
         - level
@@ -11236,14 +11236,14 @@ components:
         response:
           $ref: '#/components/schemas/Client.SessionReverification'
         client:
-          $ref: '#/components/schemas/schemas-Client.Client'
+          $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
     Server.Sessions:
       type: array
       items:
-        $ref: '#/components/schemas/schemas-Client.Session'
+        $ref: '#/components/schemas/Client.Session-2'
     Server.UserEmailAddresses:
       type: array
       items:
@@ -11261,7 +11261,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11290,7 +11290,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11311,7 +11311,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11332,7 +11332,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11349,7 +11349,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11366,7 +11366,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11383,7 +11383,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11437,7 +11437,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11480,7 +11480,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11494,7 +11494,7 @@ components:
       required:
         - response
         - client
-    schemas-Client.ClientWrappedUser:
+    Client.ClientWrappedUser-2:
       type: object
       additionalProperties: false
       properties:
@@ -12359,7 +12359,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12383,7 +12383,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12397,7 +12397,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12421,7 +12421,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12437,7 +12437,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12474,7 +12474,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12659,7 +12659,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12822,7 +12822,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12836,7 +12836,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12943,7 +12943,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12957,7 +12957,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12972,7 +12972,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12997,7 +12997,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13024,7 +13024,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13135,7 +13135,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13150,7 +13150,7 @@ components:
           nullable: false
         client:
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
           type: object
           nullable: false
       required:
@@ -13204,7 +13204,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13221,7 +13221,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13238,11 +13238,11 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
-    schemas-Client.ClientWrappedOrganization:
+    Client.ClientWrappedOrganization-2:
       type: object
       additionalProperties: false
       properties:
@@ -13281,7 +13281,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13298,7 +13298,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13315,7 +13315,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13465,7 +13465,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13482,7 +13482,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13539,7 +13539,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13556,7 +13556,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13659,7 +13659,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13866,12 +13866,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedSignIn'
-    responses-Client.SignIn:
+    Client.SignIn-2:
       description: Returns the sign in object, as well as the updated session object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/schemas-Client.ClientWrappedSignIn'
+            $ref: '#/components/schemas/Client.ClientWrappedSignIn-2'
     Client.SignUp:
       description: Returns the sign up object, as well as the updated session object.
       content:
@@ -14016,12 +14016,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedImage'
-    responses-Client.ClientWrappedUser:
+    Client.ClientWrappedUser-2:
       description: Returns the response for Session wrapped User object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/schemas-Client.ClientWrappedUser'
+            $ref: '#/components/schemas/Client.ClientWrappedUser-2'
     Client.BillingSubscription:
       description: Returns a commerce subscription.
       content:
@@ -14172,12 +14172,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedOrganization'
-    responses-Client.ClientWrappedOrganization:
+    Client.ClientWrappedOrganization-2:
       description: Returns the response for Client wrapped Organization object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/schemas-Client.ClientWrappedOrganization'
+            $ref: '#/components/schemas/Client.ClientWrappedOrganization-2'
     Client.ClientWrappedOrganizationInvitations:
       description: Returns the response for Client wrapped array of OrganizationInvitation objects.
       content:
