@@ -161,6 +161,22 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/WellKnown.OAuth2AuthorizationServerMetadata'
+  /.well-known/webauthn:
+    get:
+      summary: WebAuthn Related Origins
+      description: |-
+        Get the WebAuthn Related Origin Requests document. Only available when
+        the instance uses the auth_host passkey RP ID strategy; returns a not
+        found error otherwise.
+      operationId: getWebAuthnRelatedOrigins
+      security: []
+      tags:
+        - Well Known
+      responses:
+        '200':
+          $ref: '#/components/responses/WellKnown.WebAuthn'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
   /oauth/authorize:
     get:
       summary: Request OAuth2 authorization
@@ -1263,7 +1279,7 @@ paths:
                 - password
       responses:
         '200':
-          $ref: '#/components/responses/responses-Client.SignIn'
+          $ref: '#/components/responses/Client.SignIn-2'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '422':
@@ -3981,7 +3997,7 @@ paths:
                   nullable: true
       responses:
         '200':
-          $ref: '#/components/responses/responses-Client.ClientWrappedUser'
+          $ref: '#/components/responses/Client.ClientWrappedUser-2'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '403':
@@ -4007,7 +4023,7 @@ paths:
                   type: string
       responses:
         '200':
-          $ref: '#/components/responses/responses-Client.ClientWrappedUser'
+          $ref: '#/components/responses/Client.ClientWrappedUser-2'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '403':
@@ -4308,7 +4324,7 @@ paths:
               format: base64
       responses:
         '200':
-          $ref: '#/components/responses/responses-Client.ClientWrappedOrganization'
+          $ref: '#/components/responses/Client.ClientWrappedOrganization-2'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '401':
@@ -6549,6 +6565,16 @@ components:
         - id_token_signing_alg_values_supported
         - claims_supported
         - code_challenge_methods_supported
+    WellKnown.WebAuthn:
+      type: object
+      additionalProperties: false
+      properties:
+        origins:
+          type: array
+          items:
+            type: string
+      required:
+        - origins
     OAuth.DynamicClientRegistrationRequest:
       type: object
       additionalProperties: false
@@ -9764,7 +9790,7 @@ components:
       required:
         - response
         - client
-    schemas-Client.SignIn:
+    Client.SignIn-2:
       type: object
       additionalProperties: false
       properties:
@@ -9885,7 +9911,7 @@ components:
         - user_data
         - created_session_id
         - abandon_at
-    schemas-Client.SessionBase:
+    Client.SessionBase-2:
       type: object
       properties:
         id:
@@ -9930,9 +9956,9 @@ components:
         - expire_at
         - abandon_at
         - last_active_at
-    schemas-Client.Session:
+    Client.Session-2:
       allOf:
-        - $ref: '#/components/schemas/schemas-Client.SessionBase'
+        - $ref: '#/components/schemas/Client.SessionBase-2'
         - type: object
           properties:
             last_active_organization_id:
@@ -9966,7 +9992,7 @@ components:
             - factor_verification_age
             - created_at
             - updated_at
-    schemas-Client.Client:
+    Client.Client-2:
       type: object
       nullable: true
       properties:
@@ -9981,12 +10007,12 @@ components:
         sessions:
           type: array
           items:
-            $ref: '#/components/schemas/schemas-Client.Session'
+            $ref: '#/components/schemas/Client.Session-2'
         sign_in:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.SignIn'
+            - $ref: '#/components/schemas/Client.SignIn-2'
         sign_up:
           type: object
           nullable: true
@@ -10029,14 +10055,14 @@ components:
         - captcha_bypass
         - created_at
         - updated_at
-    schemas-Client.ClientWrappedSignIn:
+    Client.ClientWrappedSignIn-2:
       type: object
       additionalProperties: false
       properties:
         response:
-          $ref: '#/components/schemas/schemas-Client.SignIn'
+          $ref: '#/components/schemas/Client.SignIn-2'
         client:
-          $ref: '#/components/schemas/schemas-Client.Client'
+          $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -10426,11 +10452,11 @@ components:
         response:
           $ref: '#/components/schemas/Image'
         client:
-          $ref: '#/components/schemas/schemas-Client.Client'
+          $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
-    schemas-Client.ClientWrappedUser:
+    Client.ClientWrappedUser-2:
       type: object
       additionalProperties: false
       properties:
@@ -10443,7 +10469,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -10688,7 +10714,7 @@ components:
       required:
         - response
         - client
-    schemas-Client.ClientWrappedOrganization:
+    Client.ClientWrappedOrganization-2:
       type: object
       additionalProperties: false
       properties:
@@ -10701,7 +10727,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11159,6 +11185,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/WellKnown.OAuth2AuthorizationServerMetadata'
+    WellKnown.WebAuthn:
+      description: Get the WebAuthn Related Origin Requests document
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WellKnown.WebAuthn'
     OAuth.DynamicClientRegistration:
       description: |-
         Client information response after successful OAuth 2.0 dynamic client registration.
@@ -11300,12 +11332,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedSignIn'
-    responses-Client.SignIn:
+    Client.SignIn-2:
       description: Returns the sign in object, as well as the updated session object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/schemas-Client.ClientWrappedSignIn'
+            $ref: '#/components/schemas/Client.ClientWrappedSignIn-2'
     Client.SignUp:
       description: Returns the sign up object, as well as the updated session object.
       content:
@@ -11450,12 +11482,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedImage'
-    responses-Client.ClientWrappedUser:
+    Client.ClientWrappedUser-2:
       description: Returns the response for Session wrapped User object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/schemas-Client.ClientWrappedUser'
+            $ref: '#/components/schemas/Client.ClientWrappedUser-2'
     Client.ClientWrappedOrganizationMemberships:
       description: Returns the response for Client wrapped array of OrganizationMembership objects.
       content:
@@ -11492,12 +11524,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedOrganization'
-    responses-Client.ClientWrappedOrganization:
+    Client.ClientWrappedOrganization-2:
       description: Returns the response for Client wrapped Organization object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/schemas-Client.ClientWrappedOrganization'
+            $ref: '#/components/schemas/Client.ClientWrappedOrganization-2'
     Client.ClientWrappedOrganizationInvitations:
       description: Returns the response for Client wrapped array of OrganizationInvitation objects.
       content:
