@@ -8893,7 +8893,7 @@ paths:
               $ref: '#/components/schemas/ExtendFreeTrialRequest'
       responses:
         '200':
-          $ref: '#/components/responses/responses-CommerceSubscriptionItem'
+          $ref: '#/components/responses/CommerceSubscriptionItem-2'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '401':
@@ -14628,7 +14628,7 @@ components:
           type: integer
           format: int64
           description: Unix timestamp (in milliseconds) when the payer was last updated.
-    schemas-CommercePerUnitTotalTier:
+    CommercePerUnitTotalTier-2:
       type: object
       additionalProperties: false
       properties:
@@ -14658,11 +14658,11 @@ components:
         tiers:
           type: array
           items:
-            $ref: '#/components/schemas/schemas-CommercePerUnitTotalTier'
+            $ref: '#/components/schemas/CommercePerUnitTotalTier-2'
           description: Per-unit cost breakdown by pricing tier
       required:
         - quantity
-    schemas-CommercePerUnitTotal:
+    CommercePerUnitTotal-2:
       type: object
       additionalProperties: false
       properties:
@@ -14676,7 +14676,7 @@ components:
         tiers:
           type: array
           items:
-            $ref: '#/components/schemas/schemas-CommercePerUnitTotalTier'
+            $ref: '#/components/schemas/CommercePerUnitTotalTier-2'
           description: Computed totals for each pricing tier
       required:
         - name
@@ -14722,7 +14722,7 @@ components:
       required:
         - proration
         - total
-    schemas-CommerceTotalsResponse:
+    CommerceTotalsResponse-2:
       type: object
       additionalProperties: false
       properties:
@@ -14737,7 +14737,7 @@ components:
         per_unit_totals:
           type: array
           items:
-            $ref: '#/components/schemas/schemas-CommercePerUnitTotal'
+            $ref: '#/components/schemas/CommercePerUnitTotal-2'
         credits:
           allOf:
             - $ref: '#/components/schemas/CommerceCreditsResponse'
@@ -14883,7 +14883,7 @@ components:
           description: Seat quantity for seat-based billing.
         totals:
           allOf:
-            - $ref: '#/components/schemas/schemas-CommerceTotalsResponse'
+            - $ref: '#/components/schemas/CommerceTotalsResponse-2'
           nullable: true
           description: Totals for this subscription item.
     CommerceSubscriptionNextPayment:
@@ -14903,11 +14903,11 @@ components:
         per_unit_totals:
           type: array
           items:
-            $ref: '#/components/schemas/schemas-CommercePerUnitTotal'
+            $ref: '#/components/schemas/CommercePerUnitTotal-2'
           description: Per-unit total breakdown (for example, seats) for the next payment.
         totals:
           allOf:
-            - $ref: '#/components/schemas/schemas-CommerceTotalsResponse'
+            - $ref: '#/components/schemas/CommerceTotalsResponse-2'
           nullable: true
           description: Breakdown of the recurring amount that will be billed at renewal (base fee + per-unit charges). Tax and credits are not previewed.
     CommerceSubscription:
@@ -17197,7 +17197,7 @@ components:
             RFC3339 timestamp to extend the free trial to.
             Must be in the future and not more than 365 days from now.
           example: '2026-01-08T00:00:00Z'
-    schemas-FeatureResponse:
+    FeatureResponse-2:
       type: object
       additionalProperties: false
       required:
@@ -17228,7 +17228,7 @@ components:
         avatar_url:
           type: string
           description: The URL of the feature's avatar image.
-    schemas-CommercePlan:
+    CommercePlan-2:
       type: object
       additionalProperties: false
       required:
@@ -17350,7 +17350,7 @@ components:
         features:
           type: array
           items:
-            $ref: '#/components/schemas/schemas-FeatureResponse'
+            $ref: '#/components/schemas/FeatureResponse-2'
           description: The features included in this plan.
         free_trial_enabled:
           type: boolean
@@ -17442,7 +17442,7 @@ components:
           type: boolean
           nullable: true
           description: Whether this payment source can be removed.
-    schemas-CommercePayerResponse:
+    CommercePayerResponse-2:
       type: object
       additionalProperties: false
       required:
@@ -17499,7 +17499,7 @@ components:
           type: integer
           format: int64
           description: Unix timestamp (in milliseconds) when the payer was last updated.
-    schemas-CommerceSubscriptionItem:
+    CommerceSubscriptionItem-2:
       type: object
       additionalProperties: false
       required:
@@ -17551,7 +17551,7 @@ components:
           description: Unique identifier for the associated price
         plan:
           allOf:
-            - $ref: '#/components/schemas/schemas-CommercePlan'
+            - $ref: '#/components/schemas/CommercePlan-2'
           nullable: true
           description: The associated commerce plan.
         plan_period:
@@ -17593,7 +17593,7 @@ components:
           description: Unique identifier for the payer.
         payer:
           allOf:
-            - $ref: '#/components/schemas/schemas-CommercePayerResponse'
+            - $ref: '#/components/schemas/CommercePayerResponse-2'
           nullable: true
           description: The payer associated with this subscription.
         is_free_trial:
@@ -17661,7 +17661,7 @@ components:
         - previous_subscription_item_id
       properties:
         previous_plan:
-          $ref: '#/components/schemas/schemas-CommercePlan'
+          $ref: '#/components/schemas/CommercePlan-2'
         previous_price:
           $ref: '#/components/schemas/BillingPriceResponse'
         effective_at:
@@ -17711,7 +17711,7 @@ components:
           enum:
             - commerce_price_transition
         subscription_item:
-          $ref: '#/components/schemas/schemas-CommerceSubscriptionItem'
+          $ref: '#/components/schemas/CommerceSubscriptionItem-2'
         transition:
           $ref: '#/components/schemas/CommercePriceTransitionDetails'
     BillingPaymentAttempt:
@@ -17779,7 +17779,7 @@ components:
           description: The amount for this payment attempt.
         totals:
           allOf:
-            - $ref: '#/components/schemas/schemas-CommerceTotalsResponse'
+            - $ref: '#/components/schemas/CommerceTotalsResponse-2'
           nullable: true
           description: Totals breakdown for this payment attempt.
         payment_method_id:
@@ -18858,12 +18858,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CommerceSubscriptionItem'
-    responses-CommerceSubscriptionItem:
+    CommerceSubscriptionItem-2:
       description: A commerce subscription item.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/schemas-CommerceSubscriptionItem'
+            $ref: '#/components/schemas/CommerceSubscriptionItem-2'
     CommercePriceTransition:
       description: A commerce price transition.
       content:
