@@ -179,6 +179,22 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/WellKnown.OAuth2AuthorizationServerMetadata'
+  /.well-known/webauthn:
+    get:
+      summary: WebAuthn Related Origins
+      description: |-
+        Get the WebAuthn Related Origin Requests document. Only available when
+        the instance uses the auth_host passkey RP ID strategy; returns a not
+        found error otherwise.
+      operationId: getWebAuthnRelatedOrigins
+      security: []
+      tags:
+        - Well Known
+      responses:
+        '200':
+          $ref: '#/components/responses/WellKnown.WebAuthn'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
   /oauth/authorize:
     get:
       summary: Request OAuth2 authorization
@@ -1334,7 +1350,7 @@ paths:
                 - password
       responses:
         '200':
-          $ref: '#/components/responses/responses-Client.SignIn'
+          $ref: '#/components/responses/Client.SignIn-2'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '422':
@@ -2777,14 +2793,916 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
-  /v1/organizations/{organizationID}/enterprise_connections: {}
-  /v1/organizations/{organizationID}/enterprise_connections/{enterprise_connection_id}: {}
-  /v1/organizations/{organizationID}/enterprise_connections/{enterprise_connection_id}/test_runs: {}
-  /v1/me/enterprise_connections: {}
-  /v1/me/enterprise_connections/{enterprise_connection_id}: {}
-  /v1/me/enterprise_connections/{enterprise_connection_id}/test_runs: {}
-  /v1/enterprise_connections/{enterpriseConnectionID}/init_test_run: {}
-  /v1/enterprise_connections/{enterpriseConnectionID}/test_runs/{testRunID}: {}
+  /v1/organizations/{organizationID}/enterprise_connections:
+    get:
+      operationId: listOrganizationEnterpriseConnections
+      summary: List enterprise connections for the active organization
+      description: |
+        Returns the active enterprise connections visible to the requesting user within the active organization
+        context. The active organization is taken from the session, not the URL path. Unless the
+        `with_organization_account_linking` query is `true`, the result set is filtered to connections whose domains
+        match the user's verified primary email address.
+      tags:
+        - Enterprise Connections
+      parameters:
+        - in: path
+          name: organizationID
+          required: true
+          schema:
+            type: string
+          description: The ID of the active organization
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedEnterpriseConnections'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+    post:
+      operationId: createOrganizationEnterpriseConnection
+      summary: Create enterprise connection for an organization
+      description: |
+        Creates an enterprise connection bound to the organization in the URL path. The caller's session must be pinned
+        to that organization and the caller must hold the `org:sys_entconns:manage` permission.
+      tags:
+        - Enterprise Connections
+      parameters:
+        - in: path
+          name: organizationID
+          required: true
+          schema:
+            type: string
+          description: The ID of the active organization
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - provider
+                - domains
+              properties:
+                provider:
+                  type: string
+                  enum:
+                    - saml_custom
+                    - saml_okta
+                    - saml_google
+                    - saml_microsoft
+                    - oidc_custom
+                    - oidc_github_enterprise
+                    - oidc_gitlab
+                  description: SSO provider type
+                name:
+                  type: string
+                  description: |
+                    Optional display name for the enterprise connection. When omitted (or sent empty),
+                    the name defaults to the requesting user's primary email address domain, falling
+                    back to the organization's name.
+                domains:
+                  type: array
+                  items:
+                    type: string
+                  minItems: 1
+                  description: |
+                    Domains served by this enterprise connection. Repeated values are sent as multiple
+                    `domains` form fields (e.g. `domains=acme.test&domains=beta.acme.test`). Each entry is lowercased,
+                    trimmed, and deduplicated server-side. Every supplied domain must already exist as one of the
+                    organization's domains with verified ownership (see the organization domains verification flow)
+                    and the `enterprise_sso` enrollment mode; the whole request is rejected with a 422 if any domain
+                    is missing, unverified, or configured with a different enrollment mode.
+                saml_idp_entity_id:
+                  type: string
+                  nullable: true
+                  description: SAML IdP entity ID (only when using a SAML provider)
+                saml_idp_sso_url:
+                  type: string
+                  nullable: true
+                  description: SAML IdP SSO URL (only when using a SAML provider)
+                saml_idp_certificate:
+                  type: string
+                  nullable: true
+                  description: SAML IdP X.509 certificate (only when using a SAML provider)
+                saml_idp_metadata_url:
+                  type: string
+                  nullable: true
+                  description: SAML IdP metadata URL (only when using a SAML provider)
+                saml_idp_metadata:
+                  type: string
+                  nullable: true
+                  description: SAML IdP metadata XML document (only when using a SAML provider)
+                saml_attribute_mapping:
+                  type: string
+                  nullable: true
+                  description: |
+                    JSON-encoded IdP attribute mapping (only when using a SAML provider).
+                    Shape depends on provider.
+                saml_allow_subdomains:
+                  type: boolean
+                  nullable: true
+                saml_allow_idp_initiated:
+                  type: boolean
+                  nullable: true
+                saml_force_authn:
+                  type: boolean
+                  nullable: true
+                oidc_client_id:
+                  type: string
+                  nullable: true
+                  description: OIDC client ID (only when using an OIDC provider)
+                oidc_client_secret:
+                  type: string
+                  nullable: true
+                  description: OIDC client secret (only when using an OIDC provider)
+                oidc_discovery_url:
+                  type: string
+                  nullable: true
+                  description: OIDC discovery URL (only when using an OIDC provider)
+                oidc_auth_url:
+                  type: string
+                  nullable: true
+                  description: OIDC authorization endpoint URL (only when using an OIDC provider)
+                oidc_token_url:
+                  type: string
+                  nullable: true
+                  description: OIDC token endpoint URL (only when using an OIDC provider)
+                oidc_user_info_url:
+                  type: string
+                  nullable: true
+                  description: OIDC user info endpoint URL (only when using an OIDC provider)
+                oidc_requires_pkce:
+                  type: boolean
+                  nullable: true
+      responses:
+        '201':
+          $ref: '#/components/responses/Client.ClientWrappedEnterpriseConnection'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/organizations/{organizationID}/enterprise_connections/{enterprise_connection_id}:
+    patch:
+      operationId: updateOrganizationEnterpriseConnection
+      summary: Update enterprise connection for an organization
+      description: |
+        Updates an enterprise connection bound to the organization in the URL path. The caller's session must be pinned
+        to that organization and the caller must hold the `org:sys_entconns:manage` permission.
+      tags:
+        - Enterprise Connections
+      parameters:
+        - in: path
+          name: organizationID
+          required: true
+          schema:
+            type: string
+          description: The ID of the active organization
+        - in: path
+          name: enterprise_connection_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the enterprise connection
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                name:
+                  type: string
+                  nullable: true
+                domains:
+                  type: array
+                  nullable: true
+                  items:
+                    type: string
+                  description: |
+                    Replacement domains for this enterprise connection. Repeated values are sent as multiple
+                    `domains` form fields (e.g. `domains=acme.test&domains=beta.acme.test`). Every supplied domain
+                    must already exist as one of the organization's domains with verified ownership and the
+                    `enterprise_sso` enrollment mode.
+                active:
+                  type: boolean
+                  nullable: true
+                sync_user_attributes:
+                  type: boolean
+                  nullable: true
+                disable_additional_identifications:
+                  type: boolean
+                  nullable: true
+                custom_attributes:
+                  type: string
+                  nullable: true
+                  description: |
+                    JSON-encoded custom attributes (only when enabled for the instance).
+                saml_idp_entity_id:
+                  type: string
+                  nullable: true
+                saml_idp_sso_url:
+                  type: string
+                  nullable: true
+                saml_idp_certificate:
+                  type: string
+                  nullable: true
+                saml_idp_metadata_url:
+                  type: string
+                  nullable: true
+                saml_idp_metadata:
+                  type: string
+                  nullable: true
+                saml_attribute_mapping:
+                  type: string
+                  nullable: true
+                  description: JSON-encoded IdP attribute mapping. Shape depends on provider.
+                saml_allow_subdomains:
+                  type: boolean
+                  nullable: true
+                saml_allow_idp_initiated:
+                  type: boolean
+                  nullable: true
+                saml_force_authn:
+                  type: boolean
+                  nullable: true
+                oidc_client_id:
+                  type: string
+                  nullable: true
+                oidc_client_secret:
+                  type: string
+                  nullable: true
+                oidc_discovery_url:
+                  type: string
+                  nullable: true
+                oidc_auth_url:
+                  type: string
+                  nullable: true
+                oidc_token_url:
+                  type: string
+                  nullable: true
+                oidc_user_info_url:
+                  type: string
+                  nullable: true
+                oidc_requires_pkce:
+                  type: boolean
+                  nullable: true
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedEnterpriseConnection'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      operationId: deleteOrganizationEnterpriseConnection
+      summary: Delete enterprise connection for an organization
+      description: |
+        Deletes an enterprise connection bound to the organization in the URL path. The caller's session must be pinned
+        to that organization and the caller must hold the `org:sys_entconns:manage` permission.
+      tags:
+        - Enterprise Connections
+      parameters:
+        - in: path
+          name: organizationID
+          required: true
+          schema:
+            type: string
+          description: The ID of the active organization
+        - in: path
+          name: enterprise_connection_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the enterprise connection to delete
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedDeletedObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/organizations/{organizationID}/enterprise_connections/{enterprise_connection_id}/test_runs:
+    get:
+      operationId: listOrganizationEnterpriseConnectionTestRuns
+      summary: List enterprise connection test runs for an organization
+      description: |
+        Returns a paginated list of SAML or OIDC debug test runs for an organization-bound enterprise connection.
+      tags:
+        - Enterprise Connections
+      parameters:
+        - in: path
+          name: organizationID
+          required: true
+          schema:
+            type: string
+          description: The ID of the active organization
+        - in: path
+          name: enterprise_connection_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the enterprise connection
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - pending
+                - success
+                - failed
+          style: form
+          explode: true
+          description: Filter test runs by status (may be repeated)
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/Paginated'
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedEnterpriseConnectionTestRunsList'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    post:
+      operationId: createOrganizationEnterpriseConnectionTestRun
+      summary: Create enterprise connection test run for an organization
+      description: |
+        Returns a short-lived URL that starts the IdP test flow for an organization-bound enterprise connection.
+      tags:
+        - Enterprise Connections
+      parameters:
+        - in: path
+          name: organizationID
+          required: true
+          schema:
+            type: string
+          description: The ID of the active organization
+        - in: path
+          name: enterprise_connection_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the enterprise connection
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedEnterpriseConnectionTestRun'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/me/enterprise_connections:
+    get:
+      operationId: getMeEnterpriseConnections
+      deprecated: true
+      summary: List enterprise connections for the current user
+      description: |
+        **Deprecated.** Use `GET /v1/organizations/{organizationID}/enterprise_connections` instead.
+
+        Returns active enterprise connections on the instance whose domains match the **verified** primary email address
+        of the current user. If the user has no primary email or it is not verified, the list is empty.
+      tags:
+        - Enterprise Connections
+      parameters:
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedEnterpriseConnections'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+    post:
+      operationId: createMeEnterpriseConnection
+      deprecated: true
+      summary: Create enterprise connection
+      description: |
+        **Deprecated.** Use `POST /v1/organizations/{organizationID}/enterprise_connections` instead.
+
+        Creates an enterprise connection for the instance.
+      tags:
+        - Enterprise Connections
+      parameters:
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - provider
+                - domains
+              properties:
+                provider:
+                  type: string
+                  enum:
+                    - saml_custom
+                    - saml_okta
+                    - saml_google
+                    - saml_microsoft
+                    - oidc_custom
+                    - oidc_github_enterprise
+                    - oidc_gitlab
+                  description: SSO provider type
+                name:
+                  type: string
+                  description: |
+                    Optional display name for the enterprise connection. When omitted,
+                    the name defaults to the requesting user's primary email address domain, falling
+                    back to the current user's active organization's name.
+                domains:
+                  type: array
+                  items:
+                    type: string
+                  minItems: 1
+                  description: |
+                    Domains served by this enterprise connection. Repeated values are sent as multiple
+                    `domains` form fields (e.g. `domains=acme.test&domains=beta.acme.test`). Each entry is lowercased,
+                    trimmed, and deduplicated server-side. Every supplied domain must already exist as one of the
+                    organization's domains with verified ownership and the `enterprise_sso` enrollment mode; the whole
+                    request is rejected with a 422 if any domain is missing, unverified, or configured with a different
+                    enrollment mode.
+                organization_id:
+                  type: string
+                  nullable: true
+                  description: Optional organization ID to associate with this connection
+                saml_idp_entity_id:
+                  type: string
+                  nullable: true
+                  description: SAML IdP entity ID (only when using a SAML provider)
+                saml_idp_sso_url:
+                  type: string
+                  nullable: true
+                  description: SAML IdP SSO URL (only when using a SAML provider)
+                saml_idp_certificate:
+                  type: string
+                  nullable: true
+                  description: SAML IdP X.509 certificate (only when using a SAML provider)
+                saml_idp_metadata_url:
+                  type: string
+                  nullable: true
+                  description: SAML IdP metadata URL (only when using a SAML provider)
+                saml_idp_metadata:
+                  type: string
+                  nullable: true
+                  description: SAML IdP metadata XML document (only when using a SAML provider)
+                saml_attribute_mapping:
+                  type: string
+                  nullable: true
+                  description: |
+                    JSON-encoded IdP attribute mapping (only when using a SAML provider).
+                    Shape depends on provider.
+                saml_allow_subdomains:
+                  type: boolean
+                  nullable: true
+                saml_allow_idp_initiated:
+                  type: boolean
+                  nullable: true
+                saml_force_authn:
+                  type: boolean
+                  nullable: true
+                oidc_client_id:
+                  type: string
+                  nullable: true
+                  description: OIDC client ID (only when using an OIDC provider)
+                oidc_client_secret:
+                  type: string
+                  nullable: true
+                  description: OIDC client secret (only when using an OIDC provider)
+                oidc_discovery_url:
+                  type: string
+                  nullable: true
+                  description: OIDC discovery URL (only when using an OIDC provider)
+                oidc_auth_url:
+                  type: string
+                  nullable: true
+                  description: OIDC authorization endpoint URL (only when using an OIDC provider)
+                oidc_token_url:
+                  type: string
+                  nullable: true
+                  description: OIDC token endpoint URL (only when using an OIDC provider)
+                oidc_user_info_url:
+                  type: string
+                  nullable: true
+                  description: OIDC user info endpoint URL (only when using an OIDC provider)
+                oidc_requires_pkce:
+                  type: boolean
+                  nullable: true
+      responses:
+        '201':
+          $ref: '#/components/responses/Client.ClientWrappedEnterpriseConnection'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/me/enterprise_connections/{enterprise_connection_id}:
+    patch:
+      operationId: updateMeEnterpriseConnection
+      deprecated: true
+      summary: Update enterprise connection
+      description: |
+        **Deprecated.** Use `PATCH /v1/organizations/{organizationID}/enterprise_connections/{enterprise_connection_id}` instead.
+
+        Updates an enterprise connection the current user may manage (verified primary email domain must match the connection).
+      tags:
+        - Enterprise Connections
+      parameters:
+        - in: path
+          name: enterprise_connection_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the enterprise connection
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                name:
+                  type: string
+                  nullable: true
+                domains:
+                  type: array
+                  nullable: true
+                  items:
+                    type: string
+                  description: |
+                    Replacement domains for this enterprise connection. Repeated values are sent as multiple
+                    `domains` form fields (e.g. `domains=acme.test&domains=beta.acme.test`). Every supplied domain
+                    must already exist as one of the organization's domains with verified ownership and the
+                    `enterprise_sso` enrollment mode.
+                active:
+                  type: boolean
+                  nullable: true
+                sync_user_attributes:
+                  type: boolean
+                  nullable: true
+                disable_additional_identifications:
+                  type: boolean
+                  nullable: true
+                organization_id:
+                  type: string
+                  nullable: true
+                custom_attributes:
+                  type: string
+                  nullable: true
+                  description: |
+                    JSON-encoded custom attributes (only when enabled for the instance).
+                saml_idp_entity_id:
+                  type: string
+                  nullable: true
+                saml_idp_sso_url:
+                  type: string
+                  nullable: true
+                saml_idp_certificate:
+                  type: string
+                  nullable: true
+                saml_idp_metadata_url:
+                  type: string
+                  nullable: true
+                saml_idp_metadata:
+                  type: string
+                  nullable: true
+                saml_attribute_mapping:
+                  type: string
+                  nullable: true
+                  description: JSON-encoded IdP attribute mapping. Shape depends on provider.
+                saml_allow_subdomains:
+                  type: boolean
+                  nullable: true
+                saml_allow_idp_initiated:
+                  type: boolean
+                  nullable: true
+                saml_force_authn:
+                  type: boolean
+                  nullable: true
+                oidc_client_id:
+                  type: string
+                  nullable: true
+                oidc_client_secret:
+                  type: string
+                  nullable: true
+                oidc_discovery_url:
+                  type: string
+                  nullable: true
+                oidc_auth_url:
+                  type: string
+                  nullable: true
+                oidc_token_url:
+                  type: string
+                  nullable: true
+                oidc_user_info_url:
+                  type: string
+                  nullable: true
+                oidc_requires_pkce:
+                  type: boolean
+                  nullable: true
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedEnterpriseConnection'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      operationId: deleteMeEnterpriseConnection
+      deprecated: true
+      summary: Delete enterprise connection
+      description: |
+        **Deprecated.** Use `DELETE /v1/organizations/{organizationID}/enterprise_connections/{enterprise_connection_id}` instead.
+
+        Deletes an enterprise connection the current user may manage (verified primary email domain must match the connection).
+      tags:
+        - Enterprise Connections
+      parameters:
+        - in: path
+          name: enterprise_connection_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the enterprise connection to delete
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedDeletedObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/me/enterprise_connections/{enterprise_connection_id}/test_runs:
+    get:
+      operationId: listMeEnterpriseConnectionTestRuns
+      deprecated: true
+      summary: List enterprise connection test runs
+      description: |
+        **Deprecated.** Use `GET /v1/organizations/{organizationID}/enterprise_connections/{enterprise_connection_id}/test_runs` instead.
+
+        Returns a paginated list of SAML or OIDC debug test runs for the connection.
+      tags:
+        - Enterprise Connections
+      parameters:
+        - in: path
+          name: enterprise_connection_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the enterprise connection
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - pending
+                - success
+                - failed
+          style: form
+          explode: true
+          description: Filter test runs by status (may be repeated)
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+        - $ref: '#/components/parameters/Paginated'
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedEnterpriseConnectionTestRunsList'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    post:
+      operationId: createMeEnterpriseConnectionTestRun
+      deprecated: true
+      summary: Create enterprise connection test run
+      description: |
+        **Deprecated.** Use `POST /v1/organizations/{organizationID}/enterprise_connections/{enterprise_connection_id}/test_runs` instead.
+
+        Returns a short-lived URL that starts the IdP test flow for this connection.
+      tags:
+        - Enterprise Connections
+      parameters:
+        - in: path
+          name: enterprise_connection_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the enterprise connection
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedEnterpriseConnectionTestRun'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/enterprise_connections/{enterpriseConnectionID}/init_test_run:
+    get:
+      operationId: initEnterpriseConnectionTestRun
+      security: []
+      tags:
+        - Enterprise Connections
+      summary: Initiate enterprise connection test run
+      description: |
+        Initiates a test run for an enterprise connection.
+        Validates the provided ticket and redirects to the Identity Provider for authentication.
+      parameters:
+        - name: enterpriseConnectionID
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the enterprise connection to test
+        - name: ticket
+          in: query
+          required: true
+          schema:
+            type: string
+          description: A ticket that authorizes and expires this test run request
+      responses:
+        '301':
+          description: Redirect to Identity Provider for authentication
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /v1/enterprise_connections/{enterpriseConnectionID}/test_runs/{testRunID}:
+    get:
+      operationId: getEnterpriseConnectionTestRunResult
+      security: []
+      tags:
+        - Enterprise Connections
+      summary: Get enterprise connection test run result
+      description: |
+        Returns the result of an enterprise connection test run as an HTML page.
+        Displays success or error status with detailed information about the test run.
+      parameters:
+        - name: enterpriseConnectionID
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the enterprise connection
+        - name: testRunID
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the test run (SAML debug run or OAuth debug run)
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+          description: A token that authorizes access to view the test run results
+      responses:
+        '200':
+          description: HTML page displaying the test run result
+          content:
+            text/html:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /v1/me/email_addresses:
     get:
       operationId: getEmailAddresses
@@ -4057,7 +4975,7 @@ paths:
                   nullable: true
       responses:
         '200':
-          $ref: '#/components/responses/responses-Client.ClientWrappedUser'
+          $ref: '#/components/responses/Client.ClientWrappedUser-2'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '403':
@@ -4083,7 +5001,7 @@ paths:
                   type: string
       responses:
         '200':
-          $ref: '#/components/responses/responses-Client.ClientWrappedUser'
+          $ref: '#/components/responses/Client.ClientWrappedUser-2'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '403':
@@ -5373,7 +6291,7 @@ paths:
               format: base64
       responses:
         '200':
-          $ref: '#/components/responses/responses-Client.ClientWrappedOrganization'
+          $ref: '#/components/responses/Client.ClientWrappedOrganization-2'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '401':
@@ -5884,9 +6802,168 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
-  /v1/organizations/{organization_id}/domains/bulk: {}
-  /v1/organizations/{organization_id}/domains/prepare_ownership_verification/bulk: {}
-  /v1/organizations/{organization_id}/domains/attempt_ownership_verification/bulk: {}
+  /v1/organizations/{organization_id}/domains/bulk:
+    post:
+      summary: Bulk Create Organization Domains
+      description: |-
+        Creates up to 10 organization domains by name. Duplicate names in the
+        request are skipped. The response is a partial-success payload:
+        successfully created domains are returned in `data`, while per-name
+        failures are returned in `errors`.
+
+        The current user must have permissions to manage the domains of the
+        organization. Requires the self-serve SSO feature to be enabled on the
+        instance.
+      tags:
+        - Domains
+      operationId: createOrganizationDomainsBulk
+      parameters:
+        - in: path
+          required: true
+          name: organization_id
+          schema:
+            type: string
+          description: The organization ID.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                names:
+                  type: array
+                  maxItems: 10
+                  items:
+                    type: string
+                  description: The domain names to create.
+                enrollment_mode:
+                  type: string
+                  description: The enrollment mode for the new domains. Defaults to `manual_invitation`.
+                  nullable: true
+                  enum:
+                    - manual_invitation
+                    - automatic_invitation
+                    - automatic_suggestion
+                    - enterprise_sso
+              required:
+                - names
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedOrganizationDomainBulkCreate'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
+  /v1/organizations/{organization_id}/domains/prepare_ownership_verification/bulk:
+    post:
+      summary: Bulk Prepare Organization Domain Ownership Verification
+      description: |-
+        Collection-level bulk counterpart of the single
+        `/domains/{domain_id}/prepare_ownership_verification` endpoint. Accepts a
+        set of `organization_domain_ids` and issues a fresh TXT challenge for
+        each. The plaintext TXT record value for each prepared domain is returned
+        in the response payload and is only stored as a bcrypt digest on the
+        server. Re-preparing replaces any prior outstanding TXT challenge for the
+        same domain.
+
+        The current user must have permissions to manage the domains of the
+        organization. Requires the self-serve SSO feature to be enabled on the
+        instance.
+      tags:
+        - Domains
+      operationId: prepareOrganizationDomainsOwnershipVerification
+      parameters:
+        - in: path
+          required: true
+          name: organization_id
+          schema:
+            type: string
+          description: The organization ID.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                organization_domain_ids:
+                  type: array
+                  items:
+                    type: string
+                  description: The organization domain IDs to prepare ownership verification for.
+              required:
+                - organization_domain_ids
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedOrganizationDomainBulkOwnershipVerification'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
+  /v1/organizations/{organization_id}/domains/attempt_ownership_verification/bulk:
+    post:
+      summary: Bulk Attempt Organization Domain Ownership Verification
+      description: |-
+        Collection-level bulk counterpart of the single
+        `/domains/{domain_id}/attempt_ownership_verification` endpoint. Accepts a
+        set of `organization_domain_ids` and runs the same TXT ownership attempt
+        for each.
+      tags:
+        - Domains
+      operationId: attemptOrganizationDomainsOwnershipVerification
+      parameters:
+        - in: path
+          required: true
+          name: organization_id
+          schema:
+            type: string
+          description: The organization ID.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                organization_domain_ids:
+                  type: array
+                  items:
+                    type: string
+                  description: The organization domain IDs to attempt ownership verification for.
+              required:
+                - organization_domain_ids
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedOrganizationDomainBulkOwnershipVerification'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
   /v1/organizations/{organization_id}/domains/{domain_id}:
     get:
       summary: Get Organization Domain
@@ -6100,8 +7177,92 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
-  /v1/organizations/{organization_id}/domains/{domain_id}/prepare_ownership_verification: {}
-  /v1/organizations/{organization_id}/domains/{domain_id}/attempt_ownership_verification: {}
+  /v1/organizations/{organization_id}/domains/{domain_id}/prepare_ownership_verification:
+    post:
+      summary: Prepare Organization Domain Ownership Verification
+      description: |-
+        Issues a fresh TXT challenge for the organization domain. The plaintext
+        TXT record value is returned in the response payload and is only stored
+        as a bcrypt digest on the server. Re-preparing replaces any prior
+        outstanding TXT challenge for the same domain.
+
+        The current user must have permissions to manage the domains of the
+        organization. Requires the self-serve SSO feature to be enabled on the
+        instance.
+      tags:
+        - Domains
+      operationId: prepareOrganizationDomainOwnershipVerification
+      parameters:
+        - in: path
+          required: true
+          name: organization_id
+          schema:
+            type: string
+          description: The organization ID.
+        - in: path
+          required: true
+          name: domain_id
+          schema:
+            type: string
+          description: The domain ID.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedOrganizationDomain'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
+  /v1/organizations/{organization_id}/domains/{domain_id}/attempt_ownership_verification:
+    post:
+      summary: Attempt Organization Domain Ownership Verification
+      description: |-
+        Resolves the TXT record for the organization domain and, on a successful
+        match against the outstanding challenge, marks the domain as
+        ownership-verified and emits an `organization_domain.ownership_verified`
+        audit event.
+
+        The current user must have permissions to manage the domains of the
+        organization. Requires the self-serve SSO feature to be enabled on the
+        instance.
+      tags:
+        - Domains
+      operationId: attemptOrganizationDomainOwnershipVerification
+      parameters:
+        - in: path
+          required: true
+          name: organization_id
+          schema:
+            type: string
+          description: The organization ID.
+        - in: path
+          required: true
+          name: domain_id
+          schema:
+            type: string
+          description: The domain ID.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedOrganizationDomain'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
   /v1/organizations/{organization_id}/membership_requests:
     get:
       summary: Get Organization Membership Requests
@@ -7619,6 +8780,16 @@ components:
         - id_token_signing_alg_values_supported
         - claims_supported
         - code_challenge_methods_supported
+    WellKnown.WebAuthn:
+      type: object
+      additionalProperties: false
+      properties:
+        origins:
+          type: array
+          items:
+            type: string
+      required:
+        - origins
     OAuth.DynamicClientRegistrationRequest:
       type: object
       additionalProperties: false
@@ -8581,6 +9752,10 @@ components:
           type: integer
         admin_delete_enabled:
           type: boolean
+        self_serve_sso_enabled:
+          type: boolean
+          description: |
+            Whether this organization can configure self-serve enterprise SSO.
         public_metadata:
           type: object
           additionalProperties: true
@@ -10539,9 +11714,14 @@ components:
           type: boolean
           description: Passkey UI will be shown when user clicks on a button.
           default: true
+        satisfies_second_factor:
+          type: boolean
+          description: Whether signing in with a passkey satisfies an existing second-factor requirement (skipping the second-factor prompt).
+          default: true
       required:
         - allow_autofill
         - show_sign_in_button
+        - satisfies_second_factor
     Client.UserSettings:
       type: object
       additionalProperties: false
@@ -10778,7 +11958,7 @@ components:
           type: string
       required:
         - key
-    schemas-Client.SessionBase:
+    Client.SessionBase-2:
       type: object
       properties:
         id:
@@ -10829,9 +12009,9 @@ components:
         - expire_at
         - abandon_at
         - last_active_at
-    schemas-Client.Session:
+    Client.Session-2:
       allOf:
-        - $ref: '#/components/schemas/schemas-Client.SessionBase'
+        - $ref: '#/components/schemas/Client.SessionBase-2'
         - type: object
           properties:
             last_active_organization_id:
@@ -10865,7 +12045,7 @@ components:
             - factor_verification_age
             - created_at
             - updated_at
-    schemas-Client.SignIn:
+    Client.SignIn-2:
       type: object
       additionalProperties: false
       properties:
@@ -10987,7 +12167,7 @@ components:
         - user_data
         - created_session_id
         - abandon_at
-    schemas-Client.Client:
+    Client.Client-2:
       type: object
       nullable: true
       properties:
@@ -11002,12 +12182,12 @@ components:
         sessions:
           type: array
           items:
-            $ref: '#/components/schemas/schemas-Client.Session'
+            $ref: '#/components/schemas/Client.Session-2'
         sign_in:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.SignIn'
+            - $ref: '#/components/schemas/Client.SignIn-2'
         sign_up:
           type: object
           nullable: true
@@ -11058,12 +12238,12 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
         client:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11075,7 +12255,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
         client:
           type: object
           nullable: true
@@ -11087,13 +12267,13 @@ components:
       additionalProperties: false
       properties:
         response:
-          $ref: '#/components/schemas/schemas-Client.SignIn'
+          $ref: '#/components/schemas/Client.SignIn-2'
         client:
-          $ref: '#/components/schemas/schemas-Client.Client'
+          $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
-    schemas-Client.ClientWrappedSignIn:
+    Client.ClientWrappedSignIn-2:
       type: object
       additionalProperties: false
       properties:
@@ -11111,7 +12291,7 @@ components:
         response:
           $ref: '#/components/schemas/Client.SignUp'
         client:
-          $ref: '#/components/schemas/schemas-Client.Client'
+          $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11120,9 +12300,9 @@ components:
       additionalProperties: false
       properties:
         response:
-          $ref: '#/components/schemas/schemas-Client.Session'
+          $ref: '#/components/schemas/Client.Session-2'
         client:
-          $ref: '#/components/schemas/schemas-Client.Client'
+          $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11131,10 +12311,10 @@ components:
       additionalProperties: false
       properties:
         response:
-          $ref: '#/components/schemas/schemas-Client.Session'
+          $ref: '#/components/schemas/Client.Session-2'
         client:
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
           nullable: true
       required:
         - response
@@ -11166,7 +12346,7 @@ components:
         - is_mobile
     Client.ActiveSession:
       allOf:
-        - $ref: '#/components/schemas/schemas-Client.SessionBase'
+        - $ref: '#/components/schemas/Client.SessionBase-2'
         - type: object
           properties:
             latest_activity:
@@ -11220,7 +12400,7 @@ components:
         session:
           type: object
           oneOf:
-            - $ref: '#/components/schemas/schemas-Client.SessionBase'
+            - $ref: '#/components/schemas/Client.SessionBase-2'
       required:
         - object
         - level
@@ -11236,32 +12416,178 @@ components:
         response:
           $ref: '#/components/schemas/Client.SessionReverification'
         client:
-          $ref: '#/components/schemas/schemas-Client.Client'
+          $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
     Server.Sessions:
       type: array
       items:
-        $ref: '#/components/schemas/schemas-Client.Session'
-    Server.UserEmailAddresses:
-      type: array
-      items:
-        $ref: '#/components/schemas/Client.EmailAddress'
-    Client.ClientWrappedEmailAddress:
+        $ref: '#/components/schemas/Client.Session-2'
+    EnterpriseConnectionResponse:
+      type: object
+      required:
+        - id
+        - name
+        - provider
+        - active
+        - domains
+        - sync_user_attributes
+        - disable_additional_identifications
+        - allow_organization_account_linking
+        - authenticatable
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          description: The enterprise connection ID
+        name:
+          type: string
+          description: The display name of the connection
+        provider:
+          type: string
+        logo_public_url:
+          type: string
+          nullable: true
+        active:
+          type: boolean
+          description: Whether the enterprise connection is active
+        domains:
+          type: array
+          items:
+            type: string
+          description: Domains associated with the enterprise connection
+        organization_id:
+          type: string
+          description: Organization ID when the connection is linked to an organization
+        sync_user_attributes:
+          type: boolean
+          description: Whether user attributes are synced from the identity provider on each sign-in
+        disable_additional_identifications:
+          type: boolean
+          description: Whether additional identification methods are disabled for users signing in through this connection
+        allow_organization_account_linking:
+          type: boolean
+          description: Whether this connection supports account linking via organization membership
+        saml_connection:
+          type: object
+          description: Present when the enterprise connection uses SAML
+          properties:
+            id:
+              type: string
+              description: SAML connection ID
+            name:
+              type: string
+              description: SAML connection display name
+            idp_entity_id:
+              type: string
+              description: IdP entity ID (optional, when connection details are loaded)
+            idp_sso_url:
+              type: string
+              description: IdP SSO URL (optional, when connection details are loaded)
+            idp_metadata_url:
+              type: string
+              description: IdP metadata URL (optional, when connection details are loaded)
+            acs_url:
+              type: string
+              description: Assertion Consumer Service URL
+            sp_entity_id:
+              type: string
+              description: Service Provider entity ID
+            sp_metadata_url:
+              type: string
+              description: Service Provider metadata URL
+            active:
+              type: boolean
+              description: Whether the SAML connection is active
+            allow_idp_initiated:
+              type: boolean
+              description: Whether IdP-initiated SSO is allowed
+            allow_subdomains:
+              type: boolean
+              description: Whether subdomains are allowed for domain matching
+            force_authn:
+              type: boolean
+              description: Whether to force re-authentication
+        oauth_config:
+          type: object
+          description: Present when the enterprise connection uses OIDC
+          properties:
+            id:
+              type: string
+              description: OAuth config ID
+            name:
+              type: string
+              description: Custom OIDC provider display name
+            provider_key:
+              type: string
+              description: OAuth provider key (e.g. oidc_custom, oidc_ghe_*, oidc_gitlab_ent_*)
+            client_id:
+              type: string
+              description: OAuth client ID
+            discovery_url:
+              type: string
+              description: OIDC discovery URL
+            auth_url:
+              type: string
+              description: OAuth authorization endpoint URL (present when configured or resolved from discovery)
+            token_url:
+              type: string
+              description: OAuth token endpoint URL (present when configured or resolved from discovery)
+            user_info_url:
+              type: string
+              description: OIDC userinfo endpoint URL (present when configured or resolved from discovery)
+            requires_pkce:
+              type: boolean
+              description: Whether PKCE is required for this OAuth client
+            logo_public_url:
+              type: string
+              description: Logo URL for the provider
+            created_at:
+              type: integer
+              format: int64
+              description: Unix timestamp in milliseconds when the config was created
+            updated_at:
+              type: integer
+              format: int64
+              description: Unix timestamp in milliseconds when the config was last updated
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the connection was created
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the connection was last updated
+    Client.ClientWrappedEnterpriseConnections:
       type: object
       additionalProperties: false
       properties:
         response:
-          type: object
-          nullable: false
-          allOf:
-            - $ref: '#/components/schemas/Client.EmailAddress'
+          type: array
+          items:
+            $ref: '#/components/schemas/EnterpriseConnectionResponse'
+          description: List of active enterprise connections for the current user's primary email domain
         client:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
+      required:
+        - response
+        - client
+    Client.ClientWrappedEnterpriseConnection:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          $ref: '#/components/schemas/EnterpriseConnectionResponse'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11290,7 +12616,149 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
+      required:
+        - response
+        - client
+    EnterpriseConnectionTestRunListItem:
+      type: object
+      required:
+        - id
+        - status
+        - connection_type
+        - created_at
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          description: Test run status (e.g. pending, success, failed)
+        connection_type:
+          type: string
+          enum:
+            - saml
+            - oauth
+        parsed_user_info:
+          type: object
+          nullable: true
+          additionalProperties: false
+          properties:
+            email_address:
+              type: string
+            first_name:
+              type: string
+            last_name:
+              type: string
+            user_id:
+              type: string
+        logs:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              level:
+                type: string
+              code:
+                type: string
+              short_message:
+                type: string
+              message:
+                type: string
+        saml:
+          type: object
+          nullable: true
+          additionalProperties: false
+          properties:
+            saml_request:
+              type: string
+            saml_response:
+              type: string
+            relay_state:
+              type: string
+        oauth:
+          type: object
+          nullable: true
+          additionalProperties: false
+          properties:
+            id_token:
+              type: string
+            access_token:
+              type: string
+            user_info:
+              type: string
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the test run was created
+    EnterpriseConnectionTestRunsPaginatedResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - total_count
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnterpriseConnectionTestRunListItem'
+        total_count:
+          type: integer
+          format: int64
+    Client.ClientWrappedEnterpriseConnectionTestRunsList:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          $ref: '#/components/schemas/EnterpriseConnectionTestRunsPaginatedResponse'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client-2'
+      required:
+        - response
+        - client
+    EnterpriseConnectionTestRunResponse:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          description: URL to open in the browser to start the IdP test flow.
+    Client.ClientWrappedEnterpriseConnectionTestRun:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          $ref: '#/components/schemas/EnterpriseConnectionTestRunResponse'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client-2'
+      required:
+        - response
+        - client
+    Server.UserEmailAddresses:
+      type: array
+      items:
+        $ref: '#/components/schemas/Client.EmailAddress'
+    Client.ClientWrappedEmailAddress:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Client.EmailAddress'
+        client:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11311,7 +12779,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11332,7 +12800,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11349,7 +12817,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11366,7 +12834,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11383,7 +12851,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11437,7 +12905,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11480,7 +12948,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11494,7 +12962,7 @@ components:
       required:
         - response
         - client
-    schemas-Client.ClientWrappedUser:
+    Client.ClientWrappedUser-2:
       type: object
       additionalProperties: false
       properties:
@@ -12359,7 +13827,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12383,7 +13851,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12397,7 +13865,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12421,7 +13889,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12437,7 +13905,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12474,7 +13942,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12659,7 +14127,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12822,7 +14290,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12836,7 +14304,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12943,7 +14411,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12957,7 +14425,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12972,7 +14440,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -12997,7 +14465,7 @@ components:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13024,7 +14492,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13135,7 +14603,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13150,7 +14618,7 @@ components:
           nullable: false
         client:
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
           type: object
           nullable: false
       required:
@@ -13204,7 +14672,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13221,7 +14689,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13238,11 +14706,11 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
-    schemas-Client.ClientWrappedOrganization:
+    Client.ClientWrappedOrganization-2:
       type: object
       additionalProperties: false
       properties:
@@ -13281,7 +14749,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13298,7 +14766,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13315,7 +14783,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13465,7 +14933,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13482,7 +14950,103 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
+      required:
+        - response
+        - client
+    Client.OrganizationDomainBulkCreateError:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: The domain name this error applies to.
+        code:
+          type: string
+          description: |
+            The API error code for this domain name (e.g. `form_param_format_invalid`), so the SDK can decide how to surface the per-name failure.
+      required:
+        - name
+        - code
+    Client.OrganizationDomainBulkCreate:
+      type: object
+      additionalProperties: false
+      description: |
+        Partial-success payload of the bulk organization domain creation endpoint. Each requested domain name lands in exactly one of `data` (the created organization domain) or `errors` (a per-name failure).
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Client.OrganizationDomain'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Client.OrganizationDomainBulkCreateError'
+      required:
+        - data
+        - errors
+    Client.ClientWrappedOrganizationDomainBulkCreate:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Client.OrganizationDomainBulkCreate'
+        client:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Client.Client-2'
+      required:
+        - response
+        - client
+    Client.OrganizationDomainBulkOwnershipVerificationError:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          description: The organization domain ID this error applies to.
+        code:
+          type: string
+          description: |
+            The API error code for this id (e.g. `resource_not_found`), so the SDK can decide how to surface the per-id failure.
+      required:
+        - id
+        - code
+    Client.OrganizationDomainBulkOwnershipVerification:
+      type: object
+      additionalProperties: false
+      description: |
+        Partial-success payload of the bulk organization domain ownership verification endpoints (`prepare_ownership_verification` and `attempt_ownership_verification`). Each requested id lands in exactly one of `data` (its current/updated ownership state) or `errors` (a per-id failure).
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Client.OrganizationDomain'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Client.OrganizationDomainBulkOwnershipVerificationError'
+      required:
+        - data
+        - errors
+    Client.ClientWrappedOrganizationDomainBulkOwnershipVerification:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Client.OrganizationDomainBulkOwnershipVerification'
+        client:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13539,7 +15103,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13556,7 +15120,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13659,7 +15223,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -13713,6 +15277,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/WellKnown.OAuth2AuthorizationServerMetadata'
+    WellKnown.WebAuthn:
+      description: Get the WebAuthn Related Origin Requests document
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WellKnown.WebAuthn'
     OAuth.DynamicClientRegistration:
       description: |-
         Client information response after successful OAuth 2.0 dynamic client registration.
@@ -13866,12 +15436,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedSignIn'
-    responses-Client.SignIn:
+    Client.SignIn-2:
       description: Returns the sign in object, as well as the updated session object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/schemas-Client.ClientWrappedSignIn'
+            $ref: '#/components/schemas/Client.ClientWrappedSignIn-2'
     Client.SignUp:
       description: Returns the sign up object, as well as the updated session object.
       content:
@@ -13908,6 +15478,54 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Server.Sessions'
+    Client.ClientWrappedEnterpriseConnections:
+      description: Returns active enterprise connections for the current user's primary email domain.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.ClientWrappedEnterpriseConnections'
+    Client.ClientWrappedEnterpriseConnection:
+      description: Returns the enterprise connection for the current user's primary email domain.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.ClientWrappedEnterpriseConnection'
+    PaymentRequired:
+      description: Payment required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    ResourceNotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    UnprocessableEntity:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    Client.ClientWrappedDeletedObject:
+      description: Returns a deleted generic object.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.ClientWrappedDeletedObject'
+    Client.ClientWrappedEnterpriseConnectionTestRunsList:
+      description: Returns a paginated list of enterprise connection test runs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.ClientWrappedEnterpriseConnectionTestRunsList'
+    Client.ClientWrappedEnterpriseConnectionTestRun:
+      description: Returns a URL to initiate an enterprise connection test run.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.ClientWrappedEnterpriseConnectionTestRun'
     Server.UserEmailAddresses:
       description: Returns UserEmailAddresses array.
       content:
@@ -13920,12 +15538,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedEmailAddress'
-    Client.ClientWrappedDeletedObject:
-      description: Returns a deleted generic object.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Client.ClientWrappedDeletedObject'
     Server.UserPhoneNumbers:
       description: Returns UserPhoneNumbers array.
       content:
@@ -14016,24 +15628,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedImage'
-    responses-Client.ClientWrappedUser:
+    Client.ClientWrappedUser-2:
       description: Returns the response for Session wrapped User object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/schemas-Client.ClientWrappedUser'
+            $ref: '#/components/schemas/Client.ClientWrappedUser-2'
     Client.BillingSubscription:
       description: Returns a commerce subscription.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.BillingSubscription'
-    ResourceNotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClerkErrors'
     Client.BillingSubscriptionItemList:
       description: Returns a list of commerce subscription items.
       content:
@@ -14046,12 +15652,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.BillingSubscriptionItem'
-    UnprocessableEntity:
-      description: Invalid request parameters
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClerkErrors'
     Client.BillingPaymentMethodList:
       description: Returns a list of commerce payment methods.
       content:
@@ -14172,12 +15772,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedOrganization'
-    responses-Client.ClientWrappedOrganization:
+    Client.ClientWrappedOrganization-2:
       description: Returns the response for Client wrapped Organization object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/schemas-Client.ClientWrappedOrganization'
+            $ref: '#/components/schemas/Client.ClientWrappedOrganization-2'
     Client.ClientWrappedOrganizationInvitations:
       description: Returns the response for Client wrapped array of OrganizationInvitation objects.
       content:
@@ -14208,6 +15808,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedOrganizationDomain'
+    Client.ClientWrappedOrganizationDomainBulkCreate:
+      description: Returns the per-name partial-success payload for bulk organization domain creation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.ClientWrappedOrganizationDomainBulkCreate'
+    Client.ClientWrappedOrganizationDomainBulkOwnershipVerification:
+      description: Returns the per-domain partial-success payload for the bulk organization domain ownership verification endpoints.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.ClientWrappedOrganizationDomainBulkOwnershipVerification'
     Client.DeletedOrganizationDomain:
       description: Returns a deleted organization domain.
       content:
