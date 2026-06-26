@@ -161,6 +161,22 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/WellKnown.OAuth2AuthorizationServerMetadata'
+  /.well-known/webauthn:
+    get:
+      summary: WebAuthn Related Origins
+      description: |-
+        Get the WebAuthn Related Origin Requests document. Only available when
+        the instance uses the auth_host passkey RP ID strategy; returns a not
+        found error otherwise.
+      operationId: getWebAuthnRelatedOrigins
+      security: []
+      tags:
+        - Well Known
+      responses:
+        '200':
+          $ref: '#/components/responses/WellKnown.WebAuthn'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
   /oauth/authorize:
     get:
       summary: Request OAuth2 authorization
@@ -885,7 +901,36 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
-  /v1/enterprise_connections/{enterpriseConnectionID}/init_test_run: {}
+  /v1/enterprise_connections/{enterpriseConnectionID}/init_test_run:
+    get:
+      operationId: initEnterpriseConnectionTestRun
+      security: []
+      tags:
+        - Enterprise Connections
+      summary: Initiate enterprise connection test run
+      description: |
+        Initiates a test run for an enterprise connection.
+        Validates the provided ticket and redirects to the Identity Provider for authentication.
+      parameters:
+        - name: enterpriseConnectionID
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the enterprise connection to test
+        - name: ticket
+          in: query
+          required: true
+          schema:
+            type: string
+          description: A ticket that authorizes and expires this test run request
+      responses:
+        '301':
+          description: Redirect to Identity Provider for authentication
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /v1/health:
     get:
       summary: Get Health
@@ -3847,7 +3892,7 @@ paths:
                     Existing keys are deep-merged; keys at any level with `null` values are removed.
       responses:
         '200':
-          $ref: '#/components/responses/responses-Client.ClientWrappedUser'
+          $ref: '#/components/responses/Client.ClientWrappedUser-2'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '401':
@@ -6558,6 +6603,16 @@ components:
         - id_token_signing_alg_values_supported
         - claims_supported
         - code_challenge_methods_supported
+    WellKnown.WebAuthn:
+      type: object
+      additionalProperties: false
+      properties:
+        origins:
+          type: array
+          items:
+            type: string
+      required:
+        - origins
     OAuth.DynamicClientRegistrationRequest:
       type: object
       additionalProperties: false
@@ -7700,9 +7755,14 @@ components:
           type: boolean
           description: Passkey UI will be shown when user clicks on a button.
           default: true
+        satisfies_second_factor:
+          type: boolean
+          description: Whether signing in with a passkey satisfies an existing second-factor requirement (skipping the second-factor prompt).
+          default: true
       required:
         - allow_autofill
         - show_sign_in_button
+        - satisfies_second_factor
     Client.UserSettings:
       type: object
       additionalProperties: false
@@ -8525,6 +8585,10 @@ components:
           type: integer
         admin_delete_enabled:
           type: boolean
+        self_serve_sso_enabled:
+          type: boolean
+          description: |
+            Whether this organization can configure self-serve enterprise SSO.
         public_metadata:
           type: object
           additionalProperties: true
@@ -10146,7 +10210,7 @@ components:
           type: string
       required:
         - key
-    schemas-Client.SessionBase:
+    Client.SessionBase-2:
       type: object
       properties:
         id:
@@ -10197,9 +10261,9 @@ components:
         - expire_at
         - abandon_at
         - last_active_at
-    schemas-Client.Session:
+    Client.Session-2:
       allOf:
-        - $ref: '#/components/schemas/schemas-Client.SessionBase'
+        - $ref: '#/components/schemas/Client.SessionBase-2'
         - type: object
           properties:
             last_active_organization_id:
@@ -10233,7 +10297,7 @@ components:
             - factor_verification_age
             - created_at
             - updated_at
-    schemas-Client.SignIn:
+    Client.SignIn-2:
       type: object
       additionalProperties: false
       properties:
@@ -10355,7 +10419,7 @@ components:
         - user_data
         - created_session_id
         - abandon_at
-    schemas-Client.Client:
+    Client.Client-2:
       type: object
       nullable: true
       properties:
@@ -10370,12 +10434,12 @@ components:
         sessions:
           type: array
           items:
-            $ref: '#/components/schemas/schemas-Client.Session'
+            $ref: '#/components/schemas/Client.Session-2'
         sign_in:
           type: object
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.SignIn'
+            - $ref: '#/components/schemas/Client.SignIn-2'
         sign_up:
           type: object
           nullable: true
@@ -10418,7 +10482,7 @@ components:
         - captcha_bypass
         - created_at
         - updated_at
-    schemas-Client.ClientWrappedUser:
+    Client.ClientWrappedUser-2:
       type: object
       additionalProperties: false
       properties:
@@ -10431,7 +10495,7 @@ components:
           type: object
           nullable: false
           allOf:
-            - $ref: '#/components/schemas/schemas-Client.Client'
+            - $ref: '#/components/schemas/Client.Client-2'
       required:
         - response
         - client
@@ -11141,6 +11205,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/WellKnown.OAuth2AuthorizationServerMetadata'
+    WellKnown.WebAuthn:
+      description: Get the WebAuthn Related Origin Requests document
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WellKnown.WebAuthn'
     OAuth.DynamicClientRegistration:
       description: |-
         Client information response after successful OAuth 2.0 dynamic client registration.
@@ -11264,6 +11334,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.Environment'
+    ResourceNotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
     Client.Client:
       description: Returns the current session object.
       content:
@@ -11414,12 +11490,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedBackupCodes'
-    responses-Client.ClientWrappedUser:
+    Client.ClientWrappedUser-2:
       description: Returns the response for Session wrapped User object.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/schemas-Client.ClientWrappedUser'
+            $ref: '#/components/schemas/Client.ClientWrappedUser-2'
     Token:
       description: Success
       content:
