@@ -882,6 +882,32 @@ x-webhooks:
                       cycle_days_remaining: 15
                       cycle_days_total: 30
                       cycle_remaining_percent: 0.5
+                    credits:
+                      proration:
+                        amount:
+                          amount: 300
+                          amount_formatted: $3.00
+                          currency: USD
+                          currency_symbol: $
+                        cycle_days_remaining: 15
+                        cycle_days_total: 30
+                        cycle_remaining_percent: 0.5
+                      payer:
+                        applied_amount:
+                          amount: 200
+                          amount_formatted: $2.00
+                          currency: USD
+                          currency_symbol: $
+                        remaining_balance:
+                          amount: 800
+                          amount_formatted: $8.00
+                          currency: USD
+                          currency_symbol: $
+                      total:
+                        amount: 500
+                        amount_formatted: $5.00
+                        currency: USD
+                        currency_symbol: $
                     proration_date: '2024-05-01'
                     plan_period: month
                     period_start: 1716883200000
@@ -1001,6 +1027,32 @@ x-webhooks:
                       cycle_days_remaining: 15
                       cycle_days_total: 30
                       cycle_remaining_percent: 0.5
+                    credits:
+                      proration:
+                        amount:
+                          amount: 300
+                          amount_formatted: $3.00
+                          currency: USD
+                          currency_symbol: $
+                        cycle_days_remaining: 15
+                        cycle_days_total: 30
+                        cycle_remaining_percent: 0.5
+                      payer:
+                        applied_amount:
+                          amount: 200
+                          amount_formatted: $2.00
+                          currency: USD
+                          currency_symbol: $
+                        remaining_balance:
+                          amount: 800
+                          amount_formatted: $8.00
+                          currency: USD
+                          currency_symbol: $
+                      total:
+                        amount: 500
+                        amount_formatted: $5.00
+                        currency: USD
+                        currency_symbol: $
                     proration_date: '2024-05-01'
                     plan_period: month
                     period_start: 1716883200000
@@ -2584,6 +2636,63 @@ components:
         - is_recurring
         - amount
         - currency
+    BillingSubscriptionCredit:
+      type: object
+      deprecated: true
+      description: Proration-only credit. Use BillingSubscriptionCredits instead.
+      properties:
+        amount:
+          $ref: '#/components/schemas/BillingAmount'
+          description: Proration credit amount
+        cycle_days_remaining:
+          type: integer
+          format: int64
+          description: Number of days remaining in the billing cycle
+        cycle_days_total:
+          type: integer
+          format: int64
+          description: Total number of days in the billing cycle
+        cycle_remaining_percent:
+          type: number
+          format: double
+          description: Percentage of the billing cycle remaining (0.0 to 1.0)
+      required:
+        - amount
+        - cycle_days_remaining
+        - cycle_days_total
+        - cycle_remaining_percent
+    BillingSubscriptionPayerCredit:
+      type: object
+      description: Account credit applied to a subscription item charge
+      properties:
+        applied_amount:
+          $ref: '#/components/schemas/BillingAmount'
+          description: Amount of account credit applied to this charge
+        remaining_balance:
+          $ref: '#/components/schemas/BillingAmount'
+          description: Remaining account credit balance after this charge
+      required:
+        - applied_amount
+        - remaining_balance
+    BillingSubscriptionCredits:
+      type: object
+      description: Unified credits breakdown including proration and account credits
+      properties:
+        proration:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionCredit'
+          nullable: true
+          description: Proration credit details, present when switching plans mid-cycle
+        payer:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionPayerCredit'
+          nullable: true
+          description: Account credit details, present when the account has a credit balance
+        total:
+          $ref: '#/components/schemas/BillingAmount'
+          description: Total combined credit amount applied
+      required:
+        - total
     BillingSubscriptionItem:
       type: object
       properties:
@@ -2644,6 +2753,16 @@ components:
         subscription_id:
           type: string
           description: The identifier of the subscription this subscription item belongs to
+        credit:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionCredit'
+          deprecated: true
+          description: Proration-only credit. Use credits instead.
+        credits:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionCredits'
+          nullable: true
+          description: Unified credits breakdown including proration and account credits
       required:
         - id
         - object
