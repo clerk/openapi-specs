@@ -7387,6 +7387,49 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /oauth_applications/{oauth_application_id}/revoke_token:
+    post:
+      operationId: RevokeOAuthApplicationToken
+      x-speakeasy-group: oauthApplications
+      x-speakeasy-name-override: revokeToken
+      summary: Revoke an OAuth application token
+      description: |-
+        Revoke both OAuth access token and refresh token for the associated grant for the given OAuth application.
+        The request may specify either token.
+        JWT access tokens cannot be revoked.
+      tags:
+        - OAuth Applications
+      parameters:
+        - name: oauth_application_id
+          in: path
+          description: The ID of the OAuth application for which to revoke the token
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                token:
+                  type: string
+                  description: The opaque OAuth access token or refresh token to revoke. All tokens associated with the same OAuth grant are also revoked.
+              required:
+                - token
+      responses:
+        '204':
+          description: Token revoked
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /saml_connections:
     get:
       deprecated: true
@@ -14979,7 +15022,6 @@ components:
         - id
         - payer_id
         - amount
-        - currency
         - source_type
         - source_id
         - created_at
@@ -14994,12 +15036,8 @@ components:
           type: string
           description: The ID of the payer whose balance was adjusted.
         amount:
-          type: integer
-          format: int64
-          description: The signed credit amount. Positive for increases, negative for decreases.
-        currency:
-          type: string
-          description: The currency code of the credit adjustment.
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+          description: The credit amount with formatting. Positive for increases, negative for decreases.
         source_type:
           type: string
           description: The type of source that originated the adjustment (e.g. "grant").

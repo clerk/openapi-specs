@@ -1280,6 +1280,10 @@ paths:
                   type: string
                   description: Used with `oauth_[provider]` or `enterprise_sso`. The given value will be forwarded to the OIDC `prompt` parameter of the generated redirect URL. When using shared credentials, this value might be adjusted for security reasons.
                   nullable: true
+                proof_token:
+                  type: string
+                  description: Proof token produced by the Clerk Protect SDK.
+                  nullable: true
       responses:
         '200':
           $ref: '#/components/responses/Client.SignIn'
@@ -1408,6 +1412,10 @@ paths:
                 phone_number_id:
                   type: string
                   description: Used with the `phone_code` and `reset_password_phone_code` strategies.
+                  nullable: true
+                proof_token:
+                  type: string
+                  description: Proof token produced by the Clerk Protect SDK.
                   nullable: true
                 web3_wallet_id:
                   type: string
@@ -1561,6 +1569,10 @@ paths:
                 phone_number_id:
                   type: string
                   description: Used with the `phone_code` strategy.
+                  nullable: true
+                proof_token:
+                  type: string
+                  description: Proof token produced by the Clerk Protect SDK.
                   nullable: true
                 email_address_id:
                   type: string
@@ -1717,6 +1729,10 @@ paths:
                   type: string
                   description: Used with `oauth_[provider]` or `enterprise_sso`. The given value will be forwarded to the OIDC `prompt` parameter of the generated redirect URL. When using shared credentials this value might be adjusted for security reasons.
                   nullable: true
+                proof_token:
+                  type: string
+                  description: Proof token produced by the Clerk Protect SDK.
+                  nullable: true
       responses:
         '200':
           $ref: '#/components/responses/Client.SignUp'
@@ -1842,6 +1858,10 @@ paths:
                   type: string
                   description: Used with `oauth_[provider]` or `enterprise_sso`. The given value will be forwarded to the OIDC `prompt` parameter of the generated redirect URL. When using shared credentials this value might be adjusted for security reasons.
                   nullable: true
+                proof_token:
+                  type: string
+                  description: Proof token produced by the Clerk Protect SDK.
+                  nullable: true
       responses:
         '200':
           $ref: '#/components/responses/Client.SignUp'
@@ -1914,6 +1934,10 @@ paths:
                 oidc_prompt:
                   type: string
                   description: Used with `oauth_[provider]` or `enterprise_sso`. The given value will be forwarded to the OIDC `prompt` parameter of the generated redirect URL. When using shared credentials this value might be adjusted for security reasons.
+                  nullable: true
+                proof_token:
+                  type: string
+                  description: Proof token produced by the Clerk Protect SDK.
                   nullable: true
       responses:
         '200':
@@ -2618,6 +2642,10 @@ paths:
                   type: string
                   description: Used with the `phone_code` strategy.
                   nullable: true
+                proof_token:
+                  type: string
+                  description: Proof token produced by the Clerk Protect SDK.
+                  nullable: true
       responses:
         '200':
           $ref: '#/components/responses/Client.SessionReverification'
@@ -2720,6 +2748,10 @@ paths:
                 phone_number_id:
                   type: string
                   description: Used with the `phone_code` strategy.
+                  nullable: true
+                proof_token:
+                  type: string
+                  description: Proof token produced by the Clerk Protect SDK.
                   nullable: true
       responses:
         '200':
@@ -4053,6 +4085,10 @@ paths:
                   description: Strategy used to verify the phone number.
                   enum:
                     - phone_code
+                proof_token:
+                  type: string
+                  description: Proof token produced by the Clerk Protect SDK.
+                  nullable: true
               required:
                 - strategy
       responses:
