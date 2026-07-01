@@ -13860,7 +13860,6 @@ components:
         - id
         - payer_id
         - amount
-        - currency
         - source_type
         - source_id
         - created_at
@@ -13875,12 +13874,8 @@ components:
           type: string
           description: The ID of the payer whose balance was adjusted.
         amount:
-          type: integer
-          format: int64
-          description: The signed credit amount. Positive for increases, negative for decreases.
-        currency:
-          type: string
-          description: The currency code of the credit adjustment.
+          $ref: '#/components/schemas/CommerceMoneyResponse'
+          description: The credit amount with formatting. Positive for increases, negative for decreases.
         source_type:
           type: string
           description: The type of source that originated the adjustment (e.g. "grant").
