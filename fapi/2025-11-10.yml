@@ -12277,6 +12277,17 @@ components:
             idp_sso_url:
               type: string
               description: IdP SSO URL (optional, when connection details are loaded)
+            idp_certificate:
+              type: string
+              description: IdP X.509 signing certificate (optional, when connection details are loaded)
+            idp_certificate_issued_at:
+              type: integer
+              format: int64
+              description: Unix timestamp (milliseconds) of the start of the IdP certificate validity window (X.509 NotBefore). Present when a certificate is configured.
+            idp_certificate_expires_at:
+              type: integer
+              format: int64
+              description: Unix timestamp (milliseconds) of the end of the IdP certificate validity window (X.509 NotAfter). Present when a certificate is configured.
             idp_metadata_url:
               type: string
               description: IdP metadata URL (optional, when connection details are loaded)

@@ -15722,6 +15722,18 @@ components:
         idp_certificate:
           type: string
           nullable: true
+        idp_certificate_issued_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp (milliseconds) of the start of the IdP certificate validity window (X.509 NotBefore). Null when no certificate is configured.
+        idp_certificate_expires_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp (milliseconds) of the end of the IdP certificate validity window (X.509 NotAfter). Null when no certificate is configured.
         idp_metadata_url:
           type: string
           nullable: true
@@ -15778,6 +15790,8 @@ components:
         - idp_entity_id
         - idp_sso_url
         - idp_certificate
+        - idp_certificate_issued_at
+        - idp_certificate_expires_at
         - acs_url
         - sp_entity_id
         - sp_metadata_url
