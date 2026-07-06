@@ -6625,6 +6625,8 @@ components:
           type: array
           items:
             type: string
+        client_id_metadata_document_supported:
+          type: boolean
       required:
         - issuer
         - authorization_endpoint
