@@ -9576,8 +9576,66 @@ paths:
   /scim_directories: {}
   /scim_directories/{scim_directory_id}: {}
   /scim_directories/{scim_directory_id}/groups: {}
-  /scim_directories/{scim_directory_id}/group_role_mappings: {}
-  /scim_directories/{scim_directory_id}/group_role_mappings/{mapping_id}: {}
+  /scim_directories/{scim_directory_id}/group_role_mappings:
+    get:
+      operationId: ListSCIMGroupRoleMappings
+      x-speakeasy-group: scimDirectories
+      x-speakeasy-name-override: listGroupRoleMappings
+      tags:
+        - SCIM Directories
+      summary: List SCIM group role mappings
+      description: Returns the list of SCIM group to organization role mappings for a SCIM directory, ordered by precedence.
+      parameters:
+        - name: scim_directory_id
+          in: path
+          description: The ID of the SCIM directory.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SCIMGroupRoleMapping.List'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /scim_directories/{scim_directory_id}/group_role_mappings/{mapping_id}:
+    delete:
+      operationId: DeleteSCIMGroupRoleMapping
+      x-speakeasy-group: scimDirectories
+      x-speakeasy-name-override: deleteGroupRoleMapping
+      tags:
+        - SCIM Directories
+      summary: Delete a SCIM group role mapping
+      description: |-
+        Deletes a single SCIM group role mapping. Group role mapping must be enabled on the
+        directory.
+      parameters:
+        - name: scim_directory_id
+          in: path
+          description: The ID of the SCIM directory.
+          required: true
+          schema:
+            type: string
+        - name: mapping_id
+          in: path
+          description: The ID of the SCIM group role mapping to delete.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SCIMGroupRoleMapping.Deleted'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /admin_portal_link_tokens:
     post:
       operationId: createAdminPortalLinkToken
@@ -16618,6 +16676,7 @@ components:
         - allow_organization_account_linking
         - authenticatable
         - force_authn
+        - disable_jit_provisioning
         - created_at
         - updated_at
       anyOf:
@@ -16650,6 +16709,7 @@ components:
         - active
         - domains
         - authenticatable
+        - disable_jit_provisioning
         - created_at
         - updated_at
       properties:
@@ -18163,6 +18223,53 @@ components:
       description: Mappings from source role keys to destination role keys for role reassignment
       additionalProperties:
         type: string
+    SCIMGroupRoleMapping:
+      type: object
+      description: A mapping from a SCIM group to an organization role. Members of the group are assigned the role; the lowest-precedence match wins when a user belongs to multiple mapped groups.
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Always "scim_group_role_mapping".
+          enum:
+            - scim_group_role_mapping
+        id:
+          type: string
+          description: Unique identifier for the SCIM group role mapping.
+        scim_directory_id:
+          type: string
+          description: The ID of the SCIM directory this mapping belongs to.
+        scim_group_id:
+          type: string
+          description: The SCIM group ID from the identity provider.
+        scim_group_display_name:
+          type: string
+          description: The display name of the SCIM group, as reported by the identity provider.
+        role:
+          $ref: '#/components/schemas/Role'
+        precedence:
+          type: integer
+          description: Mapping precedence, starting at 1. Lower values take priority when a user belongs to multiple mapped groups.
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) of when the mapping was created.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) of when the mapping was last updated.
+      required:
+        - object
+        - id
+        - scim_directory_id
+        - scim_group_id
+        - scim_group_display_name
+        - precedence
+        - created_at
+        - updated_at
+    SCIMGroupRoleMappings:
+      type: array
+      items:
+        $ref: '#/components/schemas/SCIMGroupRoleMapping'
   responses:
     WellKnown.JWKS:
       description: Get the JSON Web Key Set
@@ -18918,6 +19025,46 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/RoleSet'
+    SCIMGroupRoleMapping.List:
+      description: A list of SCIM group role mappings, ordered by precedence.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/SCIMGroupRoleMappings'
+              total_count:
+                type: integer
+                format: int64
+                description: Total number of SCIM group role mappings in the directory.
+            required:
+              - data
+              - total_count
+    SCIMGroupRoleMapping.Deleted:
+      description: A SCIM group role mapping was deleted.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              object:
+                type: string
+                enum:
+                  - scim_group_role_mapping
+                description: String representing the object's type.
+              id:
+                type: string
+                description: The ID of the deleted SCIM group role mapping.
+              deleted:
+                type: boolean
+                enum:
+                  - true
+                description: Whether the SCIM group role mapping was successfully deleted.
+            required:
+              - object
+              - id
+              - deleted
   parameters:
     Paginated:
       name: paginated
