@@ -9622,8 +9622,190 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
   /audit_logs: {}
   /audit_logs/{event_time_and_id}: {}
-  /scim_directories: {}
-  /scim_directories/{scim_directory_id}: {}
+  /scim_directories:
+    get:
+      operationId: ListSCIMDirectories
+      x-speakeasy-group: scimDirectories
+      x-speakeasy-name-override: list
+      tags:
+        - SCIM Directories
+      summary: List all SCIM directories
+      description: Returns a list of all SCIM directories for the instance.
+      parameters:
+        - $ref: '#/components/parameters/LimitParameter'
+        - $ref: '#/components/parameters/OffsetParameter'
+      responses:
+        '200':
+          $ref: '#/components/responses/SCIMDirectory.List'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+    post:
+      operationId: CreateSCIMDirectory
+      x-speakeasy-group: scimDirectories
+      x-speakeasy-name-override: create
+      tags:
+        - SCIM Directories
+      summary: Create a SCIM directory
+      description: Create a new SCIM directory for the instance.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                enterprise_connection_id:
+                  type: string
+                  description: The ID of the enterprise connection to associate with this SCIM directory.
+                name:
+                  type: string
+                  description: A human-friendly name for the SCIM directory.
+                provider:
+                  type: string
+                  description: The identity provider for this SCIM directory.
+                group_role_mappings:
+                  type: array
+                  description: Optional SCIM group to organization role mappings to create with the directory.
+                  items:
+                    type: object
+                    properties:
+                      scim_group_id:
+                        type: string
+                        description: The SCIM group ID from the identity provider.
+                      scim_group_display_name:
+                        type: string
+                        maxLength: 255
+                        description: Optional display name for the SCIM group.
+                      role_id:
+                        type: string
+                        description: The organization role ID to assign to members of the SCIM group.
+                      precedence:
+                        type: integer
+                        minimum: 1
+                        description: The precedence for this mapping. If omitted, precedence is assigned by array order.
+                    required:
+                      - scim_group_id
+                      - role_id
+              required:
+                - enterprise_connection_id
+                - provider
+      responses:
+        '200':
+          $ref: '#/components/responses/SCIMDirectory'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /scim_directories/{scim_directory_id}:
+    get:
+      operationId: GetSCIMDirectory
+      x-speakeasy-group: scimDirectories
+      x-speakeasy-name-override: get
+      tags:
+        - SCIM Directories
+      summary: Retrieve a SCIM directory
+      description: Returns the details of a SCIM directory.
+      parameters:
+        - name: scim_directory_id
+          in: path
+          description: The ID of the SCIM directory to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SCIMDirectory'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    patch:
+      operationId: UpdateSCIMDirectory
+      x-speakeasy-group: scimDirectories
+      x-speakeasy-name-override: update
+      tags:
+        - SCIM Directories
+      summary: Update a SCIM directory
+      description: Updates a SCIM directory.
+      parameters:
+        - name: scim_directory_id
+          in: path
+          description: The ID of the SCIM directory to update
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: A human-friendly name for the SCIM directory.
+                enabled:
+                  type: boolean
+                  description: Whether the SCIM directory is enabled.
+                provider:
+                  type: string
+                  description: The identity provider for this SCIM directory.
+                attribute_mapping:
+                  type: object
+                  additionalProperties:
+                    type: string
+                    nullable: true
+                  description: |-
+                    Attribute-to-SCIM-path entries to merge into the directory's attribute mapping.
+                    Set a key to `null` to remove it from the mapping.
+                group_role_mapping_enabled:
+                  type: boolean
+                  description: Whether group-to-role mapping is enabled for this SCIM directory.
+      responses:
+        '200':
+          $ref: '#/components/responses/SCIMDirectory'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      operationId: DeleteSCIMDirectory
+      x-speakeasy-group: scimDirectories
+      x-speakeasy-name-override: delete
+      tags:
+        - SCIM Directories
+      summary: Delete a SCIM directory
+      description: |-
+        Deletes a SCIM directory and stops provisioning for it. SCIM requests authenticated
+        with the directory's API key are rejected afterwards.
+      parameters:
+        - name: scim_directory_id
+          in: path
+          description: The ID of the SCIM directory to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /admin_portal_link_tokens:
     post:
       operationId: createAdminPortalLinkToken
@@ -18211,6 +18393,90 @@ components:
       description: Mappings from source role keys to destination role keys for role reassignment
       additionalProperties:
         type: string
+    SCIMDirectory:
+      type: object
+      description: A SCIM directory configuration for provisioning users via SCIM protocol.
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Always "scim_directory".
+          enum:
+            - scim_directory
+        id:
+          type: string
+          description: Unique identifier for the SCIM directory.
+        name:
+          type: string
+          description: A human-friendly name for the SCIM directory.
+        enterprise_connection_id:
+          type: string
+          nullable: true
+          description: The ID of the associated enterprise connection.
+        endpoint_url:
+          type: string
+          description: The SCIM endpoint URL for this directory.
+        provider:
+          type: string
+          description: The identity provider for this SCIM directory.
+        enabled:
+          type: boolean
+          description: Whether the SCIM directory is enabled.
+        group_role_mapping_enabled:
+          type: boolean
+          description: Whether group-to-role mapping is enabled for this SCIM directory.
+        attribute_mapping:
+          type: object
+          additionalProperties:
+            type: string
+          description: Mapping of user attributes to the SCIM attribute paths they are extracted from.
+        custom_attributes:
+          type: array
+          description: Custom attributes to map from the IdP to the user's profile via SCIM provisioning. Requires the custom attributes feature to be enabled for the instance.
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Display name for the custom attribute
+              key:
+                type: string
+                description: Key used to store the attribute in the user's public/private/unsafe metadata
+              sso_path:
+                type: string
+                description: Path to extract the attribute value from SSO claims (SAML assertions or OIDC claims)
+              scim_path:
+                type: string
+                description: GJSON path to extract the attribute value from SCIM user resources
+              multi_valued:
+                type: boolean
+                description: When true, the attribute supports multiple values; values from the IdP are written to public_metadata as an array. Defaults to false.
+        api_key:
+          type: string
+          nullable: true
+          description: The API key for authenticating SCIM requests. Only returned when the directory is created or the key is rotated.
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp when the SCIM directory was created.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp when the SCIM directory was last updated.
+      required:
+        - object
+        - id
+        - name
+        - endpoint_url
+        - provider
+        - enabled
+        - group_role_mapping_enabled
+        - attribute_mapping
+        - created_at
+        - updated_at
+    SCIMDirectories:
+      type: array
+      items:
+        $ref: '#/components/schemas/SCIMDirectory'
   responses:
     WellKnown.JWKS:
       description: Get the JSON Web Key Set
@@ -18966,6 +19232,27 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/RoleSet'
+    SCIMDirectory.List:
+      description: A list of SCIM directories
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/SCIMDirectories'
+              total_count:
+                type: integer
+                description: Total number of SCIM directories.
+            required:
+              - data
+              - total_count
+    SCIMDirectory:
+      description: A SCIM directory
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SCIMDirectory'
   parameters:
     Paginated:
       name: paginated
