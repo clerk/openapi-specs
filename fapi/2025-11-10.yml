@@ -2119,7 +2119,14 @@ paths:
         '404':
           $ref: '#/components/responses/ClerkErrors'
         '422':
-          $ref: '#/components/responses/ClerkErrors'
+          description: Request was not successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClerkErrors'
+            text/html:
+              schema:
+                type: string
         '500':
           $ref: '#/components/responses/ClerkErrors'
   /v1/agents/tasks:
@@ -12314,6 +12321,22 @@ components:
             force_authn:
               type: boolean
               description: Whether to force re-authentication
+            login_hint:
+              type: object
+              description: Configuration for the login_hint sent to the IdP on SSO sign-in
+              properties:
+                mode:
+                  type: string
+                  enum:
+                    - email_address
+                    - custom_attribute
+                    - 'off'
+                  description: Controls the login_hint sent to the IdP on SSO sign-in
+                source:
+                  type: string
+                  description: The user public_metadata key whose value is sent as the login_hint when mode is custom_attribute
+              required:
+                - mode
         oauth_config:
           type: object
           description: Present when the enterprise connection uses OIDC
@@ -13097,6 +13120,7 @@ components:
           enum:
             - card
             - link
+            - payer-credits
         is_default:
           type: boolean
           description: Whether this is the default payment method for the payer
