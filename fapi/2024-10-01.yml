@@ -2031,7 +2031,14 @@ paths:
         '404':
           $ref: '#/components/responses/ClerkErrors'
         '422':
-          $ref: '#/components/responses/ClerkErrors'
+          description: Request was not successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClerkErrors'
+            text/html:
+              schema:
+                type: string
         '500':
           $ref: '#/components/responses/ClerkErrors'
   /v1/agents/tasks:
