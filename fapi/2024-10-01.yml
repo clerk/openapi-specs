@@ -1273,6 +1273,10 @@ paths:
           $ref: '#/components/responses/Client.SignIn'
         '400':
           $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
   /v1/client/sign_ins/{sign_in_id}/prepare_first_factor:
@@ -1364,6 +1368,8 @@ paths:
           $ref: '#/components/responses/Client.SignIn'
         '400':
           $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
@@ -1444,6 +1450,8 @@ paths:
           description: Redirect, no body.
         '400':
           $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
@@ -1498,6 +1506,8 @@ paths:
           $ref: '#/components/responses/Client.SignIn'
         '400':
           $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '422':
@@ -1541,6 +1551,8 @@ paths:
         '307':
           description: Redirect, no body.
         '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
           $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
@@ -1780,6 +1792,8 @@ paths:
           description: Redirect, no body.
         '400':
           $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
@@ -1920,6 +1934,8 @@ paths:
           description: Redirect, no body.
         '400':
           $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '409':
@@ -2031,7 +2047,14 @@ paths:
         '404':
           $ref: '#/components/responses/ClerkErrors'
         '422':
-          $ref: '#/components/responses/ClerkErrors'
+          description: Request was not successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClerkErrors'
+            text/html:
+              schema:
+                type: string
         '500':
           $ref: '#/components/responses/ClerkErrors'
   /v1/agents/tasks:
@@ -2304,6 +2327,8 @@ paths:
           $ref: '#/components/responses/Client.Session'
         '400':
           $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
   /v1/client/sessions/{session_id}/remove:
@@ -2324,6 +2349,8 @@ paths:
         '200':
           $ref: '#/components/responses/Client.Session'
         '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
@@ -2555,6 +2582,8 @@ paths:
           $ref: '#/components/responses/Client.SessionReverification'
         '400':
           $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '422':
@@ -2617,6 +2646,8 @@ paths:
           $ref: '#/components/responses/Client.SessionReverification'
         '400':
           $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '422':
@@ -2662,6 +2693,8 @@ paths:
           $ref: '#/components/responses/Client.SessionReverification'
         '400':
           $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '422':
@@ -2702,6 +2735,8 @@ paths:
         '200':
           $ref: '#/components/responses/Client.SessionReverification'
         '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
           $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
@@ -3416,6 +3451,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedPasskey'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
   /v1/me/passkeys/{passkey_id}:
@@ -3435,6 +3472,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedPasskey'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
         '422':
@@ -3466,6 +3505,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedPasskey'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
         '422':
@@ -3486,6 +3527,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Client.DeletedPasskey'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
@@ -3601,6 +3644,8 @@ paths:
           $ref: '#/components/responses/Client.ClientWrappedExternalAccount'
         '400':
           $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
@@ -3655,6 +3700,8 @@ paths:
           $ref: '#/components/responses/Client.ClientWrappedExternalAccount'
         '400':
           $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
         '422':
@@ -3677,6 +3724,8 @@ paths:
         '200':
           $ref: '#/components/responses/Client.DeletedExternalAccount'
         '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
           $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
@@ -3701,6 +3750,8 @@ paths:
           $ref: '#/components/responses/Client.ClientWrappedUser'
         '400':
           $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
   /v1/me/totp:
@@ -3714,6 +3765,8 @@ paths:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedTOTP'
         '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
           $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
@@ -3729,6 +3782,8 @@ paths:
         '200':
           $ref: '#/components/responses/Client.DeletedTOTP'
         '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
           $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
@@ -3758,6 +3813,8 @@ paths:
           $ref: '#/components/responses/Client.ClientWrappedTOTP'
         '400':
           $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
@@ -3779,6 +3836,8 @@ paths:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedBackupCodes'
         '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
           $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
@@ -3964,6 +4023,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Token'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
@@ -4059,6 +4120,8 @@ paths:
           $ref: '#/components/responses/Client.ClientWrappedUser'
         '400':
           $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '422':
@@ -4092,6 +4155,8 @@ paths:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedUser'
         '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
           $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
@@ -4137,6 +4202,8 @@ paths:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedDeletedObject'
         '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
           $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
@@ -4358,6 +4425,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedDeletedObject'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
@@ -4469,6 +4538,12 @@ paths:
                     The role that will be assigned to the user after joining.
                     This can be one of the predefined roles (`org:admin`, `org:basic_member`) or a custom role.
                   nullable: false
+                notify:
+                  type: boolean
+                  description: |-
+                    Optional flag which denotes whether an email invitation should be sent to the given email address.
+                    Defaults to `true`.
+                  nullable: true
               required:
                 - email_address
                 - role
@@ -4567,6 +4642,12 @@ paths:
                     The role that will be assigned to each of the users after joining.
                     This can be one of the predefined roles (`org:admin`, `org:basic_member`) or a custom role.
                   nullable: false
+                notify:
+                  type: boolean
+                  description: |-
+                    Optional flag which denotes whether email invitations should be sent to the given email addresses.
+                    Defaults to `true`.
+                  nullable: true
               required:
                 - email_address
                 - role
@@ -4685,6 +4766,8 @@ paths:
         '200':
           $ref: '#/components/responses/Client.ClientWrappedOrganizationMembership'
         '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
           $ref: '#/components/responses/ClerkErrors'
         '403':
           $ref: '#/components/responses/ClerkErrors'
