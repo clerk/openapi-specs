@@ -2359,6 +2359,8 @@ components:
           nullable: true
         banned:
           type: boolean
+        deprovisioned:
+          type: boolean
       required:
         - user_id
         - first_name
