@@ -1408,6 +1408,61 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+    post:
+      operationId: PlatformCreateInstanceUser
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: createInstanceUser
+      tags:
+        - Users
+      summary: Create an instance user
+      description: |
+        Creates a user within an application instance.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Requires the `users:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformCreateInstanceUserRequest'
+      responses:
+        '200':
+          description: User created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}:
     delete:
       operationId: PlatformDeleteUser
@@ -4371,6 +4426,8 @@ components:
           nullable: true
         banned:
           type: boolean
+        deprovisioned:
+          type: boolean
       required:
         - user_id
         - first_name
@@ -4693,6 +4750,143 @@ components:
       required:
         - data
         - total_count
+    PlatformPasswordHasher:
+      type: string
+      description: The hashing algorithm used to generate `password_digest`. See the Backend API user creation documentation for supported algorithms and digest formats.
+    PlatformCreateInstanceUserRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        external_id:
+          type: string
+          description: The ID of the user as used in your external systems or your previous authentication solution. Must be unique across your instance.
+          nullable: true
+        first_name:
+          type: string
+          description: The first name to assign to the user.
+          nullable: true
+        last_name:
+          type: string
+          description: The last name to assign to the user.
+          nullable: true
+        locale:
+          type: string
+          description: The locale to assign to the user (e.g., "en-US", "fr-FR").
+          nullable: true
+        email_address:
+          type: array
+          items:
+            type: string
+          description: Email addresses to add to the user. Must be unique across your instance. The first email address will be set as the user's primary email address. Created verified by default; see `email_address_identification_status` to create them reserved.
+        email_address_identification_status:
+          type: array
+          items:
+            type: string
+            enum:
+              - verified
+              - reserved
+          description: 'Controls the status each email address is created with. Runs parallel to `email_address`: when provided, it must contain exactly one item per email address, applied by position. When omitted or empty, every email address is created `verified`. Set an item to `reserved` to create the corresponding email address reserved (unverified but usable for sign-in and locked so no other user can claim it).'
+        phone_number:
+          type: array
+          items:
+            type: string
+          description: Phone numbers to add to the user. Must be unique across your instance. The first phone number will be set as the user's primary phone number. Created verified by default; see `phone_number_identification_status` to create them reserved.
+        phone_number_identification_status:
+          type: array
+          items:
+            type: string
+            enum:
+              - verified
+              - reserved
+          description: 'Controls the status each phone number is created with. Runs parallel to `phone_number`: when provided, it must contain exactly one item per phone number, applied by position. When omitted or empty, every phone number is created `verified`. Set an item to `reserved` to create the corresponding phone number reserved (unverified but usable for sign-in and locked so no other user can claim it).'
+        web3_wallet:
+          type: array
+          items:
+            type: string
+          description: Web3 wallets to add to the user. Must be unique across your instance. The first wallet will be set as the user's primary wallet.
+        username:
+          type: string
+          description: The username to give to the user. It must be unique across your instance.
+          nullable: true
+        password:
+          type: string
+          description: The plaintext password to give the user. Must be at least 8 characters long, and cannot be in any list of hacked passwords.
+          nullable: true
+        password_digest:
+          type: string
+          description: In case you already have the password digests and not the passwords, you can use them for the newly created user via this property. The digests should be generated with one of the supported algorithms. The hashing algorithm can be specified using the `password_hasher` property.
+          nullable: true
+        password_hasher:
+          $ref: '#/components/schemas/PlatformPasswordHasher'
+        skip_password_checks:
+          type: boolean
+          description: When set to `true` all password checks are skipped. It is recommended to use this method only when migrating plaintext passwords to Clerk. Upon migration the user base should be prompted to pick a stronger password.
+          nullable: true
+        skip_password_requirement:
+          type: boolean
+          description: When set to `true`, `password` is not required anymore when creating the user and can be omitted. This is useful when you need to create a user without a password in an instance that is using passwords. You cannot use this flag if password is the only way to sign in to your instance.
+          nullable: true
+        totp_secret:
+          type: string
+          description: If TOTP is configured on the instance, provides the secret to enable it for the newly created user. Supported options are a 30-second period, 6-digit codes, and SHA1.
+          nullable: true
+        backup_codes:
+          type: array
+          items:
+            type: string
+          description: Backup codes for the user. Provide plaintext codes or their corresponding bcrypt digests.
+        public_metadata:
+          type: object
+          description: Metadata saved on the user that is visible to both the Frontend and Backend APIs.
+          additionalProperties: true
+        private_metadata:
+          type: object
+          description: Metadata saved on the user that is only visible to the Backend API.
+          additionalProperties: true
+        unsafe_metadata:
+          type: object
+          description: Metadata saved on the user that can be updated from both the Frontend and Backend APIs. It is not guaranteed to be safe because the frontend can modify it.
+          additionalProperties: true
+        delete_self_enabled:
+          type: boolean
+          description: If enabled, the user can delete themselves via FAPI.
+          nullable: true
+        legal_accepted_at:
+          type: string
+          description: A custom RFC3339 timestamp for when the user accepted legal requirements.
+          nullable: true
+        skip_legal_checks:
+          type: boolean
+          description: When set to `true` all legal checks are skipped. Use only when migrating a user to Clerk.
+          nullable: true
+        skip_user_requirement:
+          type: boolean
+          description: When set to `true`, identification types are not enforced. At least one identification type must be enabled and provided on the instance (email, phone, web3 wallet, or username). Users without required identification types cannot use those authentication strategies.
+          nullable: true
+        create_organization_enabled:
+          type: boolean
+          description: If enabled, the user can create organizations via FAPI.
+          nullable: true
+        create_organizations_limit:
+          type: integer
+          description: The maximum number of organizations the user can create. Zero means unlimited.
+          nullable: true
+        created_at:
+          type: string
+          description: A custom RFC3339 timestamp for when the user signed up to the application.
+          nullable: true
+        bypass_client_trust:
+          type: boolean
+          description: When set to `true`, the user bypasses client trust checks during sign-in.
+          nullable: true
+        banned:
+          type: boolean
+          description: When set to `true`, the user is created already banned and cannot sign in. Requires the same plan support as the ban user endpoint.
+          nullable: true
+        locked:
+          type: boolean
+          description: When set to `true`, the user is created already locked. Requires the user lockout feature to be enabled on the instance.
+          nullable: true
     DeletedObject:
       type: object
       additionalProperties: false
@@ -4885,18 +5079,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ClerkErrors'
-    DeletedObject:
-      description: Deleted Object
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DeletedObject'
     PaymentRequired:
       description: Payment required
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ClerkErrors'
+    DeletedObject:
+      description: Deleted Object
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeletedObject'
 x-tagGroups:
   - name: Core Resources
     tags:
