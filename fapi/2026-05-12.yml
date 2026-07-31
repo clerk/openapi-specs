@@ -77,6 +77,8 @@ tags:
     description: Used to interact with the web3 wallets of the logged in user.
   - name: Passkeys
     description: Used to interact with the passkeys of the logged in user.
+  - name: Trusted Devices
+    description: Used to interact with native trusted-device credentials of the logged in user.
   - name: External Accounts
     description: Used to interact with the external accounts of the current user.
   - name: TOTP
@@ -1227,6 +1229,8 @@ paths:
 
         If the strategy equals `passkey` then no identifier is provided.
 
+        If the strategy equals `trusted_device` then trusted_device_id is required.
+
         If the strategy equals `google_one_tap` then token is required.
       tags:
         - Sign Ins
@@ -1248,7 +1252,7 @@ paths:
                   type: string
                   description: |-
                     Strategy used to sign in.
-                    Can be one of `phone_code`, `email_code`, `ticket`, `web3_[provider]_signature` `reset_password_code`, `reset_password_phone_code`, `email_link`, `oauth_[provider]`, `oauth_token_[provider]`, `saml`, `password`, `passkey`, `google_one_tap`
+                    Can be one of `phone_code`, `email_code`, `ticket`, `web3_[provider]_signature` `reset_password_code`, `reset_password_phone_code`, `email_link`, `oauth_[provider]`, `oauth_token_[provider]`, `saml`, `password`, `passkey`, `trusted_device`, `google_one_tap`
                   nullable: true
                 identifier:
                   type: string
@@ -1290,6 +1294,10 @@ paths:
                 proof_token:
                   type: string
                   description: Proof token produced by the Clerk Protect SDK.
+                  nullable: true
+                trusted_device_id:
+                  type: string
+                  description: Used with the `trusted_device` strategy.
                   nullable: true
       responses:
         '200':
@@ -1383,6 +1391,7 @@ paths:
         If the strategy equals phone_code then this request will send an SMS with an OTP code.
         If the strategy equals oauth_[provider] then this request generate a URL that the User needs to visit in order to authenticate.
         If the strategy equals passkey then this request will begin the passkey registration flow.
+        If the strategy equals trusted_device then this request will issue a trusted-device sign-in challenge.
 
         Parameter rules:
         If the strategy equals `oauth_[provider]` then a redirect_url is required, and an action_complete_redirect_url is optional.
@@ -1415,7 +1424,7 @@ paths:
                     Can be one of the following `email_code`, `email_link`,
                     `phone_code`, `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature`,
                     `web3_okx_wallet_signature`, `reset_password_phone_code`, `reset_password_email_code`,
-                    `oauth_[provider]`, `saml`, `passkey`, `enterprise_sso`
+                    `oauth_[provider]`, `saml`, `passkey`, `trusted_device`, `enterprise_sso`
                 email_address_id:
                   type: string
                   description: Used with the `email_code`, `reset_password_email_code` and `email_link` strategies.
@@ -1435,6 +1444,10 @@ paths:
                 passkey_id:
                   type: string
                   description: Used with the `passkey` strategy.
+                  nullable: true
+                trusted_device_id:
+                  type: string
+                  description: Used with the `trusted_device` strategy.
                   nullable: true
                 redirect_url:
                   type: string
@@ -1479,6 +1492,7 @@ paths:
         Parameter rules:
         If the strategy equals `email_code` or `phone_code` then a code is required.
         If the strategy equals `password` then a password is required.
+        If the strategy equals `trusted_device` then trusted_device_id, client_data, signature and algorithm are required.
       tags:
         - Sign Ins
       operationId: attemptSignInFactorOne
@@ -1507,7 +1521,7 @@ paths:
 
                     Can be one of the following `email_code`, `email_link`, `password`, `phone_code`,
                     `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature`, `web3_okx_wallet_signature`,
-                    `reset_password_phone_code`, `reset_password_email_code`, `passkey`, `google_one_tap`
+                    `reset_password_phone_code`, `reset_password_email_code`, `passkey`, `trusted_device`, `google_one_tap`
                 code:
                   type: string
                   description: The code that was sent to the email. Used with the `email_code`, `phone_code`, and `email_link` strategies.
@@ -1518,7 +1532,7 @@ paths:
                   nullable: true
                 signature:
                   type: string
-                  description: Used with the `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature` and `web3_okx_wallet_signature` strategies.
+                  description: Used with the `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature`, `web3_okx_wallet_signature`, and `trusted_device` strategies.
                   nullable: true
                 token:
                   type: string
@@ -1531,6 +1545,20 @@ paths:
                 public_key_credential:
                   type: string
                   description: Used with the `passkey` strategy.
+                  nullable: true
+                trusted_device_id:
+                  type: string
+                  description: Used with the `trusted_device` strategy.
+                  nullable: true
+                client_data:
+                  type: string
+                  description: Canonical trusted-device challenge payload returned by prepare.
+                  nullable: true
+                algorithm:
+                  type: string
+                  enum:
+                    - ES256
+                  description: Signature algorithm used with the `trusted_device` strategy.
                   nullable: true
               required:
                 - strategy
@@ -2154,6 +2182,40 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
   /v1/client/hosted_auth: {}
   /v1/client/hosted_auth/complete: {}
+  /v1/client/trusted_devices/validate:
+    post:
+      summary: Validate Trusted Device Sign-In Credential
+      description: Validates that a local trusted-device credential can be used by the current native client.
+      operationId: validateTrustedDevice
+      tags:
+        - Trusted Devices
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                trusted_device_id:
+                  type: string
+                  description: The trusted-device credential ID stored by the native SDK.
+              required:
+                - trusted_device_id
+      responses:
+        '200':
+          description: Returns whether the trusted-device credential is valid for the current client.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client.ClientWrappedTrustedDeviceValidation'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
   /v1/agents/tasks:
     get:
       x-speakeasy-group: agentTasks
@@ -4596,6 +4658,165 @@ paths:
         '404':
           $ref: '#/components/responses/ClerkErrors'
         '422':
+          $ref: '#/components/responses/ClerkErrors'
+  /v1/me/trusted_devices:
+    get:
+      summary: List Trusted Devices
+      description: Retrieve active trusted-device credentials associated with the current user.
+      operationId: listTrustedDevices
+      tags:
+        - Trusted Devices
+      responses:
+        '200':
+          description: Returns the current user's trusted-device credentials.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client.ClientWrappedTrustedDevices'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+  /v1/me/trusted_devices/prepare:
+    post:
+      summary: Prepare Trusted Device Enrollment
+      description: Issues a one-time challenge for enrolling a native trusted-device credential.
+      operationId: prepareTrustedDevice
+      tags:
+        - Trusted Devices
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                platform:
+                  type: string
+                  enum:
+                    - ios
+                    - android
+                app_identifier:
+                  type: string
+                  description: Bundle identifier or package name for the native application.
+                name:
+                  type: string
+                  nullable: true
+                  description: Optional user-facing device name.
+                algorithm:
+                  type: string
+                  enum:
+                    - ES256
+                public_key_jwk:
+                  type: string
+                  description: Canonical public JWK for the device-bound P-256 key.
+              required:
+                - platform
+                - app_identifier
+                - algorithm
+                - public_key_jwk
+      responses:
+        '200':
+          description: Returns the enrollment challenge that must be signed by the native private key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client.ClientWrappedTrustedDeviceChallenge'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
+  /v1/me/trusted_devices/attempt:
+    post:
+      summary: Attempt Trusted Device Enrollment
+      description: Verifies a signed enrollment challenge and creates a trusted-device credential.
+      operationId: attemptTrustedDevice
+      tags:
+        - Trusted Devices
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                platform:
+                  type: string
+                  enum:
+                    - ios
+                    - android
+                app_identifier:
+                  type: string
+                  description: Bundle identifier or package name for the native application.
+                name:
+                  type: string
+                  nullable: true
+                  description: Optional user-facing device name.
+                algorithm:
+                  type: string
+                  enum:
+                    - ES256
+                public_key_jwk:
+                  type: string
+                  description: Canonical public JWK for the device-bound P-256 key.
+                client_data:
+                  type: string
+                  description: Canonical JSON challenge payload returned from prepare.
+                signature:
+                  type: string
+                  description: Base64url raw ECDSA P-256 signature over `client_data`.
+              required:
+                - platform
+                - app_identifier
+                - algorithm
+                - public_key_jwk
+                - client_data
+                - signature
+      responses:
+        '200':
+          description: Returns the created trusted-device credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client.ClientWrappedTrustedDevice'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
+  /v1/me/trusted_devices/{trusted_device_id}:
+    delete:
+      summary: Revoke Trusted Device
+      description: Revokes a trusted-device credential so it can no longer authenticate.
+      operationId: revokeTrustedDevice
+      tags:
+        - Trusted Devices
+      parameters:
+        - in: path
+          required: true
+          name: trusted_device_id
+          schema:
+            type: string
+          description: The trusted-device credential ID.
+      responses:
+        '200':
+          description: Returns the revoked trusted-device credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client.ClientWrappedTrustedDevice'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
           $ref: '#/components/responses/ClerkErrors'
   /v1/me/external_accounts:
     post:
@@ -10539,6 +10760,7 @@ components:
             - reset_password_email_code
             - reset_password_phone_code
             - passkey
+            - trusted_device
             - google_one_tap
         safe_identifier:
           type: string
@@ -10553,6 +10775,8 @@ components:
         web3_wallet_id:
           type: string
         passkey_id:
+          type: string
+        trusted_device_id:
           type: string
         primary:
           type: boolean
@@ -10622,6 +10846,67 @@ components:
         attempts:
           type: integer
           nullable: true
+      required:
+        - status
+        - strategy
+        - expire_at
+    Stubs.Verification.TrustedDevice:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_trusted_device
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+        strategy:
+          type: string
+          enum:
+            - trusted_device
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        trusted_device_challenge:
+          type: object
+          nullable: true
+          additionalProperties: false
+          properties:
+            object:
+              type: string
+              enum:
+                - trusted_device_challenge
+            challenge:
+              type: string
+            challenge_id:
+              type: string
+            trusted_device_id:
+              type: string
+            client_data:
+              type: string
+            expires_at:
+              type: integer
+              format: int64
+            algorithm:
+              type: string
+              enum:
+                - ES256
+          required:
+            - object
+            - challenge
+            - challenge_id
+            - trusted_device_id
+            - client_data
+            - expires_at
+            - algorithm
       required:
         - status
         - strategy
@@ -10759,6 +11044,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.Ticket'
             - $ref: '#/components/schemas/Stubs.Verification.SAML'
             - $ref: '#/components/schemas/Stubs.Verification.Passkey'
+            - $ref: '#/components/schemas/Stubs.Verification.TrustedDevice'
             - $ref: '#/components/schemas/Stubs.Verification.GoogleOneTap'
         second_factor_verification:
           type: object
@@ -11138,6 +11424,28 @@ components:
         - after_leave_organization_url
         - logo_link_url
         - customization
+    Client.NativeSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - native_settings
+        api_enabled:
+          type: boolean
+        trusted_device_sign_in_enabled:
+          type: boolean
+        trusted_device_enrollment_prompt_after_sign_in_enabled:
+          type: boolean
+        trusted_device_enrollment_prompt_after_sign_up_enabled:
+          type: boolean
+      required:
+        - object
+        - api_enabled
+        - trusted_device_sign_in_enabled
+        - trusted_device_enrollment_prompt_after_sign_in_enabled
+        - trusted_device_enrollment_prompt_after_sign_up_enabled
     Client.AuthConfig:
       type: object
       additionalProperties: false
@@ -11224,6 +11532,8 @@ components:
           nullable: true
         reverification:
           type: boolean
+        native_settings:
+          $ref: '#/components/schemas/Client.NativeSettings'
       required:
         - object
         - id
@@ -11244,6 +11554,7 @@ components:
         - url_based_session_syncing
         - claimed_at
         - reverification
+        - native_settings
     Image:
       type: object
       properties:
@@ -12225,6 +12536,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.Ticket'
             - $ref: '#/components/schemas/Stubs.Verification.SAML'
             - $ref: '#/components/schemas/Stubs.Verification.Passkey'
+            - $ref: '#/components/schemas/Stubs.Verification.TrustedDevice'
             - $ref: '#/components/schemas/Stubs.Verification.GoogleOneTap'
         second_factor_verification:
           type: object
@@ -12420,6 +12732,36 @@ components:
       required:
         - response
         - client
+    Client.TrustedDeviceValidation:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - trusted_device_validation
+        valid:
+          type: boolean
+      required:
+        - object
+        - valid
+    Client.ClientWrappedTrustedDeviceValidation:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Client.TrustedDeviceValidation'
+        client:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Client.Client-2'
+      required:
+        - response
+        - client
     Client.ClientWrappedSession:
       type: object
       additionalProperties: false
@@ -12514,6 +12856,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.Password'
             - $ref: '#/components/schemas/Stubs.Verification.OTP'
             - $ref: '#/components/schemas/Stubs.Verification.Passkey'
+            - $ref: '#/components/schemas/Stubs.Verification.TrustedDevice'
             - $ref: '#/components/schemas/Stubs.Verification.SAML'
         second_factor_verification:
           type: object
@@ -12968,6 +13311,145 @@ components:
           nullable: false
           allOf:
             - $ref: '#/components/schemas/Client.Passkey'
+        client:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Client.Client-2'
+      required:
+        - response
+        - client
+    Client.TrustedDevice:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          enum:
+            - trusted_device
+        platform:
+          type: string
+          enum:
+            - ios
+            - android
+        app_identifier:
+          type: string
+          description: Bundle identifier or package name for the native application that owns the credential.
+        name:
+          type: string
+          nullable: true
+          description: Optional user-facing device name supplied by the SDK.
+        algorithm:
+          type: string
+          enum:
+            - ES256
+        status:
+          type: string
+          enum:
+            - active
+            - revoked
+        created_at:
+          type: integer
+          format: int64
+        updated_at:
+          type: integer
+          format: int64
+        last_used_at:
+          type: integer
+          format: int64
+          nullable: true
+        revoked_at:
+          type: integer
+          format: int64
+          nullable: true
+      required:
+        - id
+        - object
+        - platform
+        - app_identifier
+        - name
+        - algorithm
+        - status
+        - created_at
+        - updated_at
+        - last_used_at
+        - revoked_at
+    Client.ClientWrappedTrustedDevices:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: array
+          items:
+            $ref: '#/components/schemas/Client.TrustedDevice'
+        client:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Client.Client-2'
+      required:
+        - response
+        - client
+    Client.TrustedDeviceChallenge:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - trusted_device_challenge
+        challenge:
+          type: string
+        challenge_id:
+          type: string
+        trusted_device_id:
+          type: string
+          description: Present for sign-in challenges and omitted for enrollment challenges.
+        client_data:
+          type: string
+          description: Canonical JSON challenge payload that the native SDK must sign.
+        expires_at:
+          type: integer
+          format: int64
+        algorithm:
+          type: string
+          enum:
+            - ES256
+      required:
+        - object
+        - challenge
+        - challenge_id
+        - client_data
+        - expires_at
+        - algorithm
+    Client.ClientWrappedTrustedDeviceChallenge:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Client.TrustedDeviceChallenge'
+        client:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Client.Client-2'
+      required:
+        - response
+        - client
+    Client.ClientWrappedTrustedDevice:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Client.TrustedDevice'
         client:
           type: object
           nullable: false
@@ -16059,6 +16541,7 @@ x-tagGroups:
       - Phone Numbers
       - Web3 Wallets
       - Passkeys
+      - Trusted Devices
       - External Accounts
       - TOTP
       - Backup Codes
