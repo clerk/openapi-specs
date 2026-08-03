@@ -7182,6 +7182,28 @@ components:
         - after_leave_organization_url
         - logo_link_url
         - customization
+    Client.NativeSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - native_settings
+        api_enabled:
+          type: boolean
+        trusted_device_sign_in_enabled:
+          type: boolean
+        trusted_device_enrollment_prompt_after_sign_in_enabled:
+          type: boolean
+        trusted_device_enrollment_prompt_after_sign_up_enabled:
+          type: boolean
+      required:
+        - object
+        - api_enabled
+        - trusted_device_sign_in_enabled
+        - trusted_device_enrollment_prompt_after_sign_in_enabled
+        - trusted_device_enrollment_prompt_after_sign_up_enabled
     Client.AuthConfig:
       type: object
       additionalProperties: false
@@ -7268,6 +7290,8 @@ components:
           nullable: true
         reverification:
           type: boolean
+        native_settings:
+          $ref: '#/components/schemas/Client.NativeSettings'
       required:
         - object
         - id
@@ -7288,6 +7312,7 @@ components:
         - url_based_session_syncing
         - claimed_at
         - reverification
+        - native_settings
     Image:
       type: object
       properties:
@@ -9370,6 +9395,7 @@ components:
             - reset_password_email_code
             - reset_password_phone_code
             - passkey
+            - trusted_device
             - google_one_tap
         safe_identifier:
           type: string
@@ -9384,6 +9410,8 @@ components:
         web3_wallet_id:
           type: string
         passkey_id:
+          type: string
+        trusted_device_id:
           type: string
         primary:
           type: boolean
@@ -9453,6 +9481,67 @@ components:
         attempts:
           type: integer
           nullable: true
+      required:
+        - status
+        - strategy
+        - expire_at
+    Stubs.Verification.TrustedDevice:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_trusted_device
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+        strategy:
+          type: string
+          enum:
+            - trusted_device
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        trusted_device_challenge:
+          type: object
+          nullable: true
+          additionalProperties: false
+          properties:
+            object:
+              type: string
+              enum:
+                - trusted_device_challenge
+            challenge:
+              type: string
+            challenge_id:
+              type: string
+            trusted_device_id:
+              type: string
+            client_data:
+              type: string
+            expires_at:
+              type: integer
+              format: int64
+            algorithm:
+              type: string
+              enum:
+                - ES256
+          required:
+            - object
+            - challenge
+            - challenge_id
+            - trusted_device_id
+            - client_data
+            - expires_at
+            - algorithm
       required:
         - status
         - strategy
@@ -9590,6 +9679,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.Ticket'
             - $ref: '#/components/schemas/Stubs.Verification.SAML'
             - $ref: '#/components/schemas/Stubs.Verification.Passkey'
+            - $ref: '#/components/schemas/Stubs.Verification.TrustedDevice'
             - $ref: '#/components/schemas/Stubs.Verification.GoogleOneTap'
         second_factor_verification:
           type: object
@@ -10052,6 +10142,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.Password'
             - $ref: '#/components/schemas/Stubs.Verification.OTP'
             - $ref: '#/components/schemas/Stubs.Verification.Passkey'
+            - $ref: '#/components/schemas/Stubs.Verification.TrustedDevice'
         second_factor_verification:
           type: object
           nullable: true
@@ -10475,6 +10566,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.Ticket'
             - $ref: '#/components/schemas/Stubs.Verification.SAML'
             - $ref: '#/components/schemas/Stubs.Verification.Passkey'
+            - $ref: '#/components/schemas/Stubs.Verification.TrustedDevice'
             - $ref: '#/components/schemas/Stubs.Verification.GoogleOneTap'
         second_factor_verification:
           type: object
