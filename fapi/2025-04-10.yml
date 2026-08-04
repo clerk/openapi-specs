@@ -1512,6 +1512,8 @@ paths:
 
         If the strategy equals `passkey` then no identifier is provided.
 
+        If the strategy equals `trusted_device` then trusted_device_id is required.
+
         If the strategy equals `google_one_tap` then token is required.
       tags:
         - Sign Ins
@@ -1533,7 +1535,7 @@ paths:
                   type: string
                   description: |-
                     Strategy used to sign in.
-                    Can be one of `phone_code`, `email_code`, `ticket`, `web3_[provider]_signature` `reset_password_code`, `reset_password_phone_code`, `email_link`, `oauth_[provider]`, `oauth_token_[provider]`, `saml`, `password`, `passkey`, `google_one_tap`
+                    Can be one of `phone_code`, `email_code`, `ticket`, `web3_[provider]_signature` `reset_password_code`, `reset_password_phone_code`, `email_link`, `oauth_[provider]`, `oauth_token_[provider]`, `saml`, `password`, `passkey`, `trusted_device`, `google_one_tap`
                   nullable: true
                 identifier:
                   type: string
@@ -1575,6 +1577,10 @@ paths:
                 proof_token:
                   type: string
                   description: Proof token produced by the Clerk Protect SDK.
+                  nullable: true
+                trusted_device_id:
+                  type: string
+                  description: Used with the `trusted_device` strategy.
                   nullable: true
       responses:
         '200':
@@ -1668,6 +1674,7 @@ paths:
         If the strategy equals phone_code then this request will send an SMS with an OTP code.
         If the strategy equals oauth_[provider] then this request generate a URL that the User needs to visit in order to authenticate.
         If the strategy equals passkey then this request will begin the passkey registration flow.
+        If the strategy equals trusted_device then this request will issue a trusted-device sign-in challenge.
 
         Parameter rules:
         If the strategy equals `oauth_[provider]` then a redirect_url is required, and an action_complete_redirect_url is optional.
@@ -1700,7 +1707,7 @@ paths:
                     Can be one of the following `email_code`, `email_link`,
                     `phone_code`, `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature`,
                     `web3_okx_wallet_signature`, `reset_password_phone_code`, `reset_password_email_code`,
-                    `oauth_[provider]`, `saml`, `passkey`, `enterprise_sso`
+                    `oauth_[provider]`, `saml`, `passkey`, `trusted_device`, `enterprise_sso`
                 email_address_id:
                   type: string
                   description: Used with the `email_code`, `reset_password_email_code` and `email_link` strategies.
@@ -1720,6 +1727,10 @@ paths:
                 passkey_id:
                   type: string
                   description: Used with the `passkey` strategy.
+                  nullable: true
+                trusted_device_id:
+                  type: string
+                  description: Used with the `trusted_device` strategy.
                   nullable: true
                 redirect_url:
                   type: string
@@ -1764,6 +1775,7 @@ paths:
         Parameter rules:
         If the strategy equals `email_code` or `phone_code` then a code is required.
         If the strategy equals `password` then a password is required.
+        If the strategy equals `trusted_device` then trusted_device_id, client_data, signature and algorithm are required.
       tags:
         - Sign Ins
       operationId: attemptSignInFactorOne
@@ -1792,7 +1804,7 @@ paths:
 
                     Can be one of the following `email_code`, `email_link`, `password`, `phone_code`,
                     `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature`, `web3_okx_wallet_signature`,
-                    `reset_password_phone_code`, `reset_password_email_code`, `passkey`, `google_one_tap`
+                    `reset_password_phone_code`, `reset_password_email_code`, `passkey`, `trusted_device`, `google_one_tap`
                 code:
                   type: string
                   description: The code that was sent to the email. Used with the `email_code`, `phone_code`, and `email_link` strategies.
@@ -1803,7 +1815,7 @@ paths:
                   nullable: true
                 signature:
                   type: string
-                  description: Used with the `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature` and `web3_okx_wallet_signature` strategies.
+                  description: Used with the `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature`, `web3_okx_wallet_signature`, and `trusted_device` strategies.
                   nullable: true
                 token:
                   type: string
@@ -1816,6 +1828,20 @@ paths:
                 public_key_credential:
                   type: string
                   description: Used with the `passkey` strategy.
+                  nullable: true
+                trusted_device_id:
+                  type: string
+                  description: Used with the `trusted_device` strategy.
+                  nullable: true
+                client_data:
+                  type: string
+                  description: Canonical trusted-device challenge payload returned by prepare.
+                  nullable: true
+                algorithm:
+                  type: string
+                  enum:
+                    - ES256
+                  description: Signature algorithm used with the `trusted_device` strategy.
                   nullable: true
               required:
                 - strategy
@@ -7500,6 +7526,28 @@ components:
         - after_leave_organization_url
         - logo_link_url
         - customization
+    Client.NativeSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - native_settings
+        api_enabled:
+          type: boolean
+        trusted_device_sign_in_enabled:
+          type: boolean
+        trusted_device_enrollment_prompt_after_sign_in_enabled:
+          type: boolean
+        trusted_device_enrollment_prompt_after_sign_up_enabled:
+          type: boolean
+      required:
+        - object
+        - api_enabled
+        - trusted_device_sign_in_enabled
+        - trusted_device_enrollment_prompt_after_sign_in_enabled
+        - trusted_device_enrollment_prompt_after_sign_up_enabled
     Client.AuthConfig:
       type: object
       additionalProperties: false
@@ -7586,6 +7634,8 @@ components:
           nullable: true
         reverification:
           type: boolean
+        native_settings:
+          $ref: '#/components/schemas/Client.NativeSettings'
       required:
         - object
         - id
@@ -7606,6 +7656,7 @@ components:
         - url_based_session_syncing
         - claimed_at
         - reverification
+        - native_settings
     Image:
       type: object
       properties:
@@ -9716,6 +9767,7 @@ components:
             - reset_password_email_code
             - reset_password_phone_code
             - passkey
+            - trusted_device
             - google_one_tap
         safe_identifier:
           type: string
@@ -9730,6 +9782,8 @@ components:
         web3_wallet_id:
           type: string
         passkey_id:
+          type: string
+        trusted_device_id:
           type: string
         primary:
           type: boolean
@@ -9799,6 +9853,67 @@ components:
         attempts:
           type: integer
           nullable: true
+      required:
+        - status
+        - strategy
+        - expire_at
+    Stubs.Verification.TrustedDevice:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - verification_trusted_device
+        status:
+          type: string
+          enum:
+            - unverified
+            - verified
+            - failed
+            - expired
+        strategy:
+          type: string
+          enum:
+            - trusted_device
+        attempts:
+          type: integer
+          nullable: true
+        expire_at:
+          type: integer
+          nullable: true
+        trusted_device_challenge:
+          type: object
+          nullable: true
+          additionalProperties: false
+          properties:
+            object:
+              type: string
+              enum:
+                - trusted_device_challenge
+            challenge:
+              type: string
+            challenge_id:
+              type: string
+            trusted_device_id:
+              type: string
+            client_data:
+              type: string
+            expires_at:
+              type: integer
+              format: int64
+            algorithm:
+              type: string
+              enum:
+                - ES256
+          required:
+            - object
+            - challenge
+            - challenge_id
+            - trusted_device_id
+            - client_data
+            - expires_at
+            - algorithm
       required:
         - status
         - strategy
@@ -9936,6 +10051,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.Ticket'
             - $ref: '#/components/schemas/Stubs.Verification.SAML'
             - $ref: '#/components/schemas/Stubs.Verification.Passkey'
+            - $ref: '#/components/schemas/Stubs.Verification.TrustedDevice'
             - $ref: '#/components/schemas/Stubs.Verification.GoogleOneTap'
         second_factor_verification:
           type: object
@@ -10542,6 +10658,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.Ticket'
             - $ref: '#/components/schemas/Stubs.Verification.SAML'
             - $ref: '#/components/schemas/Stubs.Verification.Passkey'
+            - $ref: '#/components/schemas/Stubs.Verification.TrustedDevice'
             - $ref: '#/components/schemas/Stubs.Verification.GoogleOneTap'
         second_factor_verification:
           type: object
@@ -10868,6 +10985,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.Password'
             - $ref: '#/components/schemas/Stubs.Verification.OTP'
             - $ref: '#/components/schemas/Stubs.Verification.Passkey'
+            - $ref: '#/components/schemas/Stubs.Verification.TrustedDevice'
             - $ref: '#/components/schemas/Stubs.Verification.SAML'
         second_factor_verification:
           type: object
