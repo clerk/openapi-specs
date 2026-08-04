@@ -1513,6 +1513,123 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}/profile_image:
+    post:
+      operationId: PlatformSetUserProfileImage
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: setUserProfileImage
+      tags:
+        - Users
+      summary: Update a user profile image
+      description: |
+        Sets or replaces the profile image for a user within an application instance.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Requires the `users:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: userID
+          in: path
+          description: User ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      responses:
+        '200':
+          description: User profile image updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '413':
+          $ref: '#/components/responses/ClerkErrors'
+    delete:
+      operationId: PlatformDeleteUserProfileImage
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: deleteUserProfileImage
+      tags:
+        - Users
+      summary: Delete a user profile image
+      description: |
+        Deletes the profile image for a user within an application instance.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Requires the `users:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: userID
+          in: path
+          description: User ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User profile image deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}/ban:
     post:
       operationId: PlatformBanUser
