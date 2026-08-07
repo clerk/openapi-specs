@@ -2045,7 +2045,7 @@ paths:
                   nullable: true
                 bypass_client_trust:
                   type: boolean
-                  description: When set to `true`, the user will bypass client trust checks during sign-in.
+                  description: When set to `true`, the user will bypass Device Trust checks during sign-in.
                   nullable: true
                 banned:
                   type: boolean
@@ -2495,7 +2495,7 @@ paths:
                   nullable: true
                 bypass_client_trust:
                   type: boolean
-                  description: When set to `true`, the user will bypass client trust checks during sign-in.
+                  description: When set to `true`, the user will bypass Device Trust checks during sign-in.
                   nullable: true
       responses:
         '200':
@@ -7357,7 +7357,10 @@ paths:
             default: +created_at
         - name: name_query
           in: query
-          description: Returns OAuth applications with names that match the given query, via case-insensitive partial match.
+          description: |-
+            Returns OAuth applications with names that match the given query, via case-insensitive partial match.
+            Also returns the OAuth application whose `client_id` is exactly the given query, which is useful for
+            resolving a `client_id` to the OAuth application `id` required by the read, update and delete endpoints.
           required: false
           schema:
             type: string
@@ -14533,7 +14536,7 @@ components:
           example: 1700690400000
         bypass_client_trust:
           type: boolean
-          description: When set to `true`, the user will bypass client trust checks during sign-in.
+          description: When set to `true`, the user will bypass Device Trust checks during sign-in.
           default: false
         scim:
           nullable: true
