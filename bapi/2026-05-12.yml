@@ -2045,7 +2045,7 @@ paths:
                   nullable: true
                 bypass_client_trust:
                   type: boolean
-                  description: When set to `true`, the user will bypass client trust checks during sign-in.
+                  description: When set to `true`, the user will bypass Device Trust checks during sign-in.
                   nullable: true
                 banned:
                   type: boolean
@@ -2458,7 +2458,7 @@ paths:
                   nullable: true
                 bypass_client_trust:
                   type: boolean
-                  description: When set to `true`, the user will bypass client trust checks during sign-in.
+                  description: When set to `true`, the user will bypass Device Trust checks during sign-in.
                   nullable: true
       responses:
         '200':
@@ -14685,7 +14685,7 @@ components:
           example: 1700690400000
         bypass_client_trust:
           type: boolean
-          description: When set to `true`, the user will bypass client trust checks during sign-in.
+          description: When set to `true`, the user will bypass Device Trust checks during sign-in.
           default: false
         scim:
           nullable: true
