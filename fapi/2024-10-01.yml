@@ -9728,7 +9728,7 @@ components:
           type: string
           nullable: true
           description: |
-            The trust state of the client for this sign-in attempt. - `pending`: The identifier has not been set yet. - `new`: The user has not had a session on this client before. - `known`: The user has had a session on this client before.
+            The Device Trust state of this sign-in attempt. - `pending`: The identifier has not been set yet. - `new`: The user has not had a session on this device before. - `known`: The user has had a session on this device before.
           enum:
             - pending
             - new
@@ -10616,7 +10616,7 @@ components:
           type: string
           nullable: true
           description: |
-            The trust state of the client for this sign-in attempt. - `pending`: The identifier has not been set yet. - `new`: The user has not had a session on this client before. - `known`: The user has had a session on this client before.
+            The Device Trust state of this sign-in attempt. - `pending`: The identifier has not been set yet. - `new`: The user has not had a session on this device before. - `known`: The user has had a session on this device before.
           enum:
             - pending
             - new
