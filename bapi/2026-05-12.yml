@@ -2045,7 +2045,7 @@ paths:
                   nullable: true
                 bypass_client_trust:
                   type: boolean
-                  description: When set to `true`, the user will bypass client trust checks during sign-in.
+                  description: When set to `true`, the user will bypass Device Trust checks during sign-in.
                   nullable: true
                 banned:
                   type: boolean
@@ -2458,7 +2458,7 @@ paths:
                   nullable: true
                 bypass_client_trust:
                   type: boolean
-                  description: When set to `true`, the user will bypass client trust checks during sign-in.
+                  description: When set to `true`, the user will bypass Device Trust checks during sign-in.
                   nullable: true
       responses:
         '200':
@@ -7308,7 +7308,10 @@ paths:
             default: +created_at
         - name: name_query
           in: query
-          description: Returns OAuth applications with names that match the given query, via case-insensitive partial match.
+          description: |-
+            Returns OAuth applications with names that match the given query, via case-insensitive partial match.
+            Also returns the OAuth application whose `client_id` is exactly the given query, which is useful for
+            resolving a `client_id` to the OAuth application `id` required by the read, update and delete endpoints.
           required: false
           schema:
             type: string
@@ -9840,8 +9843,8 @@ paths:
       x-speakeasy-name-override: list
       tags:
         - SCIM Directories
-      summary: List all SCIM directories
-      description: Returns a list of all SCIM directories for the instance.
+      summary: List all directories
+      description: Returns a list of all directories for the instance.
       parameters:
         - $ref: '#/components/parameters/LimitParameter'
         - $ref: '#/components/parameters/OffsetParameter'
@@ -9858,8 +9861,8 @@ paths:
       x-speakeasy-name-override: create
       tags:
         - SCIM Directories
-      summary: Create a SCIM directory
-      description: Create a new SCIM directory for the instance.
+      summary: Create a directory
+      description: Create a new directory for the instance.
       requestBody:
         content:
           application/json:
@@ -9868,13 +9871,13 @@ paths:
               properties:
                 enterprise_connection_id:
                   type: string
-                  description: The ID of the enterprise connection to associate with this SCIM directory.
+                  description: The ID of the enterprise connection to associate with this directory.
                 name:
                   type: string
-                  description: A human-friendly name for the SCIM directory.
+                  description: A human-friendly name for the directory.
                 provider:
                   type: string
-                  description: The identity provider for this SCIM directory.
+                  description: The identity provider for this directory.
                 group_role_mappings:
                   type: array
                   description: Optional SCIM group to organization role mappings to create with the directory.
@@ -9919,12 +9922,12 @@ paths:
       x-speakeasy-name-override: get
       tags:
         - SCIM Directories
-      summary: Retrieve a SCIM directory
-      description: Returns the details of a SCIM directory.
+      summary: Retrieve a directory
+      description: Returns the details of a directory.
       parameters:
         - name: scim_directory_id
           in: path
-          description: The ID of the SCIM directory to retrieve
+          description: The ID of the directory to retrieve
           required: true
           schema:
             type: string
@@ -9943,12 +9946,12 @@ paths:
       x-speakeasy-name-override: update
       tags:
         - SCIM Directories
-      summary: Update a SCIM directory
-      description: Updates a SCIM directory.
+      summary: Update a directory
+      description: Updates a directory.
       parameters:
         - name: scim_directory_id
           in: path
-          description: The ID of the SCIM directory to update
+          description: The ID of the directory to update
           required: true
           schema:
             type: string
@@ -9960,13 +9963,13 @@ paths:
               properties:
                 name:
                   type: string
-                  description: A human-friendly name for the SCIM directory.
+                  description: A human-friendly name for the directory.
                 enabled:
                   type: boolean
-                  description: Whether the SCIM directory is enabled.
+                  description: Whether the directory is enabled.
                 provider:
                   type: string
-                  description: The identity provider for this SCIM directory.
+                  description: The identity provider for this directory.
                 attribute_mapping:
                   type: object
                   additionalProperties:
@@ -9977,7 +9980,7 @@ paths:
                     Set a key to `null` to remove it from the mapping.
                 group_role_mapping_enabled:
                   type: boolean
-                  description: Whether group-to-role mapping is enabled for this SCIM directory.
+                  description: Whether group-to-role mapping is enabled for this directory.
       responses:
         '200':
           $ref: '#/components/responses/SCIMDirectory'
@@ -9997,14 +10000,14 @@ paths:
       x-speakeasy-name-override: delete
       tags:
         - SCIM Directories
-      summary: Delete a SCIM directory
+      summary: Delete a directory
       description: |-
-        Deletes a SCIM directory and stops provisioning for it. SCIM requests authenticated
+        Deletes a directory and stops provisioning for it. SCIM requests authenticated
         with the directory's API key are rejected afterwards.
       parameters:
         - name: scim_directory_id
           in: path
-          description: The ID of the SCIM directory to delete
+          description: The ID of the directory to delete
           required: true
           schema:
             type: string
@@ -10024,16 +10027,16 @@ paths:
       x-speakeasy-name-override: rotateApiKey
       tags:
         - SCIM Directories
-      summary: Rotate a SCIM directory's API key
+      summary: Rotate a directory's API key
       description: |-
-        Generates a new API key for the SCIM directory and returns it in the `api_key` field.
+        Generates a new API key for the directory and returns it in the `api_key` field.
         This is the only way to obtain the key after creation, so make sure to update it in
         your identity provider. The previous key remains valid for a short grace period before
         it expires.
       parameters:
         - name: scim_directory_id
           in: path
-          description: The ID of the SCIM directory whose API key to rotate
+          description: The ID of the directory whose API key to rotate
           required: true
           schema:
             type: string
@@ -10057,11 +10060,11 @@ paths:
       tags:
         - SCIM Directories
       summary: List SCIM group role mappings
-      description: Returns the list of SCIM group to organization role mappings for a SCIM directory, ordered by precedence.
+      description: Returns the list of SCIM group to organization role mappings for a directory, ordered by precedence.
       parameters:
         - name: scim_directory_id
           in: path
-          description: The ID of the SCIM directory.
+          description: The ID of the directory.
           required: true
           schema:
             type: string
@@ -10082,12 +10085,12 @@ paths:
         - SCIM Directories
       summary: Create a SCIM group role mapping
       description: |-
-        Creates a new SCIM group to organization role mapping for a SCIM directory.
+        Creates a new SCIM group to organization role mapping for a directory.
         Group role mapping must be enabled on the directory.
       parameters:
         - name: scim_directory_id
           in: path
-          description: The ID of the SCIM directory.
+          description: The ID of the directory.
           required: true
           schema:
             type: string
@@ -10142,7 +10145,7 @@ paths:
       parameters:
         - name: scim_directory_id
           in: path
-          description: The ID of the SCIM directory.
+          description: The ID of the directory.
           required: true
           schema:
             type: string
@@ -10197,7 +10200,7 @@ paths:
       parameters:
         - name: scim_directory_id
           in: path
-          description: The ID of the SCIM directory.
+          description: The ID of the directory.
           required: true
           schema:
             type: string
@@ -14487,21 +14490,21 @@ components:
       type: object
       additionalProperties: false
       description: |
-        Metadata describing a user's linkage to a SCIM directory. This object is only delivered on `user.created` and `user.updated` webhook events, and only when the user is provisioned through a SCIM directory. Its absence does not necessarily mean the user is not SCIM-managed.
+        Metadata describing a user's linkage to a directory. This object is only delivered on `user.created` and `user.updated` webhook events, and only when the user is provisioned through a directory. Its absence does not necessarily mean the user is not managed by a directory.
       properties:
         directory_id:
           type: string
           description: |
-            The ID of the SCIM directory the user is provisioned from.
+            The ID of the directory the user is provisioned from.
         directory_enabled:
           type: boolean
           description: |
-            Whether the SCIM directory is currently enabled. Omitted when false.
+            Whether the directory is currently enabled. Omitted when false.
         external_id:
           type: string
           nullable: true
           description: |
-            The user's external ID as reported by the SCIM directory, if any.
+            The user's external ID as reported by the directory, if any.
       required:
         - directory_id
         - external_id
@@ -14685,7 +14688,7 @@ components:
           example: 1700690400000
         bypass_client_trust:
           type: boolean
-          description: When set to `true`, the user will bypass client trust checks during sign-in.
+          description: When set to `true`, the user will bypass Device Trust checks during sign-in.
           default: false
         scim:
           nullable: true
@@ -18932,7 +18935,7 @@ components:
         type: string
     SCIMDirectory:
       type: object
-      description: A SCIM directory configuration for provisioning users via SCIM protocol.
+      description: A directory configuration for provisioning users via SCIM protocol.
       properties:
         object:
           type: string
@@ -18941,10 +18944,10 @@ components:
             - scim_directory
         id:
           type: string
-          description: Unique identifier for the SCIM directory.
+          description: Unique identifier for the directory.
         name:
           type: string
-          description: A human-friendly name for the SCIM directory.
+          description: A human-friendly name for the directory.
         enterprise_connection_id:
           type: string
           nullable: true
@@ -18954,13 +18957,13 @@ components:
           description: The SCIM endpoint URL for this directory.
         provider:
           type: string
-          description: The identity provider for this SCIM directory.
+          description: The identity provider for this directory.
         enabled:
           type: boolean
-          description: Whether the SCIM directory is enabled.
+          description: Whether the directory is enabled.
         group_role_mapping_enabled:
           type: boolean
-          description: Whether group-to-role mapping is enabled for this SCIM directory.
+          description: Whether group-to-role mapping is enabled for this directory.
         attribute_mapping:
           type: object
           additionalProperties:
@@ -18994,11 +18997,11 @@ components:
         created_at:
           type: integer
           format: int64
-          description: Unix timestamp when the SCIM directory was created.
+          description: Unix timestamp when the directory was created.
         updated_at:
           type: integer
           format: int64
-          description: Unix timestamp when the SCIM directory was last updated.
+          description: Unix timestamp when the directory was last updated.
       required:
         - object
         - id
@@ -19028,7 +19031,7 @@ components:
           description: Unique identifier for the SCIM group role mapping.
         scim_directory_id:
           type: string
-          description: The ID of the SCIM directory this mapping belongs to.
+          description: The ID of the directory this mapping belongs to.
         scim_group_id:
           type: string
           description: The SCIM group ID from the identity provider.
@@ -19856,7 +19859,7 @@ components:
           schema:
             $ref: '#/components/schemas/RoleSet'
     SCIMDirectory.List:
-      description: A list of SCIM directories
+      description: A list of directories
       content:
         application/json:
           schema:
@@ -19866,12 +19869,12 @@ components:
                 $ref: '#/components/schemas/SCIMDirectories'
               total_count:
                 type: integer
-                description: Total number of SCIM directories.
+                description: Total number of directories.
             required:
               - data
               - total_count
     SCIMDirectory:
-      description: A SCIM directory
+      description: A directory
       content:
         application/json:
           schema:
