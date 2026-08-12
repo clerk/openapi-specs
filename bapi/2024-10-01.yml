@@ -1643,6 +1643,11 @@ paths:
       description: |-
         Returns a list of all users.
         The users are returned sorted by creation date, with the newest users appearing first.
+
+        To walk more than a few pages, paginate with `starting_after` rather than `offset`.
+        A cursor page costs the same no matter how far into the list it sits, while a large `offset`
+        has to walk and discard every row before it, so it gets progressively slower and eventually
+        times out. Cursor pagination requires the `created_at` ordering, which is the default.
       tags:
         - Users
       parameters:
@@ -1860,6 +1865,20 @@ paths:
           required: false
         - $ref: '#/components/parameters/LimitParameter'
         - $ref: '#/components/parameters/OffsetParameter'
+        - name: starting_after
+          in: query
+          description: |-
+            A cursor for pagination: the `id` of the last user on the previous page. Returns the users that follow it.
+
+            **Requires ordering by `created_at`** — that is, `order_by` omitted, or set to `created_at`, `+created_at`
+            or `-created_at`. Any other `order_by` value is rejected with a 422: the other orderings sort by a value
+            that is neither unique per user nor immutable, so a cursor over them would skip or repeat users.
+
+            Cannot be combined with a non-zero `offset`, which is also a 422. Keep every other parameter identical
+            across requests, and stop when a page returns fewer than `limit` users.
+          required: false
+          schema:
+            type: string
         - name: order_by
           in: query
           description: |-
@@ -1869,6 +1888,7 @@ paths:
             For example, if you want users to be returned in descending order according to their `created_at` property, you can use `-created_at`.
             If you don't use `+` or `-`, then `+` is implied. We only support one `order_by` parameter, and if multiple `order_by` parameters are provided, we will only keep the first one. For example,
             if you pass `order_by=username&order_by=created_at`, we will consider only the first `order_by` parameter, which is `username`. The `created_at` parameter will be ignored in this case.
+            Only the `created_at` orderings can be combined with `starting_after` cursor pagination; see that parameter.
           schema:
             type: string
             default: '-created_at'
@@ -2081,7 +2101,7 @@ paths:
                   nullable: true
                 bypass_client_trust:
                   type: boolean
-                  description: When set to `true`, the user will bypass client trust checks during sign-in.
+                  description: When set to `true`, the user will bypass Device Trust checks during sign-in.
                   nullable: true
                 banned:
                   type: boolean
@@ -2531,7 +2551,7 @@ paths:
                   nullable: true
                 bypass_client_trust:
                   type: boolean
-                  description: When set to `true`, the user will bypass client trust checks during sign-in.
+                  description: When set to `true`, the user will bypass Device Trust checks during sign-in.
                   nullable: true
       responses:
         '200':
@@ -7287,7 +7307,10 @@ paths:
             default: +created_at
         - name: name_query
           in: query
-          description: Returns OAuth applications with names that match the given query, via case-insensitive partial match.
+          description: |-
+            Returns OAuth applications with names that match the given query, via case-insensitive partial match.
+            Also returns the OAuth application whose `client_id` is exactly the given query, which is useful for
+            resolving a `client_id` to the OAuth application `id` required by the read, update and delete endpoints.
           required: false
           schema:
             type: string
@@ -8184,6 +8207,9 @@ paths:
                       scim_path:
                         type: string
                         description: GJSON path to extract the attribute value from SCIM user resources
+                      directory_path:
+                        type: string
+                        description: The new name for `scim_path`. Send either one, or both with the same value; sending both with different values is rejected.
                       multi_valued:
                         type: boolean
                         description: When true, the attribute supports multiple values; values from the IdP are written to public_metadata as an array. Defaults to false.
@@ -8419,6 +8445,9 @@ paths:
                       scim_path:
                         type: string
                         description: GJSON path to extract the attribute value from SCIM user resources
+                      directory_path:
+                        type: string
+                        description: The new name for `scim_path`. Send either one, or both with the same value; sending both with different values is rejected.
                       multi_valued:
                         type: boolean
                         description: When true, the attribute supports multiple values; values from the IdP are written to public_metadata as an array. Defaults to false.
@@ -13782,21 +13811,21 @@ components:
       type: object
       additionalProperties: false
       description: |
-        Metadata describing a user's linkage to a SCIM directory. This object is only delivered on `user.created` and `user.updated` webhook events, and only when the user is provisioned through a SCIM directory. Its absence does not necessarily mean the user is not SCIM-managed.
+        Metadata describing a user's linkage to a directory. This object is only delivered on `user.created` and `user.updated` webhook events, and only when the user is provisioned through a directory. Its absence does not necessarily mean the user is not managed by a directory.
       properties:
         directory_id:
           type: string
           description: |
-            The ID of the SCIM directory the user is provisioned from.
+            The ID of the directory the user is provisioned from.
         directory_enabled:
           type: boolean
           description: |
-            Whether the SCIM directory is currently enabled. Omitted when false.
+            Whether the directory is currently enabled. Omitted when false.
         external_id:
           type: string
           nullable: true
           description: |
-            The user's external ID as reported by the SCIM directory, if any.
+            The user's external ID as reported by the directory, if any.
       required:
         - directory_id
         - external_id
@@ -13980,7 +14009,7 @@ components:
           example: 1700690400000
         bypass_client_trust:
           type: boolean
-          description: When set to `true`, the user will bypass client trust checks during sign-in.
+          description: When set to `true`, the user will bypass Device Trust checks during sign-in.
           default: false
         scim:
           nullable: true
@@ -16633,6 +16662,9 @@ components:
               scim_path:
                 type: string
                 description: GJSON path to extract the attribute value from SCIM user resources
+              directory_path:
+                type: string
+                description: GJSON path to extract the attribute value from directory sync user resources. Same value as `scim_path`.
               multi_valued:
                 type: boolean
                 description: When true, the attribute supports multiple values; values from the IdP are written to public_metadata as an array. Defaults to false.
