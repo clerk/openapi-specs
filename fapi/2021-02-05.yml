@@ -8249,6 +8249,9 @@ components:
           type: string
         waitlist_url:
           type: string
+        oauth_consent_url:
+          type: string
+          description: URL of the OAuth consent screen for flows that require human consent.
         after_sign_in_url:
           type: string
         after_sign_up_url:
@@ -8355,6 +8358,7 @@ components:
         - sign_up_url
         - user_profile_url
         - waitlist_url
+        - oauth_consent_url
         - after_sign_in_url
         - after_sign_up_url
         - after_sign_out_one_url

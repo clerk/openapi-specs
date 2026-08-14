@@ -5608,6 +5608,51 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '410':
           $ref: '#/components/responses/ClerkErrors'
+    patch:
+      operationId: UpdateUserBillingCheckout
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: updateUserCheckout
+      tags:
+        - Checkouts
+      summary: Update billing checkout
+      description: |-
+        Applies or removes a promo code on an in-progress billing checkout for the current user.
+        A non-blank promo_code applies the code; a blank value clears it.
+      parameters:
+        - name: checkoutID
+          in: path
+          description: The ID of the checkout to update
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - promo_code
+              properties:
+                promo_code:
+                  type: string
+                  nullable: true
+                  description: |-
+                    The promo code to apply to this checkout.
+                    Send a blank value to clear the currently applied promo code.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingCheckout'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /v1/me/billing/checkouts/{checkoutID}/confirm:
     patch:
       operationId: ConfirmUserBillingCheckout
@@ -5864,6 +5909,59 @@ paths:
         '404':
           $ref: '#/components/responses/ResourceNotFound'
         '410':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    patch:
+      operationId: UpdateOrganizationBillingCheckout
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: updateOrganizationCheckout
+      tags:
+        - Checkouts
+      summary: Update organization billing checkout
+      description: |-
+        Applies or removes a promo code on an in-progress billing checkout for the organization.
+        A non-blank promo_code applies the code; a blank value clears it.
+      parameters:
+        - name: organizationID
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: string
+        - name: checkoutID
+          in: path
+          description: The ID of the checkout to update
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - promo_code
+              properties:
+                promo_code:
+                  type: string
+                  nullable: true
+                  description: |-
+                    The promo code to apply to this checkout.
+                    Send a blank value to clear the currently applied promo code.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.BillingCheckout'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
@@ -11611,6 +11709,9 @@ components:
           type: string
         waitlist_url:
           type: string
+        oauth_consent_url:
+          type: string
+          description: URL of the OAuth consent screen for flows that require human consent.
         after_sign_in_url:
           type: string
         after_sign_up_url:
@@ -11717,6 +11818,7 @@ components:
         - sign_up_url
         - user_profile_url
         - waitlist_url
+        - oauth_consent_url
         - after_sign_in_url
         - after_sign_up_url
         - after_sign_out_one_url
@@ -14057,6 +14159,59 @@ components:
         - cycle_days_passed
         - cycle_days_total
         - cycle_passed_percent
+    BillingAppliedDiscount:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          $ref: '#/components/schemas/BillingMoneyResponse'
+          description: How much this discount takes off the transaction
+        discount_id:
+          type: string
+          description: Unique identifier for the discount
+        name:
+          type: string
+          description: The display name of the discount
+        effect:
+          type: string
+          description: The snapshotted discount effect
+          enum:
+            - percentage
+            - fixed_amount
+        percent_off:
+          type: number
+          format: double
+          description: Percent off when the effect is percentage
+        amount_off:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          description: Configured fixed amount off when the effect is fixed_amount
+        promo_code:
+          type: string
+          description: The promo code applied at checkout, when applicable
+        cycles_remaining:
+          type: integer
+          format: int32
+          nullable: true
+          description: Remaining billing cycles the discount applies to. Null means the discount lasts forever
+        duration_in_cycles:
+          type: integer
+          format: int32
+          nullable: true
+          description: Original configured duration in billing cycles. Null means the discount lasts forever
+        cycles_applied:
+          type: integer
+          format: int32
+          nullable: true
+          description: Number of billing cycles the discount has already been applied to
+      required:
+        - amount
+        - discount_id
+        - name
+        - effect
+        - cycles_remaining
+        - duration_in_cycles
+        - cycles_applied
     BillingDiscountsResponse:
       type: object
       additionalProperties: false
@@ -14067,6 +14222,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingProrationDiscountDetail'
           description: Proration details from passed subscription time
+        discount:
+          allOf:
+            - $ref: '#/components/schemas/BillingAppliedDiscount'
+          nullable: true
+          description: Discount applied to this transaction, if any
         total:
           $ref: '#/components/schemas/BillingMoneyResponse'
           description: Total discounts applied
@@ -14236,6 +14396,93 @@ components:
           description: Per-unit cost breakdown by pricing tier
       required:
         - quantity
+    BillingDiscountRedemption:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - commerce_discount_redemption
+        id:
+          type: string
+          description: Unique identifier for the discount redemption
+        subscription_item_id:
+          type: string
+          description: Unique identifier for the subscription item the discount was applied to
+        discount_id:
+          type: string
+          description: Unique identifier for the discount that was applied
+        name:
+          type: string
+          description: The display name of the discount
+        source:
+          type: string
+          description: How the discount was applied to the subscription item
+          enum:
+            - manual
+            - promo_code
+        promo_code:
+          type: string
+          description: The promo code used to redeem the discount, when applicable
+        effect:
+          type: string
+          description: The snapshotted discount effect
+          enum:
+            - percentage
+            - fixed_amount
+        percent_off:
+          type: number
+          format: double
+          nullable: true
+          description: Percent off when the effect is percentage
+        amount_off:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: Fixed amount off when the effect is fixed_amount
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/BillingMoneyResponse'
+          nullable: true
+          description: |-
+            How much this discount takes off the subscription item's next renewal charge.
+            Present for either effect when next-payment data is available.
+        cycles_remaining:
+          type: integer
+          format: int32
+          nullable: true
+          description: Remaining billing cycles the discount applies to. Null means the discount lasts forever
+        cycles_applied:
+          type: integer
+          format: int32
+          description: Number of billing cycles the discount has already been applied to
+        status:
+          type: string
+          description: Current status of the discount redemption
+          enum:
+            - active
+            - exhausted
+            - removed
+        redeemed_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the discount was redeemed
+        redeemed_by:
+          type: string
+          nullable: true
+          description: Identifier of the actor that redeemed the discount, when available
+      required:
+        - object
+        - id
+        - subscription_item_id
+        - discount_id
+        - source
+        - cycles_applied
+        - cycles_remaining
+        - redeemed_at
+        - redeemed_by
     BillingSubscriptionItem:
       type: object
       additionalProperties: false
@@ -14355,6 +14602,11 @@ components:
             - $ref: '#/components/schemas/BillingTotalsResponse'
           nullable: true
           description: Totals for this subscription item
+        applied_discount:
+          allOf:
+            - $ref: '#/components/schemas/BillingDiscountRedemption'
+          nullable: true
+          description: The currently active discount applied to this subscription item, if any
       required:
         - object
         - id
