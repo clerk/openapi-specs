@@ -9280,6 +9280,91 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
         '500':
           $ref: '#/components/responses/ClerkErrors'
+  /billing/subscription_items/{subscription_item_id}/discounts:
+    post:
+      operationId: ApplyBillingSubscriptionItemDiscount
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: applySubscriptionItemDiscount
+      tags:
+        - Billing
+      summary: Apply a discount to a subscription item
+      description: |-
+        Applies an existing discount to a subscription item.
+        Manual application is an override path: self-serve distribution rules are not enforced.
+        At most one active discount is allowed per subscription item; applying a different
+        discount replaces the currently active one. Re-applying the same active discount returns a conflict.
+      parameters:
+        - name: subscription_item_id
+          in: path
+          description: The ID of the subscription item to apply the discount to
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Parameters for applying the discount
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplyCommerceDiscountRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/CommerceDiscountRedemption'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
+  /billing/subscription_items/{subscription_item_id}/discounts/{discount_id}:
+    delete:
+      operationId: RemoveBillingSubscriptionItemDiscount
+      x-speakeasy-group: billing
+      x-speakeasy-name-override: removeSubscriptionItemDiscount
+      tags:
+        - Billing
+      summary: Remove a discount from a subscription item
+      description: |-
+        Removes the active discount from a subscription item.
+        The discount_id must match the subscription item's currently active discount.
+      parameters:
+        - name: subscription_item_id
+          in: path
+          description: The ID of the subscription item to remove the discount from
+          required: true
+          schema:
+            type: string
+        - name: discount_id
+          in: path
+          description: The ID of the discount to remove
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/CommerceDiscountRedemption'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
   /billing/statements:
     get:
       operationId: GetBillingStatementList
@@ -16291,11 +16376,17 @@ components:
           example:
             - http://localhost:3000
             - https://some-domain
+        workspace_id:
+          type: string
+          nullable: true
+          description: The ID of the Clerk workspace that owns the instance's application. It is null when the application has no owner.
+          example: org_2abc123def456
       required:
         - object
         - id
         - environment_type
         - allowed_origins
+        - workspace_id
     InstanceRestrictions:
       type: object
       properties:
@@ -17995,12 +18086,12 @@ components:
           type: integer
           format: int64
           nullable: true
-          description: The monthly amount in cents. Must be at least $1 (100 cents) if not null.
+          description: The monthly amount in cents. Use `0` for a complimentary price. Positive amounts must be at least $1 (100 cents).
         annual_monthly_amount:
           type: integer
           format: int64
           nullable: true
-          description: The monthly amount in cents when billed annually. Must be at least $1 (100 cents) if not null.
+          description: The monthly amount in cents when billed annually. Use `0` for a complimentary price. Positive amounts must be at least $1 (100 cents).
         description:
           type: string
           description: An optional description for this custom price.
@@ -18557,6 +18648,103 @@ components:
           $ref: '#/components/schemas/CommerceSubscriptionItem-2'
         transition:
           $ref: '#/components/schemas/CommercePriceTransitionDetails'
+    ApplyCommerceDiscountRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - discount_id
+      properties:
+        discount_id:
+          type: string
+          description: The ID of the discount to apply to the subscription item.
+    CommerceDiscountRedemptionResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - object
+        - id
+        - subscription_item_id
+        - discount_id
+        - source
+        - cycles_applied
+        - cycles_remaining
+        - redeemed_at
+        - redeemed_by
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - commerce_discount_redemption
+        id:
+          type: string
+          description: Unique identifier for the discount redemption.
+        subscription_item_id:
+          type: string
+          description: Unique identifier for the subscription item the discount was applied to.
+        discount_id:
+          type: string
+          description: Unique identifier for the discount that was applied.
+        name:
+          type: string
+          description: The display name of the discount.
+        source:
+          type: string
+          description: How the discount was applied to the subscription item.
+          enum:
+            - promotion
+            - manual
+            - promo_code
+        promo_code:
+          type: string
+          description: The promo code used to redeem the discount, when applicable.
+        effect:
+          type: string
+          description: The snapshotted discount effect.
+          enum:
+            - percentage
+            - fixed_amount
+        percent_off:
+          type: number
+          format: double
+          nullable: true
+          description: Percent off when the effect is percentage.
+        amount_off:
+          allOf:
+            - $ref: '#/components/schemas/CommerceMoneyResponse'
+          nullable: true
+          description: Fixed amount off when the effect is fixed_amount.
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/CommerceMoneyResponse'
+          nullable: true
+          description: |-
+            How much this discount takes off the subscription item's next renewal charge.
+            Present for either effect when next-payment data is available.
+        cycles_remaining:
+          type: integer
+          format: int32
+          nullable: true
+          description: Remaining billing cycles the discount applies to. Null means the discount lasts forever.
+        cycles_applied:
+          type: integer
+          format: int32
+          description: Number of billing cycles the discount has already been applied to.
+        status:
+          type: string
+          description: Current status of the discount redemption.
+          enum:
+            - active
+            - exhausted
+            - removed
+        redeemed_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (in milliseconds) when the discount was redeemed.
+        redeemed_by:
+          type: string
+          nullable: true
+          description: Identifier of the actor that redeemed the discount, when available.
     BillingPaymentAttempt:
       type: object
       additionalProperties: false
@@ -19926,6 +20114,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CommercePriceTransitionResponse'
+    CommerceDiscountRedemption:
+      description: A commerce discount redemption.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommerceDiscountRedemptionResponse'
     BillingStatement.List:
       description: A list of billing statements.
       content:
