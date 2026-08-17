@@ -1996,6 +1996,13 @@ paths:
                     This is useful when you are trying to create a user that doesn't have a password, in an instance that is using passwords.
                     Please note that you cannot use this flag if password is the only way for a user to sign into your instance.
                   nullable: true
+                skip_restriction_checks:
+                  type: boolean
+                  description: |-
+                    When set to `true`, the instance's restrictions are not applied to this user.
+                    Those settings are the allowlist, the blocklist, blocked disposable email domains and blocked email subaddresses, and they normally reject a matching identifier here just as they do at sign-up.
+                    Use this when your backend is creating a user it already trusts, such as during a migration or from an admin tool.
+                  nullable: true
                 totp_secret:
                   type: string
                   description: |-
