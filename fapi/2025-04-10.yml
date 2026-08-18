@@ -6984,6 +6984,8 @@ components:
           type: boolean
         end_session_endpoint:
           type: string
+        authorization_response_iss_parameter_supported:
+          type: boolean
       required:
         - issuer
         - authorization_endpoint
@@ -7060,6 +7062,8 @@ components:
           items:
             type: string
         client_id_metadata_document_supported:
+          type: boolean
+        authorization_response_iss_parameter_supported:
           type: boolean
       required:
         - issuer
