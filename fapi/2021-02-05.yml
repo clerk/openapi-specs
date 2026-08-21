@@ -212,19 +212,14 @@ paths:
           required: false
           style: spaceDelimited
           explode: false
-          description: Space-separated list of scopes being requested. Available scopes are `email`, `profile`, `openid`, `public_metadata`, `private_metadata`, `offline_access`, and `user:org:read` (when Organizations are enabled). Defaults to `profile email` if not provided.
+          description: |
+            Space-separated list of scopes being requested.
+            Available scopes are `email`, `profile`, `openid`, `public_metadata`, `private_metadata`, `offline_access`, and `user:org:read` (when Organizations are enabled), and any custom scope keys assigned to the OAuth application.
+            Falls back to the OAuth application's registered scopes if not provided.
           schema:
             type: array
             items:
               type: string
-              enum:
-                - email
-                - profile
-                - openid
-                - offline_access
-                - public_metadata
-                - private_metadata
-                - user:org:read
         - name: state
           in: query
           required: false
@@ -318,7 +313,10 @@ paths:
                 scope:
                   type: string
                   nullable: true
-                  description: Space-separated list of scopes being requested. Available scopes are `email`, `profile`, `openid`, `public_metadata`, `private_metadata`, `offline_access`, and `user:org:read` (when Organizations are enabled). Defaults to `profile email` if not provided. Multiple values should be space-delimited (e.g., "email profile openid").
+                  description: |
+                    Space-separated list of scopes being requested.
+                    Available scopes are `email`, `profile`, `openid`, `public_metadata`, `private_metadata`, `offline_access`, and `user:org:read` (when Organizations are enabled), and any custom scope keys assigned to the OAuth application.
+                    Falls back to the OAuth application's registered scopes if not provided.
                 state:
                   type: string
                   nullable: true
@@ -2214,11 +2212,11 @@ paths:
                     `oauth_[provider]`, `saml`, `passkey`, `enterprise_sso`
                 email_address_id:
                   type: string
-                  description: Used with the `email_code`, `reset_password_email_code` and `email_link` strategies.
+                  description: Used with the `email_code`, `reset_password_email_code` and `email_link` strategies. Pass the `email_address_id` from this sign-in's `supported_first_factors` unchanged.
                   nullable: true
                 phone_number_id:
                   type: string
-                  description: Used with the `phone_code` and `reset_password_phone_code` strategies.
+                  description: Used with the `phone_code` and `reset_password_phone_code` strategies. Pass the `phone_number_id` from this sign-in's `supported_first_factors` unchanged.
                   nullable: true
                 proof_token:
                   type: string
@@ -2226,7 +2224,7 @@ paths:
                   nullable: true
                 web3_wallet_id:
                   type: string
-                  description: Used with the `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature`, `web3_okx_wallet_signature`, and `web3_solana_signature` strategies.
+                  description: Used with the `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature`, `web3_okx_wallet_signature`, and `web3_solana_signature` strategies. Pass the `web3_wallet_id` from this sign-in's `supported_first_factors` unchanged.
                   nullable: true
                 passkey_id:
                   type: string
@@ -7482,6 +7480,10 @@ components:
           type: array
           items:
             type: string
+          description: |-
+            Built-in scope values supported by the authorization server. On instances using
+            Clerk's current OAuth identity provider, this also includes the instance's custom
+            scopes that are marked as advertised.
         response_types_supported:
           type: array
           items:
@@ -7520,6 +7522,8 @@ components:
           type: boolean
         end_session_endpoint:
           type: string
+        authorization_response_iss_parameter_supported:
+          type: boolean
       required:
         - issuer
         - authorization_endpoint
@@ -7571,6 +7575,10 @@ components:
           type: array
           items:
             type: string
+          description: |-
+            Built-in scope values supported by the authorization server. On instances using
+            Clerk's current OAuth identity provider, this also includes the instance's custom
+            scopes that are marked as advertised.
         subject_types_supported:
           type: array
           items:
@@ -7596,6 +7604,8 @@ components:
           items:
             type: string
         client_id_metadata_document_supported:
+          type: boolean
+        authorization_response_iss_parameter_supported:
           type: boolean
       required:
         - issuer
@@ -7682,6 +7692,11 @@ components:
           description: |-
             Space-separated list of scope values that the client can use when requesting
             access tokens. If omitted, the client will be registered with the default set of scopes.
+
+            Accepts built-in scope values and, on instances using Clerk's current OAuth
+            identity provider, any custom scope defined for the instance. Instances still on the
+            legacy OAuth identity provider accept built-in scope values only. Scope values that
+            the instance does not define are rejected with `invalid_client_metadata`.
       required:
         - redirect_uris
     OAuth.DynamicClientRegistrationResponse:
@@ -7754,7 +7769,8 @@ components:
           type: string
           description: |-
             Space-separated list of scope values that the client can use when
-            requesting access tokens.
+            requesting access tokens. Contains the effective set of scopes registered
+            for the client, including both built-in and custom scope values.
         token_endpoint_auth_method:
           type: string
           enum:
@@ -10471,10 +10487,28 @@ components:
           type: string
         email_address_id:
           type: string
+          description: |-
+            The `email_address_id` to pass back to `prepare_first_factor` for this factor, unchanged.
+
+            Treat this as an opaque value scoped to this sign-in. It is stable for the life of the sign-in, but
+            it is not guaranteed to be an identification ID, to be the same on a later sign-in, or to be usable
+            anywhere else, including the Backend API.
         phone_number_id:
           type: string
+          description: |-
+            The `phone_number_id` to pass back to `prepare_first_factor` for this factor, unchanged.
+
+            Treat this as an opaque value scoped to this sign-in. It is stable for the life of the sign-in, but
+            it is not guaranteed to be an identification ID, to be the same on a later sign-in, or to be usable
+            anywhere else, including the Backend API.
         web3_wallet_id:
           type: string
+          description: |-
+            The `web3_wallet_id` to pass back to `prepare_first_factor` for this factor, unchanged.
+
+            Treat this as an opaque value scoped to this sign-in. It is stable for the life of the sign-in, but
+            it is not guaranteed to be an identification ID, to be the same on a later sign-in, or to be usable
+            anywhere else, including the Backend API.
         passkey_id:
           type: string
         trusted_device_id:
@@ -10756,6 +10790,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.TOTP'
             - $ref: '#/components/schemas/Stubs.Verification.Ticket'
             - $ref: '#/components/schemas/Stubs.Verification.BackupCode'
+            - $ref: '#/components/schemas/Stubs.Verification.Passkey'
         identifier:
           nullable: true
           type: string
@@ -11387,6 +11422,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.TOTP'
             - $ref: '#/components/schemas/Stubs.Verification.Ticket'
             - $ref: '#/components/schemas/Stubs.Verification.BackupCode'
+            - $ref: '#/components/schemas/Stubs.Verification.Passkey'
         identifier:
           nullable: true
           type: string
@@ -11664,6 +11700,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.OTP'
             - $ref: '#/components/schemas/Stubs.Verification.TOTP'
             - $ref: '#/components/schemas/Stubs.Verification.BackupCode'
+            - $ref: '#/components/schemas/Stubs.Verification.Passkey'
         session:
           type: object
           oneOf:
