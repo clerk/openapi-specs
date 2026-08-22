@@ -1996,6 +1996,13 @@ paths:
                     This is useful when you are trying to create a user that doesn't have a password, in an instance that is using passwords.
                     Please note that you cannot use this flag if password is the only way for a user to sign into your instance.
                   nullable: true
+                skip_restriction_checks:
+                  type: boolean
+                  description: |-
+                    When set to `true`, the instance's restrictions are not applied to this user.
+                    Those settings are the allowlist, the blocklist, blocked disposable email domains and blocked email subaddresses, and they normally reject a matching identifier here just as they do at sign-up.
+                    Use this when your backend is creating a user it already trusts, such as during a migration or from an admin tool.
+                  nullable: true
                 totp_secret:
                   type: string
                   description: |-
@@ -4128,6 +4135,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '402':
           $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/FeatureNotEnabled'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /actor_tokens/{actor_token_id}/revoke:
@@ -4343,9 +4352,12 @@ paths:
                   nullable: true
                 allowed_origins:
                   type: array
+                  nullable: true
                   items:
                     type: string
-                  description: For browser-like stacks such as browser extensions, Electron (not officially supported), or Capacitor.js (not officially supported), the instance allowed origins need to be updated with the request origin value. For Chrome extensions popup, background, or service worker pages, the origin is chrome-extension://extension_uuid. For Electron apps the default origin is http://localhost:3000. For Capacitor, the origin is capacitor://localhost.
+                  description: |-
+                    For browser-like stacks such as browser extensions, Electron (not officially supported), or Capacitor.js (not officially supported), the instance allowed origins need to be updated with the request origin value. For Chrome extensions popup, background, or service worker pages, the origin is chrome-extension://extension_uuid. For Electron apps the default origin is http://localhost:3000. For Capacitor, the origin is capacitor://localhost.
+                    Send an empty array to remove all allowed origins. A null value leaves the current list unchanged.
                 cookieless_dev:
                   type: boolean
                   description: |-
@@ -4432,6 +4444,7 @@ paths:
                 rules_enabled:
                   type: boolean
                   nullable: true
+                  description: Set true to enforce Protect rules on this instance. Set false to stop enforcing and return the instance to its default posture, where traffic is still evaluated in shadow but nothing is blocked. This does not remove the instance from Protect.
                 specter_enabled:
                   type: boolean
                   nullable: true
@@ -4519,7 +4532,8 @@ paths:
                 default_scopes:
                   type: array
                   nullable: true
-                  description: Default scopes. Set to null to reset to Clerk-provided defaults.
+                  description: |
+                    Default scopes assigned when a dynamically registered or first-contact CIMD client omits `scope`. Accepts built-in keys and current custom catalog keys. `advertised` does not affect eligibility. Duplicate keys, unknown keys, and `offline_access` are rejected. An empty array or null resets to Clerk-provided defaults.
                   items:
                     type: string
                 oauth_jwt_access_tokens:
@@ -7430,7 +7444,7 @@ paths:
                 scopes:
                   type: string
                   maxLength: 1024
-                  description: Define the allowed scopes for the new OAuth applications that dictate the user payload of the OAuth user info endpoint. Available scopes are `profile`, `email`, `public_metadata`, `private_metadata`. Provide the requested scopes as a string, separated by spaces.
+                  description: Define the application's built-in and custom scope ceiling. Provide scope keys as a space-delimited string. Custom keys must exist in the instance OAuth scope catalog.
                   default: profile email
                   example: profile email public_metadata
                   nullable: true
@@ -7526,9 +7540,8 @@ paths:
                 scopes:
                   type: string
                   maxLength: 1024
-                  description: Define the allowed scopes for the new OAuth applications that dictate the user payload of the OAuth user info endpoint. Available scopes are `profile`, `email`, `public_metadata`, `private_metadata`. Provide the requested scopes as a string, separated by spaces.
-                  default: profile email
-                  example: profile email public_metadata private_metadata
+                  description: Replace the application's complete built-in and custom scope ceiling. Provide scope keys as a space-delimited string. Custom keys must exist in the instance OAuth scope catalog. Required built-in scopes, such as `offline_access`, must be included in the replacement set, otherwise the request is rejected. Omit this field to leave all scope assignments unchanged.
+                  example: profile email offline_access public_metadata private_metadata
                   nullable: true
                 consent_screen_enabled:
                   type: boolean
@@ -16421,16 +16434,21 @@ components:
             - instance_protect
         rules_enabled:
           type: boolean
+          description: Whether Protect rules are enforced on this instance. False does not mean the instance is outside Protect — by default it is still evaluated in shadow, where rules are scored and recorded but never block.
         specter_enabled:
           type: boolean
         checks_bypassed:
           type: boolean
           description: Whether the instance has opted out of the Protect prerequisite checks, asserting its setup already meets the requirements.
+        checks_verified:
+          type: boolean
+          description: Whether the Protect system has verified the instance's prerequisite checks. Protect rules are gated on checks being verified or bypassed.
       required:
         - object
         - rules_enabled
         - specter_enabled
         - checks_bypassed
+        - checks_verified
     InstanceCommunication:
       type: object
       description: Per-instance SMS communication settings, including the SMS country blocklist.
@@ -16461,7 +16479,8 @@ components:
         default_scopes:
           type: array
           nullable: true
-          description: Default scopes.
+          description: |
+            Default scopes assigned when a dynamically registered or first-contact CIMD client omits `scope`. Contains built-in keys and custom catalog keys. Null means Clerk-provided defaults. `advertised` does not affect eligibility. An empty input array is stored and returned as null.
           uniqueItems: true
           items:
             type: string
@@ -17297,6 +17316,8 @@ components:
           type: boolean
         scopes:
           type: string
+          description: |
+            The complete scope ceiling for the OAuth application, as a space-delimited list of built-in and assigned custom scope keys.
         redirect_uris:
           type: array
           items:
@@ -19700,6 +19721,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ActorToken'
+    FeatureNotEnabled:
+      description: Feature not enabled
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
     Domains:
       description: A list of domains
       content:
