@@ -230,19 +230,14 @@ paths:
           required: false
           style: spaceDelimited
           explode: false
-          description: Space-separated list of scopes being requested. Available scopes are `email`, `profile`, `openid`, `public_metadata`, `private_metadata`, `offline_access`, and `user:org:read` (when Organizations are enabled). Defaults to `profile email` if not provided.
+          description: |
+            Space-separated list of scopes being requested.
+            Available scopes are `email`, `profile`, `openid`, `public_metadata`, `private_metadata`, `offline_access`, and `user:org:read` (when Organizations are enabled), and any custom scope keys assigned to the OAuth application.
+            Falls back to the OAuth application's registered scopes if not provided.
           schema:
             type: array
             items:
               type: string
-              enum:
-                - email
-                - profile
-                - openid
-                - offline_access
-                - public_metadata
-                - private_metadata
-                - user:org:read
         - name: state
           in: query
           required: false
@@ -293,15 +288,28 @@ paths:
           description: String value used to associate a client session with an ID Token and to mitigate replay attacks. Used in OpenID Connect flows.
           schema:
             type: string
+        - name: resource
+          in: query
+          required: false
+          description: |-
+            Absolute URI that identifies the resource server for the requested access token, as defined by RFC 8707.
+            The URI must not contain a fragment. Only one `resource` value is supported.
+          schema:
+            type: string
+            format: uri
       responses:
         '200':
-          description: Success for 'form_post' response mode
+          description: |-
+            HTML `form_post` authorization response containing either a code or an OAuth error.
+            An invalid `resource` returns `error=invalid_target`. The response preserves a supplied `state` and includes `iss`.
         '302':
-          description: Redirect, no body.
+          description: Intermediate redirect for top-level navigation, sign-in, or consent.
         '303':
-          description: Redirect, no body.
+          description: |-
+            Authorization response redirect containing either a code or an OAuth error.
+            An invalid `resource` returns `error=invalid_target`. The redirect preserves a supplied `state` and includes `iss`.
         '400':
-          description: Bad request error, for example a request parameter is invalid.
+          description: Direct bad-request response used when the authorization server cannot safely return the error to the client's redirect URI.
         '401':
           description: Unauthorized error, for example the provided client is invalid.
         '403':
@@ -336,7 +344,10 @@ paths:
                 scope:
                   type: string
                   nullable: true
-                  description: Space-separated list of scopes being requested. Available scopes are `email`, `profile`, `openid`, `public_metadata`, `private_metadata`, `offline_access`, and `user:org:read` (when Organizations are enabled). Defaults to `profile email` if not provided. Multiple values should be space-delimited (e.g., "email profile openid").
+                  description: |
+                    Space-separated list of scopes being requested.
+                    Available scopes are `email`, `profile`, `openid`, `public_metadata`, `private_metadata`, `offline_access`, and `user:org:read` (when Organizations are enabled), and any custom scope keys assigned to the OAuth application.
+                    Falls back to the OAuth application's registered scopes if not provided.
                 state:
                   type: string
                   nullable: true
@@ -367,18 +378,29 @@ paths:
                   type: string
                   nullable: true
                   description: String value used to associate a client session with an ID Token and to mitigate replay attacks. Used in OpenID Connect flows.
+                resource:
+                  type: string
+                  format: uri
+                  nullable: true
+                  description: |-
+                    Absolute URI that identifies the resource server for the requested access token, as defined by RFC 8707.
+                    The URI must not contain a fragment. Only one `resource` value is supported.
               required:
                 - response_type
                 - client_id
       responses:
         '200':
-          description: Success for 'form_post' response mode
+          description: |-
+            HTML `form_post` authorization response containing either a code or an OAuth error.
+            An invalid `resource` returns `error=invalid_target`. The response preserves a supplied `state` and includes `iss`.
         '302':
-          description: Redirect, no body.
+          description: Intermediate redirect for top-level navigation, sign-in, or consent.
         '303':
-          description: Redirect, no body.
+          description: |-
+            Authorization response redirect containing either a code or an OAuth error.
+            An invalid `resource` returns `error=invalid_target`. The redirect preserves a supplied `state` and includes `iss`.
         '400':
-          description: Bad request error, for example a request parameter is invalid.
+          description: Direct bad-request response used when the authorization server cannot safely return the error to the client's redirect URI.
         '401':
           description: Unauthorized error, for example the provided client is invalid.
         '403':
@@ -411,6 +433,11 @@ paths:
         - The `token_endpoint_auth_method` values `client_secret_basic` and `client_secret_post` are
           treated equivalently in the current implementation; both methods can be used at the
           token endpoint
+        - `application_type` accepts only `native` and `web`. Native clients may use custom URI
+          schemes, claimed `https` URIs ([RFC 8252 Section 7.2](https://datatracker.ietf.org/doc/html/rfc8252#section-7.2)),
+          and `http` only on loopback hosts. The field is optional; when omitted it defaults to
+          `web` ([OpenID Connect Dynamic Client Registration 1.0 §2](https://openid.net/specs/openid-connect-registration-1_0.html))
+          and is returned as `web`.
 
         See [RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591) for complete specification details.
       operationId: registerOAuthClient
@@ -444,6 +471,7 @@ paths:
                 value:
                   client_name: My Mobile App
                   client_uri: https://example.com
+                  application_type: native
                   redirect_uris:
                     - myapp://oauth/callback
                   token_endpoint_auth_method: none
@@ -467,6 +495,56 @@ paths:
           description: |-
             Internal server error. The authorization server encountered an unexpected condition
             that prevented it from fulfilling the registration request.
+  /oauth/device_authorization:
+    post:
+      summary: Start a device authorization request
+      description: |-
+        Starts an OAuth 2.0 Device Authorization Grant (RFC 8628). Display the returned
+        `user_code` and `verification_uri`, then poll `/oauth/token` with the returned
+        `device_code` at the specified `interval`.
+      operationId: createOAuthDeviceAuthorization
+      security:
+        - ClientCredentials: []
+        - {}
+      tags:
+        - OAuth2 Identity Provider
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - client_id
+              properties:
+                client_id:
+                  type: string
+                  description: OAuth 2.0 client identifier. Must match the authenticated client.
+                client_secret:
+                  type: string
+                  nullable: true
+                  description: OAuth 2.0 client secret when not using HTTP Basic Authentication.
+                scope:
+                  type: string
+                  nullable: true
+                  description: Space-separated list of requested scopes. Must be a subset of the scopes allowed for the client.
+                nonce:
+                  type: string
+                  nullable: true
+                  description: OpenID Connect nonce. Must be at least 8 characters when present.
+      responses:
+        '200':
+          $ref: '#/components/responses/OAuth.DeviceAuthorization'
+        '400':
+          $ref: '#/components/responses/OAuth.DeviceAuthorizationError400'
+        '401':
+          $ref: '#/components/responses/OAuth.TokenError401'
+        '403':
+          description: Forbidden error, for example you are trying to use a satellite domain
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
   /oauth/token:
     post:
       summary: Get OAuth2 token
@@ -474,12 +552,19 @@ paths:
         Exchange an authorization grant for OAuth2 tokens (access token, refresh token, and optionally ID token).
 
         This endpoint implements the OAuth 2.0 Token Endpoint (RFC 6749) and OpenID Connect token endpoint.
-        It supports two grant types: `authorization_code` and `refresh_token`.
+        It supports three grant types by default: `authorization_code`, `refresh_token`, and
+        `urn:ietf:params:oauth:grant-type:device_code`. Instances with token exchange enabled also support
+        `urn:ietf:params:oauth:grant-type:token-exchange`.
 
         #### Grant Types
 
         - **`authorization_code`**: Exchange an authorization code for tokens
         - **`refresh_token`**: Refresh an access token using a refresh token
+        - **`urn:ietf:params:oauth:grant-type:device_code`**: Poll for the tokens of a device
+          authorization request (RFC 8628), which the client starts at
+          `/oauth/device_authorization`
+        - **`urn:ietf:params:oauth:grant-type:token-exchange`**: Exchange an access token for a
+          resource-scoped access token (RFC 8693). This grant is available only when enabled for the instance.
 
         #### Authentication
 
@@ -509,7 +594,8 @@ paths:
 
         #### Token Lifespans
 
-        - **Access token**: 1 day (86400 seconds)
+        - **Access token**: 1 day (86400 seconds). Access tokens issued by token exchange are valid for up to
+          5 minutes and never expire after the source token.
         - **Refresh token**: 10 years
         - **ID token**: 1 day (86400 seconds)
         - **Authorization code**: 10 minutes (must be exchanged within this time)
@@ -540,9 +626,19 @@ paths:
                     The grant type being used.
                     - `authorization_code`: Exchange an authorization code for tokens
                     - `refresh_token`: Refresh an access token
+                    - `urn:ietf:params:oauth:grant-type:device_code`: Poll for tokens for a device authorization request
+                    - `urn:ietf:params:oauth:grant-type:token-exchange`: Exchange an access token for a resource-scoped access token
                   enum:
                     - authorization_code
                     - refresh_token
+                    - urn:ietf:params:oauth:grant-type:device_code
+                    - urn:ietf:params:oauth:grant-type:token-exchange
+                device_code:
+                  type: string
+                  nullable: true
+                  description: |-
+                    The device code issued by the device authorization endpoint.
+                    **Required when `grant_type=urn:ietf:params:oauth:grant-type:device_code`**.
                 code:
                   type: string
                   nullable: true
@@ -582,6 +678,26 @@ paths:
                   description: |-
                     The refresh token issued to the client.
                     **Required when `grant_type=refresh_token`**.
+                subject_token:
+                  type: string
+                  nullable: true
+                  description: |-
+                    The active access token to exchange.
+                    **Required when `grant_type=urn:ietf:params:oauth:grant-type:token-exchange`**.
+                subject_token_type:
+                  type: string
+                  nullable: true
+                  enum:
+                    - urn:ietf:params:oauth:token-type:access_token
+                  description: |-
+                    The type of the subject token.
+                    **Required when `grant_type=urn:ietf:params:oauth:grant-type:token-exchange`**.
+                requested_token_type:
+                  type: string
+                  nullable: true
+                  enum:
+                    - urn:ietf:params:oauth:token-type:access_token
+                  description: The requested output token type for an RFC 8693 token exchange.
                 scope:
                   type: string
                   nullable: true
@@ -590,6 +706,16 @@ paths:
                     **Optional when `grant_type=refresh_token`**.
                     If provided, the requested scope must not exceed the scope originally granted.
                     If omitted, the same scope as originally granted will be used.
+                resource:
+                  type: string
+                  format: uri
+                  nullable: true
+                  description: |-
+                    Absolute URI that identifies the resource server for the access token, as defined by RFC 8707.
+                    **Required when `grant_type=urn:ietf:params:oauth:grant-type:token-exchange`**.
+                    For authorization code and refresh token grants, if omitted, the resource from the authorization grant is used.
+                    If provided, it must exactly match that resource.
+                    The URI must not contain a fragment. Only one `resource` value is supported.
             examples:
               authorizationCodeConfidential:
                 summary: Authorization Code - Confidential Client
@@ -617,6 +743,14 @@ paths:
                   refresh_token: clk_refresh_abc123xyz
                   client_id: client_abc123
                   client_secret: secret_xyz789
+              tokenExchange:
+                summary: Token Exchange
+                description: Exchange an active access token for a short-lived resource-scoped access token
+                value:
+                  grant_type: urn:ietf:params:oauth:grant-type:token-exchange
+                  resource: https://api.example.com
+                  subject_token: oat_subject_token
+                  subject_token_type: urn:ietf:params:oauth:token-type:access_token
       responses:
         '200':
           $ref: '#/components/responses/OAuth.Token'
@@ -625,7 +759,7 @@ paths:
         '401':
           $ref: '#/components/responses/OAuth.TokenError401'
         '403':
-          description: Forbidden error, for example you are trying to use a satellite domain
+          $ref: '#/components/responses/OAuth.TokenError403'
   /oauth/userinfo:
     get:
       summary: Get user info after OAuth2 flow
@@ -798,7 +932,7 @@ paths:
         In addition to the fields documented below, the request body must
         re-submit the standard OAuth2 authorize parameters from the original
         `/oauth/authorize` request: `response_type`, `redirect_uri`, `scope`,
-        `state`, `nonce`, `code_challenge`, and `code_challenge_method`. These
+        `state`, `nonce`, `code_challenge`, `code_challenge_method`, and `resource`. These
         are forwarded as-is to the authorize flow.
       operationId: submitOAuthConsent
       security:
@@ -835,13 +969,24 @@ paths:
                     Optional. The organization to scope the issued token to. The
                     authenticated user must be a member of this organization. If
                     omitted, the user's currently active organization is used.
+                resource:
+                  type: string
+                  format: uri
+                  nullable: true
+                  description: |-
+                    Absolute URI from the original authorization request that identifies the resource server for the requested access token.
+                    The URI must not contain a fragment. Only one `resource` value is supported.
       responses:
         '200':
-          description: Success for 'form_post' response mode
+          description: |-
+            HTML `form_post` authorization response containing either a code or an OAuth error.
+            An invalid `resource` returns `error=invalid_target`. The response preserves a supplied `state` and includes `iss`.
         '302':
-          description: Redirect, no body.
+          description: Intermediate redirect for sign-in or consent.
         '303':
-          description: Redirect, no body.
+          description: |-
+            Authorization response redirect containing either a code or an OAuth error.
+            An invalid `resource` returns `error=invalid_target`. The redirect preserves a supplied `state` and includes `iss`.
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '401':
@@ -851,6 +996,94 @@ paths:
         '404':
           $ref: '#/components/responses/ClerkErrors'
         '422':
+          $ref: '#/components/responses/ClerkErrors'
+  /v1/me/oauth/device:
+    post:
+      summary: Submit an OAuth2 device authorization decision
+      description: Approves or denies a pending OAuth2 device authorization for the authenticated user.
+      operationId: submitOAuthDeviceAuthorizationDecision
+      security:
+        - DevBrowser: []
+        - ProductionBrowser: []
+        - ProductionNativeApp: []
+          ProductionNativeFlag: []
+      tags:
+        - OAuth2 Identity Provider
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - user_code
+                - approved
+              properties:
+                user_code:
+                  type: string
+                  description: The user code returned by the device authorization endpoint.
+                approved:
+                  type: boolean
+                  description: Whether the authenticated user approves the device authorization.
+                organization_id:
+                  type: string
+                  nullable: true
+                  description: Optional organization context for the issued tokens.
+      responses:
+        '200':
+          $ref: '#/components/responses/OAuth.DeviceVerification'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
+        '429':
+          $ref: '#/components/responses/ClerkErrors'
+  /v1/me/oauth/device/lookup:
+    post:
+      summary: Look up an OAuth2 device authorization
+      description: Returns the OAuth application and requested scopes associated with a user code.
+      operationId: lookupOAuthDeviceAuthorization
+      security:
+        - DevBrowser: []
+        - ProductionBrowser: []
+        - ProductionNativeApp: []
+          ProductionNativeFlag: []
+      tags:
+        - OAuth2 Identity Provider
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - user_code
+              properties:
+                user_code:
+                  type: string
+                  description: The user code returned by the device authorization endpoint.
+      responses:
+        '200':
+          $ref: '#/components/responses/OAuth.DeviceAuthorizationInfo'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
+        '429':
           $ref: '#/components/responses/ClerkErrors'
   /v1/me/organization_creation_defaults:
     get:
@@ -1425,11 +1658,11 @@ paths:
                     `oauth_[provider]`, `saml`, `passkey`, `trusted_device`, `enterprise_sso`
                 email_address_id:
                   type: string
-                  description: Used with the `email_code`, `reset_password_email_code` and `email_link` strategies.
+                  description: Used with the `email_code`, `reset_password_email_code` and `email_link` strategies. Pass the `email_address_id` from this sign-in's `supported_first_factors` unchanged.
                   nullable: true
                 phone_number_id:
                   type: string
-                  description: Used with the `phone_code` and `reset_password_phone_code` strategies.
+                  description: Used with the `phone_code` and `reset_password_phone_code` strategies. Pass the `phone_number_id` from this sign-in's `supported_first_factors` unchanged.
                   nullable: true
                 proof_token:
                   type: string
@@ -1437,7 +1670,7 @@ paths:
                   nullable: true
                 web3_wallet_id:
                   type: string
-                  description: Used with the `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature` and `web3_okx_wallet_signature` strategies.
+                  description: Used with the `web3_metamask_signature`, `web3_base_signature`, `web3_coinbase_wallet_signature` and `web3_okx_wallet_signature` strategies. Pass the `web3_wallet_id` from this sign-in's `supported_first_factors` unchanged.
                   nullable: true
                 passkey_id:
                   type: string
@@ -1680,7 +1913,6 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
-  /v1/client/sign_ins/{sign_in_id}/protect_check: {}
   /v1/client/sign_ups:
     post:
       summary: Create Sign-up
@@ -2269,7 +2501,6 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '500':
           $ref: '#/components/responses/ClerkErrors'
-  /v1/dev_tools/enable_environment_setting: {}
   /v1/oauth_callback:
     get:
       operationId: getOauthCallback
@@ -8652,12 +8883,18 @@ components:
           type: string
         userinfo_endpoint:
           type: string
+        device_authorization_endpoint:
+          type: string
         jwks_uri:
           type: string
         scopes_supported:
           type: array
           items:
             type: string
+          description: |-
+            Built-in scope values supported by the authorization server. On instances using
+            Clerk's current OAuth identity provider, this also includes the instance's custom
+            scopes that are marked as advertised.
         response_types_supported:
           type: array
           items:
@@ -8696,6 +8933,8 @@ components:
           type: boolean
         end_session_endpoint:
           type: string
+        authorization_response_iss_parameter_supported:
+          type: boolean
       required:
         - issuer
         - authorization_endpoint
@@ -8727,6 +8966,8 @@ components:
           type: string
         revocation_endpoint:
           type: string
+        device_authorization_endpoint:
+          type: string
         jwks_uri:
           type: string
         registration_endpoint:
@@ -8747,6 +8988,10 @@ components:
           type: array
           items:
             type: string
+          description: |-
+            Built-in scope values supported by the authorization server. On instances using
+            Clerk's current OAuth identity provider, this also includes the instance's custom
+            scopes that are marked as advertised.
         subject_types_supported:
           type: array
           items:
@@ -8772,6 +9017,8 @@ components:
           items:
             type: string
         client_id_metadata_document_supported:
+          type: boolean
+        authorization_response_iss_parameter_supported:
           type: boolean
       required:
         - issuer
@@ -8858,6 +9105,35 @@ components:
           description: |-
             Space-separated list of scope values that the client can use when requesting
             access tokens. If omitted, the client will be registered with the default set of scopes.
+
+            Accepts built-in scope values and, on instances using Clerk's current OAuth
+            identity provider, any custom scope defined for the instance. Instances still on the
+            legacy OAuth identity provider accept built-in scope values only. Scope values that
+            the instance does not define are rejected with `invalid_client_metadata`.
+        application_type:
+          type: string
+          description: |-
+            Kind of the application as defined by OpenID Connect Dynamic Client
+            Registration 1.0. Accepted values are `native` and `web`. Any other
+            non-empty value is rejected with `invalid_client_metadata`. An
+            omitted or empty value defaults to `web`. See
+            [OpenID Connect Dynamic Client Registration 1.0 §2](https://openid.net/specs/openid-connect-registration-1_0.html):
+            "The default, if omitted, is web."
+
+            MCP clients should send this field (SEP-837) so native-style redirect
+            URIs are not judged against the OIDC default of `web`. Clerk cannot
+            identify an MCP client at this shared endpoint, so omitting the field
+            is still accepted and defaults to `web`.
+
+            When `native`, custom URI schemes and claimed `https` redirect URIs
+            are allowed. See [RFC 8252 Section 7.2](https://datatracker.ietf.org/doc/html/rfc8252#section-7.2)
+            for claimed `https` redirect URIs. Plain `http` is allowed only for
+            loopback hosts (`localhost` and IPv4 or IPv6 loopback addresses);
+            other `http` hosts are rejected with `invalid_redirect_uri`.
+
+            When `web`, the current redirect URI checks apply. Clerk does not
+            issue the implicit grant, so the OIDC `https` and non-`localhost`
+            rule for web clients is not enforced.
       required:
         - redirect_uris
     OAuth.DynamicClientRegistrationResponse:
@@ -8930,7 +9206,8 @@ components:
           type: string
           description: |-
             Space-separated list of scope values that the client can use when
-            requesting access tokens.
+            requesting access tokens. Contains the effective set of scopes registered
+            for the client, including both built-in and custom scope values.
         token_endpoint_auth_method:
           type: string
           enum:
@@ -8940,6 +9217,14 @@ components:
           description: |-
             Indicator of the requested authentication method for the token endpoint.
             This value reflects what was specified during registration.
+        application_type:
+          type: string
+          description: |-
+            Kind of the application accepted during registration. `native` or
+            `web`. When the request omitted `application_type` or sent an empty
+            value, this is `web`. See
+            [OpenID Connect Dynamic Client Registration 1.0 §2](https://openid.net/specs/openid-connect-registration-1_0.html):
+            "The default, if omitted, is web."
       required:
         - client_id
         - client_id_issued_at
@@ -8993,6 +9278,10 @@ components:
           type: string
           description: The type of token issued. Always "Bearer" for OAuth 2.0.
           example: Bearer
+        issued_token_type:
+          type: string
+          description: The type of token issued by an RFC 8693 token exchange.
+          example: urn:ietf:params:oauth:token-type:access_token
         expires_in:
           type: integer
           description: |-
@@ -9114,6 +9403,15 @@ components:
           type: string
           description: Subject of the token, as defined in JWT [RFC7519].
           nullable: true
+        aud:
+          type: array
+          items:
+            type: string
+          description: |-
+            Audience identifiers for this access token, as defined in JWT [RFC7519].
+            When the authorization grant has an RFC 8707 resource, this array contains
+            the corresponding audience identifier.
+          nullable: true
         org_id:
           type: string
           description: |-
@@ -9172,6 +9470,54 @@ components:
         - client_id
         - redirect_domain
         - scopes
+    OAuth.DeviceVerification:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          example: oauth_device_verification
+        status:
+          type: string
+          enum:
+            - approved
+            - denied
+      required:
+        - object
+        - status
+    OAuth.DeviceAuthorizationInfo:
+      type: object
+      additionalProperties: false
+      properties:
+        oauth_application_name:
+          type: string
+        oauth_application_logo_url:
+          type: string
+          nullable: true
+          description: URL to the OAuth application's logo image.
+        client_id:
+          type: string
+        scopes:
+          type: array
+          items:
+            $ref: '#/components/schemas/OAuth.ScopeWithDescription'
+        status:
+          type: string
+          enum:
+            - pending
+            - approved
+            - denied
+            - consumed
+        expires_at:
+          type: integer
+          format: int64
+          description: Expiration time as Unix milliseconds.
+      required:
+        - oauth_application_name
+        - client_id
+        - scopes
+        - status
+        - expires_at
     Token:
       type: object
       additionalProperties: false
@@ -10332,7 +10678,6 @@ components:
         - passkeys
         - external_accounts
         - saml_accounts
-        - enterprise_accounts
         - public_metadata
         - external_id
         - last_sign_in_at
@@ -10426,10 +10771,28 @@ components:
           type: string
         email_address_id:
           type: string
+          description: |-
+            The `email_address_id` to pass back to `prepare_first_factor` for this factor, unchanged.
+
+            Treat this as an opaque value scoped to this sign-in. It is stable for the life of the sign-in, but
+            it is not guaranteed to be an identification ID, to be the same on a later sign-in, or to be usable
+            anywhere else, including the Backend API.
         phone_number_id:
           type: string
+          description: |-
+            The `phone_number_id` to pass back to `prepare_first_factor` for this factor, unchanged.
+
+            Treat this as an opaque value scoped to this sign-in. It is stable for the life of the sign-in, but
+            it is not guaranteed to be an identification ID, to be the same on a later sign-in, or to be usable
+            anywhere else, including the Backend API.
         web3_wallet_id:
           type: string
+          description: |-
+            The `web3_wallet_id` to pass back to `prepare_first_factor` for this factor, unchanged.
+
+            Treat this as an opaque value scoped to this sign-in. It is stable for the life of the sign-in, but
+            it is not guaranteed to be an identification ID, to be the same on a later sign-in, or to be usable
+            anywhere else, including the Backend API.
         passkey_id:
           type: string
         trusted_device_id:
@@ -10710,6 +11073,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.TOTP'
             - $ref: '#/components/schemas/Stubs.Verification.Ticket'
             - $ref: '#/components/schemas/Stubs.Verification.BackupCode'
+            - $ref: '#/components/schemas/Stubs.Verification.Passkey'
         identifier:
           nullable: true
           type: string
@@ -11270,6 +11634,8 @@ components:
         oauth_consent_url:
           type: string
           description: URL of the OAuth consent screen for flows that require human consent.
+        oauth_device_verification_url:
+          type: string
         after_sign_in_url:
           type: string
         after_sign_up_url:
@@ -11592,6 +11958,9 @@ components:
         self_serve_sso:
           type: boolean
           description: When true, end-users may manage enterprise connections for this environment.
+        self_serve_directory_sync:
+          type: boolean
+          description: When true, end-users may manage Directory Sync (SCIM) for their enterprise connections. Treat an absent value as false.
       required:
         - enabled
     UserSettings.SignIn:
@@ -12210,6 +12579,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.TOTP'
             - $ref: '#/components/schemas/Stubs.Verification.Ticket'
             - $ref: '#/components/schemas/Stubs.Verification.BackupCode'
+            - $ref: '#/components/schemas/Stubs.Verification.Passkey'
         identifier:
           nullable: true
           type: string
@@ -12498,6 +12868,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.OTP'
             - $ref: '#/components/schemas/Stubs.Verification.TOTP'
             - $ref: '#/components/schemas/Stubs.Verification.BackupCode'
+            - $ref: '#/components/schemas/Stubs.Verification.Passkey'
         session:
           type: object
           oneOf:
@@ -12536,7 +12907,6 @@ components:
         - sync_user_attributes
         - disable_additional_identifications
         - allow_organization_account_linking
-        - authenticatable
         - created_at
         - updated_at
       properties:
@@ -15486,6 +15856,90 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/OAuth.DynamicClientRegistrationError'
+    OAuth.DeviceAuthorization:
+      description: Device authorization request created.
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required:
+              - device_code
+              - user_code
+              - verification_uri
+              - expires_in
+            properties:
+              device_code:
+                type: string
+                description: The code the device polls the token endpoint with. Never shown to the user.
+              user_code:
+                type: string
+                description: The code the user types into the verification page, displayed in groups of four characters.
+              verification_uri:
+                type: string
+                description: The URL of the page where the user enters the user code.
+              verification_uri_complete:
+                type: string
+                description: The verification URI with the user code pre-filled, suitable for a QR code.
+              expires_in:
+                type: integer
+                description: Seconds until both codes expire.
+              interval:
+                type: integer
+                description: Minimum seconds the device must wait between polls of the token endpoint.
+          example:
+            device_code: 5FZ4RVGZ8QW3HJ7KM2NP9TXC6BD1YS0AE5RGH4KJVQW
+            user_code: BCDF-GHJK
+            verification_uri: https://accounts.example.com/device
+            verification_uri_complete: https://accounts.example.com/device?user_code=BCDF-GHJK
+            expires_in: 600
+            interval: 5
+    OAuth.DeviceAuthorizationError400:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                enum:
+                  - invalid_request
+                  - invalid_grant
+                  - invalid_scope
+                  - insufficient_entropy
+                example: invalid_grant
+              error_description:
+                type: string
+                example: The provided authorization grant is invalid
+    OAuth.TokenError401:
+      description: |-
+        Unauthorized error. Common causes:
+        - Invalid client credentials (`client_id` or `client_secret`)
+        - Invalid or expired authorization code
+        - Invalid or expired refresh token
+        - Invalid `code_verifier` for PKCE flow
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                enum:
+                  - invalid_client
+                  - invalid_grant
+                  - unsupported_grant_type
+                example: invalid_client
+              error_description:
+                type: string
+                example: Client authentication failed
+    TooManyRequests:
+      description: Too many requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
     OAuth.Token:
       description: |-
         Successfully issued OAuth2 tokens.
@@ -15525,6 +15979,10 @@ components:
         - Expired authorization code
         - Invalid `redirect_uri` (doesn't match authorization request)
         - Unsupported token type for revocation (e.g., JWT access tokens)
+        - A granted scope is no longer allowed (for example after a custom scope is deleted)
+        - The device authorization request has not been approved yet, has been polled too
+          quickly, or has expired (RFC 8628 §3.5)
+        - Invalid, repeated, or mismatched `resource` value (RFC 8707)
       content:
         application/json:
           schema:
@@ -15535,18 +15993,22 @@ components:
                 enum:
                   - invalid_request
                   - invalid_grant
+                  - invalid_scope
+                  - invalid_target
+                  - unsupported_grant_type
                   - unsupported_token_type
+                  - authorization_pending
+                  - slow_down
+                  - expired_token
+                  - invalid_target
                 example: invalid_request
               error_description:
                 type: string
                 example: The request is missing a required parameter
-    OAuth.TokenError401:
+    OAuth.TokenError403:
       description: |-
-        Unauthorized error. Common causes:
-        - Invalid client credentials (`client_id` or `client_secret`)
-        - Invalid or expired authorization code
-        - Invalid or expired refresh token
-        - Invalid `code_verifier` for PKCE flow
+        Forbidden. The response may contain `access_denied` when a device authorization
+        request was denied.
       content:
         application/json:
           schema:
@@ -15555,13 +16017,11 @@ components:
               error:
                 type: string
                 enum:
-                  - invalid_client
-                  - invalid_grant
-                  - unsupported_grant_type
-                example: invalid_client
+                  - access_denied
+                example: access_denied
               error_description:
                 type: string
-                example: Client authentication failed
+                example: The resource owner denied the request
     OAuth.UserInfo:
       description: Get user info after successful OAuth2 flow
       content:
@@ -15580,6 +16040,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/OAuth.ConsentInfo'
+    OAuth.DeviceVerification:
+      description: Completed OAuth2 device authorization decision.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OAuth.DeviceVerification'
+    OAuth.DeviceAuthorizationInfo:
+      description: OAuth2 device authorization information for the verification screen.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OAuth.DeviceAuthorizationInfo'
     AuthenticationInvalid:
       description: Authentication invalid
       content:
