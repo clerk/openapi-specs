@@ -2874,6 +2874,33 @@ components:
         - host
         - value
         - required
+    PlatformDNSTarget:
+      type: object
+      additionalProperties: false
+      properties:
+        host:
+          type: string
+        value:
+          type: string
+        record_type:
+          type: string
+          enum:
+            - CNAME
+            - TXT
+        automation_disposition:
+          type: string
+          description: Provider-independent safety decision for automating this DNS record when available.
+          enum:
+            - already_satisfied
+            - safe_to_create
+            - manual_resolution_required
+        required:
+          type: boolean
+      required:
+        - host
+        - value
+        - record_type
+        - required
     PlatformDomainApplicationSummary:
       type: object
       additionalProperties: false
@@ -2960,7 +2987,15 @@ components:
           items:
             $ref: '#/components/schemas/PlatformCNameTarget'
           description: |
-            CNAME targets for the domain. Omitted for development domains, which do not use custom-domain DNS setup.
+            Legacy CNAME-only targets for the domain. New consumers should prefer `dns_targets` when present.
+            Omitted for development domains, which do not use custom-domain DNS setup.
+        dns_targets:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlatformDNSTarget'
+          description: |
+            The complete typed DNS contract for the domain. Consumers should use this field instead of merging it
+            with `cname_targets`. Omitted for development domains, which do not use custom-domain DNS setup.
         created_at:
           type: string
           format: date-time
@@ -3041,6 +3076,11 @@ components:
           type: string
         to:
           type: string
+        record_type:
+          type: string
+          enum:
+            - CNAME
+            - TXT
         verified:
           type: boolean
         required:
@@ -3054,6 +3094,7 @@ components:
         - clerk_subdomain
         - from
         - to
+        - record_type
         - verified
         - required
         - failure_hints
@@ -3079,6 +3120,8 @@ components:
             clk2._domainkey:
               $ref: '#/components/schemas/CNAMEStatus'
             clkmail:
+              $ref: '#/components/schemas/CNAMEStatus'
+            _dmarc:
               $ref: '#/components/schemas/CNAMEStatus'
       required:
         - status
@@ -3236,7 +3279,7 @@ components:
           type: array
           description: DNS records to configure before completion.
           items:
-            $ref: '#/components/schemas/PlatformCNameTarget'
+            $ref: '#/components/schemas/PlatformDNSTarget'
       required:
         - object
         - id

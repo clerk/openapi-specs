@@ -246,8 +246,6 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/WellKnown.JWKS'
-  /aws_credentials: {}
-  /aws_credentials/{id}: {}
   /clients:
     get:
       deprecated: true
@@ -332,7 +330,6 @@ paths:
           $ref: '#/components/responses/AuthenticationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
-  /clients/handshake_payload: {}
   /email_addresses:
     post:
       operationId: CreateEmailAddress
@@ -1996,6 +1993,13 @@ paths:
                     This is useful when you are trying to create a user that doesn't have a password, in an instance that is using passwords.
                     Please note that you cannot use this flag if password is the only way for a user to sign into your instance.
                   nullable: true
+                skip_restriction_checks:
+                  type: boolean
+                  description: |-
+                    When set to `true`, the instance's restrictions are not applied to this user.
+                    Those settings are the allowlist, the blocklist, blocked disposable email domains and blocked email subaddresses, and they normally reject a matching identifier here just as they do at sign-up.
+                    Use this when your backend is creating a user it already trusts, such as during a migration or from an admin tool.
+                  nullable: true
                 totp_secret:
                   type: string
                   description: |-
@@ -3304,6 +3308,7 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/trusted_devices:
     get:
+      deprecated: true
       operationId: ListUserTrustedDevices
       x-speakeasy-group: users
       x-speakeasy-name-override: listTrustedDevices
@@ -3329,6 +3334,7 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/trusted_devices/{trusted_device_id}:
     delete:
+      deprecated: true
       operationId: RevokeUserTrustedDevice
       x-speakeasy-group: users
       x-speakeasy-name-override: revokeTrustedDevice
@@ -3352,6 +3358,62 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/TrustedDevice'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
+  /users/{user_id}/biometric_credentials:
+    get:
+      operationId: ListUserBiometricCredentials
+      x-speakeasy-group: users
+      x-speakeasy-name-override: listBiometricCredentials
+      summary: List a user's biometric credentials
+      description: Returns the active biometric credentials enrolled by the user.
+      tags:
+        - Users
+      parameters:
+        - name: user_id
+          in: path
+          description: The ID of the user whose biometric credentials are returned
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/BiometricCredential.List'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '500':
+          $ref: '#/components/responses/ClerkErrors'
+  /users/{user_id}/biometric_credentials/{biometric_credential_id}:
+    delete:
+      operationId: RevokeUserBiometricCredential
+      x-speakeasy-group: users
+      x-speakeasy-name-override: revokeBiometricCredential
+      summary: Revoke a user's biometric credential
+      description: Revokes an active biometric credential enrolled by the user.
+      tags:
+        - Users
+      parameters:
+        - name: user_id
+          in: path
+          description: The ID of the user that owns the biometric credential
+          required: true
+          schema:
+            type: string
+        - name: biometric_credential_id
+          in: path
+          description: The ID of the biometric credential to revoke
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/BiometricCredential'
         '403':
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
@@ -4091,6 +4153,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '402':
           $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/FeatureNotEnabled'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /actor_tokens/{actor_token_id}/revoke:
@@ -4306,9 +4370,24 @@ paths:
                   nullable: true
                 allowed_origins:
                   type: array
+                  nullable: true
                   items:
                     type: string
-                  description: For browser-like stacks such as browser extensions, Electron (not officially supported), or Capacitor.js (not officially supported), the instance allowed origins need to be updated with the request origin value. For Chrome extensions popup, background, or service worker pages, the origin is chrome-extension://extension_uuid. For Electron apps the default origin is http://localhost:3000. For Capacitor, the origin is capacitor://localhost.
+                  description: |-
+                    For browser-like stacks such as browser extensions, Electron (not officially supported), or Capacitor.js (not officially supported), the instance allowed origins need to be updated with the request origin value. For Chrome extensions popup, background, or service worker pages, the origin is chrome-extension://extension_uuid. For Electron apps the default origin is http://localhost:3000. For Capacitor, the origin is capacitor://localhost.
+                    Send an empty array to remove all allowed origins. A null value leaves the current list unchanged.
+                allowed_subdomains:
+                  type: array
+                  nullable: true
+                  items:
+                    type: string
+                  description: |-
+                    Subdomains of the instance's own domains that may originate requests while `subdomain_allowlist_enabled` is true. Each entry is either an exact host (`app.example.com`) or a wildcard anchored on a host beneath one of the instance's domains (`*.preview.example.com`), which covers every host under that anchor but not the anchor itself.
+                    Entries are stored folded to lower case with any trailing dot removed, the form the origin check compares against, so entries differing only in those respects are one entry. Entries already stored are not validated again, so a list read back from the instance can always be written again unchanged. Send an empty array to remove all entries. A null value leaves the current list unchanged. Production instances only.
+                subdomain_allowlist_enabled:
+                  type: boolean
+                  nullable: true
+                  description: Whether requests from subdomains of the instance's own domains are restricted to `allowed_subdomains`. When false, every subdomain of the instance's domain is accepted. Production instances only.
                 cookieless_dev:
                   type: boolean
                   description: |-
@@ -4395,6 +4474,7 @@ paths:
                 rules_enabled:
                   type: boolean
                   nullable: true
+                  description: Set true to enforce Protect rules on this instance. Set false to stop enforcing and return the instance to its default posture, where traffic is still evaluated in shadow but nothing is blocked. This does not remove the instance from Protect.
                 specter_enabled:
                   type: boolean
                   nullable: true
@@ -4482,13 +4562,22 @@ paths:
                 default_scopes:
                   type: array
                   nullable: true
-                  description: Default scopes. Set to null to reset to Clerk-provided defaults.
+                  description: |
+                    Default scopes assigned when a dynamically registered or first-contact CIMD client omits `scope`. Accepts built-in keys and current custom catalog keys. `advertised` does not affect eligibility. Duplicate keys, unknown keys, and `offline_access` are rejected. An empty array or null resets to Clerk-provided defaults.
                   items:
                     type: string
                 oauth_jwt_access_tokens:
                   type: boolean
                   nullable: true
                   description: Whether OAuth JWT access tokens are enabled for the instance (disabled indicates opaque access tokens).
+                aud_claim_enabled:
+                  type: boolean
+                  nullable: true
+                  description: Whether OAuth access tokens can include an aud claim derived from the RFC 8707 resource parameter.
+                pkce_required:
+                  type: boolean
+                  nullable: true
+                  description: Whether all new OAuth authorization-code requests must use PKCE with the S256 challenge method.
                 client_id_metadata_documents_advertised:
                   type: boolean
                   nullable: true
@@ -4839,7 +4928,6 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
-  /machine_tokens: {}
   /machines:
     get:
       operationId: ListMachines
@@ -7381,7 +7469,7 @@ paths:
                 scopes:
                   type: string
                   maxLength: 1024
-                  description: Define the allowed scopes for the new OAuth applications that dictate the user payload of the OAuth user info endpoint. Available scopes are `profile`, `email`, `public_metadata`, `private_metadata`. Provide the requested scopes as a string, separated by spaces.
+                  description: Define the application's built-in and custom scope ceiling. Provide scope keys as a space-delimited string. Custom keys must exist in the instance OAuth scope catalog.
                   default: profile email
                   example: profile email public_metadata
                   nullable: true
@@ -7394,6 +7482,11 @@ paths:
                   type: boolean
                   default: false
                   description: True to require the Proof Key of Code Exchange (PKCE) flow.
+                  nullable: true
+                device_authorization_grant_enabled:
+                  type: boolean
+                  default: false
+                  description: True to enable the OAuth Device Authorization Grant for this application. Enabling requires the OAuth Device Authorization Grant feature to be enabled for the instance.
                   nullable: true
                 public:
                   type: boolean
@@ -7477,9 +7570,8 @@ paths:
                 scopes:
                   type: string
                   maxLength: 1024
-                  description: Define the allowed scopes for the new OAuth applications that dictate the user payload of the OAuth user info endpoint. Available scopes are `profile`, `email`, `public_metadata`, `private_metadata`. Provide the requested scopes as a string, separated by spaces.
-                  default: profile email
-                  example: profile email public_metadata private_metadata
+                  description: Replace the application's complete built-in and custom scope ceiling. Provide scope keys as a space-delimited string. Custom keys must exist in the instance OAuth scope catalog. Required built-in scopes, such as `offline_access`, must be included in the replacement set, otherwise the request is rejected. Omit this field to leave all scope assignments unchanged.
+                  example: profile email offline_access public_metadata private_metadata
                   nullable: true
                 consent_screen_enabled:
                   type: boolean
@@ -7488,6 +7580,10 @@ paths:
                 pkce_required:
                   type: boolean
                   description: True to require the Proof Key of Code Exchange (PKCE) flow.
+                  nullable: true
+                device_authorization_grant_enabled:
+                  type: boolean
+                  description: True to enable the OAuth Device Authorization Grant for this application. Enabling requires the OAuth Device Authorization Grant feature to be enabled for the instance. Omit this field to leave the setting unchanged.
                   nullable: true
                 public:
                   type: boolean
@@ -8942,8 +9038,6 @@ paths:
           $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
-  /accountless_applications: {}
-  /accountless_applications/complete: {}
   /billing/plans:
     get:
       operationId: GetCommercePlanList
@@ -9945,8 +10039,6 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
-  /audit_logs: {}
-  /audit_logs/{event_time_and_id}: {}
   /scim_directories:
     get:
       operationId: ListSCIMDirectories
@@ -10160,9 +10252,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
-  /scim_directories/{scim_directory_id}/sync: {}
-  /scim_directories/{scim_directory_id}/credentials: {}
-  /scim_directories/{scim_directory_id}/groups: {}
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /scim_directories/{scim_directory_id}/group_role_mappings:
     get:
       operationId: ListSCIMGroupRoleMappings
@@ -10197,7 +10288,8 @@ paths:
       summary: Create a SCIM group role mapping
       description: |-
         Creates a new SCIM group to organization role mapping for a directory.
-        Group role mapping must be enabled on the directory.
+        Mappings can be created while group role mapping is disabled on the
+        directory, but they only take effect once it is enabled.
       parameters:
         - name: scim_directory_id
           in: path
@@ -10251,8 +10343,9 @@ paths:
       description: |-
         Replaces the entire set of SCIM group role mappings for a directory. The position of
         each item in the `mappings` array determines its precedence (the first item gets
-        precedence 1). Passing an empty array removes all mappings. Group role mapping must be
-        enabled on the directory.
+        precedence 1). Passing an empty array removes all mappings. Mappings can be replaced
+        while group role mapping is disabled on the directory, but they only take effect once
+        it is enabled.
       parameters:
         - name: scim_directory_id
           in: path
@@ -10306,8 +10399,9 @@ paths:
         - SCIM Directories
       summary: Delete a SCIM group role mapping
       description: |-
-        Deletes a single SCIM group role mapping. Group role mapping must be enabled on the
-        directory.
+        Deletes a single SCIM group role mapping. Mappings can be deleted while group role
+        mapping is disabled on the directory, but the change only takes effect once it is
+        enabled.
       parameters:
         - name: scim_directory_id
           in: path
@@ -10551,9 +10645,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
-  /directories/{directory_id}/sync: {}
-  /directories/{directory_id}/credentials: {}
-  /directories/{directory_id}/groups: {}
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /directories/{directory_id}/group_role_mappings:
     get:
       operationId: ListDirectoryGroupRoleMappings
@@ -10588,7 +10681,8 @@ paths:
       summary: Create a directory group role mapping
       description: |-
         Creates a new directory group to organization role mapping for a directory.
-        Group role mapping must be enabled on the directory.
+        Mappings can be created while group role mapping is disabled on the
+        directory, but they only take effect once it is enabled.
       parameters:
         - name: directory_id
           in: path
@@ -10644,8 +10738,9 @@ paths:
       description: |-
         Replaces the entire set of directory group role mappings for a directory. The position of
         each item in the `mappings` array determines its precedence (the first item gets
-        precedence 1). Passing an empty array removes all mappings. Group role mapping must be
-        enabled on the directory.
+        precedence 1). Passing an empty array removes all mappings. Mappings can be replaced
+        while group role mapping is disabled on the directory, but they only take effect once
+        it is enabled.
       parameters:
         - name: directory_id
           in: path
@@ -10701,8 +10796,9 @@ paths:
         - Directories
       summary: Delete a directory group role mapping
       description: |-
-        Deletes a single directory group role mapping. Group role mapping must be enabled on the
-        directory.
+        Deletes a single directory group role mapping. Mappings can be deleted while group role
+        mapping is disabled on the directory, but the change only takes effect once it is
+        enabled.
       parameters:
         - name: directory_id
           in: path
@@ -16462,6 +16558,63 @@ components:
         - status
         - created_at
         - updated_at
+    BiometricCredential:
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - trusted_device
+          description: String representing the object's type.
+        id:
+          type: string
+        platform:
+          type: string
+          enum:
+            - ios
+            - android
+        app_identifier:
+          type: string
+        name:
+          type: string
+          nullable: true
+        algorithm:
+          type: string
+          enum:
+            - ES256
+        status:
+          type: string
+          enum:
+            - active
+            - revoked
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of creation in milliseconds.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of the last update in milliseconds.
+        last_used_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp of the last use in milliseconds.
+        revoked_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp of revocation in milliseconds.
+      required:
+        - object
+        - id
+        - platform
+        - app_identifier
+        - algorithm
+        - status
+        - created_at
+        - updated_at
     Invitation:
       type: object
       additionalProperties: false
@@ -16659,6 +16812,34 @@ components:
         - host
         - value
         - required
+    DNSTarget:
+      type: object
+      additionalProperties: false
+      properties:
+        host:
+          type: string
+        value:
+          type: string
+        record_type:
+          type: string
+          enum:
+            - CNAME
+            - TXT
+        automation_disposition:
+          type: string
+          enum:
+            - already_satisfied
+            - safe_to_create
+            - manual_resolution_required
+        required:
+          description: |
+            Denotes whether this DNS target is required to be set in order for the domain to be considered deployed.
+          type: boolean
+      required:
+        - host
+        - value
+        - record_type
+        - required
     Domain:
       type: object
       properties:
@@ -16689,6 +16870,14 @@ components:
           items:
             $ref: '#/components/schemas/CNameTarget'
           nullable: true
+          description: Legacy CNAME-only DNS targets. Prefer `dns_targets` when present.
+        dns_targets:
+          type: array
+          items:
+            $ref: '#/components/schemas/DNSTarget'
+          nullable: true
+          description: |
+            The complete typed DNS contract. Consumers should use this field instead of merging it with `cname_targets`.
       required:
         - object
         - id
@@ -16733,6 +16922,17 @@ components:
           example:
             - http://localhost:3000
             - https://some-domain
+        allowed_subdomains:
+          type: array
+          items:
+            type: string
+          description: Subdomains of the instance's own domains that may originate requests, when the subdomain allowlist is enabled. Production instances only; always empty on a development instance.
+          example:
+            - app.example.com
+            - '*.preview.example.com'
+        subdomain_allowlist_enabled:
+          type: boolean
+          description: Whether requests from subdomains of the instance's own domains are restricted to `allowed_subdomains`. When false, every subdomain of the instance's domain is accepted. Production instances only; always false on a development instance.
         workspace_id:
           type: string
           nullable: true
@@ -16743,6 +16943,8 @@ components:
         - id
         - environment_type
         - allowed_origins
+        - allowed_subdomains
+        - subdomain_allowlist_enabled
         - workspace_id
     InstanceRestrictions:
       type: object
@@ -16778,16 +16980,21 @@ components:
             - instance_protect
         rules_enabled:
           type: boolean
+          description: Whether Protect rules are enforced on this instance. False does not mean the instance is outside Protect — by default it is still evaluated in shadow, where rules are scored and recorded but never block.
         specter_enabled:
           type: boolean
         checks_bypassed:
           type: boolean
           description: Whether the instance has opted out of the Protect prerequisite checks, asserting its setup already meets the requirements.
+        checks_verified:
+          type: boolean
+          description: Whether the Protect system has verified the instance's prerequisite checks. Protect rules are gated on checks being verified or bypassed.
       required:
         - object
         - rules_enabled
         - specter_enabled
         - checks_bypassed
+        - checks_verified
     InstanceCommunication:
       type: object
       description: Per-instance SMS communication settings, including the SMS country blocklist.
@@ -16818,13 +17025,20 @@ components:
         default_scopes:
           type: array
           nullable: true
-          description: Default scopes.
+          description: |
+            Default scopes assigned when a dynamically registered or first-contact CIMD client omits `scope`. Contains built-in keys and custom catalog keys. Null means Clerk-provided defaults. `advertised` does not affect eligibility. An empty input array is stored and returned as null.
           uniqueItems: true
           items:
             type: string
         oauth_jwt_access_tokens:
           type: boolean
           description: Whether OAuth JWT access tokens are enabled for the instance (disabled indicates opaque access tokens).
+        aud_claim_enabled:
+          type: boolean
+          description: Whether OAuth access tokens can include an aud claim derived from the RFC 8707 resource parameter.
+        pkce_required:
+          type: boolean
+          description: Whether all new OAuth authorization-code requests must use PKCE with the S256 challenge method.
         client_id_metadata_documents_advertised:
           type: boolean
           description: Whether the instance advertises support for Client ID Metadata Documents in its OAuth authorization server metadata.
@@ -16839,6 +17053,8 @@ components:
         - dynamic_oauth_client_registration
         - default_scopes
         - oauth_jwt_access_tokens
+        - aud_claim_enabled
+        - pkce_required
         - client_id_metadata_documents_advertised
         - client_id_metadata_documents_only_allow_pre_registered_clients
         - client_id_metadata_documents_block_implicitly_allowed_clients
@@ -17650,10 +17866,14 @@ components:
           type: boolean
         pkce_required:
           type: boolean
+        device_authorization_grant_enabled:
+          type: boolean
         public:
           type: boolean
         scopes:
           type: string
+          description: |
+            The complete scope ceiling for the OAuth application, as a space-delimited list of built-in and assigned custom scope keys.
         redirect_uris:
           type: array
           items:
@@ -17691,6 +17911,7 @@ components:
         - dynamically_registered
         - consent_screen_enabled
         - pkce_required
+        - device_authorization_grant_enabled
         - public
         - client_id
         - client_uri
@@ -17874,10 +18095,8 @@ components:
         - allow_idp_initiated
         - disable_additional_identifications
         - allow_organization_account_linking
-        - authenticatable
         - force_authn
         - login_hint
-        - disable_jit_provisioning
         - created_at
         - updated_at
       anyOf:
@@ -17910,8 +18129,6 @@ components:
         - provider
         - active
         - domains
-        - authenticatable
-        - disable_jit_provisioning
         - created_at
         - updated_at
       properties:
@@ -20085,6 +20302,30 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/TrustedDevice'
+    BiometricCredential.List:
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - data
+              - total_count
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BiometricCredential'
+              total_count:
+                type: integer
+                format: int64
+                description: Total number of biometric credentials
+    BiometricCredential:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BiometricCredential'
     Invitation.List:
       description: List of invitations
       content:
@@ -20167,7 +20408,7 @@ components:
               enhanced_email_deliverability:
                 deprecated: true
                 description: |
-                  Deprecated. When enabled, production authentication emails for this instance are sent through Clerk's legacy managed email delivery path. This setting is being retired; use the instance's configured email sending domain instead.
+                  Deprecated. This setting is retired and no longer affects email delivery; all email is sent through the instance's configured email sending domain. The field is preserved for API compatibility only and will be removed in a future version.
                 type: boolean
     ActorToken:
       description: Success
@@ -20175,6 +20416,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ActorToken'
+    FeatureNotEnabled:
+      description: Feature not enabled
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
     Domains:
       description: A list of domains
       content:
