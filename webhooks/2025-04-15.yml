@@ -2008,6 +2008,11 @@ components:
           type: integer
         admin_delete_enabled:
           type: boolean
+        self_serve_sso_enabled:
+          type: boolean
+          nullable: true
+          description: |
+            Whether this organization can configure self-serve enterprise SSO.
         public_metadata:
           type: object
           additionalProperties: true
