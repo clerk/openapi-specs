@@ -13287,6 +13287,13 @@ paths:
                         example:
                           - read
                           - write
+                      aud:
+                        type: array
+                        items:
+                          type: string
+                        description: The audiences of the access token. Omitted when no audience is set.
+                        example:
+                          - https://api.example.com
                       revoked:
                         type: boolean
                         example: false
