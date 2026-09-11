@@ -1830,6 +1830,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
+        '429':
+          $ref: '#/components/responses/ClerkErrors'
   /v1/client/sign_ins/{sign_in_id}:
     get:
       summary: Retrieve sign-in
