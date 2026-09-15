@@ -855,7 +855,11 @@ paths:
         backend driving its own frontend can react on every attempt — an incorrect
         or expired code is reported through the status, not as an error. Resubmitting
         a verification whose code was already accepted is rejected with a
-        `verification_already_verified` error. If the code
+        `verification_already_verified` error. If the code for this verification
+        could not be sent (the SMS provider refused or failed the send after
+        prepare_verification had returned), the attempt is rejected with a
+        `verification_code_not_sent` error and no attempt is counted; call
+        prepare_verification again to send a new code. If the code
         is correct and the phone number is not already verified, it is also marked
         as verified as a side effect (just as it would be in a frontend verification
         flow); an already verified phone number is left unchanged. It never creates
@@ -897,6 +901,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
         '500':
           $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/phone_number:
@@ -1193,7 +1199,7 @@ paths:
       description: |-
         Returns the session if it is authenticated; otherwise, returns an error.
         WARNING: This endpoint is deprecated and will be removed in future versions. We strongly recommend switching to networkless verification using short-lived session tokens,
-                 which is implemented transparently in all recent SDK versions (e.g. [NodeJS SDK](https://clerk.com/docs/backend-requests/handling/nodejs#require-auth)).
+                 which is implemented transparently in all recent SDK versions (e.g. [Express SDK](https://clerk.com/docs/reference/express/overview#requireauth)).
                  For more details on how networkless verification works, refer to our [Session Tokens documentation](https://clerk.com/docs/backend-requests/resources/session-tokens).
       parameters:
         - name: session_id
@@ -12141,6 +12147,13 @@ paths:
                         example:
                           - read
                           - write
+                      aud:
+                        type: array
+                        items:
+                          type: string
+                        description: The audiences of the access token. Omitted when no audience is set.
+                        example:
+                          - https://api.example.com
                       revoked:
                         type: boolean
                         example: false
