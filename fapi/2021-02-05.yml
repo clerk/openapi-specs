@@ -2335,6 +2335,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
+        '429':
+          $ref: '#/components/responses/ClerkErrors'
   /v1/client/sign_ins/{sign_in_id}:
     get:
       summary: Retrieve sign-in
@@ -8851,6 +8853,8 @@ components:
       type: object
       additionalProperties: false
       properties:
+        oauth_agentid:
+          $ref: '#/components/schemas/UserSettings.Social'
         oauth_apple:
           $ref: '#/components/schemas/UserSettings.Social'
         oauth_atlassian:
