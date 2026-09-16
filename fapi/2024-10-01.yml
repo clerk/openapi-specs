@@ -1455,6 +1455,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
+        '429':
+          $ref: '#/components/responses/ClerkErrors'
   /v1/client/sign_ins/{sign_in_id}:
     get:
       summary: Retrieve sign-in
@@ -7971,6 +7973,8 @@ components:
       type: object
       additionalProperties: false
       properties:
+        oauth_agentid:
+          $ref: '#/components/schemas/UserSettings.Social'
         oauth_apple:
           $ref: '#/components/schemas/UserSettings.Social'
         oauth_atlassian:
@@ -10491,6 +10495,9 @@ components:
           description: String representing the object's type. Objects of the same type share the same value.
           enum:
             - session_reverification
+        id:
+          type: string
+          description: The id of this reverification, for tying a specific action to it
         level:
           type: string
           description: The level used for the session reverification
@@ -10533,6 +10540,7 @@ components:
             - $ref: '#/components/schemas/Client.SessionBase'
       required:
         - object
+        - id
         - level
         - status
         - supported_first_factors
