@@ -1455,6 +1455,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
+        '429':
+          $ref: '#/components/responses/ClerkErrors'
   /v1/client/sign_ins/{sign_in_id}:
     get:
       summary: Retrieve sign-in
@@ -2795,6 +2797,9 @@ paths:
             schema:
               type: object
               properties:
+                trusted_device_id:
+                  type: string
+                  description: The biometric credential enrolled on this native client. Required with `trusted_device`.
                 strategy:
                   type: string
                   description: The strategy to be prepared for first factor authentication.
@@ -2803,6 +2808,7 @@ paths:
                     - phone_code
                     - passkey
                     - enterprise_sso
+                    - trusted_device
                 email_address_id:
                   type: string
                   description: Used with the `email_code` strategy.
@@ -2857,6 +2863,20 @@ paths:
             schema:
               type: object
               properties:
+                trusted_device_id:
+                  type: string
+                  description: The biometric credential enrolled on this native client. Required with `trusted_device`.
+                client_data:
+                  type: string
+                  description: The exact server-issued challenge data. Required with `trusted_device`.
+                signature:
+                  type: string
+                  description: The base64url-encoded ES256 signature. Required with `trusted_device`.
+                algorithm:
+                  type: string
+                  enum:
+                    - ES256
+                  description: Required with `trusted_device`.
                 strategy:
                   type: string
                   description: The strategy to be used for first factor authentication.
@@ -2865,6 +2885,7 @@ paths:
                     - password
                     - phone_code
                     - passkey
+                    - trusted_device
                 code:
                   type: string
                   description: The code that was sent to the email. Used with the `email_code` and `phone_code` strategies.
@@ -2912,12 +2933,16 @@ paths:
             schema:
               type: object
               properties:
+                trusted_device_id:
+                  type: string
+                  description: The biometric credential enrolled on this native client. Required with `trusted_device`.
                 strategy:
                   type: string
                   description: The strategy to be prepared for second factor authentication.
                   nullable: true
                   enum:
                     - phone_code
+                    - trusted_device
                 phone_number_id:
                   type: string
                   description: Used with the `phone_code` strategy.
@@ -2959,6 +2984,20 @@ paths:
             schema:
               type: object
               properties:
+                trusted_device_id:
+                  type: string
+                  description: The biometric credential enrolled on this native client. Required with `trusted_device`.
+                client_data:
+                  type: string
+                  description: The exact server-issued challenge data. Required with `trusted_device`.
+                signature:
+                  type: string
+                  description: The base64url-encoded ES256 signature. Required with `trusted_device`.
+                algorithm:
+                  type: string
+                  enum:
+                    - ES256
+                  description: Required with `trusted_device`.
                 strategy:
                   type: string
                   description: The strategy to be attempted for second factor authentication.
@@ -2966,6 +3005,7 @@ paths:
                     - phone_code
                     - totp
                     - backup_code
+                    - trusted_device
                 code:
                   type: string
                   description: Used with the `phone_code`, `totp` and `backup_code` strategies.
@@ -7971,6 +8011,8 @@ components:
       type: object
       additionalProperties: false
       properties:
+        oauth_agentid:
+          $ref: '#/components/schemas/UserSettings.Social'
         oauth_apple:
           $ref: '#/components/schemas/UserSettings.Social'
         oauth_atlassian:
@@ -10491,6 +10533,9 @@ components:
           description: String representing the object's type. Objects of the same type share the same value.
           enum:
             - session_reverification
+        id:
+          type: string
+          description: The id of this reverification, for tying a specific action to it
         level:
           type: string
           description: The level used for the session reverification
@@ -10523,6 +10568,7 @@ components:
           type: object
           nullable: true
           oneOf:
+            - $ref: '#/components/schemas/Stubs.Verification.TrustedDevice'
             - $ref: '#/components/schemas/Stubs.Verification.OTP'
             - $ref: '#/components/schemas/Stubs.Verification.TOTP'
             - $ref: '#/components/schemas/Stubs.Verification.BackupCode'
@@ -10533,6 +10579,7 @@ components:
             - $ref: '#/components/schemas/Client.SessionBase'
       required:
         - object
+        - id
         - level
         - status
         - supported_first_factors

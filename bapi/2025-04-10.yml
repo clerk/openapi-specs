@@ -857,7 +857,11 @@ paths:
         backend driving its own frontend can react on every attempt — an incorrect
         or expired code is reported through the status, not as an error. Resubmitting
         a verification whose code was already accepted is rejected with a
-        `verification_already_verified` error. If the code
+        `verification_already_verified` error. If the code for this verification
+        could not be sent (the SMS provider refused or failed the send after
+        prepare_verification had returned), the attempt is rejected with a
+        `verification_code_not_sent` error and no attempt is counted; call
+        prepare_verification again to send a new code. If the code
         is correct and the phone number is not already verified, it is also marked
         as verified as a side effect (just as it would be in a frontend verification
         flow); an already verified phone number is left unchanged. It never creates
@@ -899,6 +903,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/ClerkErrors'
         '500':
           $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/phone_number:
@@ -1156,6 +1162,38 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '401':
           $ref: '#/components/responses/AuthenticationInvalid'
+  /sessions/{session_id}/reverifications/{reverification_id}:
+    get:
+      operationId: GetReverification
+      x-speakeasy-group: sessions
+      x-speakeasy-name-override: getReverification
+      tags:
+        - Sessions
+      summary: Retrieve a reverification
+      description: |
+        Retrieve a reverification scoped to a session. A resource server can use this to validate a reverification id it received from its client: confirm it is real, scoped to the expected session, completed, and how fresh each factor is. Single-use / replay detection is the caller's responsibility (the id is stable, so the caller dedups consumed ids).
+      parameters:
+        - name: session_id
+          in: path
+          description: The ID of the session the reverification belongs to
+          required: true
+          schema:
+            type: string
+        - name: reverification_id
+          in: path
+          description: The ID of the reverification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Reverification'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /sessions/{session_id}/revoke:
     post:
       operationId: RevokeSession
@@ -3312,7 +3350,7 @@ paths:
       x-speakeasy-group: users
       x-speakeasy-name-override: deletePasskey
       summary: Delete a user passkey
-      description: Delete the passkey identification for a given user and notify them through email.
+      description: Delete the passkey identification for a given user. The user is notified through email or SMS unless the passkey registration was never completed.
       tags:
         - Users
       parameters:
@@ -4107,7 +4145,10 @@ paths:
         Add a new domain for your instance.
         Useful in the case of multi-domain instances, allows adding satellite domains to an instance.
         The new domain must have a `name`. The domain name can contain the port for development instances, like `localhost:3000`.
-        At the moment, instances can have only one primary domain, so the `is_satellite` parameter must be set to `true`.
+        Set `is_satellite` to `true` to add a satellite domain.
+        To migrate a production instance from an active provider domain to its first custom primary domain,
+        set `is_satellite` to `false`. The custom domain becomes active and the provider domain stays attached.
+        Additional custom primary domains are not supported.
         If you're planning to configure the new satellite domain to run behind a proxy, pass the `proxy_url` parameter accordingly.
       tags:
         - Domains
@@ -4122,9 +4163,7 @@ paths:
                   description: The new domain name. Can contain the port for development instances.
                 is_satellite:
                   type: boolean
-                  description: Marks the new domain as satellite. Only `true` is accepted at the moment.
-                  enum:
-                    - true
+                  description: Marks the new domain as satellite. Set to `false` only when migrating a production instance from an active provider domain to a custom domain.
                 proxy_url:
                   type: string
                   description: The full URL of the proxy which will forward requests to the Clerk Frontend API for this domain. Applicable only to production instances.
@@ -4146,10 +4185,10 @@ paths:
       operationId: DeleteDomain
       x-speakeasy-group: domains
       x-speakeasy-name-override: delete
-      summary: Delete a satellite domain
+      summary: Delete a domain
       description: |-
-        Deletes a satellite domain for the instance.
-        It is currently not possible to delete the instance's primary domain.
+        Deletes a domain for the instance.
+        The instance's active domain cannot be deleted.
       tags:
         - Domains
       parameters:
@@ -4158,7 +4197,7 @@ paths:
           required: true
           schema:
             type: string
-          description: The ID of the domain that will be deleted. Must be a satellite domain.
+          description: The ID of the domain that will be deleted.
       responses:
         '200':
           $ref: '#/components/responses/DeletedObject'
@@ -7408,7 +7447,7 @@ paths:
                 device_authorization_grant_enabled:
                   type: boolean
                   default: false
-                  description: True to enable the OAuth Device Authorization Grant for this application. Enabling requires the OAuth Device Authorization Grant feature to be enabled for the instance.
+                  description: True to enable the OAuth Device Authorization Grant for this application. Enabling requires the new OAuth IdP and a reachable device verification page.
                   nullable: true
                 public:
                   type: boolean
@@ -7505,7 +7544,7 @@ paths:
                   nullable: true
                 device_authorization_grant_enabled:
                   type: boolean
-                  description: True to enable the OAuth Device Authorization Grant for this application. Enabling requires the OAuth Device Authorization Grant feature to be enabled for the instance. Omit this field to leave the setting unchanged.
+                  description: True to enable the OAuth Device Authorization Grant for this application. Enabling requires the new OAuth IdP and a reachable device verification page. Omit this field to leave the setting unchanged.
                   nullable: true
                 public:
                   type: boolean
@@ -12133,6 +12172,13 @@ paths:
                         example:
                           - read
                           - write
+                      aud:
+                        type: array
+                        items:
+                          type: string
+                        description: The audiences of the access token. Omitted when no audience is set.
+                        example:
+                          - https://api.example.com
                       revoked:
                         type: boolean
                         example: false
@@ -13152,6 +13198,70 @@ components:
       oneOf:
         - $ref: '#/components/schemas/Token'
         - $ref: '#/components/schemas/Cookies'
+    Reverification:
+      type: object
+      additionalProperties: false
+      description: |
+        A reverification scoped to a session. Returned so a resource server can validate a reverification id received from its client.
+      properties:
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - reverification
+        id:
+          type: string
+        session_id:
+          type: string
+        user_id:
+          type: string
+        level:
+          type: string
+          description: The level used for the reverification
+          enum:
+            - first_factor
+            - second_factor
+            - multi_factor
+        status:
+          type: string
+          enum:
+            - needs_first_factor
+            - needs_second_factor
+            - complete
+        first_factor_verified_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp (ms) of the first factor verification, or null if not verified.
+        second_factor_verified_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Unix timestamp (ms) of the second factor verification, or null if not verified.
+        created_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - session_id
+        - user_id
+        - level
+        - status
+        - first_factor_verified_at
+        - second_factor_verified_at
+        - created_at
+        - updated_at
     Template:
       type: object
       additionalProperties: false
@@ -13949,8 +14059,32 @@ components:
       type: object
       additionalProperties: false
       description: |
-        Metadata describing a user's linkage to a directory. This object is only delivered on `user.created` and `user.updated` webhook events, and only when the user is provisioned through a directory. Its absence does not necessarily mean the user is not managed by a directory.
+        Metadata describing a user's linkage to a directory. Included in user responses when directory data is requested, and in directory-triggered user webhooks. Its absence does not necessarily mean the user is not managed by a directory.
       properties:
+        id:
+          type: string
+          description: The user's resource ID in this directory.
+        directory_name:
+          type: string
+        provider:
+          type: string
+        enterprise_connection_id:
+          type: string
+          nullable: true
+        groups:
+          type: array
+          description: Omitted when groups were not loaded; an empty array means no group memberships.
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              id:
+                type: string
+              display_name:
+                type: string
+            required:
+              - id
+              - display_name
         directory_id:
           type: string
           description: |
@@ -13958,13 +14092,18 @@ components:
         directory_enabled:
           type: boolean
           description: |
-            Whether the directory is currently enabled. Omitted when false.
+            Whether the directory is currently enabled.
         external_id:
           type: string
           nullable: true
           description: |
             The user's external ID as reported by the directory, if any.
       required:
+        - id
+        - directory_name
+        - provider
+        - enterprise_connection_id
+        - directory_enabled
         - directory_id
         - external_id
     User:
@@ -14149,7 +14288,20 @@ components:
           type: boolean
           description: When set to `true`, the user will bypass Device Trust checks during sign-in.
           default: false
+        directories:
+          type: array
+          description: |
+            All loaded directory links. Omitted when links were not loaded; an empty array means the user has no directory links.
+          items:
+            $ref: '#/components/schemas/SCIMUserMetadata'
+        directory:
+          deprecated: true
+          description: The most recently updated directory link. Use directories for all links.
+          allOf:
+            - $ref: '#/components/schemas/SCIMUserMetadata'
         scim:
+          deprecated: true
+          description: Alias of directory. Use directories for all links.
           nullable: true
           allOf:
             - $ref: '#/components/schemas/SCIMUserMetadata'
@@ -17839,6 +17991,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/SessionRefresh'
+    Reverification:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Reverification'
     Template.List:
       description: Success
       content:
