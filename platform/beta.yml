@@ -49,6 +49,8 @@ tags:
     description: Operations for managing JWT templates within an application instance.
   - name: Redirect URLs
     description: Operations for managing redirect URLs within an application instance.
+  - name: Native Applications
+    description: Operations for configuring Native API support and registering native applications with an application instance.
   - name: Config
     description: Operations for managing instance configuration. The config API provides a unified interface for reading and updating instance settings, including authentication methods, SSO connections, and other instance-level configuration options.
 externalDocs:
@@ -2270,6 +2272,330 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/native_settings:
+    get:
+      operationId: PlatformGetNativeSettings
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: getNativeSettings
+      tags:
+        - Native Applications
+      summary: Get native settings
+      description: |
+        Retrieve Native API settings for an application instance.
+
+        The `envOrInsID` parameter can be either an environment type (for example,
+        `development` or `production`) or an instance ID.
+
+        Requires the `applications:read` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: Environment type or instance ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Native settings retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformNativeSettings'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    patch:
+      operationId: PlatformUpdateNativeSettings
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: updateNativeSettings
+      tags:
+        - Native Applications
+      summary: Update native settings
+      description: |
+        Update Native API settings for an application instance.
+
+        The `envOrInsID` parameter can be either an environment type (for example,
+        `development` or `production`) or an instance ID.
+
+        Requires the `applications:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: Environment type or instance ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Native settings to update.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformUpdateNativeSettingsRequest'
+      responses:
+        '200':
+          description: Native settings updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformNativeSettings'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/native_applications/android:
+    get:
+      operationId: PlatformListAndroidApplications
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: listAndroidApplications
+      tags:
+        - Native Applications
+      summary: List Android native applications
+      description: |
+        List the Android applications registered with an application instance.
+
+        The `envOrInsID` parameter can be either an environment type (for example,
+        `development` or `production`) or an instance ID.
+
+        Requires the `applications:read` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: Environment type or instance ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Android applications retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlatformAndroidApplication'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    post:
+      operationId: PlatformCreateAndroidApplication
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: createAndroidApplication
+      tags:
+        - Native Applications
+      summary: Create an Android native application
+      description: |
+        Register an Android application with an application instance.
+
+        The `envOrInsID` parameter can be either an environment type (for example,
+        `development` or `production`) or an instance ID.
+
+        Requires the `applications:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: Environment type or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          description: |
+            Optional key. If Clerk has cached a completed response for this exact
+            request and key, Clerk replays that response. Reuse the same key only for
+            the same request. Concurrent in-flight requests are not guaranteed to be
+            coalesced, and server-error responses are not cached for this operation.
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 255
+            pattern: ^[A-Za-z0-9_-]+$
+      requestBody:
+        description: Android application registration to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformCreateAndroidApplicationRequest'
+      responses:
+        '200':
+          description: Android application registered successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformAndroidApplication'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/native_applications/ios:
+    get:
+      operationId: PlatformListIOSApplications
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: listIOSApplications
+      tags:
+        - Native Applications
+      summary: List iOS native applications
+      description: |
+        List the iOS applications registered with an application instance.
+
+        The `envOrInsID` parameter can be either an environment type (for example,
+        `development` or `production`) or an instance ID.
+
+        Requires the `applications:read` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: Environment type or instance ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: iOS applications retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlatformIOSApplication'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    post:
+      operationId: PlatformCreateIOSApplication
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: createIOSApplication
+      tags:
+        - Native Applications
+      summary: Create an iOS native application
+      description: |
+        Register an iOS application with an application instance.
+
+        The `envOrInsID` parameter can be either an environment type (for example,
+        `development` or `production`) or an instance ID.
+
+        Requires the `applications:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: Environment type or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          description: |
+            Optional key. If Clerk has cached a completed response for this exact
+            request and key, Clerk replays that response. Reuse the same key only for
+            the same request. Concurrent in-flight requests are not guaranteed to be
+            coalesced, and server-error responses are not cached for this operation.
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 255
+            pattern: ^[A-Za-z0-9_-]+$
+      requestBody:
+        description: iOS application registration to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformCreateIOSApplicationRequest'
+      responses:
+        '200':
+          description: iOS application registered successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformIOSApplication'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /platform/applications/{applicationID}/instances/{envOrInsID}/config:
     get:
       operationId: PlatformGetConfig
@@ -5201,6 +5527,152 @@ components:
       required:
         - data
         - total_count
+    PlatformNativeSettings:
+      title: Native settings
+      description: Native application settings for a Clerk application instance.
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - native_settings
+          description: The object type.
+        api_enabled:
+          type: boolean
+          description: Whether the Native API is enabled for the instance.
+      required:
+        - object
+        - api_enabled
+    PlatformUpdateNativeSettingsRequest:
+      title: Update native settings request
+      type: object
+      additionalProperties: false
+      properties:
+        api_enabled:
+          type: boolean
+          enum:
+            - true
+          description: Enable the Native API for the instance. Disabling is not supported by this endpoint.
+      required:
+        - api_enabled
+    PlatformAndroidApplication:
+      title: Android native application
+      description: An Android application registered with a Clerk application instance.
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - android_application
+          description: The object type.
+        id:
+          type: string
+          description: The unique identifier for the Android application registration.
+        namespace:
+          type: string
+          description: The Digital Asset Links namespace, typically `android_app`.
+        package_name:
+          type: string
+          description: The application's Android package name.
+        fingerprints:
+          type: array
+          description: SHA-256 certificate fingerprints used to associate the Android application with the application instance.
+          items:
+            type: string
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the registration was created.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the registration was last updated.
+      required:
+        - object
+        - id
+        - namespace
+        - package_name
+        - fingerprints
+        - created_at
+        - updated_at
+    PlatformCreateAndroidApplicationRequest:
+      title: Create Android native application request
+      type: object
+      additionalProperties: false
+      properties:
+        namespace:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: The Digital Asset Links namespace, typically `android_app`.
+        package_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: The application's Android package name.
+        fingerprints:
+          type: array
+          description: SHA-256 certificate fingerprints for the Android application's signing certificates. Fingerprints are required to use passkeys.
+          items:
+            type: string
+      required:
+        - namespace
+        - package_name
+    PlatformIOSApplication:
+      title: iOS native application
+      description: An iOS application registered with a Clerk application instance.
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - ios_application
+          description: The object type.
+        id:
+          type: string
+          description: The unique identifier for the iOS application registration.
+        app_id_prefix:
+          type: string
+          description: The Apple App ID Prefix associated with the application. For most apps, this is the Apple Developer Team ID.
+        bundle_id:
+          type: string
+          description: The application's bundle identifier.
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the registration was created.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when the registration was last updated.
+      required:
+        - object
+        - id
+        - app_id_prefix
+        - bundle_id
+        - created_at
+        - updated_at
+    PlatformCreateIOSApplicationRequest:
+      title: Create iOS native application request
+      type: object
+      additionalProperties: false
+      properties:
+        app_id_prefix:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: The Apple App ID Prefix associated with the application. For most apps, this is the Team ID. Confirm it in the app's identifier in the Apple Developer portal.
+        bundle_id:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: The application's bundle identifier.
+      required:
+        - app_id_prefix
+        - bundle_id
     PlatformConfigResponse:
       type: object
       description: Instance configuration response containing key-value pairs and metadata.
@@ -5308,4 +5780,5 @@ x-tagGroups:
       - Users
       - JWT Templates
       - Redirect URLs
+      - Native Applications
       - Config

@@ -2766,6 +2766,8 @@ paths:
           $ref: '#/components/responses/Client.SessionReverification'
         '401':
           $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/ClerkErrors'
   /v1/client/sessions/{session_id}/verify/prepare_first_factor:
