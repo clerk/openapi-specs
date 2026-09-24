@@ -10817,6 +10817,10 @@ components:
           type: string
         enterprise_connection_name:
           type: string
+        enterprise_connection_logo_public_url:
+          type: string
+        enterprise_connection_provider:
+          type: string
         email_address_id:
           type: string
           description: |-
