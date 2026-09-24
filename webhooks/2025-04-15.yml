@@ -4067,6 +4067,9 @@ components:
         locale:
           nullable: true
           type: string
+        timezone:
+          nullable: true
+          type: string
         profile_image_url:
           type: string
           deprecated: true
