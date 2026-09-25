@@ -1420,6 +1420,10 @@ paths:
                 transfer:
                   type: boolean
                   nullable: true
+                timezone:
+                  type: string
+                  nullable: true
+                  description: The IANA timezone reported by the client.
                 code:
                   type: string
                   description: The authorization or grant code for an OAuth exchange. Only used with `oauth_token_[provider]` strategies.
@@ -1887,6 +1891,10 @@ paths:
                   type: boolean
                   nullable: true
                   description: Has the value `true` if the user has accepted the legal requirements.
+                timezone:
+                  type: string
+                  nullable: true
+                  description: The IANA timezone reported by the client.
                 oidc_login_hint:
                   type: string
                   description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect URL.
@@ -2428,6 +2436,8 @@ paths:
           description: Redirect
         '303':
           description: Redirect
+        '307':
+          description: Temporary redirect to complete the OAuth callback flow.
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '403':
@@ -9810,6 +9820,10 @@ components:
           type: string
         enterprise_connection_name:
           type: string
+        enterprise_connection_logo_public_url:
+          type: string
+        enterprise_connection_provider:
+          type: string
         email_address_id:
           type: string
           description: |-
@@ -10150,6 +10164,11 @@ components:
           format: int64
           description: Unix timestamp at which the sign in will be abandoned.
           example: 1700690400000
+        timezone:
+          type: string
+          nullable: true
+          description: The IANA timezone recorded when the sign-in attempt was created.
+          example: America/Los_Angeles
         client_trust_state:
           type: string
           nullable: true
@@ -10334,6 +10353,11 @@ components:
           nullable: true
           description: Unix timestamp at which the user accepted the legal requirements.
           example: 1700690400000
+        timezone:
+          type: string
+          nullable: true
+          description: The IANA timezone recorded when the sign-up attempt was created.
+          example: America/Los_Angeles
       required:
         - object
         - id
@@ -11045,6 +11069,11 @@ components:
           format: int64
           description: Unix timestamp at which the sign in will be abandoned.
           example: 1700690400000
+        timezone:
+          type: string
+          nullable: true
+          description: The IANA timezone recorded when the sign-in attempt was created.
+          example: America/Los_Angeles
         client_trust_state:
           type: string
           nullable: true
