@@ -121,6 +121,10 @@ tags:
       Clerk instance and an identity provider.
     externalDocs:
       url: https://clerk.com/docs/guides/configure/auth-strategies/enterprise-connections/overview
+  - name: SSO Bypass
+    description: |-
+      The SSO bypass allowlist names users who may sign in with an email code when their enterprise identity
+      provider is unreachable.
   - name: Sessions
     description: |-
       The Session object is an abstraction over an HTTP session.
@@ -1948,6 +1952,10 @@ paths:
                   type: string
                   description: The locale to assign to the user (e.g., "en-US", "fr-FR")
                   nullable: true
+                timezone:
+                  type: string
+                  description: The IANA timezone to assign to the user (e.g., "America/New_York", "Europe/Paris"). Set to null to clear it and allow automatic capture on a later trusted sign-in.
+                  nullable: true
                 email_address:
                   type: array
                   items:
@@ -2433,6 +2441,10 @@ paths:
                 locale:
                   type: string
                   description: The locale to assign to the user (e.g., "en-US", "fr-FR")
+                  nullable: true
+                timezone:
+                  type: string
+                  description: The IANA timezone to assign to the user (e.g., "America/New_York", "Europe/Paris"). Set to null to clear it and allow automatic capture on a later trusted sign-in.
                   nullable: true
                 primary_email_address_id:
                   type: string
@@ -8719,6 +8731,88 @@ paths:
           $ref: '#/components/responses/EnterpriseConnectionTestRun'
         '402':
           $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /sso_bypass_allowlist_users:
+    get:
+      operationId: ListSSOBypassAllowlistUsers
+      x-speakeasy-group: ssoBypassAllowlistUsers
+      x-speakeasy-name-override: list
+      summary: List the SSO bypass allowlist
+      description: |-
+        Returns the users who may verify an email code instead of reaching their identity provider when
+        enterprise SSO is unreachable.
+      tags:
+        - SSO Bypass
+      parameters:
+        - name: enterprise_connection_id
+          in: query
+          required: false
+          description: Restrict the list to the users this enterprise connection serves.
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SSOBypassAllowlistUsers'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    post:
+      operationId: CreateSSOBypassAllowlistUser
+      x-speakeasy-group: ssoBypassAllowlistUsers
+      x-speakeasy-name-override: create
+      summary: Add a user to the SSO bypass allowlist
+      description: |-
+        Puts a user on the allowlist. The request is rejected unless the user holds a verified email
+        address on a domain one of the instance's enterprise connections serves.
+      tags:
+        - SSO Bypass
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - user_id
+              properties:
+                user_id:
+                  type: string
+                  description: The ID of the user to allowlist.
+      responses:
+        '201':
+          $ref: '#/components/responses/SSOBypassAllowlistUser'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /sso_bypass_allowlist_users/{userID}:
+    delete:
+      operationId: DeleteSSOBypassAllowlistUser
+      x-speakeasy-group: ssoBypassAllowlistUsers
+      x-speakeasy-name-override: delete
+      summary: Remove a user from the SSO bypass allowlist
+      description: Removes the user from the allowlist, across every enterprise connection that serves them.
+      tags:
+        - SSO Bypass
+      parameters:
+        - name: userID
+          in: path
+          required: true
+          description: The ID of the allowlisted user
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/DeletedObject'
         '403':
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
@@ -15302,6 +15396,9 @@ components:
         locale:
           nullable: true
           type: string
+        timezone:
+          nullable: true
+          type: string
         profile_image_url:
           type: string
           deprecated: true
@@ -17982,6 +18079,11 @@ components:
           description: |
             Unix timestamp at which the user accepted the legal requirements.
           example: 1700690400000
+        timezone:
+          type: string
+          nullable: true
+          description: The IANA timezone associated with the sign-up attempt.
+          example: America/New_York
         locale:
           type: string
           nullable: true
@@ -18613,6 +18715,72 @@ components:
         url:
           type: string
           description: A short-lived URL that can be used to initiate the test run flow
+    SSOBypassAllowlistPublicUserData:
+      description: The allowlisted user's public data.
+      type: object
+      additionalProperties: false
+      properties:
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+        identifier:
+          type: string
+        username:
+          type: string
+          nullable: true
+        profile_image_url:
+          type: string
+          nullable: true
+          deprecated: true
+          description: Use `image_url` instead.
+      required:
+        - first_name
+        - last_name
+        - identifier
+        - has_image
+        - username
+        - profile_image_url
+    SSOBypassAllowlistUser:
+      description: |
+        A user who may verify an email code instead of reaching their identity provider when enterprise SSO is unreachable.
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - sso_bypass_allowlist_user
+        user_id:
+          type: string
+          description: The allowlisted user, and the identifier the delete endpoint takes.
+        public_user_data:
+          $ref: '#/components/schemas/SSOBypassAllowlistPublicUserData'
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of last update.
+      required:
+        - object
+        - user_id
+        - public_user_data
+        - created_at
+        - updated_at
+    SSOBypassAllowlistUsers:
+      description: The instance's SSO bypass allowlist, deduplicated by user.
+      type: array
+      items:
+        $ref: '#/components/schemas/SSOBypassAllowlistUser'
     TestingToken:
       type: object
       properties:
@@ -20930,6 +21098,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/EnterpriseConnectionTestRunResponse'
+    SSOBypassAllowlistUsers:
+      description: The instance's SSO bypass allowlist, deduplicated by user
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SSOBypassAllowlistUsers'
+    SSOBypassAllowlistUser:
+      description: An SSO bypass allowlist entry
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SSOBypassAllowlistUser'
     TestingToken:
       description: A Testing Token
       content:
