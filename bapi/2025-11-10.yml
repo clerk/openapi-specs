@@ -1948,6 +1948,10 @@ paths:
                   type: string
                   description: The locale to assign to the user (e.g., "en-US", "fr-FR")
                   nullable: true
+                timezone:
+                  type: string
+                  description: The IANA timezone to assign to the user (e.g., "America/New_York", "Europe/Paris"). Set to null to clear it and allow automatic capture on a later trusted sign-in.
+                  nullable: true
                 email_address:
                   type: array
                   items:
@@ -2436,6 +2440,10 @@ paths:
                 locale:
                   type: string
                   description: The locale to assign to the user (e.g., "en-US", "fr-FR")
+                  nullable: true
+                timezone:
+                  type: string
+                  description: The IANA timezone to assign to the user (e.g., "America/New_York", "Europe/Paris"). Set to null to clear it and allow automatic capture on a later trusted sign-in.
                   nullable: true
                 primary_email_address_id:
                   type: string
@@ -14885,6 +14893,9 @@ components:
         locale:
           nullable: true
           type: string
+        timezone:
+          nullable: true
+          type: string
         profile_image_url:
           type: string
           deprecated: true
@@ -17508,6 +17519,11 @@ components:
           description: |
             Unix timestamp at which the user accepted the legal requirements.
           example: 1700690400000
+        timezone:
+          type: string
+          nullable: true
+          description: The IANA timezone associated with the sign-up attempt.
+          example: America/New_York
         locale:
           type: string
           nullable: true
