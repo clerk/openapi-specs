@@ -26,6 +26,8 @@ security:
 tags:
   - name: Applications
     description: An object representing a Clerk application. Each `application` can have multiple `instances`, typically one for development and one for production, each with distinct user pools.
+  - name: Principal
+    description: The credential that authenticated a request, and what it is allowed to do.
   - name: Domains
     description: An object representing a domain associated with a Clerk application. In development `instances`, a domain is provided by Clerk. Production `instances` require additional configuration to be set up.
   - name: Domain Intents
@@ -705,6 +707,30 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+  /platform/me:
+    get:
+      operationId: PlatformGetMe
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: getMe
+      tags:
+        - Principal
+      summary: Get the authenticated principal
+      description: |
+        Describe the credential that authenticated this request: its auth strategy, subject
+        (workspace), actor, and granted scopes. Requires no scopes and has no side effects.
+      security:
+        - platform_api_access_token: []
+      responses:
+        '200':
+          description: The authenticated principal.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformPrincipalResponse'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
   /platform/domains:
     get:
       operationId: PlatformListDomains
@@ -3548,6 +3574,48 @@ components:
           required:
             - domain_id
             - last_run_at
+    PlatformPrincipalResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - object
+        - auth_strategy
+        - subject
+        - actor
+        - scopes
+      properties:
+        object:
+          type: string
+          enum:
+            - platform_principal
+        auth_strategy:
+          type: string
+          description: The strategy that authenticated the request.
+          enum:
+            - api_key
+            - oat
+            - shared_secret
+            - devlocal
+        subject:
+          type: string
+          description: |
+            The workspace (organization) ID the request acts on behalf of. Empty for
+            shared-secret requests that do not name a workspace.
+        actor:
+          type: string
+          nullable: true
+          description: |
+            The identity acting for the subject: the API key ID for `api_key`, the
+            user ID for `oat`, or the resolved integration for `shared_secret`.
+            `null` when there is no acting identity.
+        scopes:
+          type: array
+          description: |
+            The Platform API scopes granted to the request, sorted alphabetically.
+            Only `api_key` and `oat` requests are scope-checked. `shared_secret` and
+            `devlocal` requests bypass scope checks and always return an empty array.
+          items:
+            type: string
     PlatformWorkspaceDomainResponse:
       allOf:
         - $ref: '#/components/schemas/PlatformDomainResponse'
@@ -5065,6 +5133,9 @@ components:
         locale:
           nullable: true
           type: string
+        timezone:
+          nullable: true
+          type: string
         profile_image_url:
           type: string
           deprecated: true
@@ -5774,6 +5845,7 @@ x-tagGroups:
   - name: Core Resources
     tags:
       - Applications
+      - Principal
       - Domains
       - Domain Intents
       - Application Transfers
