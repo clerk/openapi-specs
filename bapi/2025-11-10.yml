@@ -1948,6 +1948,10 @@ paths:
                   type: string
                   description: The locale to assign to the user (e.g., "en-US", "fr-FR")
                   nullable: true
+                timezone:
+                  type: string
+                  description: The IANA timezone to assign to the user (e.g., "America/New_York", "Europe/Paris"). Set to null to clear it and allow automatic capture on a later trusted sign-in.
+                  nullable: true
                 email_address:
                   type: array
                   items:
@@ -2436,6 +2440,10 @@ paths:
                 locale:
                   type: string
                   description: The locale to assign to the user (e.g., "en-US", "fr-FR")
+                  nullable: true
+                timezone:
+                  type: string
+                  description: The IANA timezone to assign to the user (e.g., "America/New_York", "Europe/Paris"). Set to null to clear it and allow automatic capture on a later trusted sign-in.
                   nullable: true
                 primary_email_address_id:
                   type: string
@@ -3805,6 +3813,31 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+  /invitations/{invitation_id}:
+    delete:
+      operationId: DeleteInvitation
+      x-speakeasy-group: invitations
+      x-speakeasy-name-override: delete
+      summary: Delete an invitation
+      description: |-
+        Permanently deletes the given invitation and the copies of the invitation email Clerk stored for its recipient.
+        Unlike revoking, deleting removes the invitation record itself, which helps honor a data erasure request from someone who was invited but never signed up.
+        Other records that contain the same email address, such as users or organization invitations, are not affected.
+        Invitations of any status can be deleted.
+      tags:
+        - Invitations
+      parameters:
+        - name: invitation_id
+          in: path
+          description: The ID of the invitation to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /invitations/{invitation_id}/revoke:
     post:
       operationId: RevokeInvitation
@@ -14885,6 +14918,9 @@ components:
         locale:
           nullable: true
           type: string
+        timezone:
+          nullable: true
+          type: string
         profile_image_url:
           type: string
           deprecated: true
@@ -17508,6 +17544,11 @@ components:
           description: |
             Unix timestamp at which the user accepted the legal requirements.
           example: 1700690400000
+        timezone:
+          type: string
+          nullable: true
+          description: The IANA timezone associated with the sign-up attempt.
+          example: America/New_York
         locale:
           type: string
           nullable: true
