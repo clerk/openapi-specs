@@ -1275,7 +1275,15 @@ paths:
                 saml_idp_certificate:
                   type: string
                   nullable: true
-                  description: SAML IdP X.509 certificate (only when using a SAML provider)
+                  deprecated: true
+                  description: Deprecated, use saml_idp_certificates. SAML IdP X.509 certificate, one or several concatenated PEM certificates; replaces the connection's whole certificate set (only when using a SAML provider)
+                saml_idp_certificates:
+                  type: array
+                  description: SAML IdP X.509 signing certificates, one per value, PEM or bare base64. Replaces the connection's whole certificate set and takes precedence over saml_idp_certificate (only when using a SAML provider)
+                  minItems: 1
+                  maxItems: 5
+                  items:
+                    type: string
                 saml_idp_metadata_url:
                   type: string
                   nullable: true
@@ -1414,6 +1422,14 @@ paths:
                 saml_idp_certificate:
                   type: string
                   nullable: true
+                  deprecated: true
+                saml_idp_certificates:
+                  type: array
+                  description: SAML IdP X.509 signing certificates, one per value, PEM or bare base64. Replaces the connection's whole certificate set and takes precedence over saml_idp_certificate (only when using a SAML provider)
+                  minItems: 1
+                  maxItems: 5
+                  items:
+                    type: string
                 saml_idp_metadata_url:
                   type: string
                   nullable: true
@@ -1602,6 +1618,174 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /v1/organizations/{organizationID}/sso_bypass_allowlist_users:
+    get:
+      operationId: listOrganizationSSOBypassAllowlistUsers
+      summary: List the organization's SSO bypass allowlist
+      description: |
+        Returns the members who may verify an email code instead of reaching their identity provider
+        when one of the organization's enterprise connections is unreachable. The caller must hold the
+        `org:sys_entconns_sso_bypass:manage` permission in the organization.
+      tags:
+        - SSO Bypass
+      parameters:
+        - in: path
+          name: organizationID
+          required: true
+          schema:
+            type: string
+          description: The ID of the organization
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedSSOBypassAllowlistUsers'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    post:
+      operationId: createOrganizationSSOBypassAllowlistUser
+      summary: Add a member to the organization's SSO bypass allowlist
+      description: |
+        Puts a member on the allowlist. The request is rejected unless the user is a member of the
+        organization and holds a verified email address on a domain one of the organization's enterprise
+        connections serves. The caller must hold the `org:sys_entconns_sso_bypass:manage` permission.
+      tags:
+        - SSO Bypass
+      parameters:
+        - in: path
+          name: organizationID
+          required: true
+          schema:
+            type: string
+          description: The ID of the organization
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - user_id
+              properties:
+                user_id:
+                  type: string
+                  description: The ID of the member to allowlist.
+      responses:
+        '201':
+          $ref: '#/components/responses/Client.ClientWrappedSSOBypassAllowlistUser'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/organizations/{organizationID}/sso_bypass_allowlist_users/bulk:
+    post:
+      operationId: createOrganizationSSOBypassAllowlistUsersBulk
+      summary: Add up to 100 members to the organization's SSO bypass allowlist
+      description: |
+        Puts a batch of members on the allowlist in one request. The response is a partial-success
+        payload: members who were added, or were already on the list, are returned in `data`, while a
+        user who is not a member of the organization, or holds no verified email address on a domain one
+        of the organization's enterprise connections serves, is returned in `errors` with the code the
+        single-user endpoint returns for them. Duplicate ids in the request are collapsed. The caller must
+        hold the `org:sys_entconns_sso_bypass:manage` permission.
+      tags:
+        - SSO Bypass
+      parameters:
+        - in: path
+          name: organizationID
+          required: true
+          schema:
+            type: string
+          description: The ID of the organization
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - user_id
+              properties:
+                user_id:
+                  type: array
+                  maxItems: 100
+                  items:
+                    type: string
+                  description: The IDs of the members to allowlist.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedSSOBypassAllowlistBulkCreate'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/organizations/{organizationID}/sso_bypass_allowlist_users/{user_id}:
+    delete:
+      operationId: deleteOrganizationSSOBypassAllowlistUser
+      summary: Remove a member from the organization's SSO bypass allowlist
+      description: |
+        Removes the user from the allowlist of every enterprise connection the organization owns. The
+        caller must hold the `org:sys_entconns_sso_bypass:manage` permission.
+      tags:
+        - SSO Bypass
+      parameters:
+        - in: path
+          name: organizationID
+          required: true
+          schema:
+            type: string
+          description: The ID of the organization
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          description: The ID of the allowlisted user
+        - in: query
+          name: _clerk_session_id
+          schema:
+            type: string
+          description: The session_id associated with the requesting user.
+      responses:
+        '200':
+          $ref: '#/components/responses/Client.ClientWrappedDeletedObject'
+        '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /v1/me/enterprise_connections:
     get:
       operationId: getMeEnterpriseConnections
@@ -1698,7 +1882,15 @@ paths:
                 saml_idp_certificate:
                   type: string
                   nullable: true
-                  description: SAML IdP X.509 certificate (only when using a SAML provider)
+                  deprecated: true
+                  description: Deprecated, use saml_idp_certificates. SAML IdP X.509 certificate, one or several concatenated PEM certificates; replaces the connection's whole certificate set (only when using a SAML provider)
+                saml_idp_certificates:
+                  type: array
+                  description: SAML IdP X.509 signing certificates, one per value, PEM or bare base64. Replaces the connection's whole certificate set and takes precedence over saml_idp_certificate (only when using a SAML provider)
+                  minItems: 1
+                  maxItems: 5
+                  items:
+                    type: string
                 saml_idp_metadata_url:
                   type: string
                   nullable: true
@@ -1836,6 +2028,14 @@ paths:
                 saml_idp_certificate:
                   type: string
                   nullable: true
+                  deprecated: true
+                saml_idp_certificates:
+                  type: array
+                  description: SAML IdP X.509 signing certificates, one per value, PEM or bare base64. Replaces the connection's whole certificate set and takes precedence over saml_idp_certificate (only when using a SAML provider)
+                  minItems: 1
+                  maxItems: 5
+                  items:
+                    type: string
                 saml_idp_metadata_url:
                   type: string
                   nullable: true
@@ -2300,6 +2500,10 @@ paths:
                 transfer:
                   type: boolean
                   nullable: true
+                timezone:
+                  type: string
+                  nullable: true
+                  description: The IANA timezone reported by the client.
                 code:
                   type: string
                   description: The authorization or grant code for an OAuth exchange. Only used with `oauth_token_[provider]` strategies.
@@ -2767,6 +2971,10 @@ paths:
                   type: boolean
                   nullable: true
                   description: Has the value `true` if the user has accepted the legal requirements.
+                timezone:
+                  type: string
+                  nullable: true
+                  description: The IANA timezone reported by the client.
                 oidc_login_hint:
                   type: string
                   description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect URL.
@@ -3308,6 +3516,8 @@ paths:
           description: Redirect
         '303':
           description: Redirect
+        '307':
+          description: Temporary redirect to complete the OAuth callback flow.
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '403':
@@ -9511,6 +9721,29 @@ components:
               type: integer
               format: int64
               description: Unix timestamp (milliseconds) of the end of the IdP certificate validity window (X.509 NotAfter). Present when a certificate is configured.
+            idp_certificates:
+              type: array
+              description: Every IdP signing certificate the connection trusts, primary first (optional, when connection details are loaded)
+              items:
+                type: object
+                properties:
+                  certificate:
+                    type: string
+                    description: The X.509 certificate, base64 DER without PEM armor
+                  issued_at:
+                    type: integer
+                    format: int64
+                    nullable: true
+                    description: Unix timestamp (milliseconds) of the X.509 NotBefore
+                  expires_at:
+                    type: integer
+                    format: int64
+                    nullable: true
+                    description: Unix timestamp (milliseconds) of the X.509 NotAfter
+                required:
+                  - certificate
+                  - issued_at
+                  - expires_at
             idp_metadata_url:
               type: string
               description: IdP metadata URL (optional, when connection details are loaded)
@@ -10868,6 +11101,10 @@ components:
           type: string
         enterprise_connection_name:
           type: string
+        enterprise_connection_logo_public_url:
+          type: string
+        enterprise_connection_provider:
+          type: string
         email_address_id:
           type: string
           description: |-
@@ -11145,6 +11382,12 @@ components:
           nullable: true
           items:
             $ref: '#/components/schemas/Stubs.SignInFactor'
+        sso_bypass_first_factors:
+          type: array
+          description: |
+            Factors a user routed to an enterprise connection may use when they cannot reach their identity provider. Absent unless the instance allows SSO bypass and the address belongs to a user on the bypass allowlist of a connection serving it. Pass the factor's `email_address_id` unchanged to `prepare_first_factor`. Deliberately separate from `supported_first_factors`, which callers rely on containing only enterprise factors before redirecting to the provider.
+          items:
+            $ref: '#/components/schemas/Stubs.SignInFactor'
         supported_second_factors:
           type: array
           nullable: true
@@ -11209,6 +11452,11 @@ components:
           format: int64
           description: Unix timestamp at which the sign in will be abandoned.
           example: 1700690400000
+        timezone:
+          type: string
+          nullable: true
+          description: The IANA timezone recorded when the sign-in attempt was created.
+          example: America/Los_Angeles
         client_trust_state:
           type: string
           nullable: true
@@ -11393,6 +11641,11 @@ components:
           nullable: true
           description: Unix timestamp at which the user accepted the legal requirements.
           example: 1700690400000
+        timezone:
+          type: string
+          nullable: true
+          description: The IANA timezone recorded when the sign-up attempt was created.
+          example: America/Los_Angeles
       required:
         - object
         - id
@@ -11659,6 +11912,145 @@ components:
       required:
         - response
         - client
+    SSOBypassAllowlistPublicUserData:
+      description: The allowlisted user's public data.
+      type: object
+      additionalProperties: false
+      properties:
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+        identifier:
+          type: string
+        username:
+          type: string
+          nullable: true
+        profile_image_url:
+          type: string
+          nullable: true
+          deprecated: true
+          description: Use `image_url` instead.
+      required:
+        - first_name
+        - last_name
+        - identifier
+        - has_image
+        - username
+        - profile_image_url
+    SSOBypassAllowlistUser:
+      description: |
+        A member who may verify an email code instead of reaching their identity provider when enterprise SSO is unreachable.
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - sso_bypass_allowlist_user
+        user_id:
+          type: string
+          description: The allowlisted user, and the identifier the delete endpoint takes.
+        public_user_data:
+          $ref: '#/components/schemas/SSOBypassAllowlistPublicUserData'
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of last update.
+      required:
+        - object
+        - user_id
+        - public_user_data
+        - created_at
+        - updated_at
+    Client.ClientWrappedSSOBypassAllowlistUsers:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          type: array
+          items:
+            $ref: '#/components/schemas/SSOBypassAllowlistUser'
+          description: The organization's SSO bypass allowlist, deduplicated by user.
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
+    Client.ClientWrappedSSOBypassAllowlistUser:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          $ref: '#/components/schemas/SSOBypassAllowlistUser'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
+    SSOBypassAllowlistBulkCreateError:
+      description: A user the bulk add could not put on the allowlist.
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          type: string
+          description: The user this error applies to.
+        code:
+          type: string
+          description: |
+            The API error code the single-user endpoint returns for this user (e.g. `sso_bypass_domain_not_served`, `resource_not_found`).
+      required:
+        - user_id
+        - code
+    SSOBypassAllowlistBulkCreate:
+      description: The partial-success payload of a bulk add to the SSO bypass allowlist.
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SSOBypassAllowlistUser'
+          description: The members who were added, or were already on the list.
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/SSOBypassAllowlistBulkCreateError'
+          description: The users who could not be added, with the reason each.
+      required:
+        - data
+        - errors
+    Client.ClientWrappedSSOBypassAllowlistBulkCreate:
+      type: object
+      additionalProperties: false
+      properties:
+        response:
+          $ref: '#/components/schemas/SSOBypassAllowlistBulkCreate'
+        client:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Client.Client'
+      required:
+        - response
+        - client
     Client.SessionBase-2:
       type: object
       properties:
@@ -11778,6 +12170,12 @@ components:
           nullable: true
           items:
             $ref: '#/components/schemas/Stubs.SignInFactor'
+        sso_bypass_first_factors:
+          type: array
+          description: |
+            Factors a user routed to an enterprise connection may use when they cannot reach their identity provider. Absent unless the instance allows SSO bypass and the address belongs to a user on the bypass allowlist of a connection serving it. Pass the factor's `email_address_id` unchanged to `prepare_first_factor`. Deliberately separate from `supported_first_factors`, which callers rely on containing only enterprise factors before redirecting to the provider.
+          items:
+            $ref: '#/components/schemas/Stubs.SignInFactor'
         supported_second_factors:
           type: array
           nullable: true
@@ -11841,6 +12239,11 @@ components:
           format: int64
           description: Unix timestamp at which the sign in will be abandoned.
           example: 1700690400000
+        timezone:
+          type: string
+          nullable: true
+          description: The IANA timezone recorded when the sign-in attempt was created.
+          example: America/Los_Angeles
         client_trust_state:
           type: string
           nullable: true
@@ -13343,6 +13746,24 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Client.ClientWrappedEnterpriseConnectionTestRun'
+    Client.ClientWrappedSSOBypassAllowlistUsers:
+      description: Returns the organization's SSO bypass allowlist, deduplicated by user.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.ClientWrappedSSOBypassAllowlistUsers'
+    Client.ClientWrappedSSOBypassAllowlistUser:
+      description: Returns an SSO bypass allowlist entry.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.ClientWrappedSSOBypassAllowlistUser'
+    Client.ClientWrappedSSOBypassAllowlistBulkCreate:
+      description: Returns the per-user partial-success payload for a bulk add to the SSO bypass allowlist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client.ClientWrappedSSOBypassAllowlistBulkCreate'
     Client.Client:
       description: Returns the current session object.
       content:
@@ -13673,6 +14094,7 @@ x-tagGroups:
       - Members
       - Domains
       - Roles
+      - SSO Bypass
   - name: Other
     tags:
       - Well Known
