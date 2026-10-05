@@ -9321,6 +9321,14 @@ components:
             the authorization code flow. As required by Section 2 of RFC 6749, clients
             using flows with redirection must register their redirection URI values.
           minItems: 1
+        grant_types:
+          type: array
+          items:
+            type: string
+          description: |-
+            Grant types the client requests, as defined in RFC 7591 Section 2.
+            Accepted for compatibility; Clerk always registers dynamic clients with
+            `authorization_code` and `refresh_token`.
         token_endpoint_auth_method:
           type: string
           enum:
