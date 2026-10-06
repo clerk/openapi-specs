@@ -2347,8 +2347,24 @@ paths:
                       - message
         '400':
           $ref: '#/components/responses/ClerkErrors'
+        '422':
+          description: Configuration is invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - unhealthy
+                  message:
+                    type: string
+                required:
+                  - status
+                  - message
         '503':
-          description: Configuration is invalid or service is unavailable
+          description: The health check could not be completed
           content:
             application/json:
               schema:
@@ -8143,6 +8159,14 @@ components:
             the authorization code flow. As required by Section 2 of RFC 6749, clients
             using flows with redirection must register their redirection URI values.
           minItems: 1
+        grant_types:
+          type: array
+          items:
+            type: string
+          description: |-
+            Grant types the client requests, as defined in RFC 7591 Section 2.
+            Accepted for compatibility; Clerk always registers dynamic clients with
+            `authorization_code` and `refresh_token`.
         token_endpoint_auth_method:
           type: string
           enum:
@@ -8462,6 +8486,26 @@ components:
         - instance_id
         - user_id
         - sub
+    OAuth.TokenActor:
+      type: object
+      additionalProperties: false
+      description: |-
+        The RFC 8693 section 4.1 actor chain of a token issued by the token
+        exchange: the client acting for the user, with the client the subject
+        token was issued to nested as the prior actor. Absent on tokens from
+        every other grant.
+      properties:
+        iss:
+          type: string
+          description: Issuer of the actor's identity; the token's own issuer.
+        sub:
+          type: string
+          description: The acting client's client_id.
+        act:
+          $ref: '#/components/schemas/OAuth.TokenActor'
+      required:
+        - iss
+        - sub
     OAuth.TokenInfo:
       type: object
       additionalProperties: false
@@ -8501,6 +8545,8 @@ components:
             Present when the `user:org:read` scope was granted and the user
             belongs to an organization.
           nullable: true
+        act:
+          $ref: '#/components/schemas/OAuth.TokenActor'
       required:
         - active
     OAuth.ScopeWithDescription:
