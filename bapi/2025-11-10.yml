@@ -13011,6 +13011,31 @@ paths:
                         description: The audiences of the access token. Omitted when no audience is set.
                         example:
                           - https://api.example.com
+                      act:
+                        type: object
+                        properties:
+                          iss:
+                            type: string
+                          sub:
+                            type: string
+                          act:
+                            type: object
+                            properties:
+                              iss:
+                                type: string
+                              sub:
+                                type: string
+                            required:
+                              - sub
+                        required:
+                          - sub
+                        description: The actor chain of an access token issued by an OAuth 2.0 Token Exchange (RFC 8693 section 4.1). Omitted for other access tokens.
+                        example:
+                          iss: https://clerk.example.com
+                          sub: client_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                          act:
+                            iss: https://clerk.example.com
+                            sub: client_3yiGkFJ6Y3rXSwuW24CaTk9I7El
                       revoked:
                         type: boolean
                         example: false
