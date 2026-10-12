@@ -528,6 +528,8 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '429':
+          $ref: '#/components/responses/ClerkErrors'
         '500':
           $ref: '#/components/responses/ClerkErrors'
   /email_addresses/{email_address_id}/attempt_verification:
@@ -4652,6 +4654,12 @@ paths:
                   type: boolean
                   nullable: true
                   description: Whether dynamic OAuth client registration is enabled for the instance (RFC 7591).
+                dynamic_client_allowed_scopes:
+                  type: array
+                  nullable: true
+                  description: Administrator-selected scope ceiling for dynamically registered and automatically admitted CIMD clients. Null preserves registered client limits; defaults must be a subset. Fresh user consent is required for expansion.
+                  items:
+                    type: string
                 default_scopes:
                   type: array
                   nullable: true
@@ -5616,9 +5624,7 @@ paths:
                   nullable: true
                 self_serve_sso_enabled:
                   type: boolean
-                  description: |-
-                    Whether this organization can configure self-serve enterprise SSO.
-                    Requires the instance to have the self-serve SSO entitlement enabled.
+                  description: Whether this organization can configure self-serve enterprise SSO.
                   nullable: true
                 created_at:
                   type: string
@@ -7595,6 +7601,16 @@ paths:
                   default: false
                   description: True to require the Proof Key of Code Exchange (PKCE) flow.
                   nullable: true
+                audience_uri:
+                  type: string
+                  nullable: true
+                  description: An absolute resource URI for a confidential application (RFC 8707 section 2). Registers a resource with no accepted scopes, or adopts an unowned resource with confirmation. Every claimed URI remains permanently reserved to this app, including retirement and deletion, and counts toward the instance resource quota. Changing it stops new exchanges from the old audience immediately. Already-issued tokens retain their lifetime. Clearing requires exchange disabled in an earlier update.
+                token_exchange_enabled:
+                  type: boolean
+                  description: Enable exchanges from the active audience. Requires an audience URI. Disabling preserves target configuration.
+                adopt_audience_resource:
+                  type: boolean
+                  description: Confirm adoption of an existing unowned resource, preserving its accepted scopes and target references. Does not override another application's reservation.
                 device_authorization_grant_enabled:
                   type: boolean
                   default: false
@@ -7693,6 +7709,16 @@ paths:
                   type: boolean
                   description: True to require the Proof Key of Code Exchange (PKCE) flow.
                   nullable: true
+                audience_uri:
+                  type: string
+                  nullable: true
+                  description: An absolute resource URI for a confidential application (RFC 8707 section 2). Registers a resource with no accepted scopes, or adopts an unowned resource with confirmation. Every claimed URI remains permanently reserved to this app, including retirement and deletion, and counts toward the instance resource quota. Changing it stops new exchanges from the old audience immediately. Already-issued tokens retain their lifetime. Clearing requires exchange disabled in an earlier update.
+                token_exchange_enabled:
+                  type: boolean
+                  description: Enable exchanges from the active audience. Requires an audience URI. Disabling preserves target configuration.
+                adopt_audience_resource:
+                  type: boolean
+                  description: Confirm adoption of an existing unowned resource, preserving its accepted scopes and target references. Does not override another application's reservation.
                 device_authorization_grant_enabled:
                   type: boolean
                   description: True to enable the OAuth Device Authorization Grant for this application. Enabling requires the new OAuth IdP and a reachable device verification page. Omit this field to leave the setting unchanged.
@@ -13514,6 +13540,31 @@ paths:
                         description: The audiences of the access token. Omitted when no audience is set.
                         example:
                           - https://api.example.com
+                      act:
+                        type: object
+                        properties:
+                          iss:
+                            type: string
+                          sub:
+                            type: string
+                          act:
+                            type: object
+                            properties:
+                              iss:
+                                type: string
+                              sub:
+                                type: string
+                            required:
+                              - sub
+                        required:
+                          - sub
+                        description: The actor chain of an access token issued by an OAuth 2.0 Token Exchange (RFC 8693 section 4.1). Omitted for other access tokens.
+                        example:
+                          iss: https://clerk.example.com
+                          sub: client_2xhFjEI5X2qWRvtV13BzSj8H6Dk
+                          act:
+                            iss: https://clerk.example.com
+                            sub: client_3yiGkFJ6Y3rXSwuW24CaTk9I7El
                       revoked:
                         type: boolean
                         example: false
@@ -15257,7 +15308,6 @@ components:
           type: boolean
         self_serve_sso_enabled:
           type: boolean
-          nullable: true
           description: |
             Whether this organization can configure self-serve enterprise SSO.
         public_metadata:
@@ -17373,6 +17423,12 @@ components:
         dynamic_oauth_client_registration:
           type: boolean
           description: Whether dynamic OAuth client registration is enabled for the instance (RFC 7591).
+        dynamic_client_allowed_scopes:
+          type: array
+          nullable: true
+          description: Administrator-selected scope ceiling for dynamically registered and automatically admitted CIMD clients. Null preserves registered client limits; defaults must be a subset. Fresh user consent is required for expansion.
+          items:
+            type: string
         default_scopes:
           type: array
           nullable: true
@@ -18227,6 +18283,13 @@ components:
           type: boolean
         pkce_required:
           type: boolean
+        audience_uri:
+          type: string
+          nullable: true
+          description: The active application audience URI, whose registry identity is permanently reserved to this application.
+        token_exchange_enabled:
+          type: boolean
+          description: Whether this confidential application accepts token exchanges from its active audience.
         device_authorization_grant_enabled:
           type: boolean
         public:
@@ -18272,6 +18335,8 @@ components:
         - dynamically_registered
         - consent_screen_enabled
         - pkce_required
+        - audience_uri
+        - token_exchange_enabled
         - device_authorization_grant_enabled
         - public
         - client_id
