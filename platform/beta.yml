@@ -3592,7 +3592,8 @@ components:
           type: string
           description: |
             The strategy that authenticated the request: `api_key` for a Platform API
-            key, or `oat` for an OAuth access token.
+            key, `oat` for an OAuth access token, or `exchanged_token` for an RFC 8693
+            exchanged access token.
         subject:
           type: string
           description: |
@@ -3602,11 +3603,14 @@ components:
           nullable: true
           description: |
             The identity acting for the subject: the API key ID for `api_key`, or
-            the user ID for `oat`. `null` when there is no acting identity.
+            the user ID for `oat` and `exchanged_token`. `null` when there is no
+            acting identity.
         scopes:
           type: array
           description: |
             The Platform API scopes granted to the request, sorted alphabetically.
+            An `exchanged_token` request reports the token's scopes capped to the
+            user's current dashboard role.
           items:
             type: string
     PlatformWorkspaceDomainResponse:
@@ -4906,7 +4910,6 @@ components:
           type: boolean
         self_serve_sso_enabled:
           type: boolean
-          nullable: true
           description: |
             Whether this organization can configure self-serve enterprise SSO.
         public_metadata:
