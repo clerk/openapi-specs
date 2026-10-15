@@ -1367,6 +1367,10 @@ paths:
         Valid fields: `created_at`, `updated_at`, `last_sign_in_at`, `last_active_at`, `email_address`, `first_name`,
         `last_name`, `username`, `phone_number`, `web3_wallet`. Default is `-created_at` (most recent first).
 
+        To walk more than a few pages, use `pagination=cursor` rather than `offset`: a large `offset`
+        gets progressively slower and eventually times out. Cursor pagination requires the
+        `created_at` ordering, which is the default.
+
         Requires the `users:read` scope.
       security:
         - platform_api_access_token: []
@@ -1419,13 +1423,47 @@ paths:
             type: integer
             minimum: 0
             default: 0
+        - name: pagination
+          in: query
+          description: |
+            How to paginate the results. `offset`, the default when omitted, pages with `limit` and
+            `offset` and returns `data` and `total_count`.
+
+            `cursor` pages by cursor: pass the previous response's `cursor.starting_after` back as
+            `starting_after`, and stop when `cursor.has_next_page` is `false`. The response is
+            `data` and `cursor`, with no `total_count`. A cursor page costs the same no matter how
+            far into the list it sits, while a large `offset` has to walk and discard every row
+            before it, so use `cursor` to walk more than a few pages.
+          required: false
+          schema:
+            type: string
+            enum:
+              - offset
+              - cursor
+        - name: starting_after
+          in: query
+          description: |
+            With `pagination=cursor`, the `cursor.starting_after` of the previous page. Returns the users that follow it.
+            Omit it for the first page. Rejected with a 422 without `pagination=cursor`.
+
+            **Cursor pagination requires ordering by `created_at`**: `order_by` omitted, or set to `created_at`,
+            `+created_at` or `-created_at`. Any other `order_by` value is rejected with a 422, because the other
+            orderings sort by a value that is neither unique per user nor immutable, so a cursor over them would
+            skip or repeat users.
+
+            A non-zero `offset` is also rejected. Keep every other parameter identical across requests.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Users retrieved successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlatformListInstanceUsersResponse'
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformListInstanceUsersResponse'
+                  - $ref: '#/components/schemas/PlatformListInstanceUsersCursorResponse'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '401':
@@ -3592,7 +3630,8 @@ components:
           type: string
           description: |
             The strategy that authenticated the request: `api_key` for a Platform API
-            key, or `oat` for an OAuth access token.
+            key, `oat` for an OAuth access token, or `exchanged_token` for an RFC 8693
+            exchanged access token.
         subject:
           type: string
           description: |
@@ -3602,11 +3641,14 @@ components:
           nullable: true
           description: |
             The identity acting for the subject: the API key ID for `api_key`, or
-            the user ID for `oat`. `null` when there is no acting identity.
+            the user ID for `oat` and `exchanged_token`. `null` when there is no
+            acting identity.
         scopes:
           type: array
           description: |
             The Platform API scopes granted to the request, sorted alphabetically.
+            An `exchanged_token` request reports the token's scopes capped to the
+            user's current dashboard role.
           items:
             type: string
     PlatformWorkspaceDomainResponse:
@@ -4906,7 +4948,6 @@ components:
           type: boolean
         self_serve_sso_enabled:
           type: boolean
-          nullable: true
           description: |
             Whether this organization can configure self-serve enterprise SSO.
         public_metadata:
@@ -5347,6 +5388,40 @@ components:
       required:
         - data
         - total_count
+    PlatformListInstanceUsersCursorResponse:
+      title: List Instance Users Cursor Response
+      description: A page of users for an application instance, returned with `pagination=cursor`.
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: The list of users.
+          items:
+            $ref: '#/components/schemas/User'
+        cursor:
+          type: object
+          additionalProperties: false
+          description: Cursor information for pagination.
+          properties:
+            starting_after:
+              type: string
+              nullable: true
+              description: Cursor to fetch the next page of results. Pass it back as `starting_after` on the next request. `null` on the last page.
+            ending_before:
+              type: string
+              nullable: true
+              description: Always `null`; this list pages forward only.
+            has_next_page:
+              type: boolean
+              description: Whether more results can be fetched using the `starting_after` cursor.
+          required:
+            - starting_after
+            - ending_before
+            - has_next_page
+      required:
+        - data
+        - cursor
     PlatformPasswordHasher:
       type: string
       description: The hashing algorithm used to generate `password_digest`. See the Backend API user creation documentation for supported algorithms and digest formats.
