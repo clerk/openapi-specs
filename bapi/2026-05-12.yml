@@ -10918,6 +10918,89 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+  /directories/{directory_id}/groups/{group_id}:
+    get:
+      operationId: GetDirectoryGroup
+      x-speakeasy-group: directories
+      x-speakeasy-name-override: getGroup
+      tags:
+        - Directories
+      summary: Retrieve a directory group
+      description: |-
+        Returns one group of the directory, as reported by the identity provider.
+        Responds with 404 once the identity provider has deleted the group.
+      parameters:
+        - name: directory_id
+          in: path
+          description: The ID of the directory.
+          required: true
+          schema:
+            type: string
+        - name: group_id
+          in: path
+          description: The ID of the group, as assigned by the directory.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/DirectoryGroup'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /directories/{directory_id}/groups/{group_id}/members:
+    get:
+      operationId: ListDirectoryGroupMembers
+      x-speakeasy-group: directories
+      x-speakeasy-name-override: listGroupMembers
+      tags:
+        - Directories
+      summary: List directory group members
+      description: |-
+        Returns the members of a group, as reported by the identity provider, using cursor-based pagination.
+        Each member carries the Clerk user it is linked to, or null until that user has been provisioned.
+      parameters:
+        - name: directory_id
+          in: path
+          description: The ID of the directory.
+          required: true
+          schema:
+            type: string
+        - name: group_id
+          in: path
+          description: The ID of the group, as assigned by the directory.
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: |-
+            Applies a limit to the number of results returned.
+            Can be used for paginating the results together with `starting_after`.
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 500
+        - name: starting_after
+          in: query
+          description: A cursor for pagination. Provide the `starting_after` cursor from a previous response to fetch the next page.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/DirectoryGroupMember.List'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /directories/{directory_id}/group_role_mappings:
     get:
       operationId: ListDirectoryGroupRoleMappings
@@ -20574,6 +20657,50 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Directory'
+    DirectoryGroup:
+      type: object
+      description: A group reported by the identity provider for a directory.
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Always "directory_group".
+          enum:
+            - directory_group
+        id:
+          type: string
+          description: The group ID from the identity provider.
+        display_name:
+          type: string
+          description: The display name of the group.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) of when the group was last updated on the identity provider.
+      required:
+        - object
+        - id
+        - display_name
+        - updated_at
+    DirectoryGroupMember:
+      type: object
+      description: A member of a group reported by the identity provider for a directory.
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Always "directory_group_member".
+          enum:
+            - directory_group_member
+        id:
+          type: string
+          description: The directory user ID of the member, as assigned by the directory.
+        user_id:
+          type: string
+          nullable: true
+          description: The ID of the Clerk user this member is linked to. Null until the member has been provisioned into Clerk.
+      required:
+        - object
+        - id
+        - user_id
     DirectoryGroupRoleMapping:
       type: object
       description: A mapping from a directory group to an organization role. Members of the group are assigned the role; the lowest-precedence match wins when a user belongs to multiple mapped groups.
@@ -21569,6 +21696,43 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Directory'
+    DirectoryGroup:
+      description: A group reported by the identity provider for a directory.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DirectoryGroup'
+    DirectoryGroupMember.List:
+      description: A cursor-paginated list of the members of a group.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DirectoryGroupMember'
+              cursor:
+                type: object
+                description: Cursor information for pagination.
+                properties:
+                  starting_after:
+                    type: string
+                    nullable: true
+                    description: Cursor to fetch the next page of results. Pass it back as `starting_after` on the next request.
+                  ending_before:
+                    type: string
+                    nullable: true
+                    description: Cursor to fetch the previous page of results. Pass it back as `ending_before` on the next request.
+                  has_next_page:
+                    type: boolean
+                    description: Whether more results can be fetched using the `starting_after` cursor.
+                required:
+                  - has_next_page
+            required:
+              - data
+              - cursor
     DirectoryGroupRoleMapping.List:
       description: A list of directory group role mappings, ordered by precedence.
       content:
