@@ -207,6 +207,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
     delete:
       operationId: PlatformDeleteApplication
       x-speakeasy-group: platform
@@ -5891,6 +5893,12 @@ components:
             $ref: '#/components/schemas/ClerkErrors'
     ResourceNotFound:
       description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
+    TooManyRequests:
+      description: Too many requests
       content:
         application/json:
           schema:
