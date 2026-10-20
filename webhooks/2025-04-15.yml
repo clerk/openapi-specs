@@ -2012,10 +2012,6 @@ components:
           type: boolean
           description: |
             Whether this organization can configure self-serve enterprise SSO.
-        self_serve_directory_sync_enabled:
-          type: boolean
-          description: |
-            Whether this organization can configure self-serve Directory Sync (SCIM).
         public_metadata:
           type: object
           additionalProperties: true
