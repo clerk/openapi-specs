@@ -10348,6 +10348,12 @@ paths:
                 enabled:
                   type: boolean
                   description: Whether the directory is enabled.
+                paused:
+                  type: boolean
+                  description: |-
+                    Pause or resume syncing. Pausing rejects provisioning requests and skips scheduled
+                    syncs while keeping the organization memberships the directory granted, so sync picks
+                    up where it left off. Disabling removes them instead.
                 provider:
                   type: string
                   description: The identity provider for this directory.
@@ -10538,6 +10544,12 @@ paths:
                 enabled:
                   type: boolean
                   description: Whether the directory is enabled.
+                paused:
+                  type: boolean
+                  description: |-
+                    Pause or resume syncing. Pausing rejects provisioning requests and skips scheduled
+                    syncs while keeping the organization memberships the directory granted, so sync picks
+                    up where it left off. Disabling removes them instead.
                 provider:
                   type: string
                   description: The identity provider for this directory.
@@ -19743,6 +19755,12 @@ components:
         enabled:
           type: boolean
           description: Whether the directory is enabled.
+        paused:
+          type: boolean
+          description: |-
+            Whether syncing is paused. A paused directory rejects SCIM requests and skips
+            scheduled syncs, but keeps the organization memberships it granted. Disabling a directory
+            removes them instead.
         group_role_mapping_enabled:
           type: boolean
           description: Whether group-to-role mapping is enabled for this directory.
@@ -19794,6 +19812,7 @@ components:
         - endpoint_url
         - provider
         - enabled
+        - paused
         - group_role_mapping_enabled
         - attribute_mapping
         - created_at
@@ -19830,6 +19849,12 @@ components:
         enabled:
           type: boolean
           description: Whether the directory is enabled.
+        paused:
+          type: boolean
+          description: |-
+            Whether syncing is paused. A paused directory rejects provisioning requests and skips
+            scheduled syncs, but keeps the organization memberships it granted. Disabling a directory
+            removes them instead.
         group_role_mapping_enabled:
           type: boolean
           description: Whether group-to-role mapping is enabled for this directory.
@@ -19881,6 +19906,7 @@ components:
         - endpoint_url
         - provider
         - enabled
+        - paused
         - group_role_mapping_enabled
         - attribute_mapping
         - created_at
