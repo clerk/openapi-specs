@@ -53,6 +53,8 @@ tags:
     description: Operations for managing redirect URLs within an application instance.
   - name: Native Applications
     description: Operations for configuring Native API support and registering native applications with an application instance.
+  - name: OAuth
+    description: 'Operations for the OAuth authorization server an instance runs: the protected resources registered on it, including MCP servers, and its instance-wide settings.'
   - name: Config
     description: Operations for managing instance configuration. The config API provides a unified interface for reading and updating instance settings, including authentication methods, SSO connections, and other instance-level configuration options.
 externalDocs:
@@ -207,6 +209,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
     delete:
       operationId: PlatformDeleteApplication
       x-speakeasy-group: platform
@@ -2336,6 +2340,425 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/oauth_resources:
+    get:
+      operationId: PlatformListOAuthResources
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: listOAuthResources
+      tags:
+        - OAuth
+      summary: List OAuth resources
+      description: |
+        List the OAuth protected resources registered on an application instance, including MCP servers.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Applications still on the legacy OAuth 2.0 provider receive a 403 `not enabled` error.
+
+        Requires the `applications:read` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page (1-500, default 10).
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 10
+        - name: offset
+          in: query
+          description: Number of results to skip for pagination.
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: oauth_application_id
+          in: query
+          description: Only resources whose current audience owner is this OAuth application. An empty value lists unowned resources.
+          required: false
+          schema:
+            type: string
+        - name: mcp_server
+          in: query
+          description: Only resources whose MCP server marker equals this value. Accepts `true` or `false`.
+          required: false
+          schema:
+            type: string
+            enum:
+              - 'true'
+              - 'false'
+      responses:
+        '200':
+          description: OAuth resources retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformListOAuthResourcesResponse'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    post:
+      operationId: PlatformCreateOAuthResource
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: createOAuthResource
+      tags:
+        - OAuth
+      summary: Create an OAuth resource
+      description: |
+        Register an OAuth protected resource on an application instance. To register an MCP server,
+        pass its canonical URL as `uri` and set `mcp_server` to true.
+
+        Registration is descriptive: Clerk mints an `aud` for any absolute `resource` a client requests
+        once `aud_claim_enabled` is on, whether or not it is registered. The registry drives the
+        Dashboard, Clerk's MCP tooling, and token exchange targets.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Applications still on the legacy OAuth 2.0 provider receive a 403 `not enabled` error.
+
+        Requires the `applications:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformCreateOAuthResourceRequest'
+      responses:
+        '200':
+          description: OAuth resource created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformOAuthResource'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/oauth_resources/{oauthResourceID}:
+    get:
+      operationId: PlatformGetOAuthResource
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: getOAuthResource
+      tags:
+        - OAuth
+      summary: Get an OAuth resource
+      description: |
+        Retrieve one OAuth protected resource registered on an application instance.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Applications still on the legacy OAuth 2.0 provider receive a 403 `not enabled` error.
+
+        Requires the `applications:read` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: oauthResourceID
+          in: path
+          description: OAuth resource ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OAuth resource retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformOAuthResource'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    patch:
+      operationId: PlatformUpdateOAuthResource
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: updateOAuthResource
+      tags:
+        - OAuth
+      summary: Update an OAuth resource
+      description: |
+        Update the name, scopes, or MCP server marker of an OAuth protected resource. The URI is
+        create-only; delete and recreate the resource to change it.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Applications still on the legacy OAuth 2.0 provider receive a 403 `not enabled` error.
+
+        Requires the `applications:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: oauthResourceID
+          in: path
+          description: OAuth resource ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformUpdateOAuthResourceRequest'
+      responses:
+        '200':
+          description: OAuth resource updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformOAuthResource'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      operationId: PlatformDeleteOAuthResource
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: deleteOAuthResource
+      tags:
+        - OAuth
+      summary: Delete an OAuth resource
+      description: |
+        Delete an OAuth protected resource. Deleting a resource removes it from every OAuth application's
+        token exchange targets. Audience URIs reserved by an OAuth application cannot be deleted.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Applications still on the legacy OAuth 2.0 provider receive a 403 `not enabled` error.
+
+        Requires the `applications:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: oauthResourceID
+          in: path
+          description: OAuth resource ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/DeletedObject'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/oauth_application_settings:
+    get:
+      operationId: PlatformGetOAuthApplicationSettings
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: getOAuthApplicationSettings
+      tags:
+        - OAuth
+      summary: Get OAuth application settings
+      description: |
+        Retrieve the instance-wide OAuth authorization server settings, such as audience claims,
+        PKCE, and client registration policy.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Applications still on the legacy OAuth 2.0 provider receive a 403 `not enabled` error.
+
+        Requires the `applications:read` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OAuth application settings retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformOAuthApplicationSettings'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+    patch:
+      operationId: PlatformUpdateOAuthApplicationSettings
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: updateOAuthApplicationSettings
+      tags:
+        - OAuth
+      summary: Update OAuth application settings
+      description: |
+        Update the instance-wide OAuth authorization server settings. Only supplied fields change.
+
+        An MCP server needs `aud_claim_enabled` so tokens carry its URL as the audience, and
+        `client_id_metadata_documents_advertised` (or `dynamic_oauth_client_registration`) so MCP
+        clients can register. Advertising CIMD admits unknown CIMD clients unless the pre-registration
+        policy settings restrict them.
+
+        The `envOrInsID` parameter can be either an environment type (e.g., "development", "production")
+        or an instance ID.
+
+        Applications still on the legacy OAuth 2.0 provider receive a 403 `not enabled` error.
+
+        Requires the `applications:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformUpdateOAuthApplicationSettingsRequest'
+      responses:
+        '200':
+          description: OAuth application settings updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformOAuthApplicationSettings'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /platform/applications/{applicationID}/instances/{envOrInsID}/native_settings:
     get:
       operationId: PlatformGetNativeSettings
@@ -5670,6 +6093,239 @@ components:
       required:
         - data
         - total_count
+    PlatformOAuthResource:
+      title: OAuth resource
+      description: An instance-scoped OAuth protected resource. Its URI is the audience that access tokens carry when a client requests it as the RFC 8707 `resource`, and MCP servers register themselves here.
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - oauth_resource
+          description: The object type.
+        id:
+          type: string
+          description: The OAuth resource ID.
+        uri:
+          type: string
+          description: The absolute URI identifying the protected API, as normalized on write. It cannot be changed after creation.
+        name:
+          type: string
+          description: A display name of at most 100 bytes.
+        scopes:
+          type: array
+          description: Custom scopes the resource accepts, filtered to the instance's current scope catalog. Empty for MCP servers that do not take part in token exchange.
+          items:
+            type: string
+        oauth_application_id:
+          type: string
+          nullable: true
+          description: The confidential OAuth application that currently uses this resource as its audience, if any.
+        reserved_oauth_application_id:
+          type: string
+          nullable: true
+          description: The OAuth application that permanently reserved this URI as an audience, if any.
+        mcp_server:
+          type: boolean
+          description: Whether the resource is an MCP server. The marker is a label only and is never read by token issuance or exchange.
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds of when the resource was created.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds of when the resource was last updated.
+      required:
+        - object
+        - id
+        - uri
+        - name
+        - scopes
+        - oauth_application_id
+        - reserved_oauth_application_id
+        - mcp_server
+        - created_at
+        - updated_at
+    PlatformListOAuthResourcesResponse:
+      title: List OAuth resources response
+      description: A paginated list of OAuth resources for an application instance.
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: The list of OAuth resources.
+          items:
+            $ref: '#/components/schemas/PlatformOAuthResource'
+        total_count:
+          type: integer
+          format: int64
+          description: The total number of OAuth resources matching the filters.
+          example: 2
+      required:
+        - data
+        - total_count
+    PlatformCreateOAuthResourceRequest:
+      title: Create OAuth resource request
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: The absolute URI identifying the protected API. It must have no fragment, and when it uses the http or https scheme must include a host and no user information. For an MCP server, use the exact URL MCP clients send as the RFC 8707 `resource`, for example `https://mcp.example.com/mcp`.
+          maxLength: 2048
+        name:
+          type: string
+          description: A display name of at most 100 bytes.
+          maxLength: 100
+        scopes:
+          type: array
+          description: Custom scopes from the instance's scope catalog. Omitted means none.
+          items:
+            type: string
+        mcp_server:
+          type: boolean
+          description: Mark the resource as an MCP server. Omitted means false.
+      required:
+        - uri
+        - name
+    PlatformUpdateOAuthResourceRequest:
+      title: Update OAuth resource request
+      description: Only supplied fields change. The URI is create-only.
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: A display name of at most 100 bytes.
+          maxLength: 100
+        scopes:
+          type: array
+          description: Replaces the resource's custom scopes.
+          items:
+            type: string
+        mcp_server:
+          type: boolean
+          description: Set or clear the MCP server marker. It is accepted on app-backed resources too.
+    PlatformOAuthApplicationSettings:
+      title: OAuth application settings
+      description: Instance-wide settings for the OAuth authorization server Clerk runs for the instance.
+      type: object
+      additionalProperties: false
+      properties:
+        object:
+          type: string
+          enum:
+            - oauth_application_settings
+          description: The object type.
+        dynamic_oauth_client_registration:
+          type: boolean
+          description: Whether dynamic OAuth client registration is enabled for the instance (RFC 7591).
+        dynamic_client_allowed_scopes:
+          type: array
+          nullable: true
+          description: Administrator-selected scope ceiling for dynamically registered and automatically admitted CIMD clients. Null preserves registered client limits.
+          items:
+            type: string
+        default_scopes:
+          type: array
+          nullable: true
+          description: Default scopes assigned when a dynamically registered or first-contact CIMD client omits `scope`. Null means Clerk-provided defaults.
+          items:
+            type: string
+        oauth_jwt_access_tokens:
+          type: boolean
+          description: Whether OAuth access tokens are JWTs. When false, access tokens are opaque.
+        oidc_sign_out_enabled:
+          type: boolean
+          description: Whether OIDC RP-initiated sign-out is enabled for the instance.
+        aud_claim_enabled:
+          type: boolean
+          description: Whether OAuth access tokens carry an `aud` claim derived from the RFC 8707 `resource` parameter. MCP servers need this to validate token audiences.
+        aud_claim_refresh_backfill_enabled:
+          type: boolean
+          description: Whether refresh grants without a resource can adopt the requested resource when audience claims are enabled.
+        pkce_required:
+          type: boolean
+          description: Whether all new OAuth authorization-code requests must use PKCE with the S256 challenge method.
+        client_id_metadata_documents_advertised:
+          type: boolean
+          description: Whether the instance advertises and admits Client ID Metadata Document clients. Unknown CIMD clients are refused while this is false.
+        client_id_metadata_documents_only_allow_pre_registered_clients:
+          type: boolean
+          description: When true, new unknown CIMD clients are rejected. Previously auto-connected and pre-registered clients remain admitted.
+        client_id_metadata_documents_block_implicitly_allowed_clients:
+          type: boolean
+          description: When true, recorded implicitly allowed CIMD clients are rejected on future client lookups.
+      required:
+        - object
+        - dynamic_oauth_client_registration
+        - dynamic_client_allowed_scopes
+        - default_scopes
+        - oauth_jwt_access_tokens
+        - oidc_sign_out_enabled
+        - aud_claim_enabled
+        - aud_claim_refresh_backfill_enabled
+        - pkce_required
+        - client_id_metadata_documents_advertised
+        - client_id_metadata_documents_only_allow_pre_registered_clients
+        - client_id_metadata_documents_block_implicitly_allowed_clients
+    PlatformUpdateOAuthApplicationSettingsRequest:
+      title: Update OAuth application settings request
+      description: Only supplied fields change.
+      type: object
+      additionalProperties: false
+      properties:
+        dynamic_oauth_client_registration:
+          type: boolean
+          nullable: true
+          description: Whether dynamic OAuth client registration is enabled for the instance (RFC 7591).
+        dynamic_client_allowed_scopes:
+          type: array
+          nullable: true
+          description: Administrator-selected scope ceiling for dynamically registered and automatically admitted CIMD clients.
+          items:
+            type: string
+        default_scopes:
+          type: array
+          nullable: true
+          description: Default scopes assigned when a dynamically registered or first-contact CIMD client omits `scope`. An empty array or null resets to Clerk-provided defaults.
+          items:
+            type: string
+        oauth_jwt_access_tokens:
+          type: boolean
+          nullable: true
+          description: Whether OAuth access tokens are JWTs. When false, access tokens are opaque.
+        oidc_sign_out_enabled:
+          type: boolean
+          nullable: true
+          description: Whether OIDC RP-initiated sign-out is enabled for the instance.
+        aud_claim_enabled:
+          type: boolean
+          nullable: true
+          description: Whether OAuth access tokens carry an `aud` claim derived from the RFC 8707 `resource` parameter.
+        aud_claim_refresh_backfill_enabled:
+          type: boolean
+          nullable: true
+          description: Whether refresh grants without a resource can adopt the requested resource when audience claims are enabled.
+        pkce_required:
+          type: boolean
+          nullable: true
+          description: Whether all new OAuth authorization-code requests must use PKCE with the S256 challenge method.
+        client_id_metadata_documents_advertised:
+          type: boolean
+          nullable: true
+          description: Whether the instance advertises and admits Client ID Metadata Document clients.
+        client_id_metadata_documents_only_allow_pre_registered_clients:
+          type: boolean
+          nullable: true
+          description: When true, new unknown CIMD clients are rejected.
+        client_id_metadata_documents_block_implicitly_allowed_clients:
+          type: boolean
+          nullable: true
+          description: When true, recorded implicitly allowed CIMD clients are rejected on future client lookups. Requires only pre-registered clients to be allowed.
     PlatformNativeSettings:
       title: Native settings
       description: Native application settings for a Clerk application instance.
@@ -5895,6 +6551,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ClerkErrors'
+    TooManyRequests:
+      description: Too many requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
     Conflict:
       description: Conflict
       content:
@@ -5925,4 +6587,5 @@ x-tagGroups:
       - JWT Templates
       - Redirect URLs
       - Native Applications
+      - OAuth
       - Config
