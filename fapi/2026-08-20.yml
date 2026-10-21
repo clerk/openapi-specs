@@ -11739,6 +11739,7 @@ components:
             - oauth_facebook
             - oauth_hubspot
             - oauth_github
+            - oauth_microsoft
             - oauth_mock
             - oauth_custom_mock
             - oauth_token_mock
