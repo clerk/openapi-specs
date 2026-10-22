@@ -5547,12 +5547,6 @@ paths:
                   type: boolean
                   description: Whether this organization can configure self-serve enterprise SSO.
                   nullable: true
-                self_serve_directory_sync_enabled:
-                  type: boolean
-                  description: |-
-                    Whether this organization can configure self-serve Directory Sync (SCIM).
-                    Independent of `self_serve_sso_enabled`.
-                  nullable: true
                 created_at:
                   type: string
                   description: A custom date/time denoting _when_ the organization was created, specified in RFC3339 format (e.g. `2012-10-20T07:15:20.902Z`).
@@ -13811,10 +13805,6 @@ components:
           type: boolean
           description: |
             Whether this organization can configure self-serve enterprise SSO.
-        self_serve_directory_sync_enabled:
-          type: boolean
-          description: |
-            Whether this organization can configure self-serve Directory Sync (SCIM).
         public_metadata:
           type: object
           additionalProperties: true
@@ -14942,6 +14932,11 @@ components:
           nullable: true
           description: The ID of the Clerk workspace that owns the instance's application. It is null when the application has no owner.
           example: org_2abc123def456
+        max_allowed_users:
+          type: integer
+          nullable: true
+          description: The maximum number of users the instance can hold. Creating a user fails with a `user_quota_exceeded` error once the instance's total user count, as returned by `GET /v1/users/count` without filters, reaches this value. It is null when the instance has no user limit.
+          example: 100
       required:
         - object
         - id
@@ -14950,6 +14945,7 @@ components:
         - allowed_subdomains
         - subdomain_allowlist_enabled
         - workspace_id
+        - max_allowed_users
     InstanceRestrictions:
       type: object
       properties:
