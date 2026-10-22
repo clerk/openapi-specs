@@ -1820,6 +1820,47 @@ x-webhooks:
                 id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
                 deleted: true
                 external_id: ex_123456789
+  user.merged:
+    post:
+      description: |-
+        Another user was merged into this user. `data.user` is the user after the merge, and
+        `data.deleted_user` the merged user as it was before it was deleted. The merge also sends
+        `user.updated` for `data.user` and `user.deleted` for `data.deleted_user`, but webhooks are not
+        delivered in order. Handle `user.merged` by moving the deleted user's data to `data.user`
+        rather than relying on the order of those events, for example when you store emails uniquely.
+      operationId: user.merged
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        user:
+                          $ref: '#/components/schemas/User'
+                        deleted_user:
+                          $ref: '#/components/schemas/User'
+                      required:
+                        - user
+                        - deleted_user
+                  required:
+                    - data
+            example:
+              object: event
+              type: user.merged
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                user:
+                  object: user
+                  id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                deleted_user:
+                  object: user
+                  id: user_2g7np8Kl3TOiDLp6FENMEbLOM1T
   waitlistEntry.created:
     post:
       description: Waitlist entry created
@@ -2012,10 +2053,6 @@ components:
           type: boolean
           description: |
             Whether this organization can configure self-serve enterprise SSO.
-        self_serve_directory_sync_enabled:
-          type: boolean
-          description: |
-            Whether this organization can configure self-serve Directory Sync (SCIM).
         public_metadata:
           type: object
           additionalProperties: true
@@ -2410,6 +2447,34 @@ components:
         - created_at
         - updated_at
         - organization
+    DirectoryGroupEventPayload:
+      type: object
+      description: A group as the identity provider reported it to a directory. A deleted group carries its last known display name.
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Always "directory_group".
+          enum:
+            - directory_group
+        id:
+          type: string
+          description: The group ID from the identity provider.
+        directory_id:
+          type: string
+          description: The ID of the directory the group belongs to.
+        display_name:
+          type: string
+          description: The display name of the group.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) of the change on the identity provider.
+      required:
+        - object
+        - id
+        - directory_id
+        - display_name
+        - updated_at
     BillingPaymentFailedReason:
       type: object
       properties:

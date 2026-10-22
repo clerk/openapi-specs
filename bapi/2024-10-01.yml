@@ -2799,6 +2799,93 @@ paths:
           $ref: '#/components/responses/User'
         '403':
           $ref: '#/components/responses/AuthorizationInvalid'
+  /users/{user_id}/merge:
+    post:
+      operationId: MergeUser
+      x-speakeasy-group: users
+      x-speakeasy-name-override: merge
+      summary: Merge another user into this user
+      description: |-
+        Moves the identifications, connected accounts, passkeys, TOTP, backup codes, organization
+        memberships, membership requests, suggestions and metadata of the user in `from_user_id` onto the
+        user in the path, then deletes the `from_user_id` user.
+        Where both users have a value, the user in the path keeps its own. First and last name, profile
+        image, `external_id`, and the password are taken from the `from_user_id` user only where the user in
+        the path has none, so if it has no password, the `from_user_id` user's password signs in to it
+        afterwards. When both users have the same
+        identifier, the verified copy is kept. The `from_user_id` user's sessions are revoked.
+        With `dry_run`, the merge is computed and returned but nothing is changed.
+
+        A merge cannot be undone. The response's `deleted_user` is the `from_user_id` user as it was before
+        the merge, so store it if you may need it. It does not include passwords, TOTP secrets, backup codes,
+        passkeys or connected-account tokens, which cannot be restored. Use `dry_run` to preview a merge.
+
+        The merge sends a `user.merged` webhook alongside `user.updated` and `user.deleted`. Webhooks are not
+        delivered in order, so `user.updated` (the user now owning the `from_user_id` user's emails) can arrive
+        before `user.deleted`; handle `user.merged` by moving the `from_user_id` user's data to the user rather
+        than relying on that order. Moved organization memberships keep their ID, so their
+        `organizationMembership.updated` webhook carries the same membership ID with a different user.
+
+        Some users cannot be merged. The request then fails with a 409 `user_merge_not_allowed` error whose
+        `meta.reasons` lists every reason that applies:
+        - `user_banned`, `from_user_banned`: either user is banned.
+        - `user_directory_managed`, `from_user_directory_managed`: either user is linked to a SCIM directory.
+        - `from_user_enterprise_account`: the `from_user_id` user has a SAML or enterprise SSO account.
+        - `from_user_billing_payer`: the `from_user_id` user is a billing payer.
+        - `from_user_student_pack`: the `from_user_id` user has claimed a student pack.
+        - `too_many_resources`: the users have too many identifications and organization memberships, requests
+          and suggestions combined to merge in one request. This reason is returned on its own.
+        - `same_user`: `from_user_id` is the user in the path.
+      tags:
+        - Users
+      parameters:
+        - name: user_id
+          in: path
+          description: The ID of the user that remains after the merge
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                from_user_id:
+                  type: string
+                  description: The ID of the user to merge into the user in the path. This user is deleted.
+                dry_run:
+                  type: boolean
+                  description: Return the merged user without changing anything.
+                  default: false
+              required:
+                - from_user_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  deleted_user:
+                    $ref: '#/components/schemas/User'
+                required:
+                  - user
+                  - deleted_user
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /users/{user_id}/profile_image:
     post:
       operationId: SetUserProfileImage
@@ -5546,12 +5633,6 @@ paths:
                 self_serve_sso_enabled:
                   type: boolean
                   description: Whether this organization can configure self-serve enterprise SSO.
-                  nullable: true
-                self_serve_directory_sync_enabled:
-                  type: boolean
-                  description: |-
-                    Whether this organization can configure self-serve Directory Sync (SCIM).
-                    Independent of `self_serve_sso_enabled`.
                   nullable: true
                 created_at:
                   type: string
@@ -14084,10 +14165,6 @@ components:
           type: boolean
           description: |
             Whether this organization can configure self-serve enterprise SSO.
-        self_serve_directory_sync_enabled:
-          type: boolean
-          description: |
-            Whether this organization can configure self-serve Directory Sync (SCIM).
         public_metadata:
           type: object
           additionalProperties: true
@@ -15215,6 +15292,11 @@ components:
           nullable: true
           description: The ID of the Clerk workspace that owns the instance's application. It is null when the application has no owner.
           example: org_2abc123def456
+        max_allowed_users:
+          type: integer
+          nullable: true
+          description: The maximum number of users the instance can hold. Creating a user fails with a `user_quota_exceeded` error once the instance's total user count, as returned by `GET /v1/users/count` without filters, reaches this value. It is null when the instance has no user limit.
+          example: 100
       required:
         - object
         - id
@@ -15223,6 +15305,7 @@ components:
         - allowed_subdomains
         - subdomain_allowlist_enabled
         - workspace_id
+        - max_allowed_users
     InstanceRestrictions:
       type: object
       properties:
