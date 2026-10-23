@@ -795,6 +795,167 @@ x-webhooks:
                   identifier: jane.doe@acme.com
                 created_at: 1716883200000
                 updated_at: 1716883200000
+  directoryGroup.created:
+    post:
+      description: A directory group was created by the identity provider
+      operationId: directoryGroup.created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/DirectoryGroupEventPayload'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Okta SCIM Client 1.0.0
+              object: event
+              type: directoryGroup.created
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: directory_group
+                id: scim_grp_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                directory_id: scimdir_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                display_name: Engineering
+                updated_at: 1716883200000
+  directoryGroup.updated:
+    post:
+      description: A directory group was renamed by the identity provider
+      operationId: directoryGroup.updated
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/DirectoryGroupEventPayload'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Okta SCIM Client 1.0.0
+              object: event
+              type: directoryGroup.updated
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: directory_group
+                id: scim_grp_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                directory_id: scimdir_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                display_name: Engineering
+                updated_at: 1716883200000
+  directoryGroup.deleted:
+    post:
+      description: A directory group was deleted by the identity provider, or stopped appearing in a pull sync. A `directoryGroupMembership.deleted` event is almost emitted for every member with `cause` set to `group_deleted`.
+      operationId: directoryGroup.deleted
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/DirectoryGroupEventPayload'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Okta SCIM Client 1.0.0
+              object: event
+              type: directoryGroup.deleted
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: directory_group
+                id: scim_grp_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                directory_id: scimdir_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                display_name: Engineering
+                updated_at: 1716883200000
+  directoryGroupMembership.created:
+    post:
+      description: A user was added to a directory group by the identity provider
+      operationId: directoryGroupMembership.created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/DirectoryGroupMembership'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Okta SCIM Client 1.0.0
+              object: event
+              type: directoryGroupMembership.created
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: directory_group_membership
+                directory_id: scimdir_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                group:
+                  object: directory_group
+                  id: scim_grp_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  display_name: Engineering
+                directory_user_id: scim_usr_2h8op3Isl1QR7tKu5FGNfaLKEoU
+                user_id: user_2h8op3Isl1QR7tKu5FGNfaLKEoU
+                updated_at: 1716883200000
+  directoryGroupMembership.deleted:
+    post:
+      description: |-
+        A user was removed from a directory group by the identity provider. `data.cause` says whether the
+        provider took the user out of the group (`member_removed`) or deleted the group itself (`group_deleted`).
+      operationId: directoryGroupMembership.deleted
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/DeletedDirectoryGroupMembership'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Okta SCIM Client 1.0.0
+              object: event
+              type: directoryGroupMembership.deleted
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: directory_group_membership
+                directory_id: scimdir_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                group:
+                  object: directory_group
+                  id: scim_grp_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                  display_name: Engineering
+                directory_user_id: scim_usr_2h8op3Isl1QR7tKu5FGNfaLKEoU
+                user_id: user_2h8op3Isl1QR7tKu5FGNfaLKEoU
+                updated_at: 1716883200000
+                cause: member_removed
   paymentAttempt.created:
     post:
       description: Payment Attempt Created
@@ -1820,6 +1981,47 @@ x-webhooks:
                 id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
                 deleted: true
                 external_id: ex_123456789
+  user.merged:
+    post:
+      description: |-
+        Another user was merged into this user. `data.user` is the user after the merge, and
+        `data.deleted_user` the merged user as it was before it was deleted. The merge also sends
+        `user.updated` for `data.user` and `user.deleted` for `data.deleted_user`, but webhooks are not
+        delivered in order. Handle `user.merged` by moving the deleted user's data to `data.user`
+        rather than relying on the order of those events, for example when you store emails uniquely.
+      operationId: user.merged
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        user:
+                          $ref: '#/components/schemas/User'
+                        deleted_user:
+                          $ref: '#/components/schemas/User'
+                      required:
+                        - user
+                        - deleted_user
+                  required:
+                    - data
+            example:
+              object: event
+              type: user.merged
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                user:
+                  object: user
+                  id: user_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                deleted_user:
+                  object: user
+                  id: user_2g7np8Kl3TOiDLp6FENMEbLOM1T
   waitlistEntry.created:
     post:
       description: Waitlist entry created
@@ -2012,10 +2214,6 @@ components:
           type: boolean
           description: |
             Whether this organization can configure self-serve enterprise SSO.
-        self_serve_directory_sync_enabled:
-          type: boolean
-          description: |
-            Whether this organization can configure self-serve Directory Sync (SCIM).
         public_metadata:
           type: object
           additionalProperties: true
@@ -2410,6 +2608,97 @@ components:
         - created_at
         - updated_at
         - organization
+    DirectoryGroupEventPayload:
+      type: object
+      description: A group as the identity provider reported it to a directory. A deleted group carries its last known display name.
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Always "directory_group".
+          enum:
+            - directory_group
+        id:
+          type: string
+          description: The group ID from the identity provider.
+        directory_id:
+          type: string
+          description: The ID of the directory the group belongs to.
+        display_name:
+          type: string
+          description: The display name of the group.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) of the change on the identity provider.
+      required:
+        - object
+        - id
+        - directory_id
+        - display_name
+        - updated_at
+    DirectoryGroupMembership:
+      type: object
+      description: One user's membership in a directory group, as the identity provider reported it.
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Always "directory_group_membership".
+          enum:
+            - directory_group_membership
+        directory_id:
+          type: string
+          description: The ID of the directory.
+        group:
+          type: object
+          description: The group the user was added to or removed from.
+          properties:
+            object:
+              type: string
+              enum:
+                - directory_group
+            id:
+              type: string
+              description: The group ID, as assigned by the directory.
+            display_name:
+              type: string
+              description: The display name of the group.
+          required:
+            - object
+            - id
+            - display_name
+        directory_user_id:
+          type: string
+          description: The directory user ID of the member, as assigned by the directory.
+        user_id:
+          type: string
+          nullable: true
+          description: The ID of the Clerk user this member is linked to. Null until the member has been provisioned into Clerk.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) of when the directory recorded the change, which is the identity provider's request for a push-based directory and the sync that observed the change for a pull-based one. Events for the same membership can arrive out of order; the later value wins.
+      required:
+        - object
+        - directory_id
+        - group
+        - directory_user_id
+        - user_id
+        - updated_at
+    DeletedDirectoryGroupMembership:
+      type: object
+      description: The payload of directoryGroupMembership.deleted. A membership with the reason it ended.
+      allOf:
+        - $ref: '#/components/schemas/DirectoryGroupMembership'
+        - type: object
+          properties:
+            cause:
+              type: string
+              description: Why the user is no longer in the group. `group_deleted` when the group itself is gone, because the identity provider deleted it or because it stopped appearing in a pull sync; it removes every member. `member_removed` when the identity provider took this user out of the group. A member removed before the group is deleted gets one event, `member_removed`, and nothing more when the group is deleted.
+              enum:
+                - group_deleted
+                - member_removed
+          required:
+            - cause
     BillingPaymentFailedReason:
       type: object
       properties:
@@ -3011,12 +3300,12 @@ components:
           type: integer
           format: int64
           description: |
-            Unix timestamp of expiration.
+            Unix timestamp in milliseconds of expiration. Zero means no maximum lifetime.
         abandon_at:
           type: integer
           format: int64
           description: |
-            Unix timestamp of abandonment.
+            Unix timestamp in milliseconds of abandonment. Zero means no abandonment deadline.
         updated_at:
           type: integer
           format: int64
