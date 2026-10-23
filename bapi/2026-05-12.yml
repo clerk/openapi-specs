@@ -2729,6 +2729,93 @@ paths:
           $ref: '#/components/responses/User'
         '403':
           $ref: '#/components/responses/AuthorizationInvalid'
+  /users/{user_id}/merge:
+    post:
+      operationId: MergeUser
+      x-speakeasy-group: users
+      x-speakeasy-name-override: merge
+      summary: Merge another user into this user
+      description: |-
+        Moves the identifications, connected accounts, passkeys, TOTP, backup codes, organization
+        memberships, membership requests, suggestions and metadata of the user in `from_user_id` onto the
+        user in the path, then deletes the `from_user_id` user.
+        Where both users have a value, the user in the path keeps its own. First and last name, profile
+        image, `external_id`, and the password are taken from the `from_user_id` user only where the user in
+        the path has none, so if it has no password, the `from_user_id` user's password signs in to it
+        afterwards. When both users have the same
+        identifier, the verified copy is kept. The `from_user_id` user's sessions are revoked.
+        With `dry_run`, the merge is computed and returned but nothing is changed.
+
+        A merge cannot be undone. The response's `deleted_user` is the `from_user_id` user as it was before
+        the merge, so store it if you may need it. It does not include passwords, TOTP secrets, backup codes,
+        passkeys or connected-account tokens, which cannot be restored. Use `dry_run` to preview a merge.
+
+        The merge sends a `user.merged` webhook alongside `user.updated` and `user.deleted`. Webhooks are not
+        delivered in order, so `user.updated` (the user now owning the `from_user_id` user's emails) can arrive
+        before `user.deleted`; handle `user.merged` by moving the `from_user_id` user's data to the user rather
+        than relying on that order. Moved organization memberships keep their ID, so their
+        `organizationMembership.updated` webhook carries the same membership ID with a different user.
+
+        Some users cannot be merged. The request then fails with a 409 `user_merge_not_allowed` error whose
+        `meta.reasons` lists every reason that applies:
+        - `user_banned`, `from_user_banned`: either user is banned.
+        - `user_directory_managed`, `from_user_directory_managed`: either user is linked to a SCIM directory.
+        - `from_user_enterprise_account`: the `from_user_id` user has a SAML or enterprise SSO account.
+        - `from_user_billing_payer`: the `from_user_id` user is a billing payer.
+        - `from_user_student_pack`: the `from_user_id` user has claimed a student pack.
+        - `too_many_resources`: the users have too many identifications and organization memberships, requests
+          and suggestions combined to merge in one request. This reason is returned on its own.
+        - `same_user`: `from_user_id` is the user in the path.
+      tags:
+        - Users
+      parameters:
+        - name: user_id
+          in: path
+          description: The ID of the user that remains after the merge
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                from_user_id:
+                  type: string
+                  description: The ID of the user to merge into the user in the path. This user is deleted.
+                dry_run:
+                  type: boolean
+                  description: Return the merged user without changing anything.
+                  default: false
+              required:
+                - from_user_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  deleted_user:
+                    $ref: '#/components/schemas/User'
+                required:
+                  - user
+                  - deleted_user
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /users/{user_id}/profile_image:
     post:
       operationId: SetUserProfileImage
@@ -5626,12 +5713,6 @@ paths:
                 self_serve_sso_enabled:
                   type: boolean
                   description: Whether this organization can configure self-serve enterprise SSO.
-                  nullable: true
-                self_serve_directory_sync_enabled:
-                  type: boolean
-                  description: |-
-                    Whether this organization can configure self-serve Directory Sync (SCIM).
-                    Independent of `self_serve_sso_enabled`.
                   nullable: true
                 created_at:
                   type: string
@@ -10441,6 +10522,12 @@ paths:
                 enabled:
                   type: boolean
                   description: Whether the directory is enabled.
+                paused:
+                  type: boolean
+                  description: |-
+                    Pause or resume syncing. Pausing rejects provisioning requests and skips scheduled
+                    syncs while keeping the organization memberships the directory granted, so sync picks
+                    up where it left off. Disabling removes them instead.
                 provider:
                   type: string
                   description: The identity provider for this directory.
@@ -10834,6 +10921,12 @@ paths:
                 enabled:
                   type: boolean
                   description: Whether the directory is enabled.
+                paused:
+                  type: boolean
+                  description: |-
+                    Pause or resume syncing. Pausing rejects provisioning requests and skips scheduled
+                    syncs while keeping the organization memberships the directory granted, so sync picks
+                    up where it left off. Disabling removes them instead.
                 provider:
                   type: string
                   description: The identity provider for this directory.
@@ -10918,6 +11011,89 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+  /directories/{directory_id}/groups/{group_id}:
+    get:
+      operationId: GetDirectoryGroup
+      x-speakeasy-group: directories
+      x-speakeasy-name-override: getGroup
+      tags:
+        - Directories
+      summary: Retrieve a directory group
+      description: |-
+        Returns one group of the directory, as reported by the identity provider.
+        Responds with 404 once the identity provider has deleted the group.
+      parameters:
+        - name: directory_id
+          in: path
+          description: The ID of the directory.
+          required: true
+          schema:
+            type: string
+        - name: group_id
+          in: path
+          description: The ID of the group, as assigned by the directory.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/DirectoryGroup'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+  /directories/{directory_id}/groups/{group_id}/members:
+    get:
+      operationId: ListDirectoryGroupMembers
+      x-speakeasy-group: directories
+      x-speakeasy-name-override: listGroupMembers
+      tags:
+        - Directories
+      summary: List directory group members
+      description: |-
+        Returns the members of a group, as reported by the identity provider, using cursor-based pagination.
+        Each member carries the Clerk user it is linked to, or null until that user has been provisioned.
+      parameters:
+        - name: directory_id
+          in: path
+          description: The ID of the directory.
+          required: true
+          schema:
+            type: string
+        - name: group_id
+          in: path
+          description: The ID of the group, as assigned by the directory.
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: |-
+            Applies a limit to the number of results returned.
+            Can be used for paginating the results together with `starting_after`.
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 500
+        - name: starting_after
+          in: query
+          description: A cursor for pagination. Provide the `starting_after` cursor from a previous response to fetch the next page.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/DirectoryGroupMember.List'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
   /directories/{directory_id}/group_role_mappings:
     get:
       operationId: ListDirectoryGroupRoleMappings
@@ -14046,12 +14222,12 @@ components:
           type: integer
           format: int64
           description: |
-            Unix timestamp of expiration.
+            Unix timestamp in milliseconds of expiration. Zero means no maximum lifetime.
         abandon_at:
           type: integer
           format: int64
           description: |
-            Unix timestamp of abandonment.
+            Unix timestamp in milliseconds of abandonment. Zero means no abandonment deadline.
         updated_at:
           type: integer
           format: int64
@@ -15329,10 +15505,6 @@ components:
           type: boolean
           description: |
             Whether this organization can configure self-serve enterprise SSO.
-        self_serve_directory_sync_enabled:
-          type: boolean
-          description: |
-            Whether this organization can configure self-serve Directory Sync (SCIM).
         public_metadata:
           type: object
           additionalProperties: true
@@ -17358,6 +17530,11 @@ components:
           nullable: true
           description: The ID of the Clerk workspace that owns the instance's application. It is null when the application has no owner.
           example: org_2abc123def456
+        max_allowed_users:
+          type: integer
+          nullable: true
+          description: The maximum number of users the instance can hold. Creating a user fails with a `user_quota_exceeded` error once the instance's total user count, as returned by `GET /v1/users/count` without filters, reaches this value. It is null when the instance has no user limit.
+          example: 100
       required:
         - object
         - id
@@ -17366,6 +17543,7 @@ components:
         - allowed_subdomains
         - subdomain_allowlist_enabled
         - workspace_id
+        - max_allowed_users
     InstanceRestrictions:
       type: object
       properties:
@@ -20369,6 +20547,12 @@ components:
         enabled:
           type: boolean
           description: Whether the directory is enabled.
+        paused:
+          type: boolean
+          description: |-
+            Whether syncing is paused. A paused directory rejects SCIM requests and skips
+            scheduled syncs, but keeps the organization memberships it granted. Disabling a directory
+            removes them instead.
         group_role_mapping_enabled:
           type: boolean
           description: Whether group-to-role mapping is enabled for this directory.
@@ -20420,6 +20604,7 @@ components:
         - endpoint_url
         - provider
         - enabled
+        - paused
         - group_role_mapping_enabled
         - attribute_mapping
         - created_at
@@ -20515,6 +20700,12 @@ components:
         enabled:
           type: boolean
           description: Whether the directory is enabled.
+        paused:
+          type: boolean
+          description: |-
+            Whether syncing is paused. A paused directory rejects provisioning requests and skips
+            scheduled syncs, but keeps the organization memberships it granted. Disabling a directory
+            removes them instead.
         group_role_mapping_enabled:
           type: boolean
           description: Whether group-to-role mapping is enabled for this directory.
@@ -20566,6 +20757,7 @@ components:
         - endpoint_url
         - provider
         - enabled
+        - paused
         - group_role_mapping_enabled
         - attribute_mapping
         - created_at
@@ -20574,6 +20766,50 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Directory'
+    DirectoryGroup:
+      type: object
+      description: A group reported by the identity provider for a directory.
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Always "directory_group".
+          enum:
+            - directory_group
+        id:
+          type: string
+          description: The group ID from the identity provider.
+        display_name:
+          type: string
+          description: The display name of the group.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) of when the group was last updated on the identity provider.
+      required:
+        - object
+        - id
+        - display_name
+        - updated_at
+    DirectoryGroupMember:
+      type: object
+      description: A member of a group reported by the identity provider for a directory.
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Always "directory_group_member".
+          enum:
+            - directory_group_member
+        id:
+          type: string
+          description: The directory user ID of the member, as assigned by the directory.
+        user_id:
+          type: string
+          nullable: true
+          description: The ID of the Clerk user this member is linked to. Null until the member has been provisioned into Clerk.
+      required:
+        - object
+        - id
+        - user_id
     DirectoryGroupRoleMapping:
       type: object
       description: A mapping from a directory group to an organization role. Members of the group are assigned the role; the lowest-precedence match wins when a user belongs to multiple mapped groups.
@@ -21569,6 +21805,43 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Directory'
+    DirectoryGroup:
+      description: A group reported by the identity provider for a directory.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DirectoryGroup'
+    DirectoryGroupMember.List:
+      description: A cursor-paginated list of the members of a group.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DirectoryGroupMember'
+              cursor:
+                type: object
+                description: Cursor information for pagination.
+                properties:
+                  starting_after:
+                    type: string
+                    nullable: true
+                    description: Cursor to fetch the next page of results. Pass it back as `starting_after` on the next request.
+                  ending_before:
+                    type: string
+                    nullable: true
+                    description: Cursor to fetch the previous page of results. Pass it back as `ending_before` on the next request.
+                  has_next_page:
+                    type: boolean
+                    description: Whether more results can be fetched using the `starting_after` cursor.
+                required:
+                  - has_next_page
+            required:
+              - data
+              - cursor
     DirectoryGroupRoleMapping.List:
       description: A list of directory group role mappings, ordered by precedence.
       content:

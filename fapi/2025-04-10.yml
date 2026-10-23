@@ -9050,9 +9050,11 @@ components:
             - abandoned
             - pending
         expire_at:
+          description: Unix timestamp in milliseconds. Zero means no maximum lifetime.
           type: integer
           format: int64
         abandon_at:
+          description: Unix timestamp in milliseconds. Zero means no abandonment deadline.
           type: integer
           format: int64
         last_active_at:
@@ -10256,6 +10258,7 @@ components:
             - oauth_facebook
             - oauth_hubspot
             - oauth_github
+            - oauth_microsoft
             - oauth_mock
             - oauth_custom_mock
             - oauth_token_mock
@@ -11316,9 +11319,11 @@ components:
             - removed
             - abandoned
         expire_at:
+          description: Unix timestamp in milliseconds. Zero means no maximum lifetime.
           type: integer
           format: int64
         abandon_at:
+          description: Unix timestamp in milliseconds. Zero means no abandonment deadline.
           type: integer
           format: int64
         last_active_at:
