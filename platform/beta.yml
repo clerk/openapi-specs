@@ -1850,7 +1850,8 @@ paths:
       summary: Ban a user
       description: |
         Marks a user as banned within an application instance. This terminates their active sessions
-        (marks them as revoked) and prevents them from signing in again.
+        (marks them as revoked), revokes their OAuth grants, and prevents them from signing in again.
+        Revoked OAuth grants are not restored if the user is unbanned.
 
         Requires the `users:manage` scope.
       security:
