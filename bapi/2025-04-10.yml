@@ -2612,7 +2612,7 @@ paths:
       x-speakeasy-group: users
       x-speakeasy-name-override: ban
       summary: Ban a user
-      description: Marks the given user as banned, which means that all their sessions are revoked and they are not allowed to sign in again.
+      description: Marks the given user as banned, which means that all their sessions and OAuth grants are revoked and they are not allowed to sign in again. Revoked OAuth grants are not restored if the user is unbanned.
       tags:
         - Users
       parameters:
@@ -12887,12 +12887,12 @@ components:
           type: integer
           format: int64
           description: |
-            Unix timestamp in milliseconds of expiration. Zero means no maximum lifetime.
+            Unix timestamp in milliseconds of expiration.
         abandon_at:
           type: integer
           format: int64
           description: |
-            Unix timestamp in milliseconds of abandonment. Zero means no abandonment deadline.
+            Unix timestamp in milliseconds of abandonment.
         updated_at:
           type: integer
           format: int64
