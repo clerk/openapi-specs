@@ -3300,12 +3300,12 @@ components:
           type: integer
           format: int64
           description: |
-            Unix timestamp in milliseconds of expiration. Zero means no maximum lifetime.
+            Unix timestamp in milliseconds of expiration.
         abandon_at:
           type: integer
           format: int64
           description: |
-            Unix timestamp in milliseconds of abandonment. Zero means no abandonment deadline.
+            Unix timestamp in milliseconds of abandonment.
         updated_at:
           type: integer
           format: int64
