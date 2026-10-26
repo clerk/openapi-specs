@@ -1674,6 +1674,71 @@ paths:
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}:
+    patch:
+      operationId: PlatformUpdateInstanceUser
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: updateInstanceUser
+      tags:
+        - Users
+      summary: Update an instance user
+      description: |
+        Updates identity and client trust settings using Backend API validation and user.updated events.
+        Only first_name, last_name, username, external_id, locale, timezone and bypass_client_trust are accepted.
+        Null clears nullable name, username, external ID and timezone fields. Omitted fields are unchanged.
+        Passwords, password digests, TOTP secrets, backup codes, metadata and all other fields are rejected.
+        The envOrInsID selector accepts an environment type or instance ID.
+        Pending-deletion applications and deleted instances cannot be updated.
+
+        Requires the `users:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: userID
+          in: path
+          description: User ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformUpdateInstanceUserRequest'
+      responses:
+        '200':
+          description: User updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '413':
+          $ref: '#/components/responses/ClerkErrors'
+        '415':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: PlatformDeleteUser
       x-speakeasy-group: platform
@@ -1723,6 +1788,83 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}/metadata:
+    patch:
+      operationId: PlatformUpdateUserMetadata
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: updateUserMetadata
+      tags:
+        - Users
+      summary: Update user metadata
+      description: |
+        Deep-merge the supplied public, private and unsafe metadata into a user in the selected instance.
+        Existing nested objects merge recursively, removing null-valued keys at each merged level.
+        New nested objects and objects replacing non-object values are copied as-is, including nulls,
+        matching BAPI. Arrays and scalar values replace existing values. Without a cached
+        idempotency response, repeating a patch containing a new nested object with nulls can change its result.
+        Omitted metadata fields, empty metadata objects and null metadata fields leave existing
+        metadata unchanged. The patch and merged result must each fit the 8 KB limit per metadata field.
+
+        Requires the `users:manage` scope. The user must belong to the selected application instance.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: userID
+          in: path
+          description: User ID.
+          required: true
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          description: |
+            Optional key. If Clerk has cached a completed response for this exact request
+            and key, Clerk replays that response without merging the metadata again.
+            Reuse the same key only for the same request.
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 255
+            pattern: ^[A-Za-z0-9_-]+$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformUpdateUserMetadataRequest'
+      responses:
+        '200':
+          description: User metadata updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '413':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}/profile_image:
     post:
       operationId: PlatformSetUserProfileImage
@@ -1850,7 +1992,8 @@ paths:
       summary: Ban a user
       description: |
         Marks a user as banned within an application instance. This terminates their active sessions
-        (marks them as revoked) and prevents them from signing in again.
+        (marks them as revoked), revokes their OAuth grants, and prevents them from signing in again.
+        Revoked OAuth grants are not restored if the user is unbanned.
 
         Requires the `users:manage` scope.
       security:
@@ -6155,6 +6298,54 @@ components:
       required:
         - object
         - deleted
+    PlatformUpdateInstanceUserRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        first_name:
+          type: string
+          nullable: true
+          description: First name.
+        last_name:
+          type: string
+          nullable: true
+          description: Last name.
+        username:
+          type: string
+          nullable: true
+          description: Username, subject to the instance user settings.
+        external_id:
+          type: string
+          nullable: true
+          description: External identifier. Must be unique in the instance.
+        timezone:
+          type: string
+          nullable: true
+          description: IANA timezone identifier.
+        locale:
+          type: string
+          description: Supported locale, subject to Backend API validation.
+        bypass_client_trust:
+          type: boolean
+          description: Whether to bypass client trust checks for this user.
+    PlatformUpdateUserMetadataRequest:
+      type: object
+      properties:
+        public_metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: BAPI merge patch. Null keys are removed at merged levels; new nested objects are copied as-is, including nulls. Omitting this field or setting it to null leaves its metadata unchanged.
+        private_metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: BAPI merge patch. Null keys are removed at merged levels; new nested objects are copied as-is, including nulls. Omitting this field or setting it to null leaves its metadata unchanged.
+        unsafe_metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: BAPI merge patch. Null keys are removed at merged levels; new nested objects are copied as-is, including nulls. Omitting this field or setting it to null leaves its metadata unchanged.
     JWTTemplate:
       type: object
       additionalProperties: false
