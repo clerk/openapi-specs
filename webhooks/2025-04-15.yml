@@ -2214,6 +2214,10 @@ components:
           type: boolean
           description: |
             Whether this organization can configure self-serve enterprise SSO.
+        self_serve_directory_sync_enabled:
+          type: boolean
+          description: |
+            Whether this organization can configure self-serve Directory Sync (SCIM).
         public_metadata:
           type: object
           additionalProperties: true
@@ -3300,12 +3304,12 @@ components:
           type: integer
           format: int64
           description: |
-            Unix timestamp in milliseconds of expiration. Zero means no maximum lifetime.
+            Unix timestamp in milliseconds of expiration.
         abandon_at:
           type: integer
           format: int64
           description: |
-            Unix timestamp in milliseconds of abandonment. Zero means no abandonment deadline.
+            Unix timestamp in milliseconds of abandonment.
         updated_at:
           type: integer
           format: int64

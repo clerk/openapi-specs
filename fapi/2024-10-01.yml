@@ -8667,13 +8667,13 @@ components:
             - removed
             - abandoned
         expire_at:
-          description: Unix timestamp in milliseconds. Zero means no maximum lifetime.
           type: integer
           format: int64
+          description: Unix timestamp in milliseconds of expiration.
         abandon_at:
-          description: Unix timestamp in milliseconds. Zero means no abandonment deadline.
           type: integer
           format: int64
+          description: Unix timestamp in milliseconds of abandonment.
         last_active_at:
           type: integer
           format: int64
@@ -10975,13 +10975,13 @@ components:
             - abandoned
             - pending
         expire_at:
-          description: Unix timestamp in milliseconds. Zero means no maximum lifetime.
           type: integer
           format: int64
+          description: Unix timestamp in milliseconds of expiration.
         abandon_at:
-          description: Unix timestamp in milliseconds. Zero means no abandonment deadline.
           type: integer
           format: int64
+          description: Unix timestamp in milliseconds of abandonment.
         last_active_at:
           type: integer
           format: int64
