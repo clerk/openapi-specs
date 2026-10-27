@@ -1540,6 +1540,10 @@ paths:
                   type: string
                   description: The ID token from an OpenID Connect flow. Only used with `oauth_token_[provider]` and `google_one_tap` strategies.
                   nullable: true
+                slack_team_id_hint:
+                  type: string
+                  pattern: ^T[A-Z0-9]+$
+                  description: Optional per-attempt Slack workspace hint. Only allowed with the oauth_slack strategy.
                 oidc_login_hint:
                   type: string
                   description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect URL.
@@ -1716,6 +1720,10 @@ paths:
                   type: string
                   description: Used with `oauth_[provider]` and `saml` strategies.
                   nullable: true
+                slack_team_id_hint:
+                  type: string
+                  pattern: ^T[A-Z0-9]+$
+                  description: Optional per-attempt Slack workspace hint. Only allowed with the oauth_slack strategy.
                 oidc_login_hint:
                   type: string
                   description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect URL.
@@ -2034,6 +2042,10 @@ paths:
                   type: string
                   nullable: true
                   description: The IANA timezone reported by the client.
+                slack_team_id_hint:
+                  type: string
+                  pattern: ^T[A-Z0-9]+$
+                  description: Optional per-attempt Slack workspace hint. Only allowed with the oauth_slack strategy.
                 oidc_login_hint:
                   type: string
                   description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect URL.
@@ -2165,6 +2177,10 @@ paths:
                   nullable: true
                   description: |
                     Has the value `true` if the user has accepted the legal requirements.
+                slack_team_id_hint:
+                  type: string
+                  pattern: ^T[A-Z0-9]+$
+                  description: Optional per-attempt Slack workspace hint. Only allowed with the oauth_slack strategy.
                 oidc_login_hint:
                   type: string
                   description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect URL.
@@ -2246,6 +2262,10 @@ paths:
                 action_complete_redirect_url:
                   type: string
                   nullable: true
+                slack_team_id_hint:
+                  type: string
+                  pattern: ^T[A-Z0-9]+$
+                  description: Optional per-attempt Slack workspace hint. Only allowed with the oauth_slack strategy.
                 oidc_login_hint:
                   type: string
                   description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect URL.
@@ -10516,13 +10536,13 @@ components:
             - removed
             - abandoned
         expire_at:
-          description: Unix timestamp in milliseconds. Zero means no maximum lifetime.
           type: integer
           format: int64
+          description: Unix timestamp in milliseconds of expiration.
         abandon_at:
-          description: Unix timestamp in milliseconds. Zero means no abandonment deadline.
           type: integer
           format: int64
+          description: Unix timestamp in milliseconds of abandonment.
         last_active_at:
           type: integer
           format: int64
@@ -11720,6 +11740,7 @@ components:
             - oauth_hubspot
             - oauth_github
             - oauth_microsoft
+            - oauth_slack
             - oauth_mock
             - oauth_custom_mock
             - oauth_token_mock
@@ -13437,13 +13458,13 @@ components:
             - abandoned
             - pending
         expire_at:
-          description: Unix timestamp in milliseconds. Zero means no maximum lifetime.
           type: integer
           format: int64
+          description: Unix timestamp in milliseconds of expiration.
         abandon_at:
-          description: Unix timestamp in milliseconds. Zero means no abandonment deadline.
           type: integer
           format: int64
+          description: Unix timestamp in milliseconds of abandonment.
         last_active_at:
           type: integer
           format: int64
@@ -13926,6 +13947,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.Passkey'
             - $ref: '#/components/schemas/Stubs.Verification.TrustedDevice'
             - $ref: '#/components/schemas/Stubs.Verification.SAML'
+            - $ref: '#/components/schemas/Stubs.Verification.Oauth'
         second_factor_verification:
           type: object
           nullable: true
