@@ -1837,6 +1837,10 @@ paths:
                   type: string
                   description: The ID token from an OpenID Connect flow. Only used with `oauth_token_[provider]` and `google_one_tap` strategies.
                   nullable: true
+                slack_team_id_hint:
+                  type: string
+                  pattern: ^T[A-Z0-9]+$
+                  description: Optional per-attempt Slack workspace hint. Only allowed with the oauth_slack strategy.
                 oidc_login_hint:
                   type: string
                   description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect URL.
@@ -2013,6 +2017,10 @@ paths:
                   type: string
                   description: Used with `oauth_[provider]` and `saml` strategies.
                   nullable: true
+                slack_team_id_hint:
+                  type: string
+                  pattern: ^T[A-Z0-9]+$
+                  description: Optional per-attempt Slack workspace hint. Only allowed with the oauth_slack strategy.
                 oidc_login_hint:
                   type: string
                   description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect URL.
@@ -2331,6 +2339,10 @@ paths:
                   type: string
                   nullable: true
                   description: The IANA timezone reported by the client.
+                slack_team_id_hint:
+                  type: string
+                  pattern: ^T[A-Z0-9]+$
+                  description: Optional per-attempt Slack workspace hint. Only allowed with the oauth_slack strategy.
                 oidc_login_hint:
                   type: string
                   description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect URL.
@@ -2462,6 +2474,10 @@ paths:
                   nullable: true
                   description: |
                     Has the value `true` if the user has accepted the legal requirements.
+                slack_team_id_hint:
+                  type: string
+                  pattern: ^T[A-Z0-9]+$
+                  description: Optional per-attempt Slack workspace hint. Only allowed with the oauth_slack strategy.
                 oidc_login_hint:
                   type: string
                   description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect URL.
@@ -2543,6 +2559,10 @@ paths:
                 action_complete_redirect_url:
                   type: string
                   nullable: true
+                slack_team_id_hint:
+                  type: string
+                  pattern: ^T[A-Z0-9]+$
+                  description: Optional per-attempt Slack workspace hint. Only allowed with the oauth_slack strategy.
                 oidc_login_hint:
                   type: string
                   description: Used with `oauth_[provider]`. The given value will be forwarded to the OIDC `login_hint` parameter of the generated redirect URL.
@@ -8963,6 +8983,59 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Client.ProtectConfig.Loader'
+    Client.NativeAppSettings:
+      type: object
+      additionalProperties: false
+      required:
+        - minimum_supported_version
+      properties:
+        minimum_supported_version:
+          type: object
+          additionalProperties: false
+          description: |
+            The minimum app version each native app must run, keyed by platform. A
+            request from an older version fails with `unsupported_app_version`.
+            Both lists are empty while native app force update is off for the instance.
+          required:
+            - ios
+            - android
+          properties:
+            ios:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                required:
+                  - bundle_id
+                  - minimum_version
+                  - update_url
+                properties:
+                  bundle_id:
+                    type: string
+                  minimum_version:
+                    type: string
+                    description: Oldest supported `CFBundleShortVersionString`, with up to three numeric components.
+                  update_url:
+                    type: string
+                    description: App Store page to send users to.
+            android:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                required:
+                  - package_name
+                  - minimum_version
+                  - update_url
+                properties:
+                  package_name:
+                    type: string
+                  minimum_version:
+                    type: string
+                    description: Oldest supported `versionCode`.
+                  update_url:
+                    type: string
+                    description: Play Store page to send users to.
     Client.Environment:
       type: object
       additionalProperties: false
@@ -8989,6 +9062,8 @@ components:
           type: boolean
         maintenance_mode:
           type: boolean
+        native_app_settings:
+          $ref: '#/components/schemas/Client.NativeAppSettings'
     Client.DeletedObject:
       type: object
       additionalProperties: false
@@ -9050,13 +9125,13 @@ components:
             - abandoned
             - pending
         expire_at:
-          description: Unix timestamp in milliseconds. Zero means no maximum lifetime.
           type: integer
           format: int64
+          description: Unix timestamp in milliseconds of expiration.
         abandon_at:
-          description: Unix timestamp in milliseconds. Zero means no abandonment deadline.
           type: integer
           format: int64
+          description: Unix timestamp in milliseconds of abandonment.
         last_active_at:
           type: integer
           format: int64
@@ -10259,6 +10334,7 @@ components:
             - oauth_hubspot
             - oauth_github
             - oauth_microsoft
+            - oauth_slack
             - oauth_mock
             - oauth_custom_mock
             - oauth_token_mock
@@ -11319,13 +11395,13 @@ components:
             - removed
             - abandoned
         expire_at:
-          description: Unix timestamp in milliseconds. Zero means no maximum lifetime.
           type: integer
           format: int64
+          description: Unix timestamp in milliseconds of expiration.
         abandon_at:
-          description: Unix timestamp in milliseconds. Zero means no abandonment deadline.
           type: integer
           format: int64
+          description: Unix timestamp in milliseconds of abandonment.
         last_active_at:
           type: integer
           format: int64
@@ -11565,6 +11641,7 @@ components:
             - $ref: '#/components/schemas/Stubs.Verification.Passkey'
             - $ref: '#/components/schemas/Stubs.Verification.TrustedDevice'
             - $ref: '#/components/schemas/Stubs.Verification.SAML'
+            - $ref: '#/components/schemas/Stubs.Verification.Oauth'
         second_factor_verification:
           type: object
           nullable: true
