@@ -62,6 +62,258 @@ tags:
 externalDocs:
   url: https://clerk.com/docs
 paths:
+  /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}/organization_memberships:
+    get:
+      operationId: PlatformListUserOrganizationMemberships
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: listUserOrganizationMemberships
+      tags:
+        - Instance Organizations
+      summary: List a user's organization memberships
+      description: |
+        Returns the Backend API membership objects, including roles, permissions, nested
+        organizations, public user data, and organization and membership private metadata.
+        Memberships are ordered newest first by membership creation time. The user must
+        belong to the selected application instance. Organizations must be enabled.
+        Requires both `organizations:read` and `users:read` scopes.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          required: true
+          description: Application ID.
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          required: true
+          description: Development, production, or a full instance ID.
+          schema:
+            type: string
+        - name: userID
+          in: path
+          required: true
+          description: ID of a user in the selected instance.
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page size. Values outside 1 to 500 use the default of 10.
+          schema:
+            type: integer
+            default: 10
+        - name: offset
+          in: query
+          description: Memberships to skip. Negative values are treated as zero.
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          $ref: '#/components/responses/OrganizationMemberships'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/organizations/{organizationID}/memberships:
+    get:
+      operationId: PlatformListInstanceOrganizationMemberships
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: listInstanceOrganizationMemberships
+      tags:
+        - Instance Organizations
+      summary: List members of an organization in an application instance
+      description: |
+        Lists memberships with roles, permissions, organization and public user data.
+        Supports Backend API membership filters and pagination, and returns the same
+        membership objects, including membership and organization private metadata.
+        Requires both `organizations:read` and `users:read`, and organizations enabled on the instance.
+        The organization must belong to the selected instance.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          required: true
+          description: Development, production, or a full instance ID.
+          schema:
+            type: string
+        - name: organizationID
+          in: path
+          required: true
+          schema:
+            type: string
+        - in: query
+          required: false
+          name: order_by
+          description: |-
+            Sorts organization memberships by phone_number, email_address, created_at, first_name, last_name, username, or role.
+            By prepending one of those values with + or -, we can choose to sort in ascending (ASC) or descending (DESC) order.
+          schema:
+            type: string
+        - name: user_id
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: |-
+            Returns memberships for the literal user IDs specified. IDs are not interpreted as
+            include/exclude expressions. Any user IDs not found are ignored.
+          required: false
+        - name: email_address
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: Returns users with the specified email addresses. Accepts up to 100 email addresses. Any email addresses not found are ignored.
+          required: false
+        - name: phone_number
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: Returns users with the specified phone numbers. Accepts up to 100 phone numbers. Any phone numbers not found are ignored.
+          required: false
+        - name: username
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: |-
+            Returns users with the specified usernames.
+            Accepts up to 100 usernames.
+            Any usernames not found are ignored.
+          required: false
+        - name: web3_wallet
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: |-
+            Returns users with the specified web3 wallet addresses.
+            Accepts up to 100 web3 wallet addresses.
+            Any web3 wallet addresses not found are ignored.
+          required: false
+        - name: role
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: Returns users with the specified roles. Accepts up to 100 roles. Any roles not found are ignored.
+          required: false
+        - name: query
+          in: query
+          description: |-
+            Returns users that match the given query.
+            For possible matches, we check the email addresses, phone numbers, usernames, web3 wallets, user IDs, first and last names.
+            The query value doesn't need to match the exact value you are looking for, it is capable of partial matches as well.
+          schema:
+            type: string
+          required: false
+        - name: email_address_query
+          in: query
+          description: |-
+            Returns users with emails that match the given query, via case-insensitive partial match.
+            For example, `email_address_query=ello` will match a user with the email `HELLO@example.com`.
+          schema:
+            type: string
+          required: false
+        - name: phone_number_query
+          in: query
+          description: |-
+            Returns users with phone numbers that match the given query, via case-insensitive partial match.
+            For example, `phone_number_query=555` will match a user with the phone number `+1555xxxxxxx`.
+          schema:
+            type: string
+          required: false
+        - name: username_query
+          in: query
+          description: |-
+            Returns users with usernames that match the given query, via case-insensitive partial match.
+            For example, `username_query=CoolUser` will match a user with the username `SomeCoolUser`.
+          schema:
+            type: string
+        - name: name_query
+          in: query
+          description: Returns users with names that match the given query, via case-insensitive partial match.
+          schema:
+            type: string
+        - name: last_active_at_before
+          in: query
+          description: |-
+            Returns users whose last session activity was before the given date (with millisecond precision).
+            Example: use 1700690400000 to retrieve users whose last session activity was before 2023-11-23.
+          example: 1700690400000
+          schema:
+            type: integer
+        - name: last_active_at_after
+          in: query
+          description: |-
+            Returns users whose last session activity was after the given date (with millisecond precision).
+            Example: use 1700690400000 to retrieve users whose last session activity was after 2023-11-23.
+          example: 1700690400000
+          schema:
+            type: integer
+        - name: created_at_before
+          in: query
+          description: |-
+            Returns users who have been created before the given date (with millisecond precision).
+            Example: use 1730160000000 to retrieve users who have been created before 2024-10-29.
+          example: 1730160000000
+          schema:
+            type: integer
+        - name: created_at_after
+          in: query
+          description: |-
+            Returns users who have been created after the given date (with millisecond precision).
+            Example: use 1730160000000 to retrieve users who have been created after 2024-10-29.
+          example: 1730160000000
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 10
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          $ref: '#/components/responses/OrganizationMemberships'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /platform/applications/{applicationID}/instances/{envOrInsID}/organizations:
     get:
       operationId: PlatformListInstanceOrganizations
@@ -209,7 +461,11 @@ paths:
         - Applications
       summary: List applications
       description: |
-        List applications.
+        List applications, newest first.
+
+        Without `paginated`, the response is an array of up to `limit` applications and does not say
+        whether more exist. To walk every application, set `paginated=true`, pass each response's
+        `cursor.starting_after` back as `starting_after`, and stop when `cursor.has_next_page` is `false`.
       security:
         - platform_api_access_token: []
       parameters:
@@ -220,19 +476,55 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: paginated
+          in: query
+          description: Return `data` and a `cursor` instead of a bare array.
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: limit
+          in: query
+          description: Number of applications to return.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 500
+        - name: starting_after
+          in: query
+          description: |
+            Cursor for pagination. Provide the ID of the last application from the
+            previous page to get the next page of results.
+          required: false
+          schema:
+            type: string
+        - name: ending_before
+          in: query
+          description: |
+            Cursor for pagination. Provide the ID of the first application from the
+            current page to get the previous page of results.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Applications retrieved successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlatformListApplicationsResponse'
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformListApplicationsResponse'
+                  - $ref: '#/components/schemas/PlatformListApplicationsCursorResponse'
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '401':
           $ref: '#/components/responses/AuthenticationInvalid'
         '403':
           $ref: '#/components/responses/AuthorizationInvalid'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     post:
       operationId: PlatformCreateApplication
       x-speakeasy-group: platform
@@ -1674,6 +1966,71 @@ paths:
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}:
+    patch:
+      operationId: PlatformUpdateInstanceUser
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: updateInstanceUser
+      tags:
+        - Users
+      summary: Update an instance user
+      description: |
+        Updates identity and client trust settings using Backend API validation and user.updated events.
+        Only first_name, last_name, username, external_id, locale, timezone and bypass_client_trust are accepted.
+        Null clears nullable name, username, external ID and timezone fields. Omitted fields are unchanged.
+        Passwords, password digests, TOTP secrets, backup codes, metadata and all other fields are rejected.
+        The envOrInsID selector accepts an environment type or instance ID.
+        Pending-deletion applications and deleted instances cannot be updated.
+
+        Requires the `users:manage` scope.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: userID
+          in: path
+          description: User ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformUpdateInstanceUserRequest'
+      responses:
+        '200':
+          description: User updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '413':
+          $ref: '#/components/responses/ClerkErrors'
+        '415':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
     delete:
       operationId: PlatformDeleteUser
       x-speakeasy-group: platform
@@ -1723,6 +2080,83 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}/metadata:
+    patch:
+      operationId: PlatformUpdateUserMetadata
+      x-speakeasy-group: platform
+      x-speakeasy-name-override: updateUserMetadata
+      tags:
+        - Users
+      summary: Update user metadata
+      description: |
+        Deep-merge the supplied public, private and unsafe metadata into a user in the selected instance.
+        Existing nested objects merge recursively, removing null-valued keys at each merged level.
+        New nested objects and objects replacing non-object values are copied as-is, including nulls,
+        matching BAPI. Arrays and scalar values replace existing values. Without a cached
+        idempotency response, repeating a patch containing a new nested object with nulls can change its result.
+        Omitted metadata fields, empty metadata objects and null metadata fields leave existing
+        metadata unchanged. The patch and merged result must each fit the 8 KB limit per metadata field.
+
+        Requires the `users:manage` scope. The user must belong to the selected application instance.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - name: applicationID
+          in: path
+          description: Application ID.
+          required: true
+          schema:
+            type: string
+        - name: envOrInsID
+          in: path
+          description: |
+            Environment type (e.g., "development", "production") or instance ID.
+          required: true
+          schema:
+            type: string
+        - name: userID
+          in: path
+          description: User ID.
+          required: true
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          description: |
+            Optional key. If Clerk has cached a completed response for this exact request
+            and key, Clerk replays that response without merging the metadata again.
+            Reuse the same key only for the same request.
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 255
+            pattern: ^[A-Za-z0-9_-]+$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformUpdateUserMetadataRequest'
+      responses:
+        '200':
+          description: User metadata updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '413':
+          $ref: '#/components/responses/ClerkErrors'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}/profile_image:
     post:
       operationId: PlatformSetUserProfileImage
@@ -1850,7 +2284,8 @@ paths:
       summary: Ban a user
       description: |
         Marks a user as banned within an application instance. This terminates their active sessions
-        (marks them as revoked) and prevents them from signing in again.
+        (marks them as revoked), revokes their OAuth grants, and prevents them from signing in again.
+        Revoked OAuth grants are not restored if the user is unbanned.
 
         Requires the `users:manage` scope.
       security:
@@ -3702,6 +4137,10 @@ components:
           type: boolean
           description: |
             Whether this organization can configure self-serve enterprise SSO.
+        self_serve_directory_sync_enabled:
+          type: boolean
+          description: |
+            Whether this organization can configure self-serve Directory Sync (SCIM).
         public_metadata:
           type: object
           additionalProperties: true
@@ -3741,19 +4180,110 @@ components:
         - public_metadata
         - created_at
         - updated_at
-    Organizations:
+    OrganizationMembershipPublicUserData:
+      description: An organization membership with public user data populated
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          type: string
+          nullable: false
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        profile_image_url:
+          type: string
+          nullable: true
+          deprecated: true
+        image_url:
+          type: string
+        has_image:
+          type: boolean
+        identifier:
+          type: string
+          nullable: true
+        username:
+          type: string
+          nullable: true
+        banned:
+          type: boolean
+        deprovisioned:
+          type: boolean
+      required:
+        - user_id
+        - first_name
+        - last_name
+        - profile_image_url
+        - image_url
+        - has_image
+    OrganizationMembership:
+      description: A user's membership in an organization
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          description: |
+            String representing the object's type. Objects of the same type share the same value.
+          enum:
+            - organization_membership
+        role:
+          type: string
+        role_name:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        public_metadata:
+          type: object
+          description: Metadata saved on the organization membership, accessible from both Frontend and Backend APIs
+          additionalProperties: true
+        private_metadata:
+          type: object
+          description: Metadata saved on the organization membership, accessible only from the Backend API
+          additionalProperties: true
+        organization:
+          type: object
+          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/Organization'
+        public_user_data:
+          $ref: '#/components/schemas/OrganizationMembershipPublicUserData'
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of creation.
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp of last update.
+      required:
+        - object
+        - id
+        - role
+        - permissions
+        - public_metadata
+        - created_at
+        - updated_at
+        - organization
+    OrganizationMemberships:
       type: object
       additionalProperties: false
       properties:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/Organization'
+            $ref: '#/components/schemas/OrganizationMembership'
         total_count:
           type: integer
           format: int64
           description: |
-            Total number of organizations
+            Total number of organization memberships
       required:
         - data
         - total_count
@@ -3787,6 +4317,22 @@ components:
           type: string
       required:
         - errors
+    Organizations:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Organization'
+        total_count:
+          type: integer
+          format: int64
+          description: |
+            Total number of organizations
+      required:
+        - data
+        - total_count
     PlatformApplicationInstance:
       title: Application Instance
       description: Represents an instance (environment) within a Clerk application. Each application can have multiple instances, typically one for development and one for production.
@@ -3840,6 +4386,40 @@ components:
       items:
         $ref: '#/components/schemas/PlatformApplicationResponse'
       minItems: 0
+    PlatformListApplicationsCursorResponse:
+      title: List Applications Cursor Response
+      description: A page of applications, returned with `paginated=true`.
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: The list of applications.
+          items:
+            $ref: '#/components/schemas/PlatformApplicationResponse'
+        cursor:
+          type: object
+          additionalProperties: false
+          description: Cursor information for pagination.
+          properties:
+            starting_after:
+              type: string
+              nullable: true
+              description: Cursor to fetch the next page of results. Pass it back as `starting_after` on the next request. `null` on the last page.
+            ending_before:
+              type: string
+              nullable: true
+              description: Cursor to fetch the previous page of results. Pass it back as `ending_before` on the next request. `null` on the first page.
+            has_next_page:
+              type: boolean
+              description: Whether older applications follow this page.
+          required:
+            - starting_after
+            - ending_before
+            - has_next_page
+      required:
+        - data
+        - cursor
     PlatformCreateApplicationRequest:
       type: object
       additionalProperties: false
@@ -5568,97 +6148,6 @@ components:
         - active
         - email_address
         - verification
-    OrganizationMembershipPublicUserData:
-      description: An organization membership with public user data populated
-      type: object
-      additionalProperties: false
-      properties:
-        user_id:
-          type: string
-          nullable: false
-        first_name:
-          type: string
-          nullable: true
-        last_name:
-          type: string
-          nullable: true
-        profile_image_url:
-          type: string
-          nullable: true
-          deprecated: true
-        image_url:
-          type: string
-        has_image:
-          type: boolean
-        identifier:
-          type: string
-          nullable: true
-        username:
-          type: string
-          nullable: true
-        banned:
-          type: boolean
-        deprovisioned:
-          type: boolean
-      required:
-        - user_id
-        - first_name
-        - last_name
-        - profile_image_url
-        - image_url
-        - has_image
-    OrganizationMembership:
-      description: A user's membership in an organization
-      type: object
-      properties:
-        id:
-          type: string
-        object:
-          type: string
-          description: |
-            String representing the object's type. Objects of the same type share the same value.
-          enum:
-            - organization_membership
-        role:
-          type: string
-        role_name:
-          type: string
-        permissions:
-          type: array
-          items:
-            type: string
-        public_metadata:
-          type: object
-          description: Metadata saved on the organization membership, accessible from both Frontend and Backend APIs
-          additionalProperties: true
-        private_metadata:
-          type: object
-          description: Metadata saved on the organization membership, accessible only from the Backend API
-          additionalProperties: true
-        organization:
-          type: object
-          nullable: false
-          allOf:
-            - $ref: '#/components/schemas/Organization'
-        public_user_data:
-          $ref: '#/components/schemas/OrganizationMembershipPublicUserData'
-        created_at:
-          type: integer
-          format: int64
-          description: Unix timestamp of creation.
-        updated_at:
-          type: integer
-          format: int64
-          description: Unix timestamp of last update.
-      required:
-        - object
-        - id
-        - role
-        - permissions
-        - public_metadata
-        - created_at
-        - updated_at
-        - organization
     SCIMUserMetadata:
       type: object
       additionalProperties: false
@@ -6155,6 +6644,54 @@ components:
       required:
         - object
         - deleted
+    PlatformUpdateInstanceUserRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        first_name:
+          type: string
+          nullable: true
+          description: First name.
+        last_name:
+          type: string
+          nullable: true
+          description: Last name.
+        username:
+          type: string
+          nullable: true
+          description: Username, subject to the instance user settings.
+        external_id:
+          type: string
+          nullable: true
+          description: External identifier. Must be unique in the instance.
+        timezone:
+          type: string
+          nullable: true
+          description: IANA timezone identifier.
+        locale:
+          type: string
+          description: Supported locale, subject to Backend API validation.
+        bypass_client_trust:
+          type: boolean
+          description: Whether to bypass client trust checks for this user.
+    PlatformUpdateUserMetadataRequest:
+      type: object
+      properties:
+        public_metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: BAPI merge patch. Null keys are removed at merged levels; new nested objects are copied as-is, including nulls. Omitting this field or setting it to null leaves its metadata unchanged.
+        private_metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: BAPI merge patch. Null keys are removed at merged levels; new nested objects are copied as-is, including nulls. Omitting this field or setting it to null leaves its metadata unchanged.
+        unsafe_metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: BAPI merge patch. Null keys are removed at merged levels; new nested objects are copied as-is, including nulls. Omitting this field or setting it to null leaves its metadata unchanged.
     JWTTemplate:
       type: object
       additionalProperties: false
@@ -6673,12 +7210,12 @@ components:
           additionalProperties: true
       additionalProperties: true
   responses:
-    Organizations:
-      description: A list of organizations
+    OrganizationMemberships:
+      description: A list of organization memberships
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Organizations'
+            $ref: '#/components/schemas/OrganizationMemberships'
     ClerkErrors:
       description: Request was not successful
       content:
@@ -6709,6 +7246,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ClerkErrors'
+    Organizations:
+      description: A list of organizations
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Organizations'
     TooManyRequests:
       description: Too many requests
       content:
