@@ -855,6 +855,36 @@ x-webhooks:
                 directory_id: scimdir_2g7np7Hrk0SN6kj5EDMLDaKNL0S
                 display_name: Engineering
                 updated_at: 1716883200000
+  directoryGroup.synced:
+    post:
+      description: The identity provider pushed a directory group in full (`PUT /Groups/{id}`), whether or not anything changed. Use it to reconcile the group's members through the Backend API. Not sent for pull-synced directories.
+      operationId: directoryGroup.synced
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/DirectoryGroupEventPayload'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Okta SCIM Client 1.0.0
+              object: event
+              type: directoryGroup.synced
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: directory_group
+                id: scim_grp_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                directory_id: scimdir_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                display_name: Engineering
+                updated_at: 1716883200000
   directoryGroup.deleted:
     post:
       description: A directory group was deleted by the identity provider, or stopped appearing in a pull sync. A `directoryGroupMembership.deleted` event is almost emitted for every member with `cause` set to `group_deleted`.
@@ -2214,6 +2244,10 @@ components:
           type: boolean
           description: |
             Whether this organization can configure self-serve enterprise SSO.
+        self_serve_directory_sync_enabled:
+          type: boolean
+          description: |
+            Whether this organization can configure self-serve Directory Sync (SCIM).
         public_metadata:
           type: object
           additionalProperties: true
@@ -3300,12 +3334,12 @@ components:
           type: integer
           format: int64
           description: |
-            Unix timestamp in milliseconds of expiration. Zero means no maximum lifetime.
+            Unix timestamp in milliseconds of expiration.
         abandon_at:
           type: integer
           format: int64
           description: |
-            Unix timestamp in milliseconds of abandonment. Zero means no abandonment deadline.
+            Unix timestamp in milliseconds of abandonment.
         updated_at:
           type: integer
           format: int64
