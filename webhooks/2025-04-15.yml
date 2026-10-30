@@ -256,6 +256,182 @@ x-webhooks:
                 subject: 123456 is your verification code
                 to_email_address: johndoe@acme.com
                 user_id: user_abcd
+  email.delivered:
+    post:
+      description: Transactional email accepted by the recipient mail server
+      operationId: email.delivered
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/EmailOutcomeEventPayload'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: ''
+                  user_agent: ''
+              object: event
+              type: email.delivered
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200000
+              data:
+                id: ema_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                to:
+                  - johndoe@acme.com
+  email.delivery_delayed:
+    post:
+      description: Transactional email delivery temporarily delayed
+      operationId: email.delivery_delayed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/EmailOutcomeEventPayload'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: ''
+                  user_agent: ''
+              object: event
+              type: email.delivery_delayed
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200000
+              data:
+                id: ema_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                to:
+                  - johndoe@acme.com
+  email.bounced:
+    post:
+      description: Transactional email bounced; inspect bounce.type for permanence
+      operationId: email.bounced
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/EmailBouncedEventPayload'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: ''
+                  user_agent: ''
+              object: event
+              type: email.bounced
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200000
+              data:
+                id: ema_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                to:
+                  - johndoe@acme.com
+                bounce:
+                  type: Permanent
+                  message: 550 5.1.1 The email account that you tried to reach does not exist.
+  email.complained:
+    post:
+      description: Transactional email reported as spam
+      operationId: email.complained
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/EmailOutcomeEventPayload'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: ''
+                  user_agent: ''
+              object: event
+              type: email.complained
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200000
+              data:
+                id: ema_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                to:
+                  - johndoe@acme.com
+  email.failed:
+    post:
+      description: Transactional email failed to send
+      operationId: email.failed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/EmailFailedEventPayload'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: ''
+                  user_agent: ''
+              object: event
+              type: email.failed
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200000
+              data:
+                id: ema_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                to:
+                  - johndoe@acme.com
+                failed:
+                  reason: provider_rejected
+  email.suppressed:
+    post:
+      description: Transactional email prevented by suppression
+      operationId: email.suppressed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/EmailSuppressedEventPayload'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: ''
+                  user_agent: ''
+              object: event
+              type: email.suppressed
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200000
+              data:
+                id: ema_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                to:
+                  - johndoe@acme.com
+                suppressed:
+                  type: OnProviderSuppressionList
+                  message: Bounced Address
   organization.created:
     post:
       description: New organization was created
@@ -847,6 +1023,36 @@ x-webhooks:
                   user_agent: Okta SCIM Client 1.0.0
               object: event
               type: directoryGroup.updated
+              instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+              timestamp: 1716883200
+              data:
+                object: directory_group
+                id: scim_grp_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                directory_id: scimdir_2g7np7Hrk0SN6kj5EDMLDaKNL0S
+                display_name: Engineering
+                updated_at: 1716883200000
+  directoryGroup.synced:
+    post:
+      description: The identity provider pushed a directory group in full (`PUT /Groups/{id}`), whether or not anything changed. Use it to reconcile the group's members through the Backend API. Not sent for pull-synced directories.
+      operationId: directoryGroup.synced
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEventPayload'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/DirectoryGroupEventPayload'
+                  required:
+                    - data
+            example:
+              event_attributes:
+                http_request:
+                  client_ip: 192.168.1.100
+                  user_agent: Okta SCIM Client 1.0.0
+              object: event
+              type: directoryGroup.synced
               instance_id: ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S
               timestamp: 1716883200
               data:
@@ -2183,6 +2389,94 @@ components:
         - from_email_name
         - data
         - delivered_by_clerk
+    EmailOutcomeEventPayload:
+      description: |-
+        A delivery outcome for one recipient of a transactional email. The payload
+        never contains the message body or the other recipients.
+      properties:
+        id:
+          type: string
+          description: The email ID
+        to:
+          type: array
+          description: The affected recipient
+          minItems: 1
+          maxItems: 1
+          items:
+            type: string
+      required:
+        - id
+        - to
+    EmailBouncedEventPayload:
+      allOf:
+        - $ref: '#/components/schemas/EmailOutcomeEventPayload'
+        - properties:
+            bounce:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - Permanent
+                    - Transient
+                    - Undetermined
+                  description: |-
+                    Only `Permanent` indicates that the recipient address is invalid.
+                    Content, reputation and policy rejections are `Transient` or `Undetermined`.
+                message:
+                  type: string
+                  description: The diagnostic message from the receiving mail server, for display only
+              required:
+                - type
+                - message
+          required:
+            - bounce
+    EmailFailedEventPayload:
+      allOf:
+        - $ref: '#/components/schemas/EmailOutcomeEventPayload'
+        - properties:
+            failed:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  enum:
+                    - provider_rejected
+                    - delivery_retry_exhausted
+                    - send_retry_exhausted
+                  description: Why the email could not be sent or delivered
+              required:
+                - reason
+          required:
+            - failed
+    EmailSuppressedEventPayload:
+      allOf:
+        - $ref: '#/components/schemas/EmailOutcomeEventPayload'
+        - properties:
+            suppressed:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - OnProviderSuppressionList
+                    - ClerkPolicy
+                  description: Whether the email provider or Clerk prevented the send
+                reason:
+                  type: string
+                  enum:
+                    - unverified_email_dns
+                    - provider_domain_restriction
+                    - application_communication_lock
+                  description: Present when `type` is `ClerkPolicy`
+                message:
+                  type: string
+                  description: A human-readable explanation, for display only
+              required:
+                - type
+                - message
+          required:
+            - suppressed
     Organization:
       type: object
       properties:
@@ -2214,6 +2508,10 @@ components:
           type: boolean
           description: |
             Whether this organization can configure self-serve enterprise SSO.
+        self_serve_directory_sync_enabled:
+          type: boolean
+          description: |
+            Whether this organization can configure self-serve Directory Sync (SCIM).
         public_metadata:
           type: object
           additionalProperties: true
@@ -3300,12 +3598,12 @@ components:
           type: integer
           format: int64
           description: |
-            Unix timestamp in milliseconds of expiration. Zero means no maximum lifetime.
+            Unix timestamp in milliseconds of expiration.
         abandon_at:
           type: integer
           format: int64
           description: |
-            Unix timestamp in milliseconds of abandonment. Zero means no abandonment deadline.
+            Unix timestamp in milliseconds of abandonment.
         updated_at:
           type: integer
           format: int64
