@@ -2612,7 +2612,7 @@ paths:
       x-speakeasy-group: users
       x-speakeasy-name-override: ban
       summary: Ban a user
-      description: Marks the given user as banned, which means that all their sessions are revoked and they are not allowed to sign in again.
+      description: Marks the given user as banned, which means that all their sessions and OAuth grants are revoked and they are not allowed to sign in again. Revoked OAuth grants are not restored if the user is unbanned.
       tags:
         - Users
       parameters:
@@ -5626,6 +5626,10 @@ paths:
                   type: boolean
                   description: Whether this organization can configure self-serve enterprise SSO.
                   nullable: true
+                self_serve_directory_sync_enabled:
+                  type: boolean
+                  description: Whether this organization can configure self-serve Directory Sync (SCIM).
+                  nullable: true
                 created_at:
                   type: string
                   description: A custom date/time denoting _when_ the organization was created, specified in RFC3339 format (e.g. `2012-10-20T07:15:20.902Z`).
@@ -6059,6 +6063,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
     get:
       operationId: ListOrganizationInvitations
       x-speakeasy-group: organizationInvitations
@@ -6221,6 +6227,8 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
   /organizations/{organization_id}/invitations/pending:
     get:
       deprecated: true
@@ -12887,12 +12895,12 @@ components:
           type: integer
           format: int64
           description: |
-            Unix timestamp in milliseconds of expiration. Zero means no maximum lifetime.
+            Unix timestamp in milliseconds of expiration.
         abandon_at:
           type: integer
           format: int64
           description: |
-            Unix timestamp in milliseconds of abandonment. Zero means no abandonment deadline.
+            Unix timestamp in milliseconds of abandonment.
         updated_at:
           type: integer
           format: int64
@@ -14170,6 +14178,10 @@ components:
           type: boolean
           description: |
             Whether this organization can configure self-serve enterprise SSO.
+        self_serve_directory_sync_enabled:
+          type: boolean
+          description: |
+            Whether this organization can configure self-serve Directory Sync (SCIM).
         public_metadata:
           type: object
           additionalProperties: true
