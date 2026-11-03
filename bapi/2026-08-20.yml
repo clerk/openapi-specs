@@ -1202,6 +1202,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '401':
           $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
   /sessions/{session_id}/reverifications/{reverification_id}:
     get:
       operationId: GetReverification
@@ -1305,6 +1307,8 @@ paths:
                     type: string
         '401':
           $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
   /sessions/{session_id}/tokens/{template_name}:
@@ -1357,6 +1361,8 @@ paths:
                     type: string
         '401':
           $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
   /templates/{template_type}:
@@ -3828,7 +3834,9 @@ paths:
       summary: List all invitations
       x-speakeasy-group: invitations
       x-speakeasy-name-override: list
-      description: Returns all non-revoked invitations for your application, sorted by creation date
+      description: |-
+        Returns non-revoked invitations for your application, sorted by creation date.
+        Without `limit`, `offset` or `paginated=true`, returns at most 500 invitations.
       operationId: ListInvitations
       parameters:
         - in: query
@@ -3848,6 +3856,16 @@ paths:
           description: Filter invitations based on their `email_address` or `id`
           schema:
             type: string
+        - in: query
+          required: false
+          name: email_address
+          description: |-
+            Returns invitations with the specified email addresses.
+            Accepts up to 100 email addresses.
+          schema:
+            type: array
+            items:
+              type: string
         - name: order_by
           in: query
           required: false
