@@ -536,6 +536,8 @@ paths:
         Create a new application.
       security:
         - platform_api_access_token: []
+      parameters:
+        - $ref: '#/components/parameters/ClerkRecipientPublicKey'
       requestBody:
         description: Application data to create.
         required: true
@@ -1645,6 +1647,7 @@ paths:
           required: true
           schema:
             type: string
+        - $ref: '#/components/parameters/ClerkRecipientPublicKey'
       requestBody:
         description: Secret key rotation parameters.
         required: true
@@ -1693,6 +1696,7 @@ paths:
           schema:
             type: string
             example: production
+        - $ref: '#/components/parameters/ClerkRecipientPublicKey'
       requestBody:
         description: Secret key rotation parameters.
         required: true
@@ -3971,6 +3975,7 @@ paths:
           required: true
           schema:
             type: string
+        - $ref: '#/components/parameters/ClerkRecipientPublicKey'
       requestBody:
         required: true
         content:
@@ -4017,7 +4022,10 @@ paths:
                     $ref: '#/components/schemas/PlatformDomainResponse'
                   secret_key:
                     type: string
+                    description: The secret key for this instance. Omitted when the `Clerk-Recipient-Public-Key` header is set; `encrypted_secret_key` is returned instead.
                     x-sensitive: true
+                  encrypted_secret_key:
+                    $ref: '#/components/schemas/PlatformEncryptedSecretKey'
                   publishable_key:
                     type: string
                   created_at:
@@ -4033,7 +4041,6 @@ paths:
                   - id
                   - environment_type
                   - active_domain
-                  - secret_key
                   - publishable_key
                   - created_at
                   - updated_at
@@ -4333,6 +4340,11 @@ components:
       required:
         - data
         - total_count
+    PlatformEncryptedSecretKey:
+      title: Encrypted Secret Key
+      description: Unpadded base64url encoding of the RSA-OAEP ciphertext for one instance secret key, encrypted to the RSA public key in the `Clerk-Recipient-Public-Key` header. Returned only by endpoints that accept that header. The ciphertext length in bytes matches the RSA modulus size in bytes. OAEP and MGF1 both use SHA-256; the OAEP label is empty. Only the holder of the matching private key can decrypt this value.
+      type: string
+      x-sensitive: true
     PlatformApplicationInstance:
       title: Application Instance
       description: Represents an instance (environment) within a Clerk application. Each application can have multiple instances, typically one for development and one for production.
@@ -4352,9 +4364,11 @@ components:
           example: production
         secret_key:
           type: string
-          description: The secret key for authenticating server-side API requests to this instance. Keep this value secure and never expose it in client-side code.
+          description: The secret key for authenticating server-side API requests to this instance. Keep this value secure and never expose it in client-side code. Omitted from `POST /platform/applications` responses when the `Clerk-Recipient-Public-Key` header is set; `encrypted_secret_key` is returned instead.
           example: sk_live_abc123...
           x-sensitive: true
+        encrypted_secret_key:
+          $ref: '#/components/schemas/PlatformEncryptedSecretKey'
         publishable_key:
           type: string
           description: The publishable key for this instance. Safe to include in client-side code and used to initialize Clerk SDKs in the browser.
@@ -5086,13 +5100,14 @@ components:
           example: production
         secret_key:
           type: string
-          description: The new secret key for authenticating server-side API requests to this instance. Keep this value secure and never expose it in client-side code.
+          description: The new secret key for authenticating server-side API requests to this instance. Keep this value secure and never expose it in client-side code. Omitted when the `Clerk-Recipient-Public-Key` header is set; `encrypted_secret_key` is returned instead.
           example: sk_live_abc123...
           x-sensitive: true
+        encrypted_secret_key:
+          $ref: '#/components/schemas/PlatformEncryptedSecretKey'
       required:
         - instance_id
         - environment_type
-        - secret_key
     PlatformRotateSecretKeysResponse:
       type: object
       additionalProperties: false
@@ -7276,6 +7291,44 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/DeletedObject'
+  parameters:
+    ClerkRecipientPublicKey:
+      name: Clerk-Recipient-Public-Key
+      in: header
+      required: false
+      description: |
+        RSA public key of the party who should be able to read secret keys in this response.
+
+        When set, each `secret_key` that this response would have included is omitted and replaced
+        with `encrypted_secret_key`, the unpadded base64url RSA-OAEP ciphertext of that secret.
+        OAEP and MGF1 both use SHA-256; the OAEP label is empty. Intermediaries that forward the
+        response see only the encrypted secret. Publishable keys stay in plaintext.
+
+        Send one public RSA key with a 2048 to 4096-bit modulus and exponent 65537, as a JSON Web Key
+        or as base64, base64url, or hexadecimal SubjectPublicKeyInfo DER. An invalid key, this
+        header on any other Platform API endpoint, or this header with `Idempotency-Key` returns 400
+        before any change is made.
+
+        ```bash
+        umask 077
+        openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out recipient-private.pem
+        RECIPIENT_PUBLIC_KEY=$(openssl pkey -in recipient-private.pem -pubout -outform DER | openssl base64 -A)
+        curl -H "Clerk-Recipient-Public-Key: ${RECIPIENT_PUBLIC_KEY:?}" ...
+        ```
+
+        Decrypt with the matching private key. For example, in Node.js:
+
+        ```javascript
+        import { constants, privateDecrypt } from 'node:crypto';
+
+        const secret = privateDecrypt({
+          key: privateKey,
+          padding: constants.RSA_PKCS1_OAEP_PADDING,
+          oaepHash: 'sha256',
+        }, Buffer.from(encryptedSecretKey, 'base64url')).toString('utf8');
+        ```
+      schema:
+        type: string
 x-tagGroups:
   - name: Core Resources
     tags:
