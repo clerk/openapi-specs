@@ -62,6 +62,110 @@ tags:
 externalDocs:
   url: https://clerk.com/docs
 paths:
+  /platform/applications/{applicationID}/instances/{envOrInsID}/logs:
+    get:
+      operationId: PlatformListInstanceLogs
+      tags:
+        - Application Logs
+      summary: List grouped application logs
+      description: Returns groups and standalone events, newest first. Groups sort by their start time. Event filters retain groups and restrict their event previews; first_event can be outside those filters. Status is null until the flow concludes. An empty page with next_page_status=unknown can be continued using cursor.starting_after. Group filters exclude standalone events. Only forward pagination is supported. Requires `application_logs:read`. Payload fields, payload filtering, and full event payloads are not supported. `user_id` and `identifier` cannot be combined with each other or with `actor` or `subject`.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - $ref: '#/components/parameters/applicationID'
+        - $ref: '#/components/parameters/envOrInsID'
+        - $ref: '#/components/parameters/user_id'
+        - $ref: '#/components/parameters/identifier'
+        - $ref: '#/components/parameters/type'
+        - $ref: '#/components/parameters/actor'
+        - $ref: '#/components/parameters/subject'
+        - $ref: '#/components/parameters/trace_id'
+        - $ref: '#/components/parameters/session_id'
+        - $ref: '#/components/parameters/client_id'
+        - $ref: '#/components/parameters/impersonator_user_id'
+        - $ref: '#/components/parameters/ip_address'
+        - $ref: '#/components/parameters/filter_match'
+        - $ref: '#/components/parameters/event_time_after'
+        - $ref: '#/components/parameters/event_time_before'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/starting_after'
+        - $ref: '#/components/parameters/group_type'
+        - $ref: '#/components/parameters/status'
+      responses:
+        '200':
+          description: Application log metadata with cursor pagination.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupedLogList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '503':
+          description: Application log storage is not configured or is temporarily unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClerkErrors'
+  /platform/applications/{applicationID}/instances/{envOrInsID}/logs/groups/{groupID}/events:
+    get:
+      operationId: PlatformListInstanceLogGroupEvents
+      tags:
+        - Application Logs
+      summary: List events in an application log group
+      description: Returns matching events oldest first. Pass the group started_at and events_cursor as starting_after, retaining the original event filters. List cursors cannot be used here. Time bounds select groups by their start in the grouped list; group expansion reads events across the flow lifetime, subject to retention. Only forward pagination is supported. Requires `application_logs:read`. Payload fields, payload filtering, and full event payloads are not supported. `user_id` and `identifier` cannot be combined with each other or with `actor` or `subject`.
+      security:
+        - platform_api_access_token: []
+      parameters:
+        - $ref: '#/components/parameters/applicationID'
+        - $ref: '#/components/parameters/envOrInsID'
+        - $ref: '#/components/parameters/user_id'
+        - $ref: '#/components/parameters/identifier'
+        - $ref: '#/components/parameters/type'
+        - $ref: '#/components/parameters/actor'
+        - $ref: '#/components/parameters/subject'
+        - $ref: '#/components/parameters/trace_id'
+        - $ref: '#/components/parameters/session_id'
+        - $ref: '#/components/parameters/client_id'
+        - $ref: '#/components/parameters/impersonator_user_id'
+        - $ref: '#/components/parameters/ip_address'
+        - $ref: '#/components/parameters/filter_match'
+        - $ref: '#/components/parameters/event_time_after'
+        - $ref: '#/components/parameters/event_time_before'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/starting_after'
+        - $ref: '#/components/parameters/groupID'
+        - $ref: '#/components/parameters/started_at'
+      responses:
+        '200':
+          description: Application log metadata with cursor pagination.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEventList'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '503':
+          description: Application log storage is not configured or is temporarily unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClerkErrors'
   /platform/applications/{applicationID}/instances/{envOrInsID}/users/{userID}/organization_memberships:
     get:
       operationId: PlatformListUserOrganizationMemberships
@@ -536,6 +640,8 @@ paths:
         Create a new application.
       security:
         - platform_api_access_token: []
+      parameters:
+        - $ref: '#/components/parameters/ClerkRecipientPublicKey'
       requestBody:
         description: Application data to create.
         required: true
@@ -1645,6 +1751,7 @@ paths:
           required: true
           schema:
             type: string
+        - $ref: '#/components/parameters/ClerkRecipientPublicKey'
       requestBody:
         description: Secret key rotation parameters.
         required: true
@@ -1693,6 +1800,7 @@ paths:
           schema:
             type: string
             example: production
+        - $ref: '#/components/parameters/ClerkRecipientPublicKey'
       requestBody:
         description: Secret key rotation parameters.
         required: true
@@ -3971,6 +4079,7 @@ paths:
           required: true
           schema:
             type: string
+        - $ref: '#/components/parameters/ClerkRecipientPublicKey'
       requestBody:
         required: true
         content:
@@ -3992,6 +4101,9 @@ paths:
                   type: string
                   nullable: true
                   description: The ID of a development instance to clone configuration from.
+                proxy_path:
+                  type: string
+                  description: Optional proxy path for the instance's domain (e.g. "/__clerk" or "/api/__clerk"). Must start with a slash and contain one or more segments made of letters, digits, "-", ".", "_" or "~"; "." and ".." segments are rejected. When set, the domain's proxy URL is https://<domain><proxy_path>. When omitted, no proxy is configured.
               required:
                 - domain
       responses:
@@ -4017,7 +4129,10 @@ paths:
                     $ref: '#/components/schemas/PlatformDomainResponse'
                   secret_key:
                     type: string
+                    description: The secret key for this instance. Omitted when the `Clerk-Recipient-Public-Key` header is set; `encrypted_secret_key` is returned instead.
                     x-sensitive: true
+                  encrypted_secret_key:
+                    $ref: '#/components/schemas/PlatformEncryptedSecretKey'
                   publishable_key:
                     type: string
                   created_at:
@@ -4033,7 +4148,6 @@ paths:
                   - id
                   - environment_type
                   - active_domain
-                  - secret_key
                   - publishable_key
                   - created_at
                   - updated_at
@@ -4105,7 +4219,570 @@ components:
       type: http
       scheme: bearer
       description: Platform API access token.
+  parameters:
+    applicationID:
+      name: applicationID
+      in: path
+      required: true
+      schema:
+        type: string
+    envOrInsID:
+      name: envOrInsID
+      in: path
+      required: true
+      schema:
+        type: string
+    user_id:
+      name: user_id
+      in: query
+      schema:
+        type: string
+    identifier:
+      name: identifier
+      in: query
+      schema:
+        type: string
+    type:
+      name: type
+      in: query
+      schema:
+        type: string
+    actor:
+      name: actor
+      in: query
+      schema:
+        type: string
+    subject:
+      name: subject
+      in: query
+      schema:
+        type: string
+    trace_id:
+      name: trace_id
+      in: query
+      schema:
+        type: string
+    session_id:
+      name: session_id
+      in: query
+      schema:
+        type: string
+    client_id:
+      name: client_id
+      in: query
+      schema:
+        type: string
+    impersonator_user_id:
+      name: impersonator_user_id
+      in: query
+      schema:
+        type: string
+    ip_address:
+      name: ip_address
+      in: query
+      schema:
+        type: string
+    filter_match:
+      name: filter_match
+      in: query
+      schema:
+        type: string
+        enum:
+          - all
+          - any
+        default: all
+    event_time_after:
+      name: event_time_after
+      in: query
+      required: false
+      description: Unix timestamp in milliseconds.
+      schema:
+        type: integer
+        format: int64
+    event_time_before:
+      name: event_time_before
+      in: query
+      required: false
+      description: Unix timestamp in milliseconds.
+      schema:
+        type: integer
+        format: int64
+    limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    starting_after:
+      name: starting_after
+      in: query
+      schema:
+        type: string
+    group_type:
+      name: group_type
+      in: query
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+            - sign_in
+            - sign_up
+    status:
+      name: status
+      in: query
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+            - completed
+            - failed
+    groupID:
+      name: groupID
+      in: path
+      required: true
+      schema:
+        type: string
+    started_at:
+      name: started_at
+      in: query
+      required: true
+      description: Unix timestamp in milliseconds.
+      schema:
+        type: integer
+        format: int64
+    ClerkRecipientPublicKey:
+      name: Clerk-Recipient-Public-Key
+      in: header
+      required: false
+      description: |
+        RSA public key of the party who should be able to read secret keys in this response.
+
+        When set, each `secret_key` that this response would have included is omitted and replaced
+        with `encrypted_secret_key`, the unpadded base64url RSA-OAEP ciphertext of that secret.
+        OAEP and MGF1 both use SHA-256; the OAEP label is empty. Intermediaries that forward the
+        response see only the encrypted secret. Publishable keys stay in plaintext.
+
+        Send one public RSA key with a 2048 to 4096-bit modulus and exponent 65537, as a JSON Web Key
+        or as base64, base64url, or hexadecimal SubjectPublicKeyInfo DER. An invalid key, this
+        header on any other Platform API endpoint, or this header with `Idempotency-Key` returns 400
+        before any change is made.
+
+        ```bash
+        umask 077
+        openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out recipient-private.pem
+        RECIPIENT_PUBLIC_KEY=$(openssl pkey -in recipient-private.pem -pubout -outform DER | openssl base64 -A)
+        curl -H "Clerk-Recipient-Public-Key: ${RECIPIENT_PUBLIC_KEY:?}" ...
+        ```
+
+        Decrypt with the matching private key. For example, in Node.js:
+
+        ```javascript
+        import { constants, privateDecrypt } from 'node:crypto';
+
+        const secret = privateDecrypt({
+          key: privateKey,
+          padding: constants.RSA_PKCS1_OAEP_PADDING,
+          oaepHash: 'sha256',
+        }, Buffer.from(encryptedSecretKey, 'base64url')).toString('utf8');
+        ```
+      schema:
+        type: string
   schemas:
+    LogApplicationContext:
+      type: object
+      description: Application context information.
+      properties:
+        id:
+          type: string
+          nullable: true
+          description: The application ID.
+        name:
+          type: string
+          nullable: true
+          description: The application name.
+    LogDomainContext:
+      type: object
+      description: Domain context information.
+      properties:
+        id:
+          type: string
+          nullable: true
+          description: The domain ID.
+        name:
+          type: string
+          nullable: true
+          description: The domain name.
+    LogEnvironmentContext:
+      type: object
+      description: Environment context for the log event.
+      properties:
+        type:
+          type: string
+          nullable: true
+          description: The environment type (e.g., "development", "production").
+        application:
+          $ref: '#/components/schemas/LogApplicationContext'
+        domain:
+          $ref: '#/components/schemas/LogDomainContext'
+        primary_domain:
+          $ref: '#/components/schemas/LogDomainContext'
+    LogBrowserContext:
+      type: object
+      description: Browser information.
+      properties:
+        name:
+          type: string
+          nullable: true
+          description: The browser name.
+        version:
+          type: string
+          nullable: true
+          description: The browser version.
+    LogLocationContext:
+      type: object
+      description: Geographic location information.
+      properties:
+        city:
+          type: string
+          nullable: true
+          description: The city name.
+        country:
+          type: string
+          nullable: true
+          description: The country, as recorded for the event.
+        country_code:
+          type: string
+          description: |-
+            The ISO 3166-1 alpha-2 code of `country`. Omitted when the
+            country cannot be resolved to a known code.
+          example: US
+    LogDeviceContext:
+      type: object
+      description: Device information for the log event.
+      properties:
+        ip_address:
+          type: string
+          nullable: true
+          description: The IP address of the client.
+        user_agent:
+          type: string
+          nullable: true
+          description: The user agent string of the client.
+        browser:
+          $ref: '#/components/schemas/LogBrowserContext'
+        device_type:
+          type: string
+          nullable: true
+          description: The type of device (e.g., "desktop", "mobile", "tablet").
+        is_mobile:
+          type: boolean
+          nullable: true
+          description: Whether the device is a mobile device.
+        location:
+          $ref: '#/components/schemas/LogLocationContext'
+        clerk_js_version:
+          type: string
+          nullable: true
+          description: The version of Clerk.js used by the client.
+        is_native:
+          type: boolean
+          nullable: true
+          description: Whether the client is a native application.
+    LogContext:
+      type: object
+      description: Context information about the environment and device where the event occurred.
+      properties:
+        environment:
+          $ref: '#/components/schemas/LogEnvironmentContext'
+        device:
+          $ref: '#/components/schemas/LogDeviceContext'
+          nullable: true
+    Log:
+      type: object
+      description: Application log metadata. Payload access is not supported.
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Always "log".
+          example: log
+          enum:
+            - log
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the log event.
+        event_time:
+          type: integer
+          format: int64
+          description: The timestamp when the event occurred (Unix timestamp in milliseconds).
+        actor:
+          type: string
+          description: The actor that performed the action (e.g., user ID).
+        actor_type:
+          type: string
+          description: |-
+            The kind of principal the `actor` identifies, classified when the
+            event was recorded: `user` (an end user of your application),
+            `dashboard_user` (a member of your Clerk Dashboard workspace),
+            `instance_key`, `api_key`, `integration`, or `clerk_system`.
+          example: dashboard_user
+        impersonator:
+          type: object
+          nullable: true
+          description: The impersonator that performed the action.
+          properties:
+            user_id:
+              type: string
+              nullable: true
+              description: The user ID of the impersonator.
+        subject:
+          type: string
+          description: The subject of the event (e.g., user ID, resource ID).
+        type:
+          type: string
+          description: The type of the log event.
+        client_id:
+          type: string
+          nullable: true
+          description: The client ID of the request. Set on FAPI requests, unset on BAPI requests.
+        source:
+          type: string
+          nullable: true
+          description: The source service that generated the event.
+        session_id:
+          type: string
+          nullable: true
+          description: The ID of the session the event occurred in, if any.
+        trace_id:
+          type: string
+          description: Trace ID for distributed tracing (32 hex characters).
+        span_id:
+          type: string
+          description: Span ID for distributed tracing (16 hex characters).
+        parent_span_id:
+          type: string
+          nullable: true
+          description: Parent span ID for hierarchical tracing.
+        event_context:
+          $ref: '#/components/schemas/LogContext'
+        group_id:
+          type: string
+          nullable: true
+          description: |-
+            The ID of the event group (a flow such as a sign-in) the event
+            belongs to, e.g. a sign-in ID. Null for an event outside any group.
+        group_type:
+          type: string
+          nullable: true
+          description: The kind of event group the event belongs to, e.g. `sign_in`. Null for an event outside any group.
+        group_started_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: When the event's group started (Unix timestamp in milliseconds). Null for an event outside any group.
+      required:
+        - object
+        - id
+        - event_time
+        - actor
+        - subject
+        - type
+        - source
+        - trace_id
+        - span_id
+        - event_context
+    LogGroup:
+      type: object
+      description: |-
+        An event group in the grouped log list: the events of one flow, such
+        as a sign-in, shown as a single item.
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Always "log_group".
+          enum:
+            - log_group
+        group_id:
+          type: string
+          description: The group's ID, e.g. a sign-in ID.
+        group_type:
+          type: string
+          description: The kind of flow the group collects, e.g. `sign_in`.
+        started_at:
+          type: integer
+          format: int64
+          description: When the flow started (Unix timestamp in milliseconds). The list sorts groups by it.
+        event_count:
+          type: integer
+          format: int64
+          description: The number of events in the group.
+        matched_event_count:
+          type: integer
+          format: int64
+          description: How many of the group's events matched the request's event filters. Present only when event filters were applied.
+        status:
+          type: string
+          nullable: true
+          description: |-
+            How the flow ended, `completed` or `failed`. Null while the flow
+            has not concluded: no status is recorded for a flow that is still
+            going or was given up.
+        status_label:
+          type: string
+          nullable: true
+          description: A display label for `status`. Null when `status` is.
+        first_event:
+          allOf:
+            - $ref: '#/components/schemas/Log'
+          nullable: true
+          description: |-
+            The group's first log, even when event filters left it out of
+            `events`, for showing how the flow started (subject, IP,
+            location).
+        events:
+          type: array
+          description: The group's first events, oldest first. Only events matching the request's event filters when any were applied.
+          items:
+            $ref: '#/components/schemas/Log'
+        has_more_events:
+          type: boolean
+          description: Whether the group has more events than `events` holds. Load them from the group events endpoint.
+        events_cursor:
+          type: string
+          nullable: true
+          description: When `has_more_events` is true, the `starting_after` to pass to the group events endpoint to load the rest. Null otherwise.
+      required:
+        - object
+        - group_id
+        - group_type
+        - started_at
+        - event_count
+        - status
+        - status_label
+        - first_event
+        - events
+        - has_more_events
+        - events_cursor
+    LogCursor:
+      type: object
+      description: Cursor information for pagination.
+      properties:
+        starting_after:
+          type: string
+          nullable: true
+          description: Cursor to fetch the next page of results.
+        ending_before:
+          type: string
+          nullable: true
+          description: Cursor to fetch the previous page of results.
+        has_next_page:
+          type: boolean
+          description: 'Deprecated: use next_page_status instead. If true, more results may be fetched using the starting_after cursor. True when next_page_status is "true", or when it is "unknown" and the page returned data.'
+        next_page_status:
+          type: string
+          enum:
+            - 'true'
+            - 'false'
+            - unknown
+          description: Pagination status. "true" means more results exist, "false" means no more results, "unknown" means the query was time-windowed and more results may exist beyond the window.
+        retention_limit_reached:
+          type: boolean
+          description: When true, next_page_status is "false" because event_time_after was clamped to the plan's retention floor. Extending event_time_after further back will not yield additional results.
+        retention_days:
+          type: integer
+          description: The plan's log retention window, in days. Events older than this are not kept and cannot be returned at any page size.
+        retention_floor:
+          type: integer
+          format: int64
+          description: |-
+            The oldest timestamp this plan can return, in Unix milliseconds: `retention_days` before the time the request was served. `searched_from` is never earlier than this, whatever `event_time_after` asked for.
+
+            Compare your own `event_time_after` against it to tell whether part of the range you asked for is unavailable. It is reported as a timestamp rather than a flag because the floor moves with the clock: a boolean would turn true partway through a long walk, and would fire on a caller who asked for exactly their window.
+        searched_from:
+          type: integer
+          format: int64
+          description: |-
+            Lower bound of the time range this page was actually read from, in Unix milliseconds.
+
+            A request is not served by scanning the whole range you ask for. The endpoint picks a sub-window of it per request and pages through your range one sub-window at a time, which is why `next_page_status` can be `"unknown"` on a page that looks short. `searched_from` and `searched_to` are that sub-window, so you can tell where in your requested range a page sits without decoding the cursor.
+
+            Never earlier than `event_time_after`, or than the plan's retention floor when that is later.
+        searched_to:
+          type: integer
+          format: int64
+          description: |-
+            Upper bound of the time range this page was actually read from, in Unix milliseconds. See `searched_from`.
+
+            On a first page with no `event_time_before`, this sits a few minutes ahead of the current time on purpose: events can arrive with timestamps marginally ahead of the service clock, and this is the bound the query ran with.
+    GroupedLogList:
+      type: object
+      required:
+        - data
+        - cursor
+      properties:
+        data:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/Log'
+              - $ref: '#/components/schemas/LogGroup'
+            discriminator:
+              propertyName: object
+              mapping:
+                log: '#/components/schemas/Log'
+                log_group: '#/components/schemas/LogGroup'
+        cursor:
+          $ref: '#/components/schemas/LogCursor'
+    ClerkError:
+      type: object
+      properties:
+        message:
+          type: string
+        long_message:
+          type: string
+        code:
+          type: string
+        meta:
+          type: object
+          additionalProperties: true
+      required:
+        - message
+        - long_message
+        - code
+    ClerkErrors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClerkError'
+        meta:
+          type: object
+          additionalProperties: true
+        clerk_trace_id:
+          type: string
+      required:
+        - errors
+    GroupEventList:
+      type: object
+      required:
+        - data
+        - cursor
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Log'
+        cursor:
+          $ref: '#/components/schemas/LogCursor'
     Organization:
       type: object
       properties:
@@ -4287,36 +4964,6 @@ components:
       required:
         - data
         - total_count
-    ClerkError:
-      type: object
-      properties:
-        message:
-          type: string
-        long_message:
-          type: string
-        code:
-          type: string
-        meta:
-          type: object
-          additionalProperties: true
-      required:
-        - message
-        - long_message
-        - code
-    ClerkErrors:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/ClerkError'
-        meta:
-          type: object
-          additionalProperties: true
-        clerk_trace_id:
-          type: string
-      required:
-        - errors
     Organizations:
       type: object
       additionalProperties: false
@@ -4333,6 +4980,11 @@ components:
       required:
         - data
         - total_count
+    PlatformEncryptedSecretKey:
+      title: Encrypted Secret Key
+      description: Unpadded base64url encoding of the RSA-OAEP ciphertext for one instance secret key, encrypted to the RSA public key in the `Clerk-Recipient-Public-Key` header. Returned only by endpoints that accept that header. The ciphertext length in bytes matches the RSA modulus size in bytes. OAEP and MGF1 both use SHA-256; the OAEP label is empty. Only the holder of the matching private key can decrypt this value.
+      type: string
+      x-sensitive: true
     PlatformApplicationInstance:
       title: Application Instance
       description: Represents an instance (environment) within a Clerk application. Each application can have multiple instances, typically one for development and one for production.
@@ -4352,9 +5004,11 @@ components:
           example: production
         secret_key:
           type: string
-          description: The secret key for authenticating server-side API requests to this instance. Keep this value secure and never expose it in client-side code.
+          description: The secret key for authenticating server-side API requests to this instance. Keep this value secure and never expose it in client-side code. Omitted from `POST /platform/applications` responses when the `Clerk-Recipient-Public-Key` header is set; `encrypted_secret_key` is returned instead.
           example: sk_live_abc123...
           x-sensitive: true
+        encrypted_secret_key:
+          $ref: '#/components/schemas/PlatformEncryptedSecretKey'
         publishable_key:
           type: string
           description: The publishable key for this instance. Safe to include in client-side code and used to initialize Clerk SDKs in the browser.
@@ -5086,13 +5740,14 @@ components:
           example: production
         secret_key:
           type: string
-          description: The new secret key for authenticating server-side API requests to this instance. Keep this value secure and never expose it in client-side code.
+          description: The new secret key for authenticating server-side API requests to this instance. Keep this value secure and never expose it in client-side code. Omitted when the `Clerk-Recipient-Public-Key` header is set; `encrypted_secret_key` is returned instead.
           example: sk_live_abc123...
           x-sensitive: true
+        encrypted_secret_key:
+          $ref: '#/components/schemas/PlatformEncryptedSecretKey'
       required:
         - instance_id
         - environment_type
-        - secret_key
     PlatformRotateSecretKeysResponse:
       type: object
       additionalProperties: false
@@ -7210,12 +7865,6 @@ components:
           additionalProperties: true
       additionalProperties: true
   responses:
-    OrganizationMemberships:
-      description: A list of organization memberships
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/OrganizationMemberships'
     ClerkErrors:
       description: Request was not successful
       content:
@@ -7246,6 +7895,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ClerkErrors'
+    OrganizationMemberships:
+      description: A list of organization memberships
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrganizationMemberships'
     Organizations:
       description: A list of organizations
       content:

@@ -2946,6 +2946,14 @@ paths:
       tags:
         - Sessions
       operationId: removeClientSessionsAndRetainCookie
+      parameters:
+        - name: sign_out_redirect_url
+          in: query
+          required: false
+          description: HTTPS return URL for primary cookie repair after production satellite browser sign-out.
+          schema:
+            type: string
+            format: uri
       responses:
         '200':
           $ref: '#/components/responses/Client.DeleteSession'
@@ -2971,6 +2979,8 @@ paths:
         '200':
           $ref: '#/components/responses/Client.Session'
         '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
@@ -3048,6 +3058,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '401':
           $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
   /v1/client/sessions/{session_id}/remove:
@@ -3070,6 +3082,8 @@ paths:
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
@@ -3202,6 +3216,8 @@ paths:
                   jwt:
                     type: string
         '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
@@ -11213,6 +11229,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        sign_out_url:
+          type: string
+          format: uri
+          description: Primary cookie repair URL returned only for production satellite browser sign-out opt-in.
         response:
           type: object
           nullable: true
@@ -11230,6 +11250,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        sign_out_url:
+          type: string
+          format: uri
+          description: Primary cookie repair URL returned only for production satellite browser sign-out opt-in.
         response:
           type: object
           nullable: true
