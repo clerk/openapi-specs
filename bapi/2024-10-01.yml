@@ -583,6 +583,13 @@ paths:
                 code:
                   type: string
                   description: The verification code that was sent to the email address
+                honor_lockout:
+                  type: boolean
+                  default: false
+                  description: |-
+                    When `true`, a wrong code counts toward the user's lockout, and a locked user is rejected with a `user_locked` error before the code is checked.
+                    Has no effect on instances with user lockout disabled.
+                    To enforce lockout across a password check and a sign-in token, set this parameter on both requests.
               required:
                 - verification_id
                 - code
@@ -915,6 +922,13 @@ paths:
                 code:
                   type: string
                   description: The verification code that was sent to the phone number
+                honor_lockout:
+                  type: boolean
+                  default: false
+                  description: |-
+                    When `true`, a wrong code counts toward the user's lockout, and a locked user is rejected with a `user_locked` error before the code is checked.
+                    Has no effect on instances with user lockout disabled.
+                    To enforce lockout across a password check and a sign-in token, set this parameter on both requests.
               required:
                 - verification_id
                 - code
@@ -1125,6 +1139,59 @@ paths:
           $ref: '#/components/responses/AuthenticationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+    patch:
+      operationId: UpdateSession
+      x-speakeasy-group: sessions
+      x-speakeasy-name-override: update
+      tags:
+        - Sessions
+      summary: Update a session
+      description: |-
+        Changes when a session expires. Use this to give one session a longer or shorter lifetime than the one configured for your instance, for example to keep a user signed in on a device they chose to remember.
+
+        `expire_at` can exceed the instance's session lifetime. The change applies only to this session, so new sign-ins still start from the instance's session lifetime. If `expire_at` is later than the session's `abandon_at`, `abandon_at` moves to the same time. The inactivity timeout, if your instance has one, still applies.
+
+        Only active and pending sessions can be updated. Expired, revoked, and other ended sessions can't be revived, and sessions with an actor, such as impersonation and agent sessions, can't be updated. To end a session immediately, revoke it instead.
+
+        Take the session ID from the `sid` claim of a verified session token. Never take it from an unverified client request, or a user could change another user's session.
+
+        Requires a plan that includes custom session duration.
+      parameters:
+        - name: session_id
+          in: path
+          description: The ID of the session
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                expire_at:
+                  type: string
+                  format: date-time
+                  description: |-
+                    When the session should expire, as an RFC3339 datetime (for example `2030-10-20T10:00:27.645Z`).
+                    Must be at least 5 minutes and at most 10 years from now.
+              required:
+                - expire_at
+      responses:
+        '200':
+          $ref: '#/components/responses/Session'
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /sessions/{session_id}/refresh:
     post:
       operationId: RefreshSession
@@ -1190,6 +1257,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '401':
           $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
   /sessions/{session_id}/reverifications/{reverification_id}:
     get:
       operationId: GetReverification
@@ -1240,6 +1309,23 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                reset_client_trust:
+                  type: boolean
+                  default: false
+                  description: |-
+                    When set to `true`, also clears Device Trust for the session's user and client, including when the session is already revoked.
+                    Trust belongs to the user and client rather than the session, so this applies to the whole device, including any other session the user has on that client. Other users on the same client are unaffected.
+                    For a session a native application received through hosted auth, this also clears the browser client the user signed in on.
+                    The next sign-in by this user on the client counts as a new device: it can require a Device Trust challenge and sends the new device email.
+                    A value that is not a boolean returns a 422 and does not revoke the session.
       responses:
         '200':
           $ref: '#/components/responses/Session'
@@ -1249,6 +1335,8 @@ paths:
           $ref: '#/components/responses/AuthenticationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
   /sessions/{session_id}/verify:
     post:
       deprecated: true
@@ -1338,6 +1426,8 @@ paths:
                     type: string
         '401':
           $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
   /sessions/{session_id}/tokens/{template_name}:
@@ -1390,6 +1480,8 @@ paths:
                     type: string
         '401':
           $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
   /templates/{template_type}:
@@ -3173,6 +3265,7 @@ paths:
       description: |-
         Fetch the corresponding OAuth access token for a user that has previously authenticated with a particular OAuth provider.
         For OAuth 2.0, if the access token has expired and we have a corresponding refresh token, the access token will be refreshed transparently the new one will be returned.
+        If another request is still refreshing the token, this endpoint may return HTTP 409 with the `resource_locked` error code. Retry the request after a short delay.
       tags:
         - Users
       parameters:
@@ -3198,6 +3291,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
   /users/{user_id}/organization_memberships:
@@ -3333,6 +3428,13 @@ paths:
                 password:
                   type: string
                   description: The user password to verify
+                honor_lockout:
+                  type: boolean
+                  default: false
+                  description: |-
+                    When `true`, a wrong password counts toward the user's lockout, and a locked user is rejected with a `user_locked` error before the password is checked.
+                    Has no effect on instances with user lockout disabled.
+                    To enforce lockout across a password check and a sign-in token, set this parameter on both requests.
               required:
                 - password
       responses:
@@ -3349,6 +3451,8 @@ paths:
                     nullable: false
         '400':
           description: The user does not have a password set.
+        '403':
+          description: The user is locked. Returned only when `honor_lockout` is `true`.
         '404':
           description: The user does not exist.
         '422':
@@ -3385,6 +3489,13 @@ paths:
                 code:
                   type: string
                   description: The TOTP or backup code to verify
+                honor_lockout:
+                  type: boolean
+                  default: false
+                  description: |-
+                    When `true`, a wrong code counts toward the user's lockout, and a locked user is rejected with a `user_locked` error before the code is checked.
+                    Has no effect on instances with user lockout disabled.
+                    To enforce lockout across a password check and a sign-in token, set this parameter on both requests.
               required:
                 - code
       responses:
@@ -3407,6 +3518,8 @@ paths:
                       - backup_code
         '400':
           description: The user does not have TOTP configured for their account.
+        '403':
+          description: The user is locked. Returned only when `honor_lockout` is `true`.
         '404':
           description: The user does not exist.
         '422':
@@ -3736,7 +3849,9 @@ paths:
       summary: List all invitations
       x-speakeasy-group: invitations
       x-speakeasy-name-override: list
-      description: Returns all non-revoked invitations for your application, sorted by creation date
+      description: |-
+        Returns non-revoked invitations for your application, sorted by creation date.
+        Without `limit`, `offset` or `paginated=true`, returns at most 500 invitations.
       operationId: ListInvitations
       parameters:
         - in: query
@@ -3756,6 +3871,16 @@ paths:
           description: Filter invitations based on their `email_address` or `id`
           schema:
             type: string
+        - in: query
+          required: false
+          name: email_address
+          description: |-
+            Returns invitations with the specified email addresses.
+            Accepts up to 100 email addresses.
+          schema:
+            type: array
+            items:
+              type: string
         - name: order_by
           in: query
           required: false
@@ -7462,6 +7587,13 @@ paths:
                     Has no effect for users without a second factor enabled.
                     A token created with this parameter signs in a user with a second factor enabled without prompting for it, so `expires_in_seconds` defaults to 10 minutes. We recommend keeping it short.
                   nullable: true
+                honor_lockout:
+                  type: boolean
+                  default: false
+                  description: |-
+                    When `true`, creating the token is rejected with a `user_locked` error if the user is locked, and so is redeeming it. A token rejected on redemption stays pending and can be redeemed once the user is unlocked.
+                    Has no effect on instances with user lockout disabled.
+                    To enforce lockout across a password check and a sign-in token, set this parameter on both requests.
               required:
                 - user_id
       responses:
@@ -10308,6 +10440,12 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
         '429':
           $ref: '#/components/responses/TooManyRequests'
+        '503':
+          description: Application log storage is not configured or is temporarily unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClerkErrors'
   /logs/schemas:
     get:
       operationId: GetLogSchema
@@ -10412,6 +10550,12 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
         '429':
           $ref: '#/components/responses/TooManyRequests'
+        '503':
+          description: Application log storage is not configured or is temporarily unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClerkErrors'
   /logs/{event_time_and_id}:
     get:
       operationId: GetLog
@@ -18950,6 +19094,14 @@ components:
           type: string
           nullable: true
           description: A display label for `status`. Null when `status` is.
+        subject:
+          type: string
+          description: |-
+            Who the flow is about: the user ID of the latest event in the
+            group whose subject is a user, or, when the flow never
+            identified a user, the first event's subject (usually the
+            instance ID). Unlike `first_event.subject`, it names the user
+            even when the flow started before the user was known.
         first_event:
           allOf:
             - $ref: '#/components/schemas/Log'
@@ -18978,6 +19130,7 @@ components:
         - event_count
         - status
         - status_label
+        - subject
         - first_event
         - events
         - has_more_events
@@ -19218,6 +19371,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Session'
+    PaymentRequired:
+      description: Payment required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClerkErrors'
     Session.Refresh:
       description: Success
       content:
@@ -19244,12 +19403,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Template'
-    PaymentRequired:
-      description: Payment required
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClerkErrors'
     Locked:
       description: Locked
       content:

@@ -2630,6 +2630,86 @@ paths:
       responses:
         '303':
           description: Redirect to GET /v1/oauth_callback with same parameters
+  /v1/sso/{providerKey}/callback:
+    parameters:
+      - in: path
+        name: providerKey
+        required: true
+        schema:
+          type: string
+        description: key of the custom OAuth provider the flow started with.
+    get:
+      operationId: getProviderCallback
+      summary: Provider OAuth Callback
+      description: |-
+        The endpoint where a custom OAuth provider with a provider-specific callback redirects to after an authentication attempt.
+        The flow's state must belong to the provider in the path.
+      tags:
+        - OAuth2 Callbacks
+      parameters:
+        - in: query
+          name: scope
+          schema:
+            type: string
+          description: returned scopes from OAuth provider.
+        - in: query
+          name: code
+          schema:
+            type: string
+          description: returned exchange code from OAuth provider.
+        - in: query
+          name: state
+          schema:
+            type: string
+          description: returned state from OAuth provider.
+        - in: query
+          name: error
+          schema:
+            type: string
+          description: returned error state from OAuth provider, if applicable
+      responses:
+        '200':
+          description: '[AuthV2] HTML-based redirection in dev instances'
+        '301':
+          description: Redirect
+        '303':
+          description: Redirect
+        '307':
+          description: Temporary redirect to complete the OAuth callback flow.
+        '400':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
+    post:
+      operationId: postProviderCallback
+      summary: Provider OAuth Post Callback
+      description: Converts a POST to a GET on the same path, for providers that issue a POST instead of a GET request.
+      tags:
+        - OAuth2 Callbacks
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: true
+              properties:
+                code:
+                  description: returned exchange code from OAuth provider.
+                  type: string
+                scope:
+                  description: returned scopes from OAuth provider.
+                  type: string
+                  nullable: true
+                state:
+                  description: returned state from OAuth provider.
+                  type: string
+                error:
+                  description: returned error state from OAuth provider, if applicable
+                  type: string
+                  nullable: true
+      responses:
+        '303':
+          description: Redirect to GET /v1/sso/{providerKey}/callback with same parameters
   /v1/clear-site-data:
     get:
       summary: Set the Clear-Site-Data header
@@ -2645,6 +2725,14 @@ paths:
       tags:
         - Sessions
       operationId: removeClientSessionsAndRetainCookie
+      parameters:
+        - name: sign_out_redirect_url
+          in: query
+          required: false
+          description: HTTPS return URL for primary cookie repair after production satellite browser sign-out.
+          schema:
+            type: string
+            format: uri
       responses:
         '200':
           $ref: '#/components/responses/Client.DeleteSession'
@@ -2670,6 +2758,8 @@ paths:
         '200':
           $ref: '#/components/responses/Client.Session'
         '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
@@ -2747,6 +2837,8 @@ paths:
           $ref: '#/components/responses/ClerkErrors'
         '401':
           $ref: '#/components/responses/ClerkErrors'
+        '403':
+          $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
   /v1/client/sessions/{session_id}/remove:
@@ -2769,6 +2861,8 @@ paths:
         '400':
           $ref: '#/components/responses/ClerkErrors'
         '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
@@ -2901,6 +2995,8 @@ paths:
                   jwt:
                     type: string
         '401':
+          $ref: '#/components/responses/ClerkErrors'
+        '403':
           $ref: '#/components/responses/ClerkErrors'
         '404':
           $ref: '#/components/responses/ClerkErrors'
@@ -13154,6 +13250,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        sign_out_url:
+          type: string
+          format: uri
+          description: Primary cookie repair URL returned only for production satellite browser sign-out opt-in.
         response:
           type: object
           nullable: true
@@ -13171,6 +13271,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        sign_out_url:
+          type: string
+          format: uri
+          description: Primary cookie repair URL returned only for production satellite browser sign-out opt-in.
         response:
           type: object
           nullable: true
