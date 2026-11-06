@@ -8398,6 +8398,7 @@ paths:
                   nullable: true
                   minimum: 0
                   exclusiveMinimum: true
+                  maximum: 2147483647
               required:
                 - name
                 - subject
