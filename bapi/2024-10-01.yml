@@ -10166,13 +10166,19 @@ paths:
             type: string
         - name: subject
           in: query
-          description: Filter logs by subject.
+          description: |-
+            Filter logs by subject: the ID of the resource the event is about,
+            such as a user, an organization, or the instance when nothing more
+            specific applies.
           required: false
           schema:
             type: string
         - name: actor
           in: query
-          description: Filter logs by actor
+          description: |-
+            Filter logs by actor: the ID of whoever triggered the event, such as
+            a user, a Clerk Dashboard user, an instance key, or an API key. In
+            an impersonated session, the actor is the impersonated user.
           required: false
           schema:
             type: string
@@ -11074,6 +11080,7 @@ paths:
                   nullable: true
                   minimum: 0
                   exclusiveMinimum: true
+                  maximum: 2147483647
               required:
                 - name
                 - subject
@@ -11632,6 +11639,7 @@ paths:
                   nullable: true
                   minimum: 0
                   exclusiveMinimum: true
+                  maximum: 2147483647
               additionalProperties: false
       responses:
         '200':
@@ -12311,6 +12319,7 @@ paths:
                   nullable: true
                   minimum: 0
                   exclusiveMinimum: true
+                  maximum: 2147483647
                 claims:
                   nullable: true
                 min_remaining_ttl_seconds:
@@ -18970,7 +18979,12 @@ components:
           description: The timestamp when the event occurred (Unix timestamp in milliseconds).
         actor:
           type: string
-          description: The actor that performed the action (e.g., user ID).
+          description: |-
+            The ID of whoever triggered the event. `actor_type` says what kind
+            of principal it is: an end user, a Clerk Dashboard user, an
+            instance key, an API key, an integration, or Clerk itself. In an
+            impersonated session, it is the impersonated user and
+            `impersonator` holds whoever started the impersonation.
         actor_type:
           type: string
           description: |-
@@ -18990,7 +19004,15 @@ components:
               description: The user ID of the impersonator.
         subject:
           type: string
-          description: The subject of the event (e.g., user ID, resource ID).
+          description: |-
+            The ID of the resource the event is about, such as a user or an
+            organization. A change to a child record, such as an email address
+            or a membership, uses the ID of its parent user or organization.
+            Events that affect several resources use their lowest common
+            parent, and side effects use the primary resource's subject. The
+            instance ID is used when nothing more specific applies.
+            Events in the same flow can have different subjects; use
+            `group_id` to follow a flow.
         type:
           type: string
           description: The type of the log event.
