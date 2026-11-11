@@ -107,6 +107,8 @@ tags:
     description: Endpoints for managing enterprise connections.
   - name: SSO Bypass
     description: Endpoints for managing who may sign in with an email code when their enterprise identity provider is unreachable.
+  - name: Access Policies
+    description: Endpoints for reading how an organization admits users and routes their sign-in.
   - name: Plans
     description: Used to interact with plans that users and organizations can purchase.
   - name: Subscriptions
@@ -8082,6 +8084,7 @@ paths:
         Parses a ticket JWT and performs the necessary actions depending on the ticket's source type.
         Depending on the ticket source type, a successful response can either redirect to a new location
         with the ticket in the query string, or respond directly with a text/html content type for the response body.
+        For session revoke tickets it only renders a confirm page; the revoke happens on `POST /v1/tickets/accept`.
       operationId: acceptTicket
       tags:
         - Sign Ins
@@ -8398,6 +8401,7 @@ paths:
                   nullable: true
                   minimum: 0
                   exclusiveMinimum: true
+                  maximum: 2147483647
               required:
                 - name
                 - subject
@@ -17305,6 +17309,7 @@ x-tagGroups:
       - Domains
       - Roles
       - SSO Bypass
+      - Access Policies
   - name: Billing
     tags:
       - Plans
