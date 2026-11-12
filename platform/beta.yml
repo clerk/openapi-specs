@@ -120,7 +120,7 @@ paths:
       tags:
         - Application Logs
       summary: List events in an application log group
-      description: Returns matching events oldest first. Pass the group started_at and events_cursor as starting_after, retaining the original event filters. List cursors cannot be used here. Time bounds select groups by their start in the grouped list; group expansion reads events across the flow lifetime, subject to retention. Only forward pagination is supported. Requires `application_logs:read`. Payload fields, payload filtering, and full event payloads are not supported. `user_id` and `identifier` cannot be combined with each other or with `actor` or `subject`.
+      description: Returns matching events oldest first. Pass the group's events_cursor as starting_after (and optionally its started_at), retaining the original event filters. List cursors cannot be used here. Time bounds select groups by their start in the grouped list; group expansion reads events across the flow lifetime, subject to retention. Only forward pagination is supported. Requires `application_logs:read`. Payload fields, payload filtering, and full event payloads are not supported. `user_id` and `identifier` cannot be combined with each other or with `actor` or `subject`.
       security:
         - platform_api_access_token: []
       parameters:
@@ -4353,8 +4353,8 @@ components:
     started_at:
       name: started_at
       in: query
-      required: true
-      description: Unix timestamp in milliseconds.
+      required: false
+      description: The group's started_at, as a Unix timestamp in milliseconds. Optional; when omitted, it is looked up from the group ID, and a group that can't be found or is past the retention window returns a 404.
       schema:
         type: integer
         format: int64
@@ -4525,7 +4525,12 @@ components:
           description: The timestamp when the event occurred (Unix timestamp in milliseconds).
         actor:
           type: string
-          description: The actor that performed the action (e.g., user ID).
+          description: |-
+            The ID of whoever triggered the event. `actor_type` says what kind
+            of principal it is: an end user, a Clerk Dashboard user, an
+            instance key, an API key, an integration, or Clerk itself. In an
+            impersonated session, it is the impersonated user and
+            `impersonator` holds whoever started the impersonation.
         actor_type:
           type: string
           description: |-
@@ -4545,7 +4550,15 @@ components:
               description: The user ID of the impersonator.
         subject:
           type: string
-          description: The subject of the event (e.g., user ID, resource ID).
+          description: |-
+            The ID of the resource the event is about, such as a user or an
+            organization. A change to a child record, such as an email address
+            or a membership, uses the ID of its parent user or organization.
+            Events that affect several resources use their lowest common
+            parent, and side effects use the primary resource's subject. The
+            instance ID is used when nothing more specific applies.
+            Events in the same flow can have different subjects; use
+            `group_id` to follow a flow.
         type:
           type: string
           description: The type of the log event.
@@ -5589,7 +5602,13 @@ components:
           description: The intended domain name.
         records:
           type: array
-          description: DNS records to configure before completion.
+          description: |
+            DNS records to configure before completion. For a pending intent with an issued
+            DMARC TXT record, the create response includes the automation_disposition at
+            creation time. Retrying with the same Idempotency-Key can replay that response.
+            Before every automated DMARC write, fetch the pending intent by ID for a fresh
+            decision. Create only on safe_to_create and never replace an existing policy.
+            List responses omit the decision. An absent decision does not authorize a write.
           items:
             $ref: '#/components/schemas/PlatformDNSTarget'
       required:
