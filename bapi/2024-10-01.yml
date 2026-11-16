@@ -3457,6 +3457,8 @@ paths:
           description: The user does not exist.
         '422':
           description: The provided password was incorrect.
+        '429':
+          description: Another password check for the user is in progress. Nothing was counted and the check can be retried.
         '500':
           $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/verify_totp:
@@ -3524,6 +3526,8 @@ paths:
           description: The user does not exist.
         '422':
           description: The provided TOTP or backup code was incorrect.
+        '429':
+          description: Another code check for the user is in progress. Nothing was counted and the check can be retried.
         '500':
           $ref: '#/components/responses/ClerkErrors'
   /users/{user_id}/mfa:
@@ -4356,6 +4360,9 @@ paths:
                     sub:
                       type: string
                       description: The ID of the actor.
+                    type:
+                      type: string
+                      description: Optional actor type. The value `agent` is reserved for agent task sessions and is rejected.
                   required:
                     - sub
                   example:
@@ -10166,13 +10173,19 @@ paths:
             type: string
         - name: subject
           in: query
-          description: Filter logs by subject.
+          description: |-
+            Filter logs by subject: the ID of the resource the event is about,
+            such as a user, an organization, or the instance when nothing more
+            specific applies.
           required: false
           schema:
             type: string
         - name: actor
           in: query
-          description: Filter logs by actor
+          description: |-
+            Filter logs by actor: the ID of whoever triggered the event, such as
+            a user, a Clerk Dashboard user, an instance key, or an API key. In
+            an impersonated session, the actor is the impersonated user.
           required: false
           schema:
             type: string
@@ -10467,8 +10480,6 @@ paths:
         intersection across every matching event type, and `matched_event_types`
         lists what the intersection was computed over; per-type metadata
         (description, severity, docs_group) is present only for concrete types.
-
-        The response is the same for every instance.
       parameters:
         - name: type
           in: query
@@ -10477,7 +10488,7 @@ paths:
             The event type to describe: concrete (`sign_in.completed`),
             trailing-`*` wildcard (`sign_in.*`), or bare family name
             (`sign_in`). Unknown types return a 422. A bare `*` is not
-            accepted.
+            accepted; to list every event type, use `GET /logs/types`.
           schema:
             type: string
             example: sign_in.*
@@ -10490,6 +10501,32 @@ paths:
           $ref: '#/components/responses/AuthorizationInvalid'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /logs/types:
+    get:
+      operationId: ListLogTypes
+      x-speakeasy-group: logs
+      x-speakeasy-name-override: listTypes
+      tags:
+        - Logs
+      summary: List all log event types
+      description: |-
+        Returns every event type the instance can see in its logs, each with
+        its payload schema, sorted by `event_type`. Each entry is the same as
+        the response of `GET /logs/schemas` for that type.
+
+        Use it to discover the values that the `type` parameter of the list
+        endpoint accepts, and the payload fields each one carries. The list is
+        not paginated. Event types whose logs are enabled per instance (such as
+        `sms.*` and `email.*`) are listed only once enabled.
+      responses:
+        '200':
+          $ref: '#/components/responses/Log.TypeList'
+        '401':
+          $ref: '#/components/responses/AuthenticationInvalid'
+        '403':
+          $ref: '#/components/responses/AuthorizationInvalid'
         '429':
           $ref: '#/components/responses/TooManyRequests'
   /logs/groups/{group_id}/events:
@@ -10516,8 +10553,10 @@ paths:
           in: query
           description: |-
             When the group started (Unix timestamp in milliseconds), the
-            `started_at` of the group item. It bounds the time range searched.
-          required: true
+            `started_at` of the group item. Optional: when omitted, it is
+            looked up from `group_id`, and a group that can't be found or is
+            past the retention window returns a 404.
+          required: false
           schema:
             type: integer
             format: int64
@@ -10546,6 +10585,8 @@ paths:
           $ref: '#/components/responses/AuthenticationInvalid'
         '403':
           $ref: '#/components/responses/AuthorizationInvalid'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
         '429':
@@ -11074,6 +11115,7 @@ paths:
                   nullable: true
                   minimum: 0
                   exclusiveMinimum: true
+                  maximum: 2147483647
               required:
                 - name
                 - subject
@@ -11632,6 +11674,7 @@ paths:
                   nullable: true
                   minimum: 0
                   exclusiveMinimum: true
+                  maximum: 2147483647
               additionalProperties: false
       responses:
         '200':
@@ -12311,6 +12354,7 @@ paths:
                   nullable: true
                   minimum: 0
                   exclusiveMinimum: true
+                  maximum: 2147483647
                 claims:
                   nullable: true
                 min_remaining_ttl_seconds:
@@ -15259,6 +15303,10 @@ components:
         total_count:
           type: integer
           format: int64
+        has_more:
+          type: boolean
+          description: |
+            Present, and `true`, only when the count was capped at 1000. `total_count` is then 1000, and more users match.
       required:
         - object
         - total_count
@@ -18970,7 +19018,12 @@ components:
           description: The timestamp when the event occurred (Unix timestamp in milliseconds).
         actor:
           type: string
-          description: The actor that performed the action (e.g., user ID).
+          description: |-
+            The ID of whoever triggered the event. `actor_type` says what kind
+            of principal it is: an end user, a Clerk Dashboard user, an
+            instance key, an API key, an integration, or Clerk itself. In an
+            impersonated session, it is the impersonated user and
+            `impersonator` holds whoever started the impersonation.
         actor_type:
           type: string
           description: |-
@@ -18990,7 +19043,15 @@ components:
               description: The user ID of the impersonator.
         subject:
           type: string
-          description: The subject of the event (e.g., user ID, resource ID).
+          description: |-
+            The ID of the resource the event is about, such as a user or an
+            organization. A change to a child record, such as an email address
+            or a membership, uses the ID of its parent user or organization.
+            Events that affect several resources use their lowest common
+            parent, and side effects use the primary resource's subject. The
+            instance ID is used when nothing more specific applies.
+            Events in the same flow can have different subjects; use
+            `group_id` to follow a flow.
         type:
           type: string
           description: The type of the log event.
@@ -19226,6 +19287,31 @@ components:
         - object
         - event_type
         - fields
+    LogSchemaList:
+      type: object
+      description: |-
+        The schema of every log event type the instance can see, sorted by
+        `event_type`. Not paginated.
+      properties:
+        object:
+          type: string
+          description: String representing the object's type. Always "list".
+          example: list
+        data:
+          type: array
+          description: |-
+            One schema per concrete event type, each the same as the
+            response to a lookup by that type.
+          items:
+            $ref: '#/components/schemas/LogSchema'
+        total_count:
+          type: integer
+          format: int64
+          description: Total number of event type schemas in the list.
+      required:
+        - object
+        - data
+        - total_count
     LogWithPayload:
       description: |-
         A log entry with the full event payload. Returned by the
@@ -20085,6 +20171,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/LogSchema'
+    Log.TypeList:
+      description: Every log event type the instance can see, with its payload schema.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LogSchemaList'
     Log.Read:
       description: A single log entry with full payload.
       content:
