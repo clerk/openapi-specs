@@ -5824,6 +5824,7 @@ paths:
         Parses a ticket JWT and performs the necessary actions depending on the ticket's source type.
         Depending on the ticket source type, a successful response can either redirect to a new location
         with the ticket in the query string, or respond directly with a text/html content type for the response body.
+        For session revoke tickets it only renders a confirm page; the revoke happens on `POST /v1/tickets/accept`.
       operationId: acceptTicket
       tags:
         - Sign Ins
@@ -6140,6 +6141,7 @@ paths:
                   nullable: true
                   minimum: 0
                   exclusiveMinimum: true
+                  maximum: 2147483647
               required:
                 - name
                 - subject
@@ -7651,6 +7653,23 @@ components:
             was provided, when the URI is not registered for the OAuth application, or when the
             URI points to an IP address or localhost. The frontend should fall back to client-side
             display logic when this field is null.
+        client_registration:
+          type: string
+          enum:
+            - preregistered
+            - dynamic
+            - metadata_document
+          description: |
+            How the client's identity was established. `preregistered` clients were created by the
+            instance admin. `dynamic` clients registered themselves through Dynamic Client
+            Registration, so their name and logo are self-asserted. `metadata_document` clients are
+            identified by a Client ID Metadata Document URL; see `client_metadata_host`.
+        client_metadata_host:
+          type: string
+          nullable: true
+          description: |
+            The host that serves the client's Client ID Metadata Document (e.g. `claude.ai`). Null
+            unless `client_registration` is `metadata_document`.
         scopes:
           type: array
           items:
@@ -7659,6 +7678,8 @@ components:
         - oauth_application_name
         - client_id
         - redirect_domain
+        - client_registration
+        - client_metadata_host
         - scopes
     OAuth.DeviceVerification:
       type: object
@@ -7790,12 +7811,15 @@ components:
           type: boolean
         trusted_device_enrollment_prompt_after_sign_up_enabled:
           type: boolean
+        session_transfers_enabled:
+          type: boolean
       required:
         - object
         - api_enabled
         - trusted_device_sign_in_enabled
         - trusted_device_enrollment_prompt_after_sign_in_enabled
         - trusted_device_enrollment_prompt_after_sign_up_enabled
+        - session_transfers_enabled
     Client.AuthConfig:
       type: object
       additionalProperties: false
