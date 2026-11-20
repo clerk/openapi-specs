@@ -2468,6 +2468,7 @@ components:
                     - unverified_email_dns
                     - provider_domain_restriction
                     - application_communication_lock
+                    - transactional_email_blocked
                   description: Present when `type` is `ClerkPolicy`
                 message:
                   type: string
