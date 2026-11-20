@@ -111,6 +111,8 @@ tags:
     description: Endpoints for managing enterprise connections.
   - name: SSO Bypass
     description: Endpoints for managing who may sign in with an email code when their enterprise identity provider is unreachable.
+  - name: Access Policies
+    description: Endpoints for managing how an organization admits users and routes their sign-in.
   - name: Plans
     description: Used to interact with plans that users and organizations can purchase.
   - name: Subscriptions
@@ -8722,6 +8724,7 @@ paths:
         Parses a ticket JWT and performs the necessary actions depending on the ticket's source type.
         Depending on the ticket source type, a successful response can either redirect to a new location
         with the ticket in the query string, or respond directly with a text/html content type for the response body.
+        For session revoke tickets it only renders a confirm page; the revoke happens on `POST /v1/tickets/accept`.
       operationId: acceptTicket
       tags:
         - Sign Ins
@@ -9038,6 +9041,7 @@ paths:
                   nullable: true
                   minimum: 0
                   exclusiveMinimum: true
+                  maximum: 2147483647
               required:
                 - name
                 - subject
@@ -10549,6 +10553,23 @@ components:
             was provided, when the URI is not registered for the OAuth application, or when the
             URI points to an IP address or localhost. The frontend should fall back to client-side
             display logic when this field is null.
+        client_registration:
+          type: string
+          enum:
+            - preregistered
+            - dynamic
+            - metadata_document
+          description: |
+            How the client's identity was established. `preregistered` clients were created by the
+            instance admin. `dynamic` clients registered themselves through Dynamic Client
+            Registration, so their name and logo are self-asserted. `metadata_document` clients are
+            identified by a Client ID Metadata Document URL; see `client_metadata_host`.
+        client_metadata_host:
+          type: string
+          nullable: true
+          description: |
+            The host that serves the client's Client ID Metadata Document (e.g. `claude.ai`). Null
+            unless `client_registration` is `metadata_document`.
         scopes:
           type: array
           items:
@@ -10557,6 +10578,8 @@ components:
         - oauth_application_name
         - client_id
         - redirect_domain
+        - client_registration
+        - client_metadata_host
         - scopes
     OAuth.DeviceVerification:
       type: object
@@ -12576,12 +12599,15 @@ components:
           type: boolean
         trusted_device_enrollment_prompt_after_sign_up_enabled:
           type: boolean
+        session_transfers_enabled:
+          type: boolean
       required:
         - object
         - api_enabled
         - trusted_device_sign_in_enabled
         - trusted_device_enrollment_prompt_after_sign_in_enabled
         - trusted_device_enrollment_prompt_after_sign_up_enabled
+        - session_transfers_enabled
     Client.AuthConfig:
       type: object
       additionalProperties: false
@@ -13983,7 +14009,7 @@ components:
             - $ref: '#/components/schemas/Client.TrustedDeviceValidation'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -14013,7 +14039,7 @@ components:
             - $ref: '#/components/schemas/Client.BiometricCredentialValidation'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -14355,7 +14381,7 @@ components:
           description: List of active enterprise connections for the current user's primary email domain
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -14679,7 +14705,7 @@ components:
             - $ref: '#/components/schemas/Client.EmailAddress'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -14700,7 +14726,7 @@ components:
             - $ref: '#/components/schemas/Client.PhoneNumber'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -14721,7 +14747,7 @@ components:
             - $ref: '#/components/schemas/Client.Web3Wallet'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -14738,7 +14764,7 @@ components:
             - $ref: '#/components/schemas/Client.Passkey'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -14811,7 +14837,7 @@ components:
             $ref: '#/components/schemas/Client.TrustedDevice'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -14860,7 +14886,7 @@ components:
             - $ref: '#/components/schemas/Client.TrustedDeviceChallenge'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -14877,7 +14903,7 @@ components:
             - $ref: '#/components/schemas/Client.TrustedDevice'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -14950,7 +14976,7 @@ components:
             $ref: '#/components/schemas/Client.BiometricCredential'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -14999,7 +15025,7 @@ components:
             - $ref: '#/components/schemas/Client.BiometricCredentialChallenge'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -15016,7 +15042,7 @@ components:
             - $ref: '#/components/schemas/Client.BiometricCredential'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -15033,7 +15059,7 @@ components:
             - $ref: '#/components/schemas/ExternalAccountWithVerification'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -15050,7 +15076,7 @@ components:
             - $ref: '#/components/schemas/Client.User'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -15104,7 +15130,7 @@ components:
             - $ref: '#/components/schemas/TOTP'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -15147,7 +15173,7 @@ components:
             - $ref: '#/components/schemas/BackupCodes'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -15174,7 +15200,7 @@ components:
             - $ref: '#/components/schemas/Client.User'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client'
       required:
@@ -16842,7 +16868,7 @@ components:
                 $ref: '#/components/schemas/Client.OrganizationMembership'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -16953,7 +16979,7 @@ components:
               format: int64
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -16972,7 +16998,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
           type: object
-          nullable: false
+          nullable: true
       required:
         - response
         - client
@@ -17022,7 +17048,7 @@ components:
               format: int64
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -17039,7 +17065,7 @@ components:
             - $ref: '#/components/schemas/Client.OrganizationSuggestion'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -17056,7 +17082,7 @@ components:
             - $ref: '#/components/schemas/Client.Organization'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -17073,7 +17099,7 @@ components:
             - $ref: '#/components/schemas/Client.Organization'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client'
       required:
@@ -17099,7 +17125,7 @@ components:
                   format: int64
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -17116,7 +17142,7 @@ components:
             - $ref: '#/components/schemas/Client.OrganizationInvitation'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -17133,7 +17159,7 @@ components:
             - $ref: '#/components/schemas/Client.OrganizationMembership'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -17283,7 +17309,7 @@ components:
               format: int64
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -17300,7 +17326,7 @@ components:
             - $ref: '#/components/schemas/Client.OrganizationDomain'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -17348,7 +17374,7 @@ components:
             - $ref: '#/components/schemas/Client.OrganizationDomainBulkCreate'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -17396,7 +17422,7 @@ components:
             - $ref: '#/components/schemas/Client.OrganizationDomainBulkOwnershipVerification'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -17453,7 +17479,7 @@ components:
               format: int64
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -17470,7 +17496,7 @@ components:
             - $ref: '#/components/schemas/Client.OrganizationMembershipRequest'
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -17573,7 +17599,7 @@ components:
               description: Indicates whether there is an active role set migration for this organization.
         client:
           type: object
-          nullable: false
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/Client.Client-2'
       required:
@@ -18393,6 +18419,7 @@ x-tagGroups:
       - Domains
       - Roles
       - SSO Bypass
+      - Access Policies
   - name: Billing
     tags:
       - Plans
