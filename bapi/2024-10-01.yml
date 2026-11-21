@@ -2659,6 +2659,13 @@ paths:
                   type: boolean
                   description: Set to `true` to sign out the user from all their active sessions once their password is updated. This parameter can only be used when providing a `password`.
                   nullable: true
+                reset_client_trust:
+                  type: boolean
+                  description: |-
+                    When set to `true`, also clears Device Trust for the user on every client, whether or not the instance has Device Trust enabled.
+                    The next sign-in by this user on any client counts as a new device: it can require a Device Trust challenge and trigger the new device email.
+                    This parameter can only be used when providing a `password` and setting `sign_out_of_other_sessions` to `true`, otherwise a 422 is returned and the user is not updated.
+                  nullable: true
                 totp_secret:
                   type: string
                   description: |-
