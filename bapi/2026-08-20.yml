@@ -2648,6 +2648,13 @@ paths:
                   type: boolean
                   description: Set to `true` to sign out the user from all their active sessions once their password is updated. This parameter can only be used when providing a `password`.
                   nullable: true
+                reset_client_trust:
+                  type: boolean
+                  description: |-
+                    When set to `true`, also clears Device Trust for the user on every client, whether or not the instance has Device Trust enabled.
+                    The next sign-in by this user on any client counts as a new device: it can require a Device Trust challenge and trigger the new device email.
+                    This parameter can only be used when providing a `password` and setting `sign_out_of_other_sessions` to `true`, otherwise a 422 is returned and the user is not updated.
+                  nullable: true
                 totp_secret:
                   type: string
                   description: In case TOTP is configured on the instance, you can provide the secret to enable it on the specific user without the need to reset it.
@@ -3837,7 +3844,10 @@ paths:
       x-speakeasy-group: users
       x-speakeasy-name-override: setPasswordCompromised
       summary: Set a user's password as compromised
-      description: Sets the given user's password as compromised. The user will be prompted to reset their password on their next sign-in.
+      description: |-
+        Sets the given user's password as compromised. The user will be prompted to reset their password on their next sign-in.
+        When the password was not already compromised, or when `revoke_all_sessions` is `true`, it also marks all of the user's devices as untrusted. On instances with Device Trust enabled, the next password sign-in on any of those devices can require a Device Trust challenge.
+        Calling it again on a password that is already compromised, without `revoke_all_sessions`, changes nothing.
       tags:
         - Users
       parameters:
