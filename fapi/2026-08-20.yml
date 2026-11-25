@@ -724,6 +724,14 @@ paths:
                     For authorization code and refresh token grants, if omitted, the resource from the authorization grant is used.
                     If provided, it must exactly match that resource.
                     The URI must not contain a fragment. Only one `resource` value is supported.
+                organization_id:
+                  type: string
+                  nullable: true
+                  description: |-
+                    The ID of the organization the exchanged token is for. Only used when `grant_type=urn:ietf:params:oauth:grant-type:token-exchange`.
+                    **Required when the subject token covers more than one organization** (its `granted_orgs` has two or more entries), and it must be one of them.
+                    Otherwise optional, and accepted only when it equals the subject token's `org_id`.
+                    Send it at most once, with exactly one ID (not the space-separated list of the consent form).
             examples:
               authorizationCodeConfidential:
                 summary: Authorization Code - Confidential Client
@@ -977,6 +985,19 @@ paths:
                     Optional. The organization to scope the issued token to. The
                     authenticated user must be a member of this organization. If
                     omitted, the user's currently active organization is used.
+
+                    When the consent info reports `max_organizations` above 1,
+                    organizations are enabled, and the `user:org:read` scope is
+                    granted, the value can be a space-separated list of 2 to
+                    `max_organizations` organization IDs. The user must be a
+                    member of each one, the first ID is the default organization,
+                    and the issued token gains a `granted_orgs` claim. Send the
+                    field once: a repeated `organization_id` field is refused.
+                    When organizations are disabled, `organization_id` is
+                    ignored rather than refused: the consent succeeds and the
+                    token has no `org_id` and no `granted_orgs`. A list of
+                    two or more distinct IDs is still refused when
+                    `max_organizations` is 1.
                 resource:
                   type: string
                   format: uri
@@ -10472,6 +10493,19 @@ components:
         - instance_id
         - user_id
         - sub
+    OAuth.TokenGrantedOrg:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          description: The organization ID.
+        name:
+          type: string
+          description: The organization name.
+      required:
+        - id
+        - name
     OAuth.TokenActor:
       type: object
       additionalProperties: false
@@ -10531,6 +10565,21 @@ components:
             Present when the `user:org:read` scope was granted and the user
             belongs to an organization.
           nullable: true
+        granted_orgs:
+          type: array
+          description: |-
+            Every organization the user granted access to in one consent,
+            at most 5.
+            Present only when two or more organizations were granted, and
+            only on tokens issued from that consent. The exchanged token of a
+            token exchange does not carry it. `org_id` stays the default
+            organization. The entries are a snapshot taken at consent: a
+            renamed or deleted organization keeps its old name
+            until the next consent. The set is a snapshot too: an
+            organization stays in it after the user's membership there ends,
+            so it is not a membership check.
+          items:
+            $ref: '#/components/schemas/OAuth.TokenGrantedOrg'
         act:
           $ref: '#/components/schemas/OAuth.TokenActor'
       required:
@@ -10592,6 +10641,16 @@ components:
           description: |
             The host that serves the client's Client ID Metadata Document (e.g. `claude.ai`). Null
             unless `client_registration` is `metadata_document`.
+        max_organizations:
+          type: integer
+          minimum: 1
+          description: |
+            The upper limit on how many organizations one consent can grant. It is above 1 only when
+            the instance allows a consent for several organizations; when it is 1, a list of
+            organizations is refused. The limit applies when organizations are enabled and the
+            `user:org:read` scope is granted; see `organization_id` on the consent form for the list
+            format. The server can still refuse a selection within the limit, for example when the
+            selected organizations do not fit in one token.
         scopes:
           type: array
           items:
@@ -10602,6 +10661,7 @@ components:
         - redirect_domain
         - client_registration
         - client_metadata_host
+        - max_organizations
         - scopes
     OAuth.DeviceVerification:
       type: object
