@@ -1317,15 +1317,20 @@ paths:
               type: object
               additionalProperties: false
               properties:
-                reset_client_trust:
+                reset_device_trust:
                   type: boolean
                   default: false
                   description: |-
-                    When set to `true`, also clears Device Trust for the session's user and client, including when the session is already revoked.
-                    Trust belongs to the user and client rather than the session, so this applies to the whole device, including any other session the user has on that client. Other users on the same client are unaffected.
-                    For a session a native application received through hosted auth, this also clears the browser client the user signed in on.
-                    The next sign-in by this user on the client counts as a new device: it can require a Device Trust challenge and sends the new device email.
+                    When set to `true`, also forgets the user's device that the session was signed in on, including when the session is already revoked.
+                    Device Trust belongs to the user and device rather than the session, so this also covers any other session the user has on that device. Other users on the same device are unaffected.
+                    For a session that a native application received through hosted auth, this also forgets the browser the user signed in on.
+                    The user's next sign-in on a forgotten device counts as a new device. It can require a Device Trust challenge, and Clerk can send the new device email.
                     A value that is not a boolean returns a 422 and does not revoke the session.
+                reset_client_trust:
+                  type: boolean
+                  default: false
+                  deprecated: true
+                  description: Use `reset_device_trust` instead. The device is forgotten when either parameter is `true`.
       responses:
         '200':
           $ref: '#/components/responses/Session'
@@ -2748,12 +2753,17 @@ paths:
                   type: boolean
                   description: Set to `true` to sign out the user from all their active sessions once their password is updated. This parameter can only be used when providing a `password`.
                   nullable: true
-                reset_client_trust:
+                reset_device_trust:
                   type: boolean
                   description: |-
-                    When set to `true`, also clears Device Trust for the user on every client, whether or not the instance has Device Trust enabled.
-                    The next sign-in by this user on any client counts as a new device: it can require a Device Trust challenge and trigger the new device email.
-                    This parameter can only be used when providing a `password` and setting `sign_out_of_other_sessions` to `true`, otherwise a 422 is returned and the user is not updated.
+                    When set to `true`, also forgets all of the user's devices.
+                    The user's next sign-in on any device counts as a new device. It can require a Device Trust challenge, and Clerk can send the new device email.
+                    This parameter can only be used when providing a `password` or `password_digest` and setting `sign_out_of_other_sessions` to `true`. Otherwise, a 422 is returned and the user is not updated.
+                  nullable: true
+                reset_client_trust:
+                  type: boolean
+                  deprecated: true
+                  description: Use `reset_device_trust` instead. The devices are forgotten when either parameter is `true`.
                   nullable: true
                 totp_secret:
                   type: string
